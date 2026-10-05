@@ -92,4 +92,22 @@ extension ConsoleMirror {
             )
         }
     }
+
+    /// Puts every band back to `Catalog.eqDefaults`; a no-op on strips without defaults.
+    public func resetEQBands(_ strip: StripID) {
+        for index in (Catalog.eqDefaults(strip) ?? []).indices { resetEQBand(strip, index + 1) }
+    }
+
+    public func resetEQBand(_ strip: StripID, _ band: Int) {
+        guard let defaults = Catalog.eqDefaults(strip), defaults.indices.contains(band - 1) else { return }
+        let target = defaults[band - 1]
+        let specs = Catalog.eqBand(strip, band)
+        let values = [
+            (specs.type, Double(target.typeIndex)), (specs.frequency, target.frequency), (specs.gain, target.gain),
+            (specs.q, target.q),
+        ]
+        for (spec, value) in values {
+            set(spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
+        }
+    }
 }

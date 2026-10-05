@@ -106,6 +106,13 @@ public enum Catalog {
         )
     }
 
+    /// The engineer's channel EQ starting point, restored by reset: four PEQs at 91.4 Hz, 418 Hz, 1.91 kHz
+    /// and 8.73 kHz, Q 1.7, 0 dB. Buses and mains have six bands and no agreed defaults yet.
+    public static func eqDefaults(_ strip: StripID) -> [EQBandState]? {
+        guard strip.kind == .input else { return nil }
+        return [91.4, 418, 1910, 8730].map { EQBandState(typeIndex: 2, frequency: $0, gain: 0, q: 1.7) }
+    }
+
     public static func sendLevel(from strip: StripID, toBus bus: Int) -> ParamSpec {
         ParamSpec(sendPrefix(strip, bus) + "/level", CoreStrings.text("Bus \(bus)"), .sendLevel, .decibels, reset: 0)
     }

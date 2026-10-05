@@ -126,6 +126,81 @@ final class ChannelUITests: XCTestCase {
         saveScreenshot("task-15-eq")
     }
 
+    // The EQ tests below each use their own channel: the fake keeps every edit, and Kick's EQ is
+    // expected untouched by the drag test above.
+
+    /// A touch near a band point grabs it, but only movement moves it: landing slightly off the point
+    /// must not jump the desk to where the finger happens to be.
+    func testTouchingNearABandChangesNothing() {
+        launch()
+        open("Tom 2")
+        app.buttons["EQ"].tap()
+        let frequency = app.descendants(matching: .any)["/ch/05/eq/1/f"]
+        let gain = app.descendants(matching: .any)["/ch/05/eq/1/g"]
+        XCTAssertTrue(frequency.waitForExistence(timeout: 2))
+        let graph = app.descendants(matching: .any)["eq-graph"]
+        let nearTheCentrePoint = graph.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .withOffset(CGVector(dx: 20, dy: -25))
+        nearTheCentrePoint.press(forDuration: 0.3)
+        XCTAssertEqual(frequency.value as? String, "632 Hz")
+        XCTAssertEqual(gain.value as? String, "0.0 dB")
+    }
+
+    func testEQTabScrollsAsAWhole() {
+        launch()
+        open("Tom 1")
+        app.buttons["EQ"].tap()
+        let graph = app.descendants(matching: .any)["eq-graph"]
+        XCTAssertTrue(graph.waitForExistence(timeout: 2))
+        let top = graph.frame.minY
+        // Drag from the Type row: on a 375 pt phone the rows below it start at the screen's bottom edge.
+        let type = app.buttons["/ch/04/eq/1/type"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        type.press(forDuration: 0.05, thenDragTo: type.withOffset(CGVector(dx: 0, dy: -250)))
+        XCTAssertLessThan(graph.frame.minY, top)
+        saveScreenshot("eq-scrolled")
+    }
+
+    func testBandTypeIsADropdown() {
+        launch()
+        open("Tom 1")
+        app.buttons["EQ"].tap()
+        let type = app.buttons["/ch/04/eq/1/type"]
+        XCTAssertTrue(type.waitForExistence(timeout: 2))
+        XCTAssertEqual(type.value as? String, "PEQ")
+        type.tap()
+        app.buttons["LShv"].tap()
+        XCTAssertEqual(type.value as? String, "LShv")
+    }
+
+    func testResetBandsAsksFirst() {
+        launch()
+        open("Snare")
+        app.buttons["EQ"].tap()
+        let frequency = app.descendants(matching: .any)["/ch/02/eq/1/f"]
+        XCTAssertTrue(frequency.waitForExistence(timeout: 2))
+        XCTAssertEqual(frequency.value as? String, "632 Hz")
+        frequency.swipeUp()
+        app.buttons["Reset bands"].tap()
+        app.buttons["Cancel"].tap()
+        XCTAssertEqual(frequency.value as? String, "632 Hz")
+        app.buttons["Reset bands"].tap()
+        app.buttons["Reset all 4 bands"].tap()
+        XCTAssertEqual(frequency.value as? String, "91.4 Hz")
+    }
+
+    func testDoubleTappingABandResetsIt() {
+        launch()
+        open("Hi-hat")
+        app.buttons["EQ"].tap()
+        let frequency = app.descendants(matching: .any)["/ch/03/eq/1/f"]
+        XCTAssertTrue(frequency.waitForExistence(timeout: 2))
+        XCTAssertEqual(frequency.value as? String, "632 Hz")
+        // All fake bands sit at the centre point; the nearest-band tie goes to band 1.
+        app.descendants(matching: .any)["eq-graph"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .doubleTap()
+        XCTAssertEqual(frequency.value as? String, "91.4 Hz")
+    }
+
     func testBusEQHasSixBands() {
         launch()
         app.buttons["Buses"].tap()

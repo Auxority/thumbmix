@@ -40,6 +40,9 @@ struct UIMathTests {
         let band = Catalog.eqBand(StripID(.input, 1), 1)
         #expect(ValueText.format(0.5, band.frequency, locale: .testEnglish) == "632 Hz")
         #expect(ValueText.format(1, band.frequency, locale: .testEnglish) == "20.00 kHz")
+        // Like the desk, three significant digits: 91.4 Hz, not 91 Hz.
+        #expect(ValueText.format(0.22, band.frequency, locale: .testEnglish) == "91.4 Hz")
+        #expect(ValueText.format(0, band.frequency, locale: .testEnglish) == "20.0 Hz")
         let pan = Catalog.pan(StripID(.input, 1))!
         #expect(ValueText.format(0.5, pan, locale: .testEnglish) == "C")
         #expect(ValueText.format(0.75, pan, locale: .testEnglish) == "R50")
