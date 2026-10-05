@@ -114,4 +114,26 @@ final class ChannelUITests: XCTestCase {
         open("Mon 1")
         XCTAssertTrue(app.buttons["6"].waitForExistence(timeout: 2))
     }
+
+    func testSendsListBusesByName() {
+        launch()
+        open("Vox 1")
+        app.buttons["Sends"].tap()
+        let toMon1 = app.otherElements["/ch/13/mix/01/level"]
+        XCTAssertTrue(toMon1.waitForExistence(timeout: 2))
+        XCTAssertEqual(toMon1.label, "Mon 1")
+        XCTAssertEqual(toMon1.value as? String, "0.0 dB")
+    }
+
+    func testFedByShowsWhoFeedsTheBus() {
+        launch()
+        app.buttons["Buses"].tap()
+        open("Mon 1")
+        app.buttons["Fed by"].tap()
+        XCTAssertTrue(app.otherElements["/ch/13/mix/01/level"].waitForExistence(timeout: 2))
+        XCTAssertEqual(app.otherElements["/ch/13/mix/01/level"].value as? String, "0.0 dB")
+        XCTAssertTrue(app.otherElements["/fxrtn/01/mix/01/level"].exists)
+        XCTAssertFalse(app.otherElements["/ch/20/mix/01/level"].exists)
+        saveScreenshot("task-16-fedby")
+    }
 }
