@@ -1,0 +1,50 @@
+# Every push to main (including a merged PR) becomes a GitHub Release with an unsigned IPA for SideStore.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Releases must not race each other: build numbers and tags are created in run order.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      BUILD_NUMBER: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Test Core
+        run: swift test --package-path Core
+
+      - name: Build unsigned IPA
+        run: scripts/build-ipa.sh
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(grep -m1 'MARKETING_VERSION:' project.yml | awk -F'"' '{print $2}')
+          test -n "$version" || { echo "MARKETING_VERSION not found in project.yml" >&2; exit 1; }
+          tag="v${version}-${BUILD_NUMBER}"
+          gh release create "$tag" build/ipa/Thumbmix.ipa \
+            --target "$GITHUB_SHA" \
+            --title "Thumbmix ${version} (build ${BUILD_NUMBER})" \
+            --generate-notes
