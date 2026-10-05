@@ -35,7 +35,16 @@ swift run --package-path Core fake-m32      # a fake M32 on 127.0.0.1:10023 for 
 xcodegen generate && open Thumbmix.xcodeproj
 ```
 
-The UI tests expect `fake-m32` to be running. Run them on the iPhone SE (3rd generation) simulator, which is 375 pt wide like the iPhone 11 Pro.
+The UI tests expect `fake-m32` to be running (start it in another terminal first). Run them on the iPhone SE (3rd generation) simulator, which is 375 pt wide like the iPhone 11 Pro:
+
+```bash
+xcodegen generate
+xcodebuild test -project Thumbmix.xcodeproj -scheme Thumbmix \
+  -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation)' \
+  -collect-test-diagnostics never
+```
+
+`-collect-test-diagnostics never` stops `xcodebuild` from hanging after a failed UI test while it gathers diagnostics. To save screenshots for a layout check, prefix the command with `TEST_RUNNER_SCREENSHOT_DIR="$PWD/build/screens"`.
 
 ## Check a real console
 
