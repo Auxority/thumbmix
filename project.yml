@@ -1,0 +1,49 @@
+name: Thumbmix
+options:
+  bundleIdPrefix: dev.thumbmix
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+packages:
+  ThumbmixCore:
+    path: Core
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_STYLE: Manual
+targets:
+  Thumbmix:
+    type: application
+    platform: iOS
+    sources: [App]
+    dependencies:
+      - package: ThumbmixCore
+        product: ThumbmixCore
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Thumbmix
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        NSLocalNetworkUsageDescription: Thumbmix talks to your M32 over the local network.
+        UILaunchScreen: {}
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIUserInterfaceStyle: Dark
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.thumbmix.app
+    scheme:
+      testTargets: [ThumbmixUITests]
+  ThumbmixUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: Thumbmix
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.thumbmix.uitests
