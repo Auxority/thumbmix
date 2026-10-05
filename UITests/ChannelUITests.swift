@@ -57,4 +57,35 @@ final class ChannelUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Snare"].exists)
         XCTAssertFalse(app.staticTexts["Bass"].exists)
     }
+
+    func testGateTabEditsThreshold() {
+        launch()
+        open("Kick")
+        app.buttons["Gate"].tap()
+        let threshold = app.otherElements["/ch/01/gate/thr"]
+        XCTAssertTrue(threshold.waitForExistence(timeout: 2))
+        let before = threshold.value as? String
+        threshold.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .press(forDuration: 0.05, thenDragTo: threshold.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)))
+        XCTAssertNotEqual(threshold.value as? String, before)
+        XCTAssertTrue(app.otherElements["/ch/01/gate/release"].exists)
+        saveScreenshot("task-14-gate")
+    }
+
+    func testCompTabShowsRatioAndMakeup() {
+        launch()
+        open("Kick")
+        app.buttons["Comp"].tap()
+        XCTAssertEqual(app.otherElements["/ch/01/dyn/ratio"].value as? String, "2.0:1")
+        XCTAssertTrue(app.otherElements["/ch/01/dyn/mgain"].exists)
+    }
+
+    func testBusHasCompButNoGate() {
+        launch()
+        app.buttons["Buses"].tap()
+        open("Mon 1")
+        XCTAssertFalse(app.buttons["Gate"].exists)
+        app.buttons["Comp"].tap()
+        XCTAssertTrue(app.otherElements["/bus/01/dyn/thr"].waitForExistence(timeout: 2))
+    }
 }
