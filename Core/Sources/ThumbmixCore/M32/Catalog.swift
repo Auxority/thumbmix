@@ -36,6 +36,19 @@ public enum Catalog {
             .linear(min: -18, max: 18, step: 0.25), .decibels, reset: 0)
     }
 
+    /// The channel's high-pass filter (doc p.25). The desk keeps it in the preamp section; only input
+    /// channels have one, so the app shows it with the EQ bands of inputs only.
+    public static func lowCut(_ strip: StripID) -> LowCutSpecs? {
+        guard strip.kind == .input else { return nil }
+        let p = strip.prefix + "/preamp/"
+        return LowCutSpecs(
+            on: ParamSpec(p + "hpon", CoreStrings.text("Low cut"), .toggle, .plain),
+            frequency: ParamSpec(p + "hpf", CoreStrings.text("Freq"), .log(min: 20, max: 400, steps: 101), .hertz),
+            slope: ParamSpec(
+                p + "hpslope", CoreStrings.text("Slope"), .choice(["12 dB/oct", "18 dB/oct", "24 dB/oct"]), .plain)
+        )
+    }
+
     /// No reset: a double-tap jumping preamp gain could cause feedback.
     public static func headampGain(_ index: Int) -> ParamSpec {
         ParamSpec(
@@ -134,6 +147,7 @@ public enum Catalog {
     private static func inputAddresses(_ strip: StripID) -> [String] {
         guard strip.hasGate else { return [] }
         return [trim(strip).address] + gate(strip).all.map(\.address) + [headampIndex(forInput: strip.number)]
+            + (lowCut(strip)?.all.map(\.address) ?? [])
     }
 
     private static func dynamicsAddresses(_ strip: StripID) -> [String] {

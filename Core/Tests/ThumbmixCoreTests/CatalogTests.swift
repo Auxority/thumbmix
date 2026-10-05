@@ -63,8 +63,8 @@ struct CatalogTests {
 
     @Test func syncListIsCompleteAndUnique() {
         let addresses = Catalog.syncAddresses()
-        // 32 inputs x 74 + 8 aux x 39 + 8 FX x 39 + 16 buses x 41 + LR 40 + M 39 + 8 DCAs x 5 + 128 headamps x 2
-        #expect(addresses.count == 4023)
+        // 32 inputs x 77 + 8 aux x 39 + 8 FX x 39 + 16 buses x 41 + LR 40 + M 39 + 8 DCAs x 5 + 128 headamps x 2
+        #expect(addresses.count == 4119)
         #expect(Set(addresses).count == addresses.count)
     }
 
