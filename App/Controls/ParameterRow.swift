@@ -1,0 +1,78 @@
+import SwiftUI
+import ThumbmixCore
+
+/// The one control in the app: drag anywhere on the row, relative to where the value was.
+struct ParameterRow: View {
+    let spec: ParamSpec
+    let mirror: ConsoleMirror
+    var title: String?
+    var accent: Color = .white
+    var height: CGFloat = 48
+    var meter: MeterCell?
+
+    @State private var dragStart: Float?
+    @State private var unityTicks = 0
+
+    var body: some View {
+        let position = mirror.normalized(spec)
+        let text = ValueText.format(position, spec)
+        ZStack(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 10).fill(Theme.track)
+            GeometryReader { geometry in
+                ZStack(alignment: .bottomLeading) {
+                    Rectangle()
+                        .fill(accent.opacity(dragStart == nil ? 0.28 : 0.45))
+                        .frame(width: geometry.size.width * CGFloat(position ?? 0))
+                    if let meter { MeterLine(cell: meter, width: geometry.size.width) }
+                }
+            }
+            HStack {
+                Text(title ?? spec.label).font(.subheadline).foregroundStyle(Theme.secondaryText).lineLimit(1)
+                Spacer(minLength: 8)
+                Text(text).font(dragStart == nil ? .body.monospacedDigit().weight(.semibold) : .title2.monospacedDigit().weight(.bold))
+            }
+            .padding(.horizontal, 12)
+            .allowsHitTesting(false)
+            HorizontalPanArea(
+                onBegan: { dragStart = mirror.normalized(spec) ?? 0 },
+                onChanged: drag,
+                onEnded: { dragStart = nil },
+                onDoubleTap: reset
+            )
+        }
+        .frame(height: height)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .sensoryFeedback(.selection, trigger: unityTicks)
+        .accessibilityElement(children: .ignore)
+        .accessibilityIdentifier(spec.address)
+        .accessibilityLabel(title.flatMap { $0.isEmpty ? nil : $0 } ?? spec.label)
+        .accessibilityValue(text)
+    }
+
+    private func drag(_ translation: CGFloat, _ width: CGFloat) {
+        guard let dragStart else { return }
+        let old = mirror.normalized(spec) ?? dragStart
+        let new = RelativeDrag.value(start: dragStart, translation: translation, width: width, scale: spec.scale)
+        guard new != old else { return }
+        if let unity = spec.unityNormalized, RelativeDrag.crossed(unity, from: old, to: new) { unityTicks += 1 }
+        mirror.set(spec.address, spec.scale.argument(fromNormalized: new))
+    }
+
+    private func reset() {
+        guard let value = spec.resetValue else { return }
+        mirror.set(spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
+    }
+}
+
+/// A separate view so 20 Hz meter updates redraw this line only, not the row.
+private struct MeterLine: View {
+    let cell: MeterCell
+    let width: CGFloat
+
+    var body: some View {
+        Capsule()
+            .fill(MeterBar.color(for: cell.level))
+            .frame(width: width * MeterScale.fraction(linear: cell.level), height: 3)
+            .padding(.bottom, 2)
+    }
+}
