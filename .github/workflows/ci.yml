@@ -7,6 +7,11 @@ on:
 permissions:
   contents: read
 
+# A new push to a PR makes the run for its previous commit pointless, so that run is stopped.
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: xcode-27
@@ -15,6 +20,16 @@ jobs:
       DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Most of the Test Core step was compiling from scratch. Swift compares file contents, not just
+      # dates, so a restored build skips unchanged files even after a fresh checkout. Caches made on a PR
+      # serve that PR's later runs; the key changes with the Xcode build so a toolchain update starts clean.
+      - name: Restore the Core build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: Core/.build
+          key: core-build-${{ runner.os }}-xcode27.0-${{ github.sha }}
+          restore-keys: core-build-${{ runner.os }}-xcode27.0-
 
       - name: Install SwiftLint
         run: brew install swiftlint
