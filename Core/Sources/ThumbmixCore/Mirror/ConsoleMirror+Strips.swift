@@ -11,6 +11,18 @@ extension ConsoleMirror {
         return ConsoleColor(index: Int(index))
     }
 
+    public func icon(_ strip: StripID) -> ConsoleIcon {
+        guard case .int(let number)? = cell(strip.icon).argument else { return ConsoleIcon.icon(1) }
+        return ConsoleIcon.icon(Int(number))
+    }
+
+    /// Sends a strip's scribble-strip label in one go, cleaned to what the desk stores.
+    public func edit(_ strip: StripID, name: String, color: ConsoleColor, icon: Int) {
+        set(strip.name, .string(StripName.sanitized(name)))
+        set(strip.color, .int(Int32(color.index)))
+        set(strip.icon, .int(Int32(ConsoleIcon.icon(icon).number)))
+    }
+
     public func normalized(_ spec: ParamSpec) -> Float? {
         cell(spec.address).argument.flatMap(spec.scale.normalized(from:))
     }
@@ -56,7 +68,8 @@ extension ConsoleMirror {
         }
     }
 
-    private func rawName(_ strip: StripID) -> String {
+    /// The name exactly as the desk holds it, empty when unnamed: what the edit sheet starts from.
+    public func rawName(_ strip: StripID) -> String {
         guard case .string(let name)? = cell(strip.name).argument else { return "" }
         return name.trimmingCharacters(in: .whitespaces)
     }

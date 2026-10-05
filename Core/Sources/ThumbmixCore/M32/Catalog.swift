@@ -127,7 +127,7 @@ public enum Catalog {
     }
 
     private static func addresses(of strip: StripID) -> [String] {
-        [strip.name, strip.color, strip.fader, strip.on] + [strip.pan, strip.dcaMask].compactMap { $0 }
+        [strip.name, strip.color, strip.icon, strip.fader, strip.on] + [strip.pan, strip.dcaMask].compactMap { $0 }
             + inputAddresses(strip) + dynamicsAddresses(strip) + eqAddresses(strip) + sendAddresses(strip)
     }
 

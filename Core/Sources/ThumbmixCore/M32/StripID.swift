@@ -44,6 +44,7 @@ public struct StripID: Hashable, Sendable, Identifiable {
 
     public var name: String { prefix + "/config/name" }
     public var color: String { prefix + "/config/color" }
+    public var icon: String { prefix + "/config/icon" }
     public var fader: String { kind == .dca ? prefix + "/fader" : prefix + "/mix/fader" }
     public var on: String { kind == .dca ? prefix + "/on" : prefix + "/mix/on" }
 

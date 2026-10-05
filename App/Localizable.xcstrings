@@ -24,6 +24,16 @@
     "%lld" : {
 
     },
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
     "+1 dB" : {
 
     },
@@ -37,6 +47,9 @@
 
     },
     "Cancel" : {
+
+    },
+    "Colour" : {
 
     },
     "Compressor curve" : {
@@ -57,6 +70,12 @@
     "Disconnected — retrying" : {
 
     },
+    "Done" : {
+
+    },
+    "Edit name, colour and icon" : {
+
+    },
     "EQ curve" : {
 
     },
@@ -72,7 +91,16 @@
     "Hidden" : {
 
     },
+    "Icon" : {
+
+    },
+    "Inverted" : {
+
+    },
     "Mute" : {
+
+    },
+    "Name" : {
 
     },
     "No channels assigned to this DCA." : {
@@ -103,6 +131,9 @@
 
     },
     "Scanning…" : {
+
+    },
+    "Search icons" : {
 
     },
     "Section" : {
