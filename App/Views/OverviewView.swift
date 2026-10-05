@@ -37,6 +37,9 @@ struct OverviewView: View {
                         .accessibilityValue(showUnused ? "Shown" : "Hidden")
                 }
             }
+            .navigationDestination(item: $openStrip) { strip in
+                ChannelView(strip: strip, mirror: mirror)
+            }
         }
     }
 

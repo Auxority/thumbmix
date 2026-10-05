@@ -6,6 +6,10 @@ final class OverviewUITests: XCTestCase {
 
     override func setUp() {
         continueAfterFailure = false
+    }
+
+    /// Launched per test rather than in setUp: the setUp override is nonisolated, XCUIApplication is main-actor.
+    private func launch() {
         app = XCUIApplication()
         app.launchArguments = ["-lastConsoleHost", "127.0.0.1"]
         app.launch()
@@ -13,6 +17,7 @@ final class OverviewUITests: XCTestCase {
     }
 
     func testHorizontalDragMovesTheFader() {
+        launch()
         let fader = app.otherElements["/ch/01/mix/fader"]
         XCTAssertTrue(fader.waitForExistence(timeout: 5))
         let before = fader.value as? String
@@ -24,6 +29,7 @@ final class OverviewUITests: XCTestCase {
     }
 
     func testVerticalSwipeScrollsInsteadOfMovingFaders() {
+        launch()
         let fader = app.otherElements["/ch/01/mix/fader"]
         let before = fader.value as? String
         let frame = app.buttons["Kick"].frame
@@ -35,6 +41,7 @@ final class OverviewUITests: XCTestCase {
     }
 
     func testUnusedChannelsHiddenUntilToggled() {
+        launch()
         XCTAssertFalse(app.buttons["Ch 20"].exists)
         app.buttons["Unused"].tap()
         app.swipeUp()
@@ -43,11 +50,13 @@ final class OverviewUITests: XCTestCase {
     }
 
     func testChipsSwitchGroups() {
+        launch()
         app.buttons["Buses"].tap()
         XCTAssertTrue(app.buttons["Mon 1"].waitForExistence(timeout: 2))
     }
 
     func testMuteToggles() {
+        launch()
         let mute = app.buttons["mute-/ch/01/mix/on"]
         mute.tap()
         XCTAssertEqual(mute.label, "Unmute")
