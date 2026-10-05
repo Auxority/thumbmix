@@ -25,8 +25,8 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: Thumbmix
-        CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "1"
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSLocalNetworkUsageDescription: Thumbmix talks to your M32 over the local network.
         UILaunchScreen: {}
         UIRequiresFullScreen: true
@@ -35,6 +35,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.thumbmix.app
+        # The release workflow reads MARKETING_VERSION for the tag and overrides the build number per run.
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
     scheme:
       testTargets: [ThumbmixUITests]
   ThumbmixUITests:

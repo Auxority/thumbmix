@@ -16,8 +16,8 @@ It supports the Midas M32 family only (FW 4.x), on iPhone only, in portrait only
 
 ## Install with SideStore (free Apple ID)
 
-1. On a Mac with Xcode and XcodeGen (`brew install xcodegen`), run `scripts/build-ipa.sh`.
-2. AirDrop `build/ipa/Thumbmix.ipa` to the iPhone, then open it with SideStore (My Apps → +).
+1. Download `Thumbmix.ipa` from the latest [release](../../releases/latest). Every merge to `main` publishes one, tagged `v<version>-<build>`. To build it yourself instead, run `scripts/build-ipa.sh` on a Mac with Xcode and XcodeGen (`brew install xcodegen`).
+2. AirDrop the IPA to the iPhone, then open it with SideStore (My Apps → +).
 3. On first launch, iOS asks for Local Network access. Allow it, or Thumbmix can't reach the desk.
 
 SideStore re-signs apps every 7 days. A free Apple ID allows 3 active sideloaded apps, and SideStore itself counts as one.
