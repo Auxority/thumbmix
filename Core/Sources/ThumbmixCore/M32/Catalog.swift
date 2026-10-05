@@ -122,6 +122,13 @@ public enum Catalog {
         return addresses
     }
 
+    /// The values a stale display would hurt most: what each strip is called and where its fader and mute sit.
+    public static func auditAddresses() -> [String] {
+        StripKind.allCases.flatMap(StripID.all).flatMap { strip in
+            [strip.name, strip.color, strip.fader, strip.on] + [strip.pan].compactMap { $0 }
+        }
+    }
+
     private static func headamp(_ index: Int) -> String { "/headamp/" + String(format: "%03d", index) }
     private static func sendPrefix(_ strip: StripID, _ bus: Int) -> String { strip.prefix + "/mix/" + String(format: "%02d", bus) }
 }

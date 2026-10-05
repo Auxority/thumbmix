@@ -27,7 +27,7 @@ struct ChannelHeader: View {
 
     private func nudge(by decibels: Double) {
         let fader = Catalog.fader(strip)
-        let current = mirror.normalized(fader) ?? 0
+        guard let current = mirror.normalized(fader) else { return }
         let next = RelativeDrag.nudged(current, byDecibels: decibels, scale: fader.scale)
         mirror.set(fader.address, fader.scale.argument(fromNormalized: next))
     }

@@ -24,19 +24,24 @@ public struct LinkTiming: Sendable {
     public var renewEvery: Duration
     public var probeWhenQuietFor: Duration
     public var lostAfter: Duration
+    public var restartAfterLost: Duration
 
-    public init(identifyTimeout: Duration, tick: Duration, renewEvery: Duration, probeWhenQuietFor: Duration, lostAfter: Duration) {
+    public init(identifyTimeout: Duration, tick: Duration, renewEvery: Duration, probeWhenQuietFor: Duration,
+                lostAfter: Duration, restartAfterLost: Duration) {
         self.identifyTimeout = identifyTimeout
         self.tick = tick
         self.renewEvery = renewEvery
         self.probeWhenQuietFor = probeWhenQuietFor
         self.lostAfter = lostAfter
+        self.restartAfterLost = restartAfterLost
     }
 
-    /// `/xremote` and `/meters` expire after 10 s on the console (doc p.9, p.16), hence the 9 s renewal.
+    /// `/xremote` and `/meters` expire after 10 s (doc p.9, p.16). Renewing every 4 s fits two renewals
+    /// in that window, so one lost UDP packet doesn't lapse the subscription.
     public static let console = LinkTiming(
         identifyTimeout: .seconds(3), tick: .milliseconds(500),
-        renewEvery: .seconds(9), probeWhenQuietFor: .seconds(1), lostAfter: .seconds(3)
+        renewEvery: .seconds(4), probeWhenQuietFor: .seconds(1), lostAfter: .seconds(3),
+        restartAfterLost: .seconds(5)
     )
 }
 
@@ -56,26 +61,39 @@ public final class ConsoleLink {
     /// Re-sent every `renewEvery`, and at once when the console comes back.
     public var renewals: [OSCMessage] = [OSCMessage("/xremote")]
 
-    private let transport: UDPTransport
+    /// Bumped each time the socket is rebuilt; tests read it.
+    private(set) var transportGeneration = 0
+
+    private let host: String
+    private let port: UInt16
+    private var transport: UDPTransport
+    private var receiveTask: Task<Void, Never>?
     private let timing: LinkTiming
     private let log = Logger(subsystem: "thumbmix", category: "link")
     private var info: ConsoleInfo?
     private var lastHeard = ContinuousClock.now
     private var lastRenewal = ContinuousClock.now
+    private var lastRestart = ContinuousClock.now
     private var tasks: [Task<Void, Never>] = []
 
     public init(host: String, port: UInt16 = 10023, timing: LinkTiming = .console) {
+        self.host = host
+        self.port = port
         transport = UDPTransport(host: host, port: port)
         self.timing = timing
     }
 
     public func start() {
-        transport.start()
-        let messages = transport.messages
-        tasks.append(Task { [weak self] in
-            for await message in messages { self?.received(message) }
-        })
+        startTransport()
         tasks.append(Task { [weak self] in await self?.identify() })
+    }
+
+    /// After the app was in the background: desk changes may have been missed and the socket may be
+    /// dead, so show the link as lost and rebuild it; the next reply makes it live and triggers a resync.
+    public func wake() {
+        guard info != nil else { return }
+        if case .live = state { state = .lost }
+        restartTransport()
     }
 
     public func send(_ message: OSCMessage) {
@@ -85,7 +103,29 @@ public final class ConsoleLink {
     public func stop() {
         tasks.forEach { $0.cancel() }
         tasks = []
+        receiveTask?.cancel()
         transport.cancel()
+    }
+
+    private func startTransport() {
+        transport.start()
+        let messages = transport.messages
+        receiveTask = Task { [weak self] in
+            for await message in messages { self?.received(message) }
+        }
+    }
+
+    /// iOS can leave a UDP connection dead after Wi-Fi loss or suspension without reporting it,
+    /// so a link that stays lost gets a fresh socket.
+    private func restartTransport() {
+        log.info("rebuilding socket to \(self.host, privacy: .public)")
+        receiveTask?.cancel()
+        transport.cancel()
+        transport = UDPTransport(host: host, port: port)
+        transportGeneration += 1
+        lastRestart = .now
+        startTransport()
+        transport.send(OSCMessage("/info"))
     }
 
     private func received(_ message: OSCMessage) {
@@ -131,7 +171,11 @@ public final class ConsoleLink {
             try? await Task.sleep(for: timing.tick)
             let now = ContinuousClock.now
             let quiet = now - lastHeard
-            if quiet > timing.lostAfter, case .live = state { state = .lost }
+            if quiet > timing.lostAfter, case .live = state {
+                state = .lost
+                lastRestart = now
+            }
+            if state == .lost, now - lastRestart >= timing.restartAfterLost { restartTransport() }
             // An idle console sends nothing, so ask for something before deciding it is gone.
             if quiet > timing.probeWhenQuietFor { transport.send(OSCMessage("/info")) }
             if now - lastRenewal >= timing.renewEvery { renew() }

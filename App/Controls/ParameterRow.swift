@@ -33,12 +33,7 @@ struct ParameterRow: View {
             }
             .padding(.horizontal, 12)
             .allowsHitTesting(false)
-            HorizontalPanArea(
-                onBegan: { dragStart = mirror.normalized(spec) ?? 0 },
-                onChanged: drag,
-                onEnded: { dragStart = nil },
-                onDoubleTap: reset
-            )
+            HorizontalPanArea(onBegan: beginDrag, onChanged: drag, onEnded: endDrag, onDoubleTap: reset)
         }
         .frame(height: height)
         .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -47,6 +42,19 @@ struct ParameterRow: View {
         .accessibilityIdentifier(spec.address)
         .accessibilityLabel(title.flatMap { $0.isEmpty ? nil : $0 } ?? spec.label)
         .accessibilityValue(text)
+    }
+
+    /// No value read yet means no drag: starting from a guess would jump the desk.
+    private func beginDrag() {
+        guard let current = mirror.normalized(spec) else { return }
+        dragStart = current
+        mirror.beginEdit(spec.address)
+    }
+
+    private func endDrag() {
+        guard dragStart != nil else { return }
+        dragStart = nil
+        mirror.endEdit(spec.address)
     }
 
     private func drag(_ translation: CGFloat, _ width: CGFloat) {
