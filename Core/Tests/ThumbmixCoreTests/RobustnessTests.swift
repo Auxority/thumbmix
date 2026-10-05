@@ -78,7 +78,9 @@ struct MirrorRobustnessTests {
         let consoleValue = fake.value(at: fader)
 
         fake.silent = true
-        mirror.set(fader, .float(0.6)) // lost on the way: the console never hears it
+        mirror.set(fader, .float(0.6))
+        // Stay silent past the 20 ms send tick so the set is really lost, as in a Wi-Fi dropout.
+        try await Task.sleep(for: .milliseconds(100))
         mirror.wake()
         fake.silent = false
 

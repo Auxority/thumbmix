@@ -42,6 +42,19 @@ struct ParameterRow: View {
         .accessibilityIdentifier(spec.address)
         .accessibilityLabel(title.flatMap { $0.isEmpty ? nil : $0 } ?? spec.label)
         .accessibilityValue(text)
+        .accessibilityAdjustableAction(adjust)
+    }
+
+    /// VoiceOver swipe up/down: dragging isn't available to a VoiceOver user, so the row steps instead.
+    private func adjust(_ direction: AccessibilityAdjustmentDirection) {
+        guard let current = mirror.normalized(spec) else { return }
+        let step = switch direction {
+        case .increment: 1
+        case .decrement: -1
+        @unknown default: 0
+        }
+        guard step != 0 else { return }
+        mirror.set(spec.address, spec.scale.argument(fromNormalized: RelativeDrag.stepped(current, by: step, scale: spec.scale)))
     }
 
     /// No value read yet means no drag: starting from a guess would jump the desk.

@@ -11,14 +11,14 @@ final class OverviewUITests: XCTestCase {
     /// Launched per test rather than in setUp: the setUp override is nonisolated, XCUIApplication is main-actor.
     private func launch() {
         app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"]
+        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
         app.launch()
         XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
     }
 
     func testHorizontalDragMovesTheFader() {
         launch()
-        let fader = app.otherElements["/ch/01/mix/fader"]
+        let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
         XCTAssertTrue(fader.waitForExistence(timeout: 5))
         let before = fader.value as? String
 
@@ -30,7 +30,7 @@ final class OverviewUITests: XCTestCase {
 
     func testVerticalSwipeScrollsInsteadOfMovingFaders() {
         launch()
-        let fader = app.otherElements["/ch/01/mix/fader"]
+        let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
         let before = fader.value as? String
         let frame = app.buttons["Kick"].frame
 
@@ -52,7 +52,7 @@ final class OverviewUITests: XCTestCase {
     func testRowStaysWhileItsFaderIsPulledDown() {
         launch()
         app.swipeUp()
-        let row = app.otherElements["/ch/17/mix/fader"]
+        let row = app.descendants(matching: .any)["/ch/17/mix/fader"]
         XCTAssertTrue(row.waitForExistence(timeout: 2))
 
         row.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5))

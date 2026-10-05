@@ -8,7 +8,7 @@ final class ConnectUITests: XCTestCase {
 
     func testRejectsInvalidAddress() {
         let app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", ""]
+        app.launchArguments = ["-lastConsoleHost", ""] + fixedLocale
         app.launch()
 
         let field = app.textFields["console-ip"]
@@ -20,7 +20,7 @@ final class ConnectUITests: XCTestCase {
 
     func testConnectsToFakeAndSyncs() {
         let app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"]
+        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
         app.launch()
 
         XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))

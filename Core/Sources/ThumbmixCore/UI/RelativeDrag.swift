@@ -10,6 +10,18 @@ public enum RelativeDrag {
         (old < mark && new >= mark) || (old > mark && new <= mark)
     }
 
+    /// One VoiceOver swipe: 1 dB on levels, one option on choices, about 1 % of the range elsewhere
+    /// (never less than one console step, or the swipe would do nothing).
+    public static func stepped(_ normalized: Float, by direction: Int, scale: ParamScale) -> Float {
+        switch scale {
+        case .fader, .sendLevel:
+            return nudged(normalized, byDecibels: Double(direction), scale: scale)
+        default:
+            let step = Swift.max(1 / Float(scale.steps - 1), 0.01)
+            return scale.snap(normalized + Float(direction) * step)
+        }
+    }
+
     public static func nudged(_ normalized: Float, byDecibels delta: Double, scale: ParamScale) -> Float {
         let current = scale.value(fromNormalized: normalized)
         return scale.normalized(forValue: (current.isFinite ? current : -90) + delta)
