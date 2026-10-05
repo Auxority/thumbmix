@@ -57,6 +57,7 @@ struct OverviewView: View {
 
 private struct GroupChips: View {
     @Binding var selection: StripGroup
+    @ScaledMetric private var chipHeight: CGFloat = 36
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -65,7 +66,7 @@ private struct GroupChips: View {
                     Button(group.title) { selection = group }
                         .font(.subheadline.weight(.semibold))
                         .padding(.horizontal, 14)
-                        .frame(height: 36)
+                        .frame(height: chipHeight)
                         .foregroundStyle(selection == group ? .black : .white)
                         .background(selection == group ? Color.white : Theme.track, in: Capsule())
                         .buttonStyle(.plain)

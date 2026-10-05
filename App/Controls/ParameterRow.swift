@@ -12,6 +12,8 @@ struct ParameterRow: View {
 
     @State private var dragStart: Float?
     @State private var unityTicks = 0
+    /// Grows the row with the user's text size, so large type isn't clipped.
+    @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
         let position = mirror.normalized(spec)
@@ -27,15 +29,22 @@ struct ParameterRow: View {
                 }
             }
             HStack {
-                Text(title ?? spec.label).font(.subheadline).foregroundStyle(Theme.secondaryText).lineLimit(1)
+                Text(title ?? spec.label)
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.secondaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
                 Spacer(minLength: 8)
-                Text(text).font(dragStart == nil ? .body.monospacedDigit().weight(.semibold) : .title2.monospacedDigit().weight(.bold))
+                Text(text)
+                    .font(dragStart == nil ? .body.monospacedDigit().weight(.semibold) : .title2.monospacedDigit().weight(.bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
             .padding(.horizontal, 12)
             .allowsHitTesting(false)
             HorizontalPanArea(onBegan: beginDrag, onChanged: drag, onEnded: endDrag, onDoubleTap: reset)
         }
-        .frame(height: height)
+        .frame(height: height * sizeScale)
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .sensoryFeedback(.selection, trigger: unityTicks)
         .accessibilityElement(children: .ignore)

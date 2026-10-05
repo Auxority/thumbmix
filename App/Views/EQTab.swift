@@ -165,11 +165,12 @@ struct EQGraph: View {
 private struct BandPoint: View {
     let number: Int
     let isSelected: Bool
+    @ScaledMetric private var size: CGFloat = 28
 
     var body: some View {
         Circle()
             .fill(isSelected ? Color.white : Theme.raised)
-            .frame(width: 28, height: 28)
+            .frame(width: size, height: size)
             .overlay(Text("\(number)").font(.caption.bold()).foregroundStyle(isSelected ? .black : .white))
     }
 }

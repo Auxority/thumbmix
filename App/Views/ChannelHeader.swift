@@ -34,14 +34,17 @@ struct ChannelHeader: View {
 }
 
 private struct NudgeButton: View {
-    let label: String
+    let label: LocalizedStringKey
     let action: () -> Void
+    @ScaledMetric private var minHeight: CGFloat = 52
 
     var body: some View {
         Button(action: action) {
             Text(label)
                 .font(.headline.monospacedDigit())
-                .frame(maxWidth: .infinity, minHeight: 52)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity, minHeight: minHeight)
                 .background(Theme.raised, in: RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
