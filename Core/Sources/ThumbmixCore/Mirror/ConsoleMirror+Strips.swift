@@ -15,6 +15,11 @@ extension ConsoleMirror {
         cell(spec.address).argument.flatMap(spec.scale.normalized(from:))
     }
 
+    /// Real units (dB, Hz, ms) or the option index; nil until the console sent it.
+    public func value(_ spec: ParamSpec) -> Double? {
+        normalized(spec).map(spec.scale.value(fromNormalized:))
+    }
+
     public func isMuted(_ strip: StripID) -> Bool {
         cell(strip.on).argument == .int(0)
     }

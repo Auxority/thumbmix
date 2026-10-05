@@ -13,8 +13,11 @@ struct GateTab: View {
                     ToggleChip(spec: gate.on, mirror: mirror, onColor: .green)
                     ParameterRow(spec: gate.mode, mirror: mirror)
                 }
-                DynamicsMeter(
-                    cell: mirror.meter(strip), threshold: decibels(gate.threshold), reduction: \.gateGain)
+                if let curve = curve(gate) {
+                    TransferGraph(
+                        output: curve.output, threshold: curve.threshold, meter: mirror.meter(strip),
+                        reduction: \.gateGain, identifier: "gate-graph", label: "Gate curve")
+                }
                 ForEach([gate.threshold, gate.range, gate.attack, gate.hold, gate.release]) {
                     ParameterRow(spec: $0, mirror: mirror)
                 }
@@ -22,8 +25,12 @@ struct GateTab: View {
         }
     }
 
-    private func decibels(_ spec: ParamSpec) -> Double? {
-        mirror.normalized(spec).map(spec.scale.value(fromNormalized:))
+    /// nil until the desk has sent every value the curve needs: the graph never draws a guess.
+    private func curve(_ gate: GateSpecs) -> (output: (Double) -> Double, threshold: Double)? {
+        guard let modeIndex = mirror.value(gate.mode), let mode = TransferCurve.GateMode(rawValue: Int(modeIndex)),
+            let threshold = mirror.value(gate.threshold), let range = mirror.value(gate.range)
+        else { return nil }
+        return ({ TransferCurve.gateOutput($0, mode: mode, threshold: threshold, range: range) }, threshold)
     }
 }
 
@@ -35,13 +42,15 @@ struct CompTab: View {
         let dynamics = Catalog.dynamics(strip)
         ScrollView {
             VStack(spacing: 8) {
-                HStack {
+                HStack(spacing: 8) {
                     ToggleChip(spec: dynamics.on, mirror: mirror, onColor: .green)
-                    Spacer()
+                    ParameterRow(spec: dynamics.mode, mirror: mirror)
                 }
-                DynamicsMeter(
-                    cell: mirror.meter(strip), threshold: decibels(dynamics.threshold),
-                    reduction: \.dynamicsGain)
+                if let curve = curve(dynamics) {
+                    TransferGraph(
+                        output: curve.output, threshold: curve.threshold, meter: mirror.meter(strip),
+                        reduction: \.dynamicsGain, identifier: "comp-graph", label: "Compressor curve")
+                }
                 ForEach([
                     dynamics.threshold, dynamics.ratio, dynamics.knee, dynamics.attack, dynamics.hold,
                     dynamics.release, dynamics.makeup,
@@ -52,25 +61,18 @@ struct CompTab: View {
         }
     }
 
-    private func decibels(_ spec: ParamSpec) -> Double? {
-        mirror.normalized(spec).map(spec.scale.value(fromNormalized:))
-    }
-}
-
-/// Input level with the threshold marked, plus gain reduction. Reads the meter cell itself so
-/// 20 Hz updates don't redraw the parameter rows.
-private struct DynamicsMeter: View {
-    let cell: MeterCell
-    let threshold: Double?
-    let reduction: KeyPath<MeterCell, Float>
-
-    var body: some View {
-        VStack(spacing: 8) {
-            MeterBar(level: cell.level, threshold: threshold, height: 12)
-            ReductionBar(gain: cell[keyPath: reduction])
+    /// nil until the desk has sent every value the curve needs: the graph never draws a guess.
+    private func curve(_ dynamics: DynamicsSpecs) -> (output: (Double) -> Double, threshold: Double)? {
+        guard let mode = mirror.value(dynamics.mode), let threshold = mirror.value(dynamics.threshold),
+            let ratioIndex = mirror.value(dynamics.ratio), let ratio = Double(Catalog.ratios[Int(ratioIndex)]),
+            let knee = mirror.value(dynamics.knee), let makeup = mirror.value(dynamics.makeup)
+        else { return nil }
+        let isExpander = mode == 1
+        let output = { (input: Double) in
+            TransferCurve.dynamicsOutput(
+                input, isExpander: isExpander, threshold: threshold, ratio: ratio, knee: knee, makeup: makeup)
         }
-        .padding(12)
-        .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
+        return (output, threshold)
     }
 }
 

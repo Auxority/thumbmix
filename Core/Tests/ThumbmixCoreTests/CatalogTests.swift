@@ -52,10 +52,19 @@ struct CatalogTests {
         #expect(bus.count == 6)
     }
 
+    /// The curve drawn for dynamics depends on it: a desk set to EXP must not be drawn as a compressor.
+    @Test func dynamicsMirrorsCompOrExpMode() {
+        let mode = Catalog.dynamics(StripID(.bus, 3)).mode
+        #expect(mode.address == "/bus/03/dyn/mode")
+        #expect(mode.scale == .choice(["COMP", "EXP"]))
+        #expect(Catalog.syncAddresses().contains("/ch/01/dyn/mode"))
+        #expect(DemoState.values()["/ch/01/dyn/mode"] == .int(0))
+    }
+
     @Test func syncListIsCompleteAndUnique() {
         let addresses = Catalog.syncAddresses()
-        // 32 inputs x 72 + 8 aux x 38 + 8 FX x 38 + 16 buses x 39 + LR 38 + M 37 + 8 DCAs x 4 + 128 headamps x 2
-        #expect(addresses.count == 3899)
+        // 32 inputs x 73 + 8 aux x 38 + 8 FX x 38 + 16 buses x 40 + LR 39 + M 38 + 8 DCAs x 4 + 128 headamps x 2
+        #expect(addresses.count == 3949)
         #expect(Set(addresses).count == addresses.count)
     }
 

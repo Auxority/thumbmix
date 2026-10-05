@@ -36,6 +36,9 @@
     "Band" : {
 
     },
+    "Compressor curve" : {
+
+    },
     "Connect" : {
 
     },
@@ -52,6 +55,9 @@
 
     },
     "EQ curve" : {
+
+    },
+    "Gate curve" : {
 
     },
     "GR %@ dB" : {

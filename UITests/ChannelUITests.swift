@@ -84,6 +84,18 @@ final class ChannelUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["/ch/01/dyn/mgain"].exists)
     }
 
+    func testGateAndCompDrawTheirCurves() {
+        launch()
+        open("Kick")
+        app.buttons["Gate"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["gate-graph"].waitForExistence(timeout: 2))
+        saveScreenshot("gate-graph")
+        app.buttons["Comp"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["comp-graph"].waitForExistence(timeout: 2))
+        XCTAssertEqual(app.descendants(matching: .any)["/ch/01/dyn/mode"].value as? String, "COMP")
+        saveScreenshot("comp-graph")
+    }
+
     func testBusHasCompButNoGate() {
         launch()
         app.buttons["Buses"].tap()

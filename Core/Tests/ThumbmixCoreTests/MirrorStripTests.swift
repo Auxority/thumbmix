@@ -18,6 +18,16 @@ struct MirrorStripTests {
         #expect(mirror.color(StripID(.bus, 2)) == ConsoleColor(base: .yellow, inverted: true))
     }
 
+    @Test func valueIsInRealUnitsAndNilUntilRead() {
+        let threshold = Catalog.gate(StripID(.input, 3)).threshold
+        #expect(mirror.value(threshold) == nil)
+        mirror.apply(OSCMessage(threshold.address, [.float(0.5)]))
+        #expect(mirror.value(threshold) == -40)
+        let mode = Catalog.dynamics(StripID(.input, 3)).mode
+        mirror.apply(OSCMessage(mode.address, [.int(1)]))
+        #expect(mirror.value(mode) == 1)
+    }
+
     @Test func mutedWhenOnIsZero() {
         mirror.apply(OSCMessage("/ch/05/mix/on", [.int(0)]))
         #expect(mirror.isMuted(StripID(.input, 5)))
