@@ -29,10 +29,13 @@ public enum MeterBanks {
             }
         case "/meters/1" where v.count >= 96:
             for i in 0..<32 {
-                readings[StripID(.input, i + 1)] = MeterReading(level: v[i], gateGain: v[32 + i], dynamicsGain: v[64 + i])
+                readings[StripID(.input, i + 1)] = MeterReading(
+                    level: v[i], gateGain: v[32 + i], dynamicsGain: v[64 + i])
             }
         case "/meters/2" where v.count >= 49:
-            for i in 0..<16 { readings[StripID(.bus, i + 1)] = MeterReading(level: v[i], dynamicsGain: v[25 + i]) }
+            for i in 0..<16 {
+                readings[StripID(.bus, i + 1)] = MeterReading(level: v[i], dynamicsGain: v[25 + i])
+            }
             readings[StripID(.mainStereo)] = MeterReading(level: max(v[22], v[23]), dynamicsGain: v[47])
             readings[StripID(.mainMono)] = MeterReading(level: v[24], dynamicsGain: v[48])
         case "/meters/5" where v.count >= 24:

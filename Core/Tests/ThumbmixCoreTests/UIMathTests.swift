@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import ThumbmixCore
 
 struct UIMathTests {
@@ -19,13 +20,16 @@ struct UIMathTests {
     }
 
     @Test func nudgeMovesOneDecibel() {
-        let up = RelativeDrag.nudged(ParamScale.fader.normalized(forValue: 0), byDecibels: 1, scale: .fader)
+        let up = RelativeDrag.nudged(
+            ParamScale.fader.normalized(forValue: 0), byDecibels: 1, scale: .fader)
         #expect(abs(ParamScale.fader.value(fromNormalized: up) - 1) < 0.05)
         #expect(RelativeDrag.nudged(0, byDecibels: 1, scale: .fader) > 0)
     }
 
     @Test func decibelText() {
-        #expect(ValueText.format(ParamScale.fader.normalized(forValue: 0), fader, locale: .testEnglish) == "0.0 dB")
+        #expect(
+            ValueText.format(ParamScale.fader.normalized(forValue: 0), fader, locale: .testEnglish)
+                == "0.0 dB")
         #expect(ValueText.format(0, fader, locale: .testEnglish) == "−∞ dB")
         #expect(ValueText.format(0.825, fader, locale: .testEnglish) == "+3.0 dB")
         #expect(ValueText.format(0.5, fader, locale: .testEnglish) == "−10.0 dB")
@@ -73,7 +77,8 @@ struct UIMathTests {
         let band = Catalog.eqBand(StripID(.input, 1), 1)
         #expect(ValueText.format(0.5, fader, locale: dutch) == "−10,0 dB")
         #expect(ValueText.format(1, band.frequency, locale: dutch) == "20,00 kHz")
-        #expect(ValueText.format(1, Catalog.dynamics(StripID(.input, 1)).release, locale: dutch) == "4000 ms")
+        #expect(
+            ValueText.format(1, Catalog.dynamics(StripID(.input, 1)).release, locale: dutch) == "4000 ms")
     }
 
     @Test func groups() {

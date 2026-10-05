@@ -11,7 +11,9 @@ public struct ParamSpec: Sendable, Identifiable, Equatable {
     /// What a double-tap restores, in real units; nil means double-tap does nothing.
     public let resetValue: Double?
 
-    public init(_ address: String, _ label: String, _ scale: ParamScale, _ unit: ParamUnit, reset: Double? = nil) {
+    public init(
+        _ address: String, _ label: String, _ scale: ParamScale, _ unit: ParamUnit, reset: Double? = nil
+    ) {
         self.address = address
         self.label = label
         self.scale = scale

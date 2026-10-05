@@ -3,9 +3,12 @@ import Foundation
 /// Every M32 parameter Thumbmix v1 touches. Ranges are from Maillot's protocol doc v4.09 (p.25-43).
 public enum Catalog {
     public static let gateModes = ["EXP2", "EXP3", "EXP4", "GATE", "DUCK"]
-    public static let ratios = ["1.1", "1.3", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "7.0", "10", "20", "100"]
+    public static let ratios = [
+        "1.1", "1.3", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "7.0", "10", "20", "100",
+    ]
     public static let eqTypes = ["LCut", "LShv", "PEQ", "VEQ", "HShv", "HCut"]
-    public static let mainEQTypes = eqTypes + ["BU6", "BU12", "BS12", "LR12", "BU18", "BU24", "BS24", "LR24"]
+    public static let mainEQTypes =
+        eqTypes + ["BU6", "BU12", "BS12", "LR12", "BU18", "BU24", "BS24", "LR24"]
 
     private static let hold = ParamScale.log(min: 0.02, max: 2000, steps: 101)
     private static let release = ParamScale.log(min: 5, max: 4000, steps: 101)
@@ -21,16 +24,22 @@ public enum Catalog {
     }
 
     public static func pan(_ strip: StripID) -> ParamSpec? {
-        strip.pan.map { ParamSpec($0, CoreStrings.text("Pan"), .linear(min: -100, max: 100, step: 2), .pan, reset: 0) }
+        strip.pan.map {
+            ParamSpec($0, CoreStrings.text("Pan"), .linear(min: -100, max: 100, step: 2), .pan, reset: 0)
+        }
     }
 
     public static func trim(_ strip: StripID) -> ParamSpec {
-        ParamSpec(strip.prefix + "/preamp/trim", CoreStrings.text("Trim"), .linear(min: -18, max: 18, step: 0.25), .decibels, reset: 0)
+        ParamSpec(
+            strip.prefix + "/preamp/trim", CoreStrings.text("Trim"),
+            .linear(min: -18, max: 18, step: 0.25), .decibels, reset: 0)
     }
 
     /// No reset: a double-tap jumping preamp gain could cause feedback.
     public static func headampGain(_ index: Int) -> ParamSpec {
-        ParamSpec(headamp(index) + "/gain", CoreStrings.text("Gain"), .linear(min: -12, max: 60, step: 0.5), .decibels)
+        ParamSpec(
+            headamp(index) + "/gain", CoreStrings.text("Gain"), .linear(min: -12, max: 60, step: 0.5),
+            .decibels)
     }
 
     public static func headampPhantom(_ index: Int) -> ParamSpec {
@@ -49,8 +58,10 @@ public enum Catalog {
         return GateSpecs(
             on: ParamSpec(p + "on", CoreStrings.text("Gate"), .toggle, .plain),
             mode: ParamSpec(p + "mode", CoreStrings.text("Mode"), .choice(gateModes), .plain),
-            threshold: ParamSpec(p + "thr", CoreStrings.text("Threshold"), .linear(min: -80, max: 0, step: 0.5), .decibels),
-            range: ParamSpec(p + "range", CoreStrings.text("Range"), .linear(min: 3, max: 60, step: 1), .decibelAmount),
+            threshold: ParamSpec(
+                p + "thr", CoreStrings.text("Threshold"), .linear(min: -80, max: 0, step: 0.5), .decibels),
+            range: ParamSpec(
+                p + "range", CoreStrings.text("Range"), .linear(min: 3, max: 60, step: 1), .decibelAmount),
             attack: ParamSpec(p + "attack", CoreStrings.text("Attack"), attack, .milliseconds),
             hold: ParamSpec(p + "hold", CoreStrings.text("Hold"), hold, .milliseconds),
             release: ParamSpec(p + "release", CoreStrings.text("Release"), release, .milliseconds)
@@ -61,13 +72,17 @@ public enum Catalog {
         let p = strip.prefix + "/dyn/"
         return DynamicsSpecs(
             on: ParamSpec(p + "on", CoreStrings.text("Comp"), .toggle, .plain),
-            threshold: ParamSpec(p + "thr", CoreStrings.text("Threshold"), .linear(min: -60, max: 0, step: 0.5), .decibels),
+            threshold: ParamSpec(
+                p + "thr", CoreStrings.text("Threshold"), .linear(min: -60, max: 0, step: 0.5), .decibels),
             ratio: ParamSpec(p + "ratio", CoreStrings.text("Ratio"), .choice(ratios), .ratio),
-            knee: ParamSpec(p + "knee", CoreStrings.text("Knee"), .linear(min: 0, max: 5, step: 1), .plain),
+            knee: ParamSpec(
+                p + "knee", CoreStrings.text("Knee"), .linear(min: 0, max: 5, step: 1), .plain),
             attack: ParamSpec(p + "attack", CoreStrings.text("Attack"), attack, .milliseconds),
             hold: ParamSpec(p + "hold", CoreStrings.text("Hold"), hold, .milliseconds),
             release: ParamSpec(p + "release", CoreStrings.text("Release"), release, .milliseconds),
-            makeup: ParamSpec(p + "mgain", CoreStrings.text("Makeup"), .linear(min: 0, max: 24, step: 0.5), .decibelAmount)
+            makeup: ParamSpec(
+                p + "mgain", CoreStrings.text("Makeup"), .linear(min: 0, max: 24, step: 0.5), .decibelAmount
+            )
         )
     }
 
@@ -80,8 +95,11 @@ public enum Catalog {
         let types = [.mainStereo, .mainMono].contains(strip.kind) ? mainEQTypes : eqTypes
         return EQBandSpecs(
             type: ParamSpec(p + "type", CoreStrings.text("Type"), .choice(types), .plain),
-            frequency: ParamSpec(p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz),
-            gain: ParamSpec(p + "g", CoreStrings.text("Gain"), .linear(min: -15, max: 15, step: 0.25), .decibels, reset: 0),
+            frequency: ParamSpec(
+                p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz),
+            gain: ParamSpec(
+                p + "g", CoreStrings.text("Gain"), .linear(min: -15, max: 15, step: 0.25), .decibels,
+                reset: 0),
             q: ParamSpec(p + "q", CoreStrings.text("Q"), .log(min: 10, max: 0.3, steps: 72), .plain)
         )
     }
@@ -113,12 +131,16 @@ public enum Catalog {
                 }
                 if strip.sendsToBuses {
                     for bus in 1...16 {
-                        addresses += [sendLevel(from: strip, toBus: bus).address, sendOn(from: strip, toBus: bus).address]
+                        addresses += [
+                            sendLevel(from: strip, toBus: bus).address, sendOn(from: strip, toBus: bus).address,
+                        ]
                     }
                 }
             }
         }
-        for index in 0..<128 { addresses += [headampGain(index).address, headampPhantom(index).address] }
+        for index in 0..<128 {
+            addresses += [headampGain(index).address, headampPhantom(index).address]
+        }
         return addresses
     }
 
@@ -129,6 +151,10 @@ public enum Catalog {
         }
     }
 
-    private static func headamp(_ index: Int) -> String { "/headamp/" + String(format: "%03d", index) }
-    private static func sendPrefix(_ strip: StripID, _ bus: Int) -> String { strip.prefix + "/mix/" + String(format: "%02d", bus) }
+    private static func headamp(_ index: Int) -> String {
+        "/headamp/" + String(format: "%03d", index)
+    }
+    private static func sendPrefix(_ strip: StripID, _ bus: Int) -> String {
+        strip.prefix + "/mix/" + String(format: "%02d", bus)
+    }
 }

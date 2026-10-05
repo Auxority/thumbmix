@@ -47,7 +47,9 @@ final class ChannelUITests: XCTestCase {
         app.buttons["Unused"].tap()
         app.swipeUp()
         app.buttons["Ch 15"].tap()
-        XCTAssertTrue(app.staticTexts["No preamp: this channel reads from an internal source."].waitForExistence(timeout: 3))
+        XCTAssertTrue(
+            app.staticTexts["No preamp: this channel reads from an internal source."].waitForExistence(
+                timeout: 3))
     }
 
     func testDCAMembers() {
@@ -66,7 +68,9 @@ final class ChannelUITests: XCTestCase {
         XCTAssertTrue(threshold.waitForExistence(timeout: 2))
         let before = threshold.value as? String
         threshold.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            .press(forDuration: 0.05, thenDragTo: threshold.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)))
+            .press(
+                forDuration: 0.05,
+                thenDragTo: threshold.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)))
         XCTAssertNotEqual(threshold.value as? String, before)
         XCTAssertTrue(app.descendants(matching: .any)["/ch/01/gate/release"].exists)
         saveScreenshot("task-14-gate")
@@ -101,7 +105,9 @@ final class ChannelUITests: XCTestCase {
 
         // All fake bands sit at the centre point; the nearest-band tie goes to band 1.
         graph.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            .press(forDuration: 0.1, thenDragTo: graph.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.25)))
+            .press(
+                forDuration: 0.1,
+                thenDragTo: graph.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.25)))
 
         XCTAssertNotEqual(frequency.value as? String, "632 Hz")
         XCTAssertNotEqual(gain.value as? String, "0.0 dB")
@@ -130,8 +136,10 @@ final class ChannelUITests: XCTestCase {
         app.buttons["Buses"].tap()
         open("Mon 1")
         app.buttons["Fed by"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["/ch/13/mix/01/level"].waitForExistence(timeout: 2))
-        XCTAssertEqual(app.descendants(matching: .any)["/ch/13/mix/01/level"].value as? String, "0.0 dB")
+        XCTAssertTrue(
+            app.descendants(matching: .any)["/ch/13/mix/01/level"].waitForExistence(timeout: 2))
+        XCTAssertEqual(
+            app.descendants(matching: .any)["/ch/13/mix/01/level"].value as? String, "0.0 dB")
         XCTAssertTrue(app.descendants(matching: .any)["/fxrtn/01/mix/01/level"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["/ch/20/mix/01/level"].exists)
         saveScreenshot("task-16-fedby")

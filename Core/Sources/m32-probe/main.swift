@@ -14,10 +14,10 @@ let recorder = MessageRecorder(transport.messages)
 func describe(_ message: OSCMessage) -> String {
     let arguments = message.arguments.map { argument -> String in
         switch argument {
-        case let .int(value): "i:\(value)"
-        case let .float(value): "f:\(value)"
-        case let .string(value): "s:\"\(value)\""
-        case let .blob(value): "b:\(value.count) bytes"
+        case .int(let value): "i:\(value)"
+        case .float(let value): "f:\(value)"
+        case .string(let value): "s:\"\(value)\""
+        case .blob(let value): "b:\(value.count) bytes"
         }
     }
     return ([message.address] + arguments).joined(separator: " ")
@@ -57,8 +57,10 @@ while ContinuousClock.now - pushStart < .seconds(20) {
 }
 let pushes = recorder.messages
 print("pushed messages received: \(pushes.count)")
-pushes.prefix(10).forEach { print("  " + describe($0)) }
-print(pushes.isEmpty ? "RESULT: NO pushes. The /xremote client limit may be reached." : "RESULT: pushes arrive.")
+for push in pushes.prefix(10) { print("  " + describe(push)) }
+print(
+    pushes.isEmpty
+        ? "RESULT: NO pushes. The /xremote client limit may be reached." : "RESULT: pushes arrive.")
 
 print("\n== 3. Preamp feeding each input (/-ha/NN/index; 32-79 = AES50-A, -1 = internal)")
 for input in 1...32 {
@@ -71,7 +73,7 @@ for input in 1...32 {
     let strip = StripID(.input, input)
     let name = await ask(strip.name)?.string(at: 0) ?? "?"
     var mask = "?"
-    if case let .int(value)? = await ask(strip.dcaMask!)?.arguments.first {
+    if case .int(let value)? = await ask(strip.dcaMask!)?.arguments.first {
         mask = zeroPadded(String(value, radix: 2), to: 8)
     }
     print(String(format: "ch %02d ", input) + "\"\(name)\" dca bits (DCA8..DCA1) \(mask)")
@@ -83,13 +85,15 @@ transport.send(OSCMessage("/meters", [.string("/meters/1")]))
 transport.send(OSCMessage("/meters", [.string("/meters/5"), .int(0), .int(0)]))
 try? await Task.sleep(for: .seconds(2))
 for bank in ["/meters/1", "/meters/5"] {
-    guard case let .blob(blob)? = recorder.last(address: bank)?.arguments.first else {
+    guard case .blob(let blob)? = recorder.last(address: bank)?.arguments.first else {
         print("\(bank) NO REPLY")
         continue
     }
     let values = MeterBlob.floats(from: blob)
     print("\(bank) count \(values.count)")
-    print(values.enumerated().map { "\($0.offset):" + String(format: "%.3f", $0.element) }.joined(separator: " "))
+    print(
+        values.enumerated().map { "\($0.offset):" + String(format: "%.3f", $0.element) }.joined(
+            separator: " "))
 }
 print("For /meters/5, note which DCA faders were up: DCA meters are expected at 16-23.")
 transport.cancel()

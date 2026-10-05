@@ -16,10 +16,10 @@ public enum OSCCodec {
         appendString("," + message.arguments.map(\.typeTag).joined(), to: &out)
         for argument in message.arguments {
             switch argument {
-            case let .int(value): appendUInt32(UInt32(bitPattern: value), to: &out)
-            case let .float(value): appendUInt32(value.bitPattern, to: &out)
-            case let .string(value): appendString(value, to: &out)
-            case let .blob(value):
+            case .int(let value): appendUInt32(UInt32(bitPattern: value), to: &out)
+            case .float(let value): appendUInt32(value.bitPattern, to: &out)
+            case .string(let value): appendString(value, to: &out)
+            case .blob(let value):
                 appendUInt32(UInt32(value.count), to: &out)
                 out.append(value)
                 padToFour(&out)
@@ -69,7 +69,9 @@ private struct Reader {
     var peek: UInt8 { bytes[offset] }
 
     mutating func string() throws -> String {
-        guard hasMore, let end = bytes[offset...].firstIndex(of: 0) else { throw OSCDecodeError.unterminatedString }
+        guard hasMore, let end = bytes[offset...].firstIndex(of: 0) else {
+            throw OSCDecodeError.unterminatedString
+        }
         let value = String(decoding: bytes[offset..<end], as: UTF8.self)
         offset = Swift.min(aligned(end + 1), bytes.count)
         return value

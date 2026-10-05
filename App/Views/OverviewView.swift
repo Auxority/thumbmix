@@ -78,7 +78,7 @@ private struct GroupChips: View {
 }
 
 #if DEBUG
-#Preview {
-    OverviewView(mirror: .preview(), onDisconnect: {})
-}
+    #Preview {
+        OverviewView(mirror: .preview(), onDisconnect: {})
+    }
 #endif

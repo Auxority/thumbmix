@@ -10,7 +10,7 @@ struct StatusBanner: View {
             EmptyView()
         case .connecting:
             banner("Connecting…", Theme.raised)
-        case let .syncing(progress):
+        case .syncing(let progress):
             banner("Syncing \(Int(progress * 100))%", Color(red: 0.2, green: 0.35, blue: 0.8))
         case .lost:
             banner("Disconnected — retrying", Theme.muteRed)
@@ -27,11 +27,11 @@ struct StatusBanner: View {
 }
 
 #if DEBUG
-#Preview {
-    VStack(spacing: 0) {
-        StatusBanner(status: .connecting)
-        StatusBanner(status: .syncing(0.42))
-        StatusBanner(status: .lost)
+    #Preview {
+        VStack(spacing: 0) {
+            StatusBanner(status: .connecting)
+            StatusBanner(status: .syncing(0.42))
+            StatusBanner(status: .lost)
+        }
     }
-}
 #endif

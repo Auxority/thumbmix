@@ -36,22 +36,30 @@ struct ConnectView: View {
             Button {
                 Task { await scan() }
             } label: {
-                Label(isScanning ? "Scanning…" : "Scan this network", systemImage: "dot.radiowaves.left.and.right")
+                Label(
+                    isScanning ? "Scanning…" : "Scan this network",
+                    systemImage: "dot.radiowaves.left.and.right")
             }
             .disabled(isScanning)
             ForEach(found) { console in
-                Button { model.connect(to: console.host) } label: { ConsoleRow(console: console) }
-                    .buttonStyle(.plain)
-                    .disabled(!console.model.hasPrefix("M32"))
+                Button {
+                    model.connect(to: console.host)
+                } label: {
+                    ConsoleRow(console: console)
+                }
+                .buttonStyle(.plain)
+                .disabled(!console.model.hasPrefix("M32"))
             }
             if hasScanned, !isScanning, !hasWiFiAddress {
                 Text("This phone has no Wi-Fi address. Join the console's Wi-Fi network, then scan again.")
                     .font(.callout)
                     .foregroundStyle(Theme.secondaryText)
             } else if hasScanned, !isScanning, found.isEmpty {
-                Text("No console answered. Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix.")
-                    .font(.callout)
-                    .foregroundStyle(Theme.secondaryText)
+                Text(
+                    "No console answered. Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix."
+                )
+                .font(.callout)
+                .foregroundStyle(Theme.secondaryText)
             }
             Spacer()
         }
@@ -78,9 +86,13 @@ struct ConnectView: View {
         let host = model.host ?? String(localized: "the console")
         switch failure {
         case .noReply:
-            return String(localized: "No reply from \(host). Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix.")
-        case let .notAnM32(consoleModel):
-            return String(localized: "\(host) is a \(consoleModel). Thumbmix supports the Midas M32 only.")
+            return String(
+                localized:
+                    "No reply from \(host). Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix."
+            )
+        case .notAnM32(let consoleModel):
+            return String(
+                localized: "\(host) is a \(consoleModel). Thumbmix supports the Midas M32 only.")
         }
     }
 }
@@ -92,7 +104,8 @@ private struct ConsoleRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(console.name).font(.headline)
-                Text("\(console.model) · \(console.host)").font(.caption).foregroundStyle(Theme.secondaryText)
+                Text("\(console.model) · \(console.host)").font(.caption).foregroundStyle(
+                    Theme.secondaryText)
             }
             Spacer()
             Image(systemName: "chevron.right").foregroundStyle(Theme.secondaryText)
@@ -103,7 +116,7 @@ private struct ConsoleRow: View {
 }
 
 #if DEBUG
-#Preview {
-    ConnectView(model: AppModel()).background(Theme.background)
-}
+    #Preview {
+        ConnectView(model: AppModel()).background(Theme.background)
+    }
 #endif

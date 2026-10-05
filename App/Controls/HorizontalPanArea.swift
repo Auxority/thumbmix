@@ -12,10 +12,12 @@ struct HorizontalPanArea: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
         view.backgroundColor = .clear
-        let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.pan(_:)))
+        let pan = UIPanGestureRecognizer(
+            target: context.coordinator, action: #selector(Coordinator.pan(_:)))
         pan.delegate = context.coordinator
         view.addGestureRecognizer(pan)
-        let doubleTap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.doubleTap))
+        let doubleTap = UITapGestureRecognizer(
+            target: context.coordinator, action: #selector(Coordinator.doubleTap))
         doubleTap.numberOfTapsRequired = 2
         view.addGestureRecognizer(doubleTap)
         return view

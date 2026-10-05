@@ -13,7 +13,8 @@ struct GateTab: View {
                     ToggleChip(spec: gate.on, mirror: mirror, onColor: .green)
                     ParameterRow(spec: gate.mode, mirror: mirror)
                 }
-                DynamicsMeter(cell: mirror.meter(strip), threshold: decibels(gate.threshold), reduction: \.gateGain)
+                DynamicsMeter(
+                    cell: mirror.meter(strip), threshold: decibels(gate.threshold), reduction: \.gateGain)
                 ForEach([gate.threshold, gate.range, gate.attack, gate.hold, gate.release]) {
                     ParameterRow(spec: $0, mirror: mirror)
                 }
@@ -38,8 +39,13 @@ struct CompTab: View {
                     ToggleChip(spec: dynamics.on, mirror: mirror, onColor: .green)
                     Spacer()
                 }
-                DynamicsMeter(cell: mirror.meter(strip), threshold: decibels(dynamics.threshold), reduction: \.dynamicsGain)
-                ForEach([dynamics.threshold, dynamics.ratio, dynamics.knee, dynamics.attack, dynamics.hold, dynamics.release, dynamics.makeup]) {
+                DynamicsMeter(
+                    cell: mirror.meter(strip), threshold: decibels(dynamics.threshold),
+                    reduction: \.dynamicsGain)
+                ForEach([
+                    dynamics.threshold, dynamics.ratio, dynamics.knee, dynamics.attack, dynamics.hold,
+                    dynamics.release, dynamics.makeup,
+                ]) {
                     ParameterRow(spec: $0, mirror: mirror)
                 }
             }
@@ -69,11 +75,11 @@ private struct DynamicsMeter: View {
 }
 
 #if DEBUG
-#Preview("Gate") {
-    GateTab(strip: StripID(.input, 1), mirror: .preview()).padding().background(Theme.background)
-}
+    #Preview("Gate") {
+        GateTab(strip: StripID(.input, 1), mirror: .preview()).padding().background(Theme.background)
+    }
 
-#Preview("Comp") {
-    CompTab(strip: StripID(.input, 1), mirror: .preview()).padding().background(Theme.background)
-}
+    #Preview("Comp") {
+        CompTab(strip: StripID(.input, 1), mirror: .preview()).padding().background(Theme.background)
+    }
 #endif

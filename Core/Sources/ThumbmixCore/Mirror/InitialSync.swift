@@ -12,7 +12,9 @@ final class InitialSync {
     private(set) var missing: [String] = []
 
     /// 10 tries x 300 ms rides out a ~3 s Wi-Fi drop; anything longer makes the link lost and restarts the sync.
-    init(addresses: [String], window: Int = 8, timeout: Duration = .milliseconds(300), maxTries: Int = 10) {
+    init(
+        addresses: [String], window: Int = 8, timeout: Duration = .milliseconds(300), maxTries: Int = 10
+    ) {
         self.addresses = addresses
         self.window = window
         self.timeout = timeout

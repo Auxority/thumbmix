@@ -2,11 +2,13 @@ import Foundation
 
 /// Values as the engineer reads them, in the phone's locale (decimal comma on a Dutch phone).
 public enum ValueText {
-    public static func format(_ normalized: Float?, _ spec: ParamSpec, locale: Locale = .current) -> String {
+    public static func format(_ normalized: Float?, _ spec: ParamSpec, locale: Locale = .current)
+        -> String
+    {
         guard let normalized else { return "—" }
         let value = spec.scale.value(fromNormalized: normalized)
         switch spec.scale {
-        case let .choice(options):
+        case .choice(let options):
             let option = options[Swift.min(Swift.max(Int(value), 0), options.count - 1)]
             return spec.unit == .ratio ? option + ":1" : option
         case .toggle:
@@ -17,7 +19,10 @@ public enum ValueText {
         switch spec.unit {
         case .decibels: return decibels(value, locale: locale)
         case .decibelAmount: return number(value, digits: 1, locale) + " dB"
-        case .hertz: return value < 1000 ? number(value, digits: 0, locale) + " Hz" : number(value / 1000, digits: 2, locale) + " kHz"
+        case .hertz:
+            return value < 1000
+                ? number(value, digits: 0, locale) + " Hz"
+                : number(value / 1000, digits: 2, locale) + " kHz"
         case .milliseconds: return milliseconds(value, locale)
         case .percent: return number(value, digits: 0, locale) + "%"
         case .pan: return pan(value)
@@ -39,11 +44,12 @@ public enum ValueText {
     }
 
     private static func milliseconds(_ value: Double, _ locale: Locale) -> String {
-        let digits = switch value {
-        case ..<10: 2
-        case ..<100: 1
-        default: 0
-        }
+        let digits =
+            switch value {
+            case ..<10: 2
+            case ..<100: 1
+            default: 0
+            }
         return number(value, digits: digits, locale) + " ms"
     }
 

@@ -10,7 +10,9 @@ struct SendsTab: View {
         ScrollView {
             VStack(spacing: 6) {
                 ForEach(StripID.all(.bus)) { bus in
-                    SendRow(source: strip, bus: bus.number, title: mirror.name(bus), accent: Theme.color(mirror.color(bus)), mirror: mirror)
+                    SendRow(
+                        source: strip, bus: bus.number, title: mirror.name(bus),
+                        accent: Theme.color(mirror.color(bus)), mirror: mirror)
                 }
             }
         }
@@ -33,7 +35,9 @@ struct FedByTab: View {
                     .font(.subheadline)
                     .padding(.horizontal, 4)
                 ForEach(sources) { source in
-                    SendRow(source: source, bus: bus.number, title: mirror.name(source), accent: Theme.color(mirror.color(source)), mirror: mirror)
+                    SendRow(
+                        source: source, bus: bus.number, title: mirror.name(source),
+                        accent: Theme.color(mirror.color(source)), mirror: mirror)
                 }
             }
         }
@@ -50,18 +54,22 @@ struct SendRow: View {
     var body: some View {
         HStack(spacing: 8) {
             // Green like every other "on" chip: a red source colour would read as mute.
-            ToggleChip(spec: Catalog.sendOn(from: source, toBus: bus), mirror: mirror, title: "On", onColor: .green)
-            ParameterRow(spec: Catalog.sendLevel(from: source, toBus: bus), mirror: mirror, title: title, accent: accent)
+            ToggleChip(
+                spec: Catalog.sendOn(from: source, toBus: bus), mirror: mirror, title: "On", onColor: .green
+            )
+            ParameterRow(
+                spec: Catalog.sendLevel(from: source, toBus: bus), mirror: mirror, title: title,
+                accent: accent)
         }
     }
 }
 
 #if DEBUG
-#Preview("Sends") {
-    SendsTab(strip: StripID(.input, 13), mirror: .preview()).padding().background(Theme.background)
-}
+    #Preview("Sends") {
+        SendsTab(strip: StripID(.input, 13), mirror: .preview()).padding().background(Theme.background)
+    }
 
-#Preview("Fed by") {
-    FedByTab(bus: StripID(.bus, 1), mirror: .preview()).padding().background(Theme.background)
-}
+    #Preview("Fed by") {
+        FedByTab(bus: StripID(.bus, 1), mirror: .preview()).padding().background(Theme.background)
+    }
 #endif

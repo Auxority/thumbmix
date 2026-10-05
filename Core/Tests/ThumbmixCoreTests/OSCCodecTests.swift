@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import ThumbmixCore
 
 struct OSCCodecTests {
@@ -12,11 +13,14 @@ struct OSCCodecTests {
     }
 
     @Test func requestWithoutArgumentsHasNoTypeTag() {
-        #expect(OSCCodec.encode(OSCMessage("/xremote")) == Data("/xremote".utf8) + Data(repeating: 0, count: 4))
+        #expect(
+            OSCCodec.encode(OSCMessage("/xremote")) == Data("/xremote".utf8)
+                + Data(repeating: 0, count: 4))
     }
 
     @Test func roundTripsEveryType() throws {
-        let message = OSCMessage("/x", [.int(-7), .float(0.25), .string("Kick Drum"), .blob(Data([1, 2, 3]))])
+        let message = OSCMessage(
+            "/x", [.int(-7), .float(0.25), .string("Kick Drum"), .blob(Data([1, 2, 3]))])
         #expect(try OSCCodec.decode(OSCCodec.encode(message)) == message)
     }
 

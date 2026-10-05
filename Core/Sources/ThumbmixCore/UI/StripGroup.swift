@@ -1,6 +1,11 @@
 /// The overview's filter chips.
 public enum StripGroup: String, CaseIterable, Identifiable, Sendable {
-    case inputs = "Inputs", aux = "Aux", fx = "FX", buses = "Buses", dca = "DCA", main = "Main"
+    case inputs = "Inputs"
+    case aux = "Aux"
+    case fx = "FX"
+    case buses = "Buses"
+    case dca = "DCA"
+    case main = "Main"
 
     public var id: Self { self }
 

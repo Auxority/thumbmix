@@ -1,5 +1,6 @@
 import FakeM32
 import Testing
+
 @testable import ThumbmixCore
 
 @MainActor
@@ -144,7 +145,9 @@ struct ConsoleMirrorTests {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         fake.ignoresXremote = true
-        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast), auditAddresses: ["/ch/02/mix/fader"])
+        let mirror = ConsoleMirror(
+            link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast),
+            auditAddresses: ["/ch/02/mix/fader"])
         mirror.start()
         defer { mirror.stop() }
         #expect(await eventually(timeout: .seconds(10)) { mirror.isLive })

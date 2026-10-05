@@ -26,8 +26,10 @@ public struct LinkTiming: Sendable {
     public var lostAfter: Duration
     public var restartAfterLost: Duration
 
-    public init(identifyTimeout: Duration, tick: Duration, renewEvery: Duration, probeWhenQuietFor: Duration,
-                lostAfter: Duration, restartAfterLost: Duration) {
+    public init(
+        identifyTimeout: Duration, tick: Duration, renewEvery: Duration, probeWhenQuietFor: Duration,
+        lostAfter: Duration, restartAfterLost: Duration
+    ) {
         self.identifyTimeout = identifyTimeout
         self.tick = tick
         self.renewEvery = renewEvery
@@ -100,7 +102,7 @@ public final class ConsoleLink {
     }
 
     public func stop() {
-        tasks.forEach { $0.cancel() }
+        for task in tasks { task.cancel() }
         tasks = []
         receiveTask?.cancel()
         transport.cancel()

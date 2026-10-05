@@ -13,7 +13,8 @@ struct InputTab: View {
                     ParameterRow(spec: Catalog.headampGain(headamp), mirror: mirror)
                     sharedWarning
                     HStack {
-                        ToggleChip(spec: Catalog.headampPhantom(headamp), mirror: mirror, onColor: Theme.muteRed)
+                        ToggleChip(
+                            spec: Catalog.headampPhantom(headamp), mirror: mirror, onColor: Theme.muteRed)
                         Spacer()
                     }
                 } else {
@@ -51,7 +52,7 @@ private struct InputMeter: View {
 }
 
 #if DEBUG
-#Preview {
-    InputTab(strip: StripID(.input, 14), mirror: .preview()).padding().background(Theme.background)
-}
+    #Preview {
+        InputTab(strip: StripID(.input, 14), mirror: .preview()).padding().background(Theme.background)
+    }
 #endif

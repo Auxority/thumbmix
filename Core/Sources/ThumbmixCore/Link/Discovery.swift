@@ -36,13 +36,18 @@ public enum Discovery {
         for pointer in sequence(first: first, next: { $0.pointee.ifa_next }) {
             let interface = pointer.pointee
             guard String(cString: interface.ifa_name) == "en0",
-                  let address = interface.ifa_addr, address.pointee.sa_family == UInt8(AF_INET) else { continue }
-            return address.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { ipString($0.pointee.sin_addr) }
+                let address = interface.ifa_addr, address.pointee.sa_family == UInt8(AF_INET)
+            else { continue }
+            return address.withMemoryRebound(to: sockaddr_in.self, capacity: 1) {
+                ipString($0.pointee.sin_addr)
+            }
         }
         return nil
     }
 
-    public static func scan(hosts: [String], port: UInt16 = 10023, timeout: TimeInterval = 1.5) async -> [DiscoveredConsole] {
+    public static func scan(hosts: [String], port: UInt16 = 10023, timeout: TimeInterval = 1.5) async
+        -> [DiscoveredConsole]
+    {
         // A GCD thread, not the Swift concurrency pool: the scan blocks in poll() for the whole timeout.
         await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
@@ -51,7 +56,9 @@ public enum Discovery {
         }
     }
 
-    private static func blockingScan(hosts: [String], port: UInt16, timeout: TimeInterval) -> [DiscoveredConsole] {
+    private static func blockingScan(hosts: [String], port: UInt16, timeout: TimeInterval)
+        -> [DiscoveredConsole]
+    {
         let socketHandle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
         guard socketHandle >= 0 else {
             log.error("discovery socket failed: errno \(errno)")
@@ -60,36 +67,45 @@ public enum Discovery {
         defer { close(socketHandle) }
 
         let request = [UInt8](OSCCodec.encode(OSCMessage("/xinfo")))
-        let failedSends = hosts.filter { !sendRequest(request, to: $0, port: port, on: socketHandle) }.count
-        if failedSends > 0 { log.warning("discovery: \(failedSends) of \(hosts.count) requests could not be sent") }
+        let failedSends = hosts.filter { !sendRequest(request, to: $0, port: port, on: socketHandle) }
+            .count
+        if failedSends > 0 {
+            log.warning("discovery: \(failedSends) of \(hosts.count) requests could not be sent")
+        }
 
         var found: [String: DiscoveredConsole] = [:]
         let deadline = Date().addingTimeInterval(timeout)
         while deadline.timeIntervalSinceNow > 0 {
             guard let (host, reply) = receiveReply(on: socketHandle, until: deadline) else { break }
             guard reply.address == "/xinfo" else { continue }
-            found[host] = DiscoveredConsole(host: host, name: reply.string(at: 1) ?? host, model: reply.string(at: 2) ?? "?")
+            found[host] = DiscoveredConsole(
+                host: host, name: reply.string(at: 1) ?? host, model: reply.string(at: 2) ?? "?")
         }
         log.info("discovery: \(found.count) consoles from \(hosts.count) hosts")
         return found.values.sorted { $0.host < $1.host }
     }
 
     /// False when the request never left the phone, e.g. no route or a full send buffer.
-    private static func sendRequest(_ request: [UInt8], to host: String, port: UInt16, on socketHandle: Int32) -> Bool {
+    private static func sendRequest(
+        _ request: [UInt8], to host: String, port: UInt16, on socketHandle: Int32
+    ) -> Bool {
         var destination = sockaddr_in()
         destination.sin_family = sa_family_t(AF_INET)
         destination.sin_port = port.bigEndian
         guard inet_pton(AF_INET, host, &destination.sin_addr) == 1 else { return false }
         let sent = withUnsafePointer(to: &destination) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                sendto(socketHandle, request, request.count, 0, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
+                sendto(
+                    socketHandle, request, request.count, 0, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
             }
         }
         return sent == request.count
     }
 
     /// The next decodable reply and its sender, or nil once the deadline passes.
-    private static func receiveReply(on socketHandle: Int32, until deadline: Date) -> (String, OSCMessage)? {
+    private static func receiveReply(on socketHandle: Int32, until deadline: Date) -> (
+        String, OSCMessage
+    )? {
         var buffer = [UInt8](repeating: 0, count: 1500)
         while deadline.timeIntervalSinceNow > 0 {
             var poller = pollfd(fd: socketHandle, events: Int16(POLLIN), revents: 0)

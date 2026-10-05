@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import ThumbmixCore
 
 /// Guards the String Catalog: a label shown in the app but missing from the catalog can never be translated.
@@ -12,8 +13,10 @@ struct LocalizationTests {
 
     @Test func everyParameterLabelIsInTheCatalog() {
         let strip = StripID(.input, 1)
-        var specs = [Catalog.fader(strip), Catalog.on(strip), Catalog.trim(strip), Catalog.headampGain(0),
-                     Catalog.headampPhantom(0), Catalog.eqOn(strip), Catalog.sendOn(from: strip, toBus: 1)]
+        var specs = [
+            Catalog.fader(strip), Catalog.on(strip), Catalog.trim(strip), Catalog.headampGain(0),
+            Catalog.headampPhantom(0), Catalog.eqOn(strip), Catalog.sendOn(from: strip, toBus: 1),
+        ]
         specs += [Catalog.pan(strip)].compactMap { $0 }
         specs += Catalog.gate(strip).all + Catalog.dynamics(strip).all + Catalog.eqBand(strip, 1).all
         for spec in specs {
@@ -22,7 +25,8 @@ struct LocalizationTests {
     }
 
     @Test func formatsAndNamesAreInTheCatalog() {
-        let keys = ["Bus %lld", "Ch %lld", "Aux %lld", "FX %lld", "DCA %lld", "Main LR", "Main M", "On", "Off"]
+        let keys =
+            ["Bus %lld", "Ch %lld", "Aux %lld", "FX %lld", "DCA %lld", "Main LR", "Main M", "On", "Off"]
             + ChannelTab.allCases.map(\.titleKey) + StripGroup.allCases.map(\.titleKey)
         for key in keys {
             #expect(isInCatalog(key), "missing \(key)")

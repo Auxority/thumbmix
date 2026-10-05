@@ -36,7 +36,10 @@ struct ParameterRow: View {
                     .minimumScaleFactor(0.6)
                 Spacer(minLength: 8)
                 Text(text)
-                    .font(dragStart == nil ? .body.monospacedDigit().weight(.semibold) : .title2.monospacedDigit().weight(.bold))
+                    .font(
+                        dragStart == nil
+                            ? .body.monospacedDigit().weight(.semibold) : .title2.monospacedDigit().weight(.bold)
+                    )
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
             }
@@ -57,13 +60,17 @@ struct ParameterRow: View {
     /// VoiceOver swipe up/down: dragging isn't available to a VoiceOver user, so the row steps instead.
     private func adjust(_ direction: AccessibilityAdjustmentDirection) {
         guard let current = mirror.normalized(spec) else { return }
-        let step = switch direction {
-        case .increment: 1
-        case .decrement: -1
-        @unknown default: 0
-        }
+        let step =
+            switch direction {
+            case .increment: 1
+            case .decrement: -1
+            @unknown default: 0
+            }
         guard step != 0 else { return }
-        mirror.set(spec.address, spec.scale.argument(fromNormalized: RelativeDrag.stepped(current, by: step, scale: spec.scale)))
+        mirror.set(
+            spec.address,
+            spec.scale.argument(
+                fromNormalized: RelativeDrag.stepped(current, by: step, scale: spec.scale)))
     }
 
     /// No value read yet means no drag: starting from a guess would jump the desk.
@@ -82,15 +89,19 @@ struct ParameterRow: View {
     private func drag(_ translation: CGFloat, _ width: CGFloat) {
         guard let dragStart else { return }
         let old = mirror.normalized(spec) ?? dragStart
-        let new = RelativeDrag.value(start: dragStart, translation: translation, width: width, scale: spec.scale)
+        let new = RelativeDrag.value(
+            start: dragStart, translation: translation, width: width, scale: spec.scale)
         guard new != old else { return }
-        if let unity = spec.unityNormalized, RelativeDrag.crossed(unity, from: old, to: new) { unityTicks += 1 }
+        if let unity = spec.unityNormalized, RelativeDrag.crossed(unity, from: old, to: new) {
+            unityTicks += 1
+        }
         mirror.set(spec.address, spec.scale.argument(fromNormalized: new))
     }
 
     private func reset() {
         guard let value = spec.resetValue else { return }
-        mirror.set(spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
+        mirror.set(
+            spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
     }
 }
 
@@ -108,13 +119,15 @@ private struct MeterLine: View {
 }
 
 #if DEBUG
-#Preview {
-    let mirror = ConsoleMirror.preview()
-    return VStack(spacing: 8) {
-        ParameterRow(spec: Catalog.fader(StripID(.input, 1)), mirror: mirror, accent: .red, height: 72, meter: mirror.meter(StripID(.input, 1)))
-        ParameterRow(spec: Catalog.gate(StripID(.input, 1)).threshold, mirror: mirror)
+    #Preview {
+        let mirror = ConsoleMirror.preview()
+        return VStack(spacing: 8) {
+            ParameterRow(
+                spec: Catalog.fader(StripID(.input, 1)), mirror: mirror, accent: .red, height: 72,
+                meter: mirror.meter(StripID(.input, 1)))
+            ParameterRow(spec: Catalog.gate(StripID(.input, 1)).threshold, mirror: mirror)
+        }
+        .padding()
+        .background(Theme.background)
     }
-    .padding()
-    .background(Theme.background)
-}
 #endif

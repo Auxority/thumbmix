@@ -1,5 +1,11 @@
 public enum ChannelTab: String, CaseIterable, Identifiable, Sendable {
-    case input = "Input", gate = "Gate", eq = "EQ", comp = "Comp", sends = "Sends", fedBy = "Fed by", members = "Members"
+    case input = "Input"
+    case gate = "Gate"
+    case eq = "EQ"
+    case comp = "Comp"
+    case sends = "Sends"
+    case fedBy = "Fed by"
+    case members = "Members"
 
     public var id: Self { self }
 

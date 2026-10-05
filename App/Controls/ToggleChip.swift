@@ -10,7 +10,9 @@ struct ToggleChip: View {
 
     var body: some View {
         let isOn = mirror.cell(spec.address).argument == .int(1)
-        Button { mirror.set(spec.address, .int(isOn ? 0 : 1)) } label: {
+        Button {
+            mirror.set(spec.address, .int(isOn ? 0 : 1))
+        } label: {
             Text(title ?? spec.label)
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
@@ -36,7 +38,9 @@ struct MuteButton: View {
 
     var body: some View {
         let muted = mirror.isMuted(strip)
-        Button { mirror.set(strip.on, .int(muted ? 1 : 0)) } label: {
+        Button {
+            mirror.set(strip.on, .int(muted ? 1 : 0))
+        } label: {
             Text(title)
                 .font(.headline)
                 .lineLimit(1)
