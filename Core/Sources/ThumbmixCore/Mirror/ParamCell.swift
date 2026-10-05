@@ -14,3 +14,9 @@ public final class MeterCell {
     public internal(set) var gateGain: Float = 1
     public internal(set) var dynamicsGain: Float = 1
 }
+
+/// The desk's RTA bands in dB (-128...0), empty while the app isn't following a channel.
+@MainActor @Observable
+public final class SpectrumCell {
+    public internal(set) var decibels: [Float] = []
+}

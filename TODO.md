@@ -2,10 +2,6 @@
 
 What's next for Thumbmix, newest decisions first within each section. Tick an item off (or delete it) in the PR that finishes it.
 
-## In flight
-
-- [ ] Merge the live-spectrum PR (branch `feat/live-spectrum`): a single red glow behind the EQ curve, the desk's RTA measured after EQ, with no switch.
-
 ## On the real M32
 
 - [ ] Run `m32-probe` with Mixing Station connected, and record each answer in a comment where the code depends on it:

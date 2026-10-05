@@ -18,7 +18,10 @@ public final class ConsoleMirror {
     public var isLive: Bool { status == .live }
 
     @ObservationIgnored private(set) var cells: [String: ParamCell] = [:]
-    @ObservationIgnored private let link: ConsoleLink
+    @ObservationIgnored let link: ConsoleLink
+    @ObservationIgnored public let spectrum = SpectrumCell()
+    /// Set while the app borrows the desk's RTA; see ConsoleMirror+RTA.
+    @ObservationIgnored var rtaLoan: RTALoan?
     @ObservationIgnored private let addresses: [String]
     @ObservationIgnored private var meterCells: [StripID: MeterCell] = [:]
     @ObservationIgnored private var sync: InitialSync?
@@ -118,6 +121,10 @@ public final class ConsoleMirror {
     }
 
     func apply(_ message: OSCMessage) {
+        if message.address == RTA.bank {
+            applySpectrum(message)
+            return
+        }
         if message.address.hasPrefix("/meters/") {
             applyMeters(message)
             return

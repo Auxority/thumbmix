@@ -100,4 +100,26 @@ for bank in ["/meters/1", "/meters/5"] {
             separator: " "))
 }
 print("For /meters/5, note which DCA faders were up: DCA meters are expected at 16-23.")
+
+// The app borrows the desk's RTA while an EQ tab is open. The doc doesn't say /meters/15 follows
+// /-prefs/rta/source, or whether "after EQ" includes the low cut and dynamics; the engineer sets it here.
+print("\n== 6. RTA: on the desk, set the RTA source to a channel with signal (try before and after EQ)")
+for address in [RTA.source, RTA.position] {
+    print(await ask(address).map(describe) ?? "\(address) NO REPLY")
+}
+print("(source: 2-33 = Ch 1-32, 50-65 = Bus 1-16, 72 = Main; position: 0 = before EQ, 1 = after EQ)")
+recorder.clear()
+transport.send(RTA.subscription)
+try? await Task.sleep(for: .seconds(3))
+if case .blob(let blob)? = recorder.last(address: RTA.bank)?.arguments.first {
+    let bands = MeterBlob.rtaDecibels(from: blob)
+    let loudest = bands.indices.max { bands[$0] < bands[$1] } ?? 0
+    let average = bands.isEmpty ? 0 : bands.reduce(0, +) / Float(bands.count)
+    print(
+        "\(RTA.bank) \(bands.count) bands, loudest \(String(format: "%.0f", RTA.bandFrequency(loudest))) Hz at "
+            + String(format: "%.1f dB, average %.1f dB", bands.isEmpty ? 0 : bands[loudest], average))
+    print("RESULT: compare with the desk's RTA screen; change the source or EQ and re-run to see it follow.")
+} else {
+    print("\(RTA.bank) NO REPLY: the spectrum is not streamed to remotes.")
+}
 transport.cancel()
