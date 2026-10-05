@@ -16,7 +16,7 @@ final class AppModel {
     var lastHost: String? { UserDefaults.standard.string(forKey: Self.lastHostKey) }
 
     func connect(to host: String) {
-        guard Discovery.isValidIPv4(host) else { return }
+        guard Discovery.isUsableIPv4(host) else { return }
         mirror?.stop()
         let mirror = ConsoleMirror(link: ConsoleLink(host: host))
         mirror.start()

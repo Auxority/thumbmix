@@ -57,10 +57,14 @@ public final class ConsoleMirror {
         tasks.append(Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: Self.sendInterval)
-                self?.tick()
+                guard let self else { return }
+                self.tick()
             }
         })
     }
+
+    /// True while the send loop and link run; tests read it.
+    var isRunning: Bool { !tasks.isEmpty }
 
     public func stop() {
         tasks.forEach { $0.cancel() }
@@ -118,6 +122,8 @@ public final class ConsoleMirror {
             return
         }
         guard let cell = cells[message.address], let argument = message.arguments.first.flatMap(Self.sanitised) else { return }
+        // A reply of another type (",i" where the parameter is ",f") is garbage, not a new value.
+        if let known = cell.argument, !known.hasSameType(as: argument) { return }
         if sync != nil {
             sync?.received(message.address)
             pumpSync()
@@ -179,12 +185,16 @@ public final class ConsoleMirror {
             status = .lost
         case let .failed(failure):
             status = .failed(failure)
+            // Nothing more will come from this console; don't keep a socket and a 50 Hz loop running.
+            stop()
         }
     }
 
     private func startSync() {
         log.info("sync started: \(self.addresses.count) addresses")
         sync = InitialSync(addresses: addresses)
+        // An edit made just before an outage may never have reached the console; the resync is the truth.
+        heldUntil.removeAll()
         status = .syncing(0)
         pumpSync()
     }

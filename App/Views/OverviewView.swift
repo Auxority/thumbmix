@@ -7,6 +7,7 @@ struct OverviewView: View {
     @State private var group: StripGroup = .inputs
     @State private var showUnused = false
     @State private var openStrip: StripID?
+    @State private var visibleStrips: [StripID] = []
 
     var body: some View {
         NavigationStack {
@@ -40,11 +41,17 @@ struct OverviewView: View {
             .navigationDestination(item: $openStrip) { strip in
                 ChannelView(strip: strip, mirror: mirror)
             }
+            .onAppear(perform: refreshVisibleStrips)
+            .onChange(of: group) { refreshVisibleStrips() }
+            .onChange(of: showUnused) { refreshVisibleStrips() }
+            .onChange(of: mirror.status) { refreshVisibleStrips() }
         }
     }
 
-    private var visibleStrips: [StripID] {
-        group.strips.filter { showUnused || !mirror.isUnused($0) }
+    /// Filtered only when the view, group, toggle or connection changes, never per fader move:
+    /// a row must not vanish under the finger when an unnamed fader reaches -inf.
+    private func refreshVisibleStrips() {
+        visibleStrips = group.strips.filter { showUnused || !mirror.isUnused($0) }
     }
 }
 

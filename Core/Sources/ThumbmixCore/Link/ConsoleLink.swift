@@ -152,6 +152,8 @@ public final class ConsoleLink {
             transport.send(OSCMessage("/info"))
             try? await Task.sleep(for: timing.tick)
         }
+        // stop() may have landed mid-identify; going live now would start a supervise loop nobody owns.
+        guard !Task.isCancelled else { return }
         guard let info else {
             state = .failed(.noReply)
             return

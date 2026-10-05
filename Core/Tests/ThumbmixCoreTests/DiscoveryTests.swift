@@ -16,11 +16,11 @@ struct DiscoveryTests {
     }
 
     @Test(arguments: ["192.168.1.10", "10.0.0.1"]) func validIPv4(_ host: String) {
-        #expect(Discovery.isValidIPv4(host))
+        #expect(Discovery.isUsableIPv4(host))
     }
 
     @Test(arguments: ["", "192.168.1", "192.168.1.300", "m32.local", "1.2.3.4; rm"]) func invalidIPv4(_ host: String) {
-        #expect(!Discovery.isValidIPv4(host))
+        #expect(!Discovery.isUsableIPv4(host))
     }
 
     @Test func scanFindsTheFake() async throws {

@@ -20,6 +20,8 @@ public enum FakeState {
             state[strip.fader] = unity
             state[strip.dcaMask!] = .int(offset < 7 ? 1 : offset < 12 ? 2 : 4)
         }
+        // Patched but never named, as often happens mid-soundcheck: visible only while its fader is up.
+        state[StripID(.input, 17).fader] = unity
         // Vox 2 shares Vox 1's preamp; inputs 15-16 read from an internal source.
         state[Catalog.headampIndex(forInput: 14)] = state[Catalog.headampIndex(forInput: 13)]
         state[Catalog.headampIndex(forInput: 15)] = .int(-1)

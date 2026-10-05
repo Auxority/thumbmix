@@ -49,6 +49,19 @@ final class OverviewUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Ch 20"].waitForExistence(timeout: 2))
     }
 
+    func testRowStaysWhileItsFaderIsPulledDown() {
+        launch()
+        app.swipeUp()
+        let row = app.otherElements["/ch/17/mix/fader"]
+        XCTAssertTrue(row.waitForExistence(timeout: 2))
+
+        row.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5))
+            .press(forDuration: 0.05, thenDragTo: row.coordinate(withNormalizedOffset: CGVector(dx: 0.0, dy: 0.5)))
+
+        XCTAssertTrue(app.buttons["Ch 17"].exists)
+        XCTAssertEqual(row.value as? String, "−∞ dB")
+    }
+
     func testChipsSwitchGroups() {
         launch()
         app.buttons["Buses"].tap()
