@@ -23,6 +23,6 @@ final class ConnectUITests: XCTestCase {
         app.launchArguments = ["-lastConsoleHost", "127.0.0.1"]
         app.launch()
 
-        XCTAssertTrue(app.staticTexts["Kick"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
     }
 }

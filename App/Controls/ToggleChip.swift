@@ -1,0 +1,47 @@
+import SwiftUI
+import ThumbmixCore
+
+struct ToggleChip: View {
+    let spec: ParamSpec
+    let mirror: ConsoleMirror
+    var title: String?
+    var onColor: Color = .white
+
+    var body: some View {
+        let isOn = mirror.cell(spec.address).argument == .int(1)
+        Button { mirror.set(spec.address, .int(isOn ? 0 : 1)) } label: {
+            Text(title ?? spec.label)
+                .font(.subheadline.weight(.semibold))
+                .frame(minWidth: 52, minHeight: 44)
+                .padding(.horizontal, 8)
+                .foregroundStyle(isOn ? .black : Theme.secondaryText)
+                .background(isOn ? onColor : Theme.track, in: RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("toggle-" + spec.address)
+        .accessibilityValue(isOn ? "On" : "Off")
+    }
+}
+
+/// Lit red when muted. On the M32 mute is `mix/on` = 0.
+struct MuteButton: View {
+    let strip: StripID
+    let mirror: ConsoleMirror
+    var title = "M"
+    var width: CGFloat = 48
+    var height: CGFloat = 48
+
+    var body: some View {
+        let muted = mirror.isMuted(strip)
+        Button { mirror.set(strip.on, .int(muted ? 1 : 0)) } label: {
+            Text(title)
+                .font(.headline)
+                .frame(width: width, height: height)
+                .foregroundStyle(muted ? .white : Theme.secondaryText)
+                .background(muted ? Theme.muteRed : Theme.track, in: RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("mute-" + strip.on)
+        .accessibilityLabel(muted ? "Unmute" : "Mute")
+    }
+}
