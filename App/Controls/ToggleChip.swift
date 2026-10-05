@@ -6,13 +6,15 @@ struct ToggleChip: View {
     let mirror: ConsoleMirror
     var title: String?
     var onColor: Color = .white
+    @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
         let isOn = mirror.cell(spec.address).argument == .int(1)
         Button { mirror.set(spec.address, .int(isOn ? 0 : 1)) } label: {
             Text(title ?? spec.label)
                 .font(.subheadline.weight(.semibold))
-                .frame(minWidth: 52, minHeight: 44)
+                .lineLimit(1)
+                .frame(minWidth: 52 * sizeScale, minHeight: 44 * sizeScale)
                 .padding(.horizontal, 8)
                 .foregroundStyle(isOn ? .black : Theme.secondaryText)
                 .background(isOn ? onColor : Theme.track, in: RoundedRectangle(cornerRadius: 10))
@@ -30,13 +32,16 @@ struct MuteButton: View {
     var title = "M"
     var width: CGFloat = 48
     var height: CGFloat = 48
+    @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
         let muted = mirror.isMuted(strip)
         Button { mirror.set(strip.on, .int(muted ? 1 : 0)) } label: {
             Text(title)
                 .font(.headline)
-                .frame(width: width, height: height)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(width: width * sizeScale, height: height * sizeScale)
                 .foregroundStyle(muted ? .white : Theme.secondaryText)
                 .background(muted ? Theme.muteRed : Theme.track, in: RoundedRectangle(cornerRadius: 10))
         }

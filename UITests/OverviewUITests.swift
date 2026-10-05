@@ -62,6 +62,18 @@ final class OverviewUITests: XCTestCase {
         XCTAssertEqual(row.value as? String, "−∞ dB")
     }
 
+    func testRowsGrowWithLargerText() {
+        app = XCUIApplication()
+        app.launchArguments = ["-lastConsoleHost", "127.0.0.1",
+                               "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityL"] + fixedLocale
+        app.launch()
+        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
+
+        let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
+        XCTAssertGreaterThan(fader.frame.height, 70)
+        saveScreenshot("dynamic-type-overview")
+    }
+
     func testChipsSwitchGroups() {
         launch()
         app.buttons["Buses"].tap()
