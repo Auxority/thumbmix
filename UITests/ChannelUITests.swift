@@ -57,6 +57,43 @@ final class ChannelUITests: XCTestCase {
         XCTAssertEqual(app.descendants(matching: .any).matching(headampControls).count, 0)
     }
 
+    /// Uses DCA 2 ("Band"): the fake keeps every edit, and other tests expect "Drums" and "Vox" untouched.
+    func testRenamingADCAReachesTheOverview() {
+        launch()
+        app.buttons["DCA"].tap()
+        open("Band")
+        app.buttons["edit-strip"].tap()
+        let field = app.textFields["strip-name"]
+        XCTAssertTrue(field.waitForExistence(timeout: 3))
+        field.tap()
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 4) + "Rhythm section")
+        XCTAssertEqual(field.value as? String, "Rhythm secti", "the desk stores 12 characters")
+        app.buttons["color-green"].tap()
+        let search = app.textFields["icon-search"]
+        search.tap()
+        search.typeText("kit")
+        app.buttons["icon-11"].tap()
+        saveScreenshot("edit-strip")
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.staticTexts["Rhythm secti"].waitForExistence(timeout: 3))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["Rhythm secti"].waitForExistence(timeout: 3))
+    }
+
+    func testCancelLeavesTheDeskUnchanged() {
+        launch()
+        app.buttons["DCA"].tap()
+        open("Vox")
+        app.buttons["edit-strip"].tap()
+        let field = app.textFields["strip-name"]
+        XCTAssertTrue(field.waitForExistence(timeout: 3))
+        field.tap()
+        field.typeText("X")
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(app.staticTexts["Vox"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.staticTexts["VoxX"].exists)
+    }
+
     func testDCAMembers() {
         launch()
         app.buttons["DCA"].tap()

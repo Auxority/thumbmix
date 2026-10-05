@@ -42,6 +42,26 @@
         }
       }
     },
+    "Bass & guitar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bass & guitar"
+          }
+        }
+      }
+    },
+    "Brass, wind & strings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brass, wind & strings"
+          }
+        }
+      }
+    },
     "Bus %lld" : {
       "localizations" : {
         "en" : {
@@ -59,6 +79,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buses"
+          }
+        }
+      }
+    },
+    "Cables & playback" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cables & playback"
           }
         }
       }
@@ -100,6 +130,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "DCA %lld"
+          }
+        }
+      }
+    },
+    "Drums & percussion" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drums & percussion"
           }
         }
       }
@@ -218,6 +258,16 @@
         }
       }
     },
+    "Keys" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keys"
+          }
+        }
+      }
+    },
     "Knee" : {
       "localizations" : {
         "en" : {
@@ -310,6 +360,16 @@
         }
       }
     },
+    "Other" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        }
+      }
+    },
     "Pan" : {
       "localizations" : {
         "en" : {
@@ -371,6 +431,16 @@
         }
       }
     },
+    "Speakers & routing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speakers & routing"
+          }
+        }
+      }
+    },
     "Threshold" : {
       "localizations" : {
         "en" : {
@@ -397,6 +467,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Type"
+          }
+        }
+      }
+    },
+    "Vocals & mics" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocals & mics"
           }
         }
       }
