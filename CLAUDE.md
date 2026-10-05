@@ -21,21 +21,28 @@ OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unoffic
 
 ## Done means
 
-`scripts/lint.sh` clean, `swift test --package-path Core` green, and the UI suite green on the **iPhone SE (3rd generation)** simulator (375 pt wide, like the target iPhone 11 Pro) with a freshly started `fake-m32`. Every change ships a test that failed first.
+`scripts/lint.sh` clean, `swift test --package-path Core` green, and `scripts/ui-test.sh` green: it runs the UI suite on the **iPhone SE (3rd generation)** simulator (375 pt wide, like the target iPhone 11 Pro) against a freshly started `fake-m32`, and refuses to run while another fake holds port 10023. Every change ships a test that failed first.
+
+## How we work
+
+- **New UI starts with a mock.** Show the options side by side in the browser (the superpowers visual companion) and build the one the user picks; they choose layouts by seeing them.
+- **`m32-probe` stays read-only.** It never sends a set to the real desk: when a check needs a setting changed, the probe asks the engineer to change it on the desk, then reports what it sees.
+- **One PR per concern**, branched from `main`. A change that builds on an unmerged PR waits on its own branch, and its PR opens after the base merges.
 
 ## Gotchas
 
 - **Complexity gate** (`.swiftlint.yml`): functions at complexity ≤ 6 and ≤ 40 lines. Split by responsibility to get under it; the limits stay put.
 - **Timing**: decisions about time live in pure types (`LinkSupervisor`, `EditHolds`) and are tested with explicit instants. Network tests assert end results with `eventually`, never a sleep-then-check race.
 - **Locale**: this Mac's region uses a decimal comma. Unit tests pass `locale: .testEnglish`; UI tests launch with `fixedLocale`. Pin the locale in any new assertion on formatted text.
-- **Localization**: user-facing text in Core goes through `CoreStrings.text(...)` and needs an explicit `en` entry in `Core/Sources/ThumbmixCore/Resources/Localizable.xcstrings` (SwiftPM drops empty entries; `LocalizationTests` fails without it). Refresh the app catalog with `xcodebuild -exportLocalizations -project Thumbmix.xcodeproj -localizationPath build/loc -exportLanguage en`.
+- **Localization**: user-facing text in Core goes through `CoreStrings.text(...)` and needs an explicit `en` entry in `Core/Sources/ThumbmixCore/Resources/Localizable.xcstrings` (SwiftPM drops empty entries; `LocalizationTests` fails without it). Refresh the app catalog with `scripts/strings.sh`, which also checks both catalogs are strict JSON.
 - **Previews** use `ConsoleMirror.preview()`, which exists only in DEBUG: wrap every `#Preview` in `#if DEBUG` or the release IPA fails to build.
 - **Project file**: `Thumbmix.xcodeproj` is generated; edit `project.yml` and run `xcodegen generate`.
-- **Fake state**: `fake-m32` keeps every set it receives, from tests and from a simulator app alike, so state-dependent tests fail against a used fake. Restart it before a full run; a UI test that edits picks a channel no other test reads.
+- **Hooks** (`.claude/settings.json`): an edited Swift file is formatted with `swift format` straight away, and edits inside `Thumbmix.xcodeproj` are blocked.
+- **Fake state**: `fake-m32` keeps every set it receives, from tests and from a simulator app alike, so state-dependent tests fail against a used fake. `scripts/ui-test.sh` starts a fresh one; close the app in other simulators too, or it writes to that fake. A UI test that edits picks a channel no other test reads.
 - **375 pt screen edge**: on the iPhone SE the rows under the EQ graph start below the screen's bottom edge. A UI test scrolls by dragging from a visible row (the Type dropdown), never by swiping a hidden one.
 - **Edit holds in tests**: for `ConsoleMirror.editHold` after the app's own edit, pushes for that address are ignored. A test that simulates a later desk change waits that out first.
 - **Mirrored parameters**: `CatalogTests.syncListIsCompleteAndUnique` pins the sync address count. A new mirrored parameter updates that count and its per-strip comment, and gets a typed default in `DemoState` (the fallback is `.float(0.5)`, wrong for int parameters).
-- **Merging**: `main` is protected (required `check`, branch up to date) and PRs are rebase-merged. Before rebasing a pushed branch, compare it with `origin/<branch>`: GitHub's "Update branch" adds commits there. A conflict in `App/Localizable.xcstrings` resolves by taking `main`'s version and re-exporting (command above).
+- **Merging**: `main` is protected (required `check`, branch up to date) and PRs are rebase-merged. Before rebasing a pushed branch, compare it with `origin/<branch>`: GitHub's "Update branch" adds commits there. A conflict in `App/Localizable.xcstrings` resolves by taking `main`'s version and running `scripts/strings.sh`.
 - **Releases**: every push to `main` publishes `v<MARKETING_VERSION>-<run number>` with the IPA. The release job builds only; lint and tests are the PR `check`'s job. Bump `MARKETING_VERSION` in `project.yml` for a new version.
 - **Tools**: `brew install xcodegen swiftlint`; `swift format` ships with Xcode.
 
