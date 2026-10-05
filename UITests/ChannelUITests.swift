@@ -219,7 +219,8 @@ final class ChannelUITests: XCTestCase {
         open("Snare")
         app.buttons["EQ"].tap()
         let frequency = app.descendants(matching: .any)["/ch/02/eq/1/f"]
-        XCTAssertTrue(frequency.waitForExistence(timeout: 2))
+        // 5 s: in one full-suite run the EQ rows took over 2 s to appear on a busy simulator.
+        XCTAssertTrue(frequency.waitForExistence(timeout: 5))
         XCTAssertEqual(frequency.value as? String, "632 Hz")
         frequency.swipeUp()
         app.buttons["Reset bands"].tap()
@@ -243,11 +244,31 @@ final class ChannelUITests: XCTestCase {
         XCTAssertEqual(frequency.value as? String, "91.4 Hz")
     }
 
+    func testLowCutIsTheFirstChoiceInTheBandPicker() {
+        launch()
+        open("OH L")
+        app.buttons["EQ"].tap()
+        app.buttons["LC"].tap()
+        let on = app.descendants(matching: .any)["toggle-/ch/06/preamp/hpon"]
+        XCTAssertTrue(on.waitForExistence(timeout: 2))
+        XCTAssertEqual(on.value as? String, "Off")
+        XCTAssertEqual(app.descendants(matching: .any)["/ch/06/preamp/hpf"].value as? String, "89.4 Hz")
+        let slope = app.buttons["/ch/06/preamp/hpslope"]
+        XCTAssertEqual(slope.value as? String, "24 dB/oct")
+        slope.tap()
+        app.buttons["12 dB/oct"].tap()
+        XCTAssertEqual(slope.value as? String, "12 dB/oct")
+        on.tap()
+        XCTAssertEqual(on.value as? String, "On")
+        saveScreenshot("low-cut")
+    }
+
     func testBusEQHasSixBands() {
         launch()
         app.buttons["Buses"].tap()
         open("Mon 1")
         XCTAssertTrue(app.buttons["6"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons["LC"].exists, "buses have no low cut")
     }
 
     func testSendsListBusesByName() {

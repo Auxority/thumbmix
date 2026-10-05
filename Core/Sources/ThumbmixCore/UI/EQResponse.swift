@@ -76,7 +76,34 @@ public enum EQResponse {
     }
 }
 
+/// The channel low cut as a Butterworth high-pass of order 2, 3 or 4 (12/18/24 dB/oct): -3 dB at the
+/// cutoff. Like `EQResponse`, a picture of what the filter does, not a measurement of the desk.
+public struct LowCutState: Equatable, Sendable {
+    public let frequency: Double
+    public let slopeIndex: Int
+
+    public init(frequency: Double, slopeIndex: Int) {
+        self.frequency = frequency
+        self.slopeIndex = slopeIndex
+    }
+
+    public func decibels(at hertz: Double) -> Double {
+        let order = Double(slopeIndex + 2)
+        return -10 * log10(1 + pow(frequency / hertz, 2 * order))
+    }
+}
+
 extension ConsoleMirror {
+    /// nil when the strip has no low cut, it is off, or its values were never read: the graph draws no cut.
+    public func lowCut(_ strip: StripID) -> LowCutState? {
+        guard let specs = Catalog.lowCut(strip), cell(specs.on.address).argument == .int(1),
+            let frequency = normalized(specs.frequency), let slope = normalized(specs.slope)
+        else { return nil }
+        return LowCutState(
+            frequency: specs.frequency.scale.value(fromNormalized: frequency),
+            slopeIndex: Int(specs.slope.scale.value(fromNormalized: slope)))
+    }
+
     /// Empty when the strip's EQ is off, so the graph draws flat.
     public func eqBands(_ strip: StripID) -> [EQBandState] {
         guard strip.eqBandCount > 0, cell(Catalog.eqOn(strip).address).argument == .int(1) else {

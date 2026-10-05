@@ -278,6 +278,16 @@
         }
       }
     },
+    "Low cut" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low cut"
+          }
+        }
+      }
+    },
     "Main" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -427,6 +437,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sends"
+          }
+        }
+      }
+    },
+    "Slope" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slope"
           }
         }
       }

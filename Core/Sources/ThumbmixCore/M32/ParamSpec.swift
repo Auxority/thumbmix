@@ -40,6 +40,11 @@ public struct DynamicsSpecs: Sendable {
     public var all: [ParamSpec] { [on, mode, threshold, ratio, knee, attack, hold, release, makeup] }
 }
 
+public struct LowCutSpecs: Sendable {
+    public let on, frequency, slope: ParamSpec
+    public var all: [ParamSpec] { [on, frequency, slope] }
+}
+
 public struct EQBandSpecs: Sendable {
     public let type, frequency, gain, q: ParamSpec
     public var all: [ParamSpec] { [type, frequency, gain, q] }
