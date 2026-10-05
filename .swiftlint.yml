@@ -1,0 +1,30 @@
+# Keeps the code simple: CI (strict mode) fails when a function gets too branchy or anything gets too long.
+# Style is swift-format's job (.swift-format); SwiftLint only guards size and complexity.
+included:
+  - Core/Sources
+  - App
+
+only_rules:
+  - cyclomatic_complexity
+  - function_body_length
+  - type_body_length
+  - file_length
+  - nesting
+
+cyclomatic_complexity:
+  warning: 6
+  error: 10
+  # A switch over an enum is a lookup, not a decision tree.
+  ignores_case_statements: true
+
+function_body_length:
+  warning: 40
+  error: 60
+
+type_body_length:
+  warning: 250
+  error: 400
+
+file_length:
+  warning: 300
+  error: 500
