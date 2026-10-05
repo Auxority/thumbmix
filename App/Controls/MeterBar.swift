@@ -47,7 +47,7 @@ struct ReductionBar: View {
                 }
             }
             .frame(height: 10)
-            Text(String(format: "GR %.1f dB", reduction))
+            Text("GR \(ValueText.number(reduction, digits: 1)) dB")
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(Theme.secondaryText)
                 .frame(width: 80, alignment: .trailing)

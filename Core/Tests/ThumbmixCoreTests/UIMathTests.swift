@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import ThumbmixCore
 
@@ -24,26 +25,34 @@ struct UIMathTests {
     }
 
     @Test func decibelText() {
-        #expect(ValueText.format(ParamScale.fader.normalized(forValue: 0), fader) == "0.0 dB")
-        #expect(ValueText.format(0, fader) == "−∞ dB")
-        #expect(ValueText.format(0.825, fader) == "+3.0 dB")
-        #expect(ValueText.format(0.5, fader) == "−10.0 dB")
-        #expect(ValueText.format(nil, fader) == "—")
+        #expect(ValueText.format(ParamScale.fader.normalized(forValue: 0), fader, locale: .testEnglish) == "0.0 dB")
+        #expect(ValueText.format(0, fader, locale: .testEnglish) == "−∞ dB")
+        #expect(ValueText.format(0.825, fader, locale: .testEnglish) == "+3.0 dB")
+        #expect(ValueText.format(0.5, fader, locale: .testEnglish) == "−10.0 dB")
+        #expect(ValueText.format(nil, fader, locale: .testEnglish) == "—")
     }
 
     @Test func otherUnits() {
         let band = Catalog.eqBand(StripID(.input, 1), 1)
-        #expect(ValueText.format(0.5, band.frequency) == "632 Hz")
-        #expect(ValueText.format(1, band.frequency) == "20.00 kHz")
+        #expect(ValueText.format(0.5, band.frequency, locale: .testEnglish) == "632 Hz")
+        #expect(ValueText.format(1, band.frequency, locale: .testEnglish) == "20.00 kHz")
         let pan = Catalog.pan(StripID(.input, 1))!
-        #expect(ValueText.format(0.5, pan) == "C")
-        #expect(ValueText.format(0.75, pan) == "R50")
-        #expect(ValueText.format(0.25, pan) == "L50")
+        #expect(ValueText.format(0.5, pan, locale: .testEnglish) == "C")
+        #expect(ValueText.format(0.75, pan, locale: .testEnglish) == "R50")
+        #expect(ValueText.format(0.25, pan, locale: .testEnglish) == "L50")
         let dynamics = Catalog.dynamics(StripID(.input, 1))
-        #expect(ValueText.format(Float(3) / 11, dynamics.ratio) == "2.0:1")
-        #expect(ValueText.format(1, dynamics.on) == "On")
-        #expect(ValueText.format(0, dynamics.hold) == "0.02 ms")
-        #expect(ValueText.format(1, dynamics.release) == "4000 ms")
+        #expect(ValueText.format(Float(3) / 11, dynamics.ratio, locale: .testEnglish) == "2.0:1")
+        #expect(ValueText.format(1, dynamics.on, locale: .testEnglish) == "On")
+        #expect(ValueText.format(0, dynamics.hold, locale: .testEnglish) == "0.02 ms")
+        #expect(ValueText.format(1, dynamics.release, locale: .testEnglish) == "4000 ms")
+    }
+
+    @Test func formatsForTheUsersLocale() {
+        let dutch = Locale(identifier: "nl_NL")
+        let band = Catalog.eqBand(StripID(.input, 1), 1)
+        #expect(ValueText.format(0.5, fader, locale: dutch) == "−10,0 dB")
+        #expect(ValueText.format(1, band.frequency, locale: dutch) == "20,00 kHz")
+        #expect(ValueText.format(1, Catalog.dynamics(StripID(.input, 1)).release, locale: dutch) == "4000 ms")
     }
 
     @Test func groups() {
