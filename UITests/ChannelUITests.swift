@@ -88,4 +88,30 @@ final class ChannelUITests: XCTestCase {
         app.buttons["Comp"].tap()
         XCTAssertTrue(app.otherElements["/bus/01/dyn/thr"].waitForExistence(timeout: 2))
     }
+
+    func testDraggingOnTheGraphMovesTheGrabbedBand() {
+        launch()
+        open("Kick")
+        app.buttons["EQ"].tap()
+        let frequency = app.otherElements["/ch/01/eq/1/f"]
+        let gain = app.otherElements["/ch/01/eq/1/g"]
+        XCTAssertTrue(frequency.waitForExistence(timeout: 2))
+        XCTAssertEqual(frequency.value as? String, "632 Hz")
+        let graph = app.otherElements["eq-graph"]
+
+        // All fake bands sit at the centre point; the nearest-band tie goes to band 1.
+        graph.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .press(forDuration: 0.1, thenDragTo: graph.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.25)))
+
+        XCTAssertNotEqual(frequency.value as? String, "632 Hz")
+        XCTAssertNotEqual(gain.value as? String, "0.0 dB")
+        saveScreenshot("task-15-eq")
+    }
+
+    func testBusEQHasSixBands() {
+        launch()
+        app.buttons["Buses"].tap()
+        open("Mon 1")
+        XCTAssertTrue(app.buttons["6"].waitForExistence(timeout: 2))
+    }
 }
