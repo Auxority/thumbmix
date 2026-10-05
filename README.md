@@ -29,6 +29,7 @@ Join the console's Wi-Fi. Then tap **Scan this network** or type the M32's IP ad
 ## Develop
 
 ```bash
+scripts/lint.sh                             # style (swift-format) and complexity/size limits (SwiftLint)
 swift test --package-path Core              # protocol, state and UI maths
 swift run --package-path Core fake-m32      # a fake M32 on 127.0.0.1:10023 for the simulator
 xcodegen generate && open Thumbmix.xcodeproj

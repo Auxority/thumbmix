@@ -105,43 +105,44 @@ public enum Catalog {
     }
 
     public static func sendLevel(from strip: StripID, toBus bus: Int) -> ParamSpec {
-        ParamSpec(sendPrefix(strip, bus) + "/level", "Bus \(bus)", .sendLevel, .decibels, reset: 0)
+        ParamSpec(sendPrefix(strip, bus) + "/level", CoreStrings.text("Bus \(bus)"), .sendLevel, .decibels, reset: 0)
     }
 
     public static func sendOn(from strip: StripID, toBus bus: Int) -> ParamSpec {
-        ParamSpec(sendPrefix(strip, bus) + "/on", "On", .toggle, .plain)
+        ParamSpec(sendPrefix(strip, bus) + "/on", CoreStrings.text("On"), .toggle, .plain)
     }
 
     /// Every address the mirror reads on connect, names first so the overview fills in early.
     public static func syncAddresses() -> [String] {
-        var addresses: [String] = []
-        for kind in StripKind.allCases {
-            for strip in StripID.all(kind) {
-                addresses += [strip.name, strip.color, strip.fader, strip.on]
-                addresses += [strip.pan, strip.dcaMask].compactMap { $0 }
-                if strip.hasGate {
-                    addresses.append(trim(strip).address)
-                    addresses += gate(strip).all.map(\.address)
-                    addresses.append(headampIndex(forInput: strip.number))
-                }
-                if strip.hasDynamics { addresses += dynamics(strip).all.map(\.address) }
-                if strip.eqBandCount > 0 {
-                    addresses.append(eqOn(strip).address)
-                    for band in 1...strip.eqBandCount { addresses += eqBand(strip, band).all.map(\.address) }
-                }
-                if strip.sendsToBuses {
-                    for bus in 1...16 {
-                        addresses += [
-                            sendLevel(from: strip, toBus: bus).address, sendOn(from: strip, toBus: bus).address,
-                        ]
-                    }
-                }
-            }
-        }
-        for index in 0..<128 {
-            addresses += [headampGain(index).address, headampPhantom(index).address]
-        }
-        return addresses
+        StripKind.allCases.flatMap(StripID.all).flatMap(addresses(of:)) + headampAddresses()
+    }
+
+    private static func addresses(of strip: StripID) -> [String] {
+        [strip.name, strip.color, strip.fader, strip.on] + [strip.pan, strip.dcaMask].compactMap { $0 }
+            + inputAddresses(strip) + dynamicsAddresses(strip) + eqAddresses(strip) + sendAddresses(strip)
+    }
+
+    private static func inputAddresses(_ strip: StripID) -> [String] {
+        guard strip.hasGate else { return [] }
+        return [trim(strip).address] + gate(strip).all.map(\.address) + [headampIndex(forInput: strip.number)]
+    }
+
+    private static func dynamicsAddresses(_ strip: StripID) -> [String] {
+        strip.hasDynamics ? dynamics(strip).all.map(\.address) : []
+    }
+
+    private static func eqAddresses(_ strip: StripID) -> [String] {
+        guard strip.eqBandCount > 0 else { return [] }
+        return [eqOn(strip).address] + (1...strip.eqBandCount).flatMap { eqBand(strip, $0).all.map(\.address) }
+    }
+
+    private static func sendAddresses(_ strip: StripID) -> [String] {
+        guard strip.sendsToBuses else { return [] }
+        return (1...16).flatMap { [sendLevel(from: strip, toBus: $0).address, sendOn(from: strip, toBus: $0).address] }
+    }
+
+    private static func headampAddresses() -> [String] {
+        (0..<128).flatMap { [headampGain($0).address, headampPhantom($0).address] }
     }
 
     /// The values a stale display would hurt most: what each strip is called and where its fader and mute sit.
