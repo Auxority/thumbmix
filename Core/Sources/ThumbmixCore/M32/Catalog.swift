@@ -3,6 +3,7 @@ import Foundation
 /// Every M32 parameter Thumbmix v1 touches. Ranges are from Maillot's protocol doc v4.09 (p.25-43).
 public enum Catalog {
     public static let gateModes = ["EXP2", "EXP3", "EXP4", "GATE", "DUCK"]
+    public static let dynamicsModes = ["COMP", "EXP"]
     public static let ratios = [
         "1.1", "1.3", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "7.0", "10", "20", "100",
     ]
@@ -72,6 +73,7 @@ public enum Catalog {
         let p = strip.prefix + "/dyn/"
         return DynamicsSpecs(
             on: ParamSpec(p + "on", CoreStrings.text("Comp"), .toggle, .plain),
+            mode: ParamSpec(p + "mode", CoreStrings.text("Mode"), .choice(dynamicsModes), .plain),
             threshold: ParamSpec(
                 p + "thr", CoreStrings.text("Threshold"), .linear(min: -60, max: 0, step: 0.5), .decibels),
             ratio: ParamSpec(p + "ratio", CoreStrings.text("Ratio"), .choice(ratios), .ratio),

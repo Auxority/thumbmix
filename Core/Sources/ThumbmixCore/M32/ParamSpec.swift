@@ -36,8 +36,8 @@ public struct GateSpecs: Sendable {
 }
 
 public struct DynamicsSpecs: Sendable {
-    public let on, threshold, ratio, knee, attack, hold, release, makeup: ParamSpec
-    public var all: [ParamSpec] { [on, threshold, ratio, knee, attack, hold, release, makeup] }
+    public let on, mode, threshold, ratio, knee, attack, hold, release, makeup: ParamSpec
+    public var all: [ParamSpec] { [on, mode, threshold, ratio, knee, attack, hold, release, makeup] }
 }
 
 public struct EQBandSpecs: Sendable {
