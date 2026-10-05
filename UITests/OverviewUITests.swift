@@ -30,6 +30,18 @@ final class OverviewUITests: XCTestCase {
         XCTAssertNotEqual(fader.value as? String, before)
     }
 
+    /// Hiding the unused channels shortens the list; scrolled near its end, the old offset showed
+    /// only black until the user scrolled back up by hand.
+    func testHidingUnusedFromFarDownShowsTheList() {
+        launch()
+        app.buttons["Unused"].tap()
+        for _ in 0..<4 { app.swipeUp() }
+        XCTAssertFalse(app.buttons["Kick"].isHittable)
+        app.buttons["Unused"].tap()
+        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Kick"].isHittable)
+    }
+
     func testVerticalSwipeScrollsInsteadOfMovingFaders() {
         launch()
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]

@@ -2,6 +2,8 @@ import SwiftUI
 import ThumbmixCore
 
 struct OverviewView: View {
+    private static let listTop = "list-top"
+
     let mirror: ConsoleMirror
     let onDisconnect: () -> Void
     @State private var group: StripGroup = .inputs
@@ -13,14 +15,22 @@ struct OverviewView: View {
         NavigationStack {
             VStack(spacing: 10) {
                 GroupChips(selection: $group)
-                ScrollView {
-                    LazyVStack(spacing: 6) {
-                        ForEach(visibleStrips) { strip in
-                            StripRow(strip: strip, mirror: mirror) { openStrip = strip }
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(spacing: 6) {
+                            Color.clear.frame(height: 0).id(Self.listTop)
+                            ForEach(visibleStrips) { strip in
+                                StripRow(strip: strip, mirror: mirror) { openStrip = strip }
+                            }
                         }
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 12)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 12)
+                    // A new list starts at its top: hiding unused strips from far down otherwise left
+                    // the old offset pointing past the shorter list, showing only black. A reconnect
+                    // refreshes too but keeps the position, so the list never moves under a finger.
+                    .onChange(of: group) { proxy.scrollTo(Self.listTop, anchor: .top) }
+                    .onChange(of: showUnused) { proxy.scrollTo(Self.listTop, anchor: .top) }
                 }
                 .disabled(!mirror.isLive)
                 .opacity(mirror.isLive ? 1 : 0.4)

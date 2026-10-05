@@ -36,6 +36,9 @@
     "Band" : {
 
     },
+    "Cancel" : {
+
+    },
     "Compressor curve" : {
 
     },
@@ -55,6 +58,9 @@
 
     },
     "EQ curve" : {
+
+    },
+    "Every band goes back to PEQ at 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz, Q 1.7, 0 dB." : {
 
     },
     "Gate curve" : {
@@ -85,6 +91,12 @@
 
     },
     "On" : {
+
+    },
+    "Reset all %lld bands" : {
+
+    },
+    "Reset bands" : {
 
     },
     "Scan this network" : {
