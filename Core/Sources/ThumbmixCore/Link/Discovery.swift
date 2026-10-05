@@ -13,13 +13,17 @@ public struct DiscoveredConsole: Equatable, Sendable, Identifiable {
 public enum Discovery {
     private static let log = Logger(subsystem: "thumbmix", category: "discovery")
 
-    public static func isValidIPv4(_ host: String) -> Bool {
+    /// A unicast IPv4 address a console could have. Loopback stays allowed for the simulator's fake console.
+    public static func isUsableIPv4(_ host: String) -> Bool {
         var address = in_addr()
-        return inet_pton(AF_INET, host, &address) == 1
+        guard inet_pton(AF_INET, host, &address) == 1 else { return false }
+        let firstOctet = UInt32(bigEndian: address.s_addr) >> 24
+        // 0.x is "this network"; 224 and up are multicast, reserved and broadcast.
+        return firstOctet != 0 && firstOctet < 224
     }
 
     public static func sweepHosts(around ip: String) -> [String] {
-        guard isValidIPv4(ip) else { return [] }
+        guard isUsableIPv4(ip) else { return [] }
         let network = ip.split(separator: ".").prefix(3).joined(separator: ".")
         return (1...254).map { "\(network).\($0)" }.filter { $0 != ip }
     }
@@ -39,7 +43,12 @@ public enum Discovery {
     }
 
     public static func scan(hosts: [String], port: UInt16 = 10023, timeout: TimeInterval = 1.5) async -> [DiscoveredConsole] {
-        await Task.detached { blockingScan(hosts: hosts, port: port, timeout: timeout) }.value
+        // A GCD thread, not the Swift concurrency pool: the scan blocks in poll() for the whole timeout.
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                continuation.resume(returning: blockingScan(hosts: hosts, port: port, timeout: timeout))
+            }
+        }
     }
 
     private static func blockingScan(hosts: [String], port: UInt16, timeout: TimeInterval) -> [DiscoveredConsole] {
@@ -51,7 +60,8 @@ public enum Discovery {
         defer { close(socketHandle) }
 
         let request = [UInt8](OSCCodec.encode(OSCMessage("/xinfo")))
-        for host in hosts { sendRequest(request, to: host, port: port, on: socketHandle) }
+        let failedSends = hosts.filter { !sendRequest(request, to: $0, port: port, on: socketHandle) }.count
+        if failedSends > 0 { log.warning("discovery: \(failedSends) of \(hosts.count) requests could not be sent") }
 
         var found: [String: DiscoveredConsole] = [:]
         let deadline = Date().addingTimeInterval(timeout)
@@ -64,16 +74,18 @@ public enum Discovery {
         return found.values.sorted { $0.host < $1.host }
     }
 
-    private static func sendRequest(_ request: [UInt8], to host: String, port: UInt16, on socketHandle: Int32) {
+    /// False when the request never left the phone, e.g. no route or a full send buffer.
+    private static func sendRequest(_ request: [UInt8], to host: String, port: UInt16, on socketHandle: Int32) -> Bool {
         var destination = sockaddr_in()
         destination.sin_family = sa_family_t(AF_INET)
         destination.sin_port = port.bigEndian
-        guard inet_pton(AF_INET, host, &destination.sin_addr) == 1 else { return }
-        _ = withUnsafePointer(to: &destination) {
+        guard inet_pton(AF_INET, host, &destination.sin_addr) == 1 else { return false }
+        let sent = withUnsafePointer(to: &destination) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
                 sendto(socketHandle, request, request.count, 0, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
             }
         }
+        return sent == request.count
     }
 
     /// The next decodable reply and its sender, or nil once the deadline passes.
@@ -81,7 +93,11 @@ public enum Discovery {
         var buffer = [UInt8](repeating: 0, count: 1500)
         while deadline.timeIntervalSinceNow > 0 {
             var poller = pollfd(fd: socketHandle, events: Int16(POLLIN), revents: 0)
-            guard poll(&poller, 1, Int32(deadline.timeIntervalSinceNow * 1000)) > 0 else { return nil }
+            // Clamped: a negative timeout would make poll() wait forever.
+            let remainingMilliseconds = Int32(max(0, deadline.timeIntervalSinceNow) * 1000)
+            let ready = poll(&poller, 1, remainingMilliseconds)
+            if ready < 0, errno == EINTR { continue }
+            guard ready > 0 else { return nil }
             var sender = sockaddr_in()
             var senderLength = socklen_t(MemoryLayout<sockaddr_in>.size)
             let count = withUnsafeMutablePointer(to: &sender) {

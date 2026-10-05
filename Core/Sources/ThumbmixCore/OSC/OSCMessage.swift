@@ -6,6 +6,10 @@ public enum OSCArgument: Equatable, Sendable {
     case string(String)
     case blob(Data)
 
+    func hasSameType(as other: OSCArgument) -> Bool {
+        typeTag == other.typeTag
+    }
+
     var typeTag: String {
         switch self {
         case .int: "i"

@@ -49,7 +49,8 @@ struct SendRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            ToggleChip(spec: Catalog.sendOn(from: source, toBus: bus), mirror: mirror, title: "On", onColor: accent)
+            // Green like every other "on" chip: a red source colour would read as mute.
+            ToggleChip(spec: Catalog.sendOn(from: source, toBus: bus), mirror: mirror, title: "On", onColor: .green)
             ParameterRow(spec: Catalog.sendLevel(from: source, toBus: bus), mirror: mirror, title: title, accent: accent)
         }
     }

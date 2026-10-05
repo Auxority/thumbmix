@@ -15,6 +15,7 @@ public enum ValueText {
         }
         switch spec.unit {
         case .decibels: return decibels(value)
+        case .decibelAmount: return String(format: "%.1f dB", value)
         case .hertz: return value < 1000 ? String(format: "%.0f Hz", value) : String(format: "%.2f kHz", value / 1000)
         case .milliseconds: return milliseconds(value)
         case .percent: return String(format: "%.0f%%", value)

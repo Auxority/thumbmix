@@ -50,7 +50,7 @@ public enum Catalog {
             on: ParamSpec(p + "on", "Gate", .toggle, .plain),
             mode: ParamSpec(p + "mode", "Mode", .choice(gateModes), .plain),
             threshold: ParamSpec(p + "thr", "Threshold", .linear(min: -80, max: 0, step: 0.5), .decibels),
-            range: ParamSpec(p + "range", "Range", .linear(min: 3, max: 60, step: 1), .decibels),
+            range: ParamSpec(p + "range", "Range", .linear(min: 3, max: 60, step: 1), .decibelAmount),
             attack: ParamSpec(p + "attack", "Attack", attack, .milliseconds),
             hold: ParamSpec(p + "hold", "Hold", hold, .milliseconds),
             release: ParamSpec(p + "release", "Release", release, .milliseconds)
@@ -67,7 +67,7 @@ public enum Catalog {
             attack: ParamSpec(p + "attack", "Attack", attack, .milliseconds),
             hold: ParamSpec(p + "hold", "Hold", hold, .milliseconds),
             release: ParamSpec(p + "release", "Release", release, .milliseconds),
-            makeup: ParamSpec(p + "mgain", "Makeup", .linear(min: 0, max: 24, step: 0.5), .decibels)
+            makeup: ParamSpec(p + "mgain", "Makeup", .linear(min: 0, max: 24, step: 0.5), .decibelAmount)
         )
     }
 

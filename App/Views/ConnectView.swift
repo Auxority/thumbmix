@@ -7,6 +7,7 @@ struct ConnectView: View {
     @State private var found: [DiscoveredConsole] = []
     @State private var isScanning = false
     @State private var hasScanned = false
+    @State private var hasWiFiAddress = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -29,7 +30,7 @@ struct ConnectView: View {
                         .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
                     Button("Connect") { model.connect(to: trimmedAddress) }
                         .buttonStyle(.borderedProminent)
-                        .disabled(!Discovery.isValidIPv4(trimmedAddress))
+                        .disabled(!Discovery.isUsableIPv4(trimmedAddress))
                 }
             }
             Button {
@@ -43,7 +44,11 @@ struct ConnectView: View {
                     .buttonStyle(.plain)
                     .disabled(!console.model.hasPrefix("M32"))
             }
-            if hasScanned, !isScanning, found.isEmpty {
+            if hasScanned, !isScanning, !hasWiFiAddress {
+                Text("This phone has no Wi-Fi address. Join the console's Wi-Fi network, then scan again.")
+                    .font(.callout)
+                    .foregroundStyle(Theme.secondaryText)
+            } else if hasScanned, !isScanning, found.isEmpty {
                 Text("No console answered. Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix.")
                     .font(.callout)
                     .foregroundStyle(Theme.secondaryText)
@@ -62,7 +67,9 @@ struct ConnectView: View {
             isScanning = false
             hasScanned = true
         }
-        guard let me = Discovery.localIPv4() else { return }
+        let me = Discovery.localIPv4()
+        hasWiFiAddress = me != nil
+        guard let me else { return }
         found = await Discovery.scan(hosts: Discovery.sweepHosts(around: me))
     }
 
