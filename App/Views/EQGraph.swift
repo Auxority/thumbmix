@@ -30,8 +30,9 @@ struct EQGraph: View {
         GeometryReader { geometry in
             let size = geometry.size
             ZStack {
+                Canvas { context, canvasSize in drawGrid(in: context, size: canvasSize) }
+                SpectrumGlow(spectrum: mirror.spectrum, color: Theme.color(mirror.color(strip)))
                 Canvas { context, canvasSize in
-                    drawGrid(in: context, size: canvasSize)
                     context.stroke(curve(bands, lowCut, in: canvasSize), with: .color(.white), lineWidth: 2)
                     if let lowCut {
                         let cutPart = curve(bands, lowCut, in: canvasSize, upTo: lowCut.frequency * 2)

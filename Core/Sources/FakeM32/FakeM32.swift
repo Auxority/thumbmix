@@ -190,8 +190,7 @@ public final class FakeM32: @unchecked Sendable {
         let time = now.timeIntervalSince(started)
         for client in clients.values {
             for (bank, until) in client.meterBanksUntil where until > now {
-                let values = FakeState.meterValues(bank: bank, time: time)
-                send(OSCMessage(bank, [.blob(MeterBlob.encode(values))]), to: client)
+                send(OSCMessage(bank, [.blob(FakeState.meterBlob(bank: bank, time: time))]), to: client)
             }
         }
     }

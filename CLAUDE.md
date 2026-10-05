@@ -13,6 +13,7 @@ A remote that shows a stale or guessed value as live makes the engineer's next d
 - The UI shows a value only after the console sent it; `ConsoleMirror.set` ignores controls whose cell was never read.
 - When contact is lost the banner says so and controls are disabled; on return the mirror resyncs before going live.
 - The user's finger owns a control from touch-down to just after release (`EditHolds`), then the console's value is re-read.
+- A desk-wide setting the app borrows (the RTA while an EQ tab is open, `ConsoleMirror+RTA`) is handed back on leaving, and only where the desk still shows the app's value: a change made on the desk meanwhile wins.
 
 ## Protocol facts
 

@@ -59,7 +59,7 @@ public enum DemoState {
         ("/config/name", .string("")), ("/config/color", .int(0)), ("/config/icon", .int(1)), ("/grp/dca", .int(0)),
         ("/phantom", .int(0)), ("/hpon", .int(0)), ("/hpslope", .int(2)), ("/on", .int(1)), ("/type", .int(2)),
         ("/dyn/mode", .int(0)), ("/mode", .int(3)), ("/ratio", .int(3)),
-        ("/fader", .float(0)), ("/level", .float(0)),
+        ("/fader", .float(0)), ("/level", .float(0)), ("/rta/source", .int(0)), ("/rta/pos", .int(0)),
     ]
 
     static func defaultValue(for address: String) -> OSCArgument {

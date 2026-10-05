@@ -136,8 +136,11 @@ public enum Catalog {
 
     /// Every address the mirror reads on connect, names first so the overview fills in early.
     public static func syncAddresses() -> [String] {
-        StripKind.allCases.flatMap(StripID.all).flatMap(addresses(of:)) + headampAddresses()
+        StripKind.allCases.flatMap(StripID.all).flatMap(addresses(of:)) + headampAddresses() + rtaAddresses
     }
+
+    /// Read on connect so the desk's own RTA setting is known before the app borrows it.
+    private static let rtaAddresses = [RTA.source, RTA.position]
 
     private static func addresses(of strip: StripID) -> [String] {
         [strip.name, strip.color, strip.icon, strip.fader, strip.on] + [strip.pan, strip.dcaMask].compactMap { $0 }
@@ -169,10 +172,13 @@ public enum Catalog {
     }
 
     /// The values a stale display would hurt most: what each strip is called and where its fader and mute sit.
+    /// The RTA setting is audited too: the doc doesn't say a change on the desk is pushed, and releasing
+    /// the RTA must not overwrite a choice the engineer made on the desk meanwhile.
     public static func auditAddresses() -> [String] {
-        StripKind.allCases.flatMap(StripID.all).flatMap { strip in
-            [strip.name, strip.color, strip.fader, strip.on] + [strip.pan].compactMap { $0 }
-        }
+        rtaAddresses
+            + StripKind.allCases.flatMap(StripID.all).flatMap { strip in
+                [strip.name, strip.color, strip.fader, strip.on] + [strip.pan].compactMap { $0 }
+            }
     }
 
     private static func headamp(_ index: Int) -> String {

@@ -222,7 +222,9 @@ final class ChannelUITests: XCTestCase {
         // 5 s: in one full-suite run the EQ rows took over 2 s to appear on a busy simulator.
         XCTAssertTrue(frequency.waitForExistence(timeout: 5))
         XCTAssertEqual(frequency.value as? String, "632 Hz")
-        frequency.swipeUp()
+        // Drag from the Type row: on a 375 pt phone the rows below it can start past the screen's bottom edge.
+        let type = app.buttons["/ch/02/eq/1/type"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        type.press(forDuration: 0.05, thenDragTo: type.withOffset(CGVector(dx: 0, dy: -300)))
         app.buttons["Reset bands"].tap()
         app.buttons["Cancel"].tap()
         XCTAssertEqual(frequency.value as? String, "632 Hz")
@@ -261,6 +263,17 @@ final class ChannelUITests: XCTestCase {
         on.tap()
         XCTAssertEqual(on.value as? String, "On")
         saveScreenshot("low-cut")
+    }
+
+    /// The EQ tab borrows the desk's RTA for this channel; the status line shows once spectrum data arrives.
+    func testEQTabShowsTheLiveSpectrum() {
+        launch()
+        open("Kick")
+        app.buttons["EQ"].tap()
+        let status = app.staticTexts["rta-status"]
+        XCTAssertTrue(status.waitForExistence(timeout: 5))
+        XCTAssertEqual(status.label, "RTA follows Kick (after EQ)")
+        saveScreenshot("eq-spectrum")
     }
 
     func testBusEQHasSixBands() {

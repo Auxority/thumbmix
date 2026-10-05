@@ -6,6 +6,7 @@ struct EQTab: View {
     let mirror: ConsoleMirror
     @State private var band = 1
     @State private var isConfirmingReset = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         let lowCut = Catalog.lowCut(strip)
@@ -14,6 +15,7 @@ struct EQTab: View {
             VStack(spacing: 8) {
                 EQGraph(strip: strip, mirror: mirror, selectedBand: $band)
                     .frame(height: 190)
+                RTAStatus(spectrum: mirror.spectrum, name: mirror.name(strip))
                 HStack(spacing: 8) {
                     ToggleChip(spec: Catalog.eqOn(strip), mirror: mirror, onColor: .green)
                     Picker("Band", selection: $band) {
@@ -30,6 +32,12 @@ struct EQTab: View {
                 }
                 if let defaults = Catalog.eqDefaults(strip) { resetButton(bandCount: defaults.count) }
             }
+        }
+        // The desk's RTA is borrowed only while this tab is on screen, and handed back when the app leaves the foreground.
+        .onAppear { mirror.followRTA(strip) }
+        .onDisappear { mirror.releaseRTA() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { mirror.followRTA(strip) } else { mirror.releaseRTA() }
         }
     }
 
