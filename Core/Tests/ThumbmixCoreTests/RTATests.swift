@@ -35,19 +35,12 @@ struct RTATests {
         #expect(abs(RTA.bandFrequency(99) - 18_660) < 1)
     }
 
-    private func liveMirror(_ port: UInt16) async -> ConsoleMirror {
-        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast))
-        mirror.start()
-        _ = await eventually(timeout: .seconds(10)) { mirror.isLive }
-        return mirror
-    }
-
     @Test func followingPointsTheDeskRTAAndReleasingPutsItBack() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         fake.deskChange(RTA.source, .int(50))
         fake.deskChange(RTA.position, .int(0))
-        let mirror = await liveMirror(port)
+        let mirror = await liveMirror(port: port)
         defer { mirror.stop() }
         #expect(await eventually { mirror.cell(RTA.source).argument == .int(50) })
 
@@ -65,7 +58,7 @@ struct RTATests {
     @Test func aChangeMadeOnTheDeskMeanwhileIsKept() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
-        let mirror = await liveMirror(port)
+        let mirror = await liveMirror(port: port)
         defer { mirror.stop() }
         mirror.followRTA(StripID(.input, 1))
         #expect(await eventually { fake.value(at: RTA.source) == .int(2) })
@@ -86,7 +79,7 @@ struct RTATests {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         fake.deskChange(RTA.source, .int(72))
-        let mirror = await liveMirror(port)
+        let mirror = await liveMirror(port: port)
         defer { mirror.stop() }
         #expect(await eventually { mirror.cell(RTA.source).argument == .int(72) })
 

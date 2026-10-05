@@ -7,13 +7,6 @@ import Testing
 struct EQResetTests {
     private let kick = StripID(.input, 1)
 
-    private func liveMirror(_ port: UInt16) async -> ConsoleMirror {
-        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast))
-        mirror.start()
-        _ = await eventually(timeout: .seconds(10)) { mirror.isLive }
-        return mirror
-    }
-
     /// What the console holds for `spec`, in real units.
     private func deskValue(_ fake: FakeM32, _ spec: ParamSpec) -> Double? {
         fake.value(at: spec.address).flatMap(spec.scale.normalized(from:)).map(spec.scale.value(fromNormalized:))
@@ -28,7 +21,7 @@ struct EQResetTests {
     @Test func resetBandsPutsEveryBandBackToItsDefault() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
-        let mirror = await liveMirror(port)
+        let mirror = await liveMirror(port: port)
         defer { mirror.stop() }
         fake.deskChange("/ch/01/eq/1/type", .int(0))
         fake.deskChange("/ch/01/eq/3/g", .float(0.9))
@@ -51,7 +44,7 @@ struct EQResetTests {
     @Test func resetOneBandLeavesTheOthers() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
-        let mirror = await liveMirror(port)
+        let mirror = await liveMirror(port: port)
         defer { mirror.stop() }
         fake.deskChange("/ch/01/eq/2/g", .float(0.9))
         fake.deskChange("/ch/01/eq/3/g", .float(0.9))
