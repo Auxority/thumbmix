@@ -30,7 +30,10 @@ struct ConnectView: View {
                         .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
                     Button("Connect") { model.connect(to: trimmedAddress) }
                         .buttonStyle(.borderedProminent)
-                        .disabled(!Discovery.isUsableIPv4(trimmedAddress))
+                        // The white app tint makes the enabled fill white and the disabled fill dark grey,
+                        // so the label colour has to follow the state or it vanishes into the fill.
+                        .foregroundStyle(canConnect ? Color.black : Theme.secondaryText)
+                        .disabled(!canConnect)
                 }
             }
             Button {
@@ -68,6 +71,7 @@ struct ConnectView: View {
     }
 
     private var trimmedAddress: String { address.trimmingCharacters(in: .whitespaces) }
+    private var canConnect: Bool { Discovery.isUsableIPv4(trimmedAddress) }
 
     private func scan() async {
         isScanning = true
