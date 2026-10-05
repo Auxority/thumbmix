@@ -33,16 +33,18 @@ final class ChannelUITests: XCTestCase {
         XCTAssertEqual(fader.value as? String, "0.0 dB")
     }
 
-    func testInputTabShowsGainAndSharedPreamp() {
+    /// Like the desk, a preamp channel offers Gain and 48V; trim is for digital sources only (doc fn.18).
+    func testPreampChannelShowsGainNotTrim() {
         launch()
         open("Vox 2")
         XCTAssertTrue(app.descendants(matching: .any)["/headamp/044/gain"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["toggle-/headamp/044/phantom"].exists)
         XCTAssertTrue(app.staticTexts["Shared with Vox 1"].exists)
-        XCTAssertTrue(app.descendants(matching: .any)["/ch/14/preamp/trim"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["/ch/14/preamp/trim"].exists)
         saveScreenshot("task-13-input")
     }
 
-    func testInternalSourceHasNoPreamp() {
+    func testInternalSourceShowsTrimNotGain() {
         launch()
         app.buttons["Unused"].tap()
         app.swipeUp()
@@ -50,6 +52,9 @@ final class ChannelUITests: XCTestCase {
         XCTAssertTrue(
             app.staticTexts["No preamp: this channel reads from an internal source."].waitForExistence(
                 timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["/ch/15/preamp/trim"].exists)
+        let headampControls = NSPredicate(format: "identifier CONTAINS '/headamp/'")
+        XCTAssertEqual(app.descendants(matching: .any).matching(headampControls).count, 0)
     }
 
     func testDCAMembers() {
