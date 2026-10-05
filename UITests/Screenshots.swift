@@ -11,3 +11,6 @@ func saveScreenshot(_ name: String) {
         XCTFail("could not save screenshot \(name): \(error)")
     }
 }
+
+/// Assertions compare English, dot-decimal text, so the app runs in en_US whatever the Mac's region is.
+let fixedLocale = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]

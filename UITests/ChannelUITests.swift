@@ -11,7 +11,7 @@ final class ChannelUITests: XCTestCase {
     /// Launched per test rather than in setUp: the setUp override is nonisolated, XCUIApplication is main-actor.
     private func launch() {
         app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"]
+        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
         app.launch()
         XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
     }
@@ -25,7 +25,7 @@ final class ChannelUITests: XCTestCase {
     func testNudgeButtonsMoveOneDecibel() {
         launch()
         open("Kick")
-        let fader = app.otherElements["/ch/01/mix/fader"]
+        let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
         XCTAssertEqual(fader.value as? String, "0.0 dB")
         app.buttons["+1 dB"].tap()
         XCTAssertEqual(fader.value as? String, "+1.0 dB")
@@ -36,9 +36,9 @@ final class ChannelUITests: XCTestCase {
     func testInputTabShowsGainAndSharedPreamp() {
         launch()
         open("Vox 2")
-        XCTAssertTrue(app.otherElements["/headamp/044/gain"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["/headamp/044/gain"].exists)
         XCTAssertTrue(app.staticTexts["Shared with Vox 1"].exists)
-        XCTAssertTrue(app.otherElements["/ch/14/preamp/trim"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["/ch/14/preamp/trim"].exists)
         saveScreenshot("task-13-input")
     }
 
@@ -62,13 +62,13 @@ final class ChannelUITests: XCTestCase {
         launch()
         open("Kick")
         app.buttons["Gate"].tap()
-        let threshold = app.otherElements["/ch/01/gate/thr"]
+        let threshold = app.descendants(matching: .any)["/ch/01/gate/thr"]
         XCTAssertTrue(threshold.waitForExistence(timeout: 2))
         let before = threshold.value as? String
         threshold.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             .press(forDuration: 0.05, thenDragTo: threshold.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)))
         XCTAssertNotEqual(threshold.value as? String, before)
-        XCTAssertTrue(app.otherElements["/ch/01/gate/release"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["/ch/01/gate/release"].exists)
         saveScreenshot("task-14-gate")
     }
 
@@ -76,8 +76,8 @@ final class ChannelUITests: XCTestCase {
         launch()
         open("Kick")
         app.buttons["Comp"].tap()
-        XCTAssertEqual(app.otherElements["/ch/01/dyn/ratio"].value as? String, "2.0:1")
-        XCTAssertTrue(app.otherElements["/ch/01/dyn/mgain"].exists)
+        XCTAssertEqual(app.descendants(matching: .any)["/ch/01/dyn/ratio"].value as? String, "2.0:1")
+        XCTAssertTrue(app.descendants(matching: .any)["/ch/01/dyn/mgain"].exists)
     }
 
     func testBusHasCompButNoGate() {
@@ -86,18 +86,18 @@ final class ChannelUITests: XCTestCase {
         open("Mon 1")
         XCTAssertFalse(app.buttons["Gate"].exists)
         app.buttons["Comp"].tap()
-        XCTAssertTrue(app.otherElements["/bus/01/dyn/thr"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.descendants(matching: .any)["/bus/01/dyn/thr"].waitForExistence(timeout: 2))
     }
 
     func testDraggingOnTheGraphMovesTheGrabbedBand() {
         launch()
         open("Kick")
         app.buttons["EQ"].tap()
-        let frequency = app.otherElements["/ch/01/eq/1/f"]
-        let gain = app.otherElements["/ch/01/eq/1/g"]
+        let frequency = app.descendants(matching: .any)["/ch/01/eq/1/f"]
+        let gain = app.descendants(matching: .any)["/ch/01/eq/1/g"]
         XCTAssertTrue(frequency.waitForExistence(timeout: 2))
         XCTAssertEqual(frequency.value as? String, "632 Hz")
-        let graph = app.otherElements["eq-graph"]
+        let graph = app.descendants(matching: .any)["eq-graph"]
 
         // All fake bands sit at the centre point; the nearest-band tie goes to band 1.
         graph.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
@@ -119,7 +119,7 @@ final class ChannelUITests: XCTestCase {
         launch()
         open("Vox 1")
         app.buttons["Sends"].tap()
-        let toMon1 = app.otherElements["/ch/13/mix/01/level"]
+        let toMon1 = app.descendants(matching: .any)["/ch/13/mix/01/level"]
         XCTAssertTrue(toMon1.waitForExistence(timeout: 2))
         XCTAssertEqual(toMon1.label, "Mon 1")
         XCTAssertEqual(toMon1.value as? String, "0.0 dB")
@@ -130,10 +130,10 @@ final class ChannelUITests: XCTestCase {
         app.buttons["Buses"].tap()
         open("Mon 1")
         app.buttons["Fed by"].tap()
-        XCTAssertTrue(app.otherElements["/ch/13/mix/01/level"].waitForExistence(timeout: 2))
-        XCTAssertEqual(app.otherElements["/ch/13/mix/01/level"].value as? String, "0.0 dB")
-        XCTAssertTrue(app.otherElements["/fxrtn/01/mix/01/level"].exists)
-        XCTAssertFalse(app.otherElements["/ch/20/mix/01/level"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["/ch/13/mix/01/level"].waitForExistence(timeout: 2))
+        XCTAssertEqual(app.descendants(matching: .any)["/ch/13/mix/01/level"].value as? String, "0.0 dB")
+        XCTAssertTrue(app.descendants(matching: .any)["/fxrtn/01/mix/01/level"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["/ch/20/mix/01/level"].exists)
         saveScreenshot("task-16-fedby")
     }
 }

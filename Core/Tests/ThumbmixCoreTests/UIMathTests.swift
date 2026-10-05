@@ -47,6 +47,27 @@ struct UIMathTests {
         #expect(ValueText.format(1, dynamics.release, locale: .testEnglish) == "4000 ms")
     }
 
+    @Test func voiceOverStepsADecibelOnFaders() {
+        let unity = ParamScale.fader.normalized(forValue: 0)
+        let up = RelativeDrag.stepped(unity, by: 1, scale: .fader)
+        #expect(abs(ParamScale.fader.value(fromNormalized: up) - 1) < 0.05)
+        let down = RelativeDrag.stepped(unity, by: -1, scale: .sendLevel)
+        #expect(abs(ParamScale.sendLevel.value(fromNormalized: down) + 1) < 0.05)
+    }
+
+    @Test func voiceOverStepsOneOptionOnChoices() {
+        let ratio = ParamScale.choice(Catalog.ratios)
+        #expect(RelativeDrag.stepped(Float(3) / 11, by: 1, scale: ratio) == Float(4) / 11)
+        #expect(RelativeDrag.stepped(0, by: -1, scale: .toggle) == 0)
+    }
+
+    @Test func voiceOverStepsAboutOnePercentElsewhere() {
+        let frequency = ParamScale.log(min: 20, max: 20_000, steps: 201)
+        #expect(RelativeDrag.stepped(0.5, by: 1, scale: frequency) == frequency.snap(0.51))
+        let knee = ParamScale.linear(min: 0, max: 5, step: 1)
+        #expect(RelativeDrag.stepped(0.4, by: 1, scale: knee) == 0.6)
+    }
+
     @Test func formatsForTheUsersLocale() {
         let dutch = Locale(identifier: "nl_NL")
         let band = Catalog.eqBand(StripID(.input, 1), 1)
