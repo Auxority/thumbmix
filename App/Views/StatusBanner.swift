@@ -25,3 +25,13 @@ struct StatusBanner: View {
             .background(color)
     }
 }
+
+#if DEBUG
+#Preview {
+    VStack(spacing: 0) {
+        StatusBanner(status: .connecting)
+        StatusBanner(status: .syncing(0.42))
+        StatusBanner(status: .lost)
+    }
+}
+#endif

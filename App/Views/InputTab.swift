@@ -49,3 +49,9 @@ private struct InputMeter: View {
             .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
     }
 }
+
+#if DEBUG
+#Preview {
+    InputTab(strip: StripID(.input, 14), mirror: .preview()).padding().background(Theme.background)
+}
+#endif

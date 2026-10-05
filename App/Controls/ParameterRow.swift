@@ -106,3 +106,15 @@ private struct MeterLine: View {
             .padding(.bottom, 2)
     }
 }
+
+#if DEBUG
+#Preview {
+    let mirror = ConsoleMirror.preview()
+    return VStack(spacing: 8) {
+        ParameterRow(spec: Catalog.fader(StripID(.input, 1)), mirror: mirror, accent: .red, height: 72, meter: mirror.meter(StripID(.input, 1)))
+        ParameterRow(spec: Catalog.gate(StripID(.input, 1)).threshold, mirror: mirror)
+    }
+    .padding()
+    .background(Theme.background)
+}
+#endif

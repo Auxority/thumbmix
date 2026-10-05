@@ -46,3 +46,17 @@ struct ChannelView: View {
         }
     }
 }
+
+#if DEBUG
+#Preview("Input") {
+    NavigationStack { ChannelView(strip: StripID(.input, 13), mirror: .preview()) }
+}
+
+#Preview("Bus") {
+    NavigationStack { ChannelView(strip: StripID(.bus, 1), mirror: .preview()) }
+}
+
+#Preview("DCA") {
+    NavigationStack { ChannelView(strip: StripID(.dca, 1), mirror: .preview()) }
+}
+#endif

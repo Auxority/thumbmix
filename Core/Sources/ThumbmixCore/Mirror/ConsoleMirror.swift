@@ -14,7 +14,7 @@ public enum MirrorStatus: Equatable, Sendable {
 /// out at most every 20 ms per address.
 @MainActor @Observable
 public final class ConsoleMirror {
-    public private(set) var status: MirrorStatus = .connecting
+    public internal(set) var status: MirrorStatus = .connecting
     public var isLive: Bool { status == .live }
 
     @ObservationIgnored private(set) var cells: [String: ParamCell] = [:]

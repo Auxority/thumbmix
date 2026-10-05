@@ -46,3 +46,14 @@ struct StripRow: View {
         MuteButton(strip: strip, mirror: mirror, height: 52)
     }
 }
+
+#if DEBUG
+#Preview {
+    let mirror = ConsoleMirror.preview()
+    return VStack(spacing: 6) {
+        ForEach(StripID.all(.input).prefix(4)) { StripRow(strip: $0, mirror: mirror) {} }
+    }
+    .padding(12)
+    .background(Theme.background)
+}
+#endif

@@ -90,7 +90,7 @@ struct ConsoleMirrorTests {
     }
 
     @Test func goesLiveWithoutAnUnansweredAddressAndIgnoresEditsToIt() async throws {
-        var state = FakeState.demo()
+        var state = DemoState.values()
         state["/ch/02/mix/fader"] = nil
         let fake = try FakeM32(state: state)
         let port = try await fake.start()

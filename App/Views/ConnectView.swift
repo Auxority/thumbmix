@@ -101,3 +101,9 @@ private struct ConsoleRow: View {
         .background(Theme.track, in: RoundedRectangle(cornerRadius: 12))
     }
 }
+
+#if DEBUG
+#Preview {
+    ConnectView(model: AppModel()).background(Theme.background)
+}
+#endif
