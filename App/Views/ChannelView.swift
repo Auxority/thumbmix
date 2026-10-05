@@ -41,7 +41,8 @@ struct ChannelView: View {
         case .gate: GateTab(strip: strip, mirror: mirror)
         case .comp: CompTab(strip: strip, mirror: mirror)
         case .eq: EQTab(strip: strip, mirror: mirror)
-        default: EmptyView()
+        case .sends: SendsTab(strip: strip, mirror: mirror)
+        case .fedBy: FedByTab(bus: strip, mirror: mirror)
         }
     }
 }
