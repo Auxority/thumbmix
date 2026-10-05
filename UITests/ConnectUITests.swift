@@ -6,6 +6,20 @@ final class ConnectUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    /// The decimal keypad shows the region's separator, so in the Netherlands it only types commas.
+    func testCommasFromADutchKeypadBecomeDots() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-lastConsoleHost", "", "-AppleLanguages", "(nl)", "-AppleLocale", "nl_NL"]
+        app.launch()
+
+        let field = app.textFields["console-ip"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("192,168,1,50")
+        XCTAssertEqual(field.value as? String, "192.168.1.50")
+        XCTAssertTrue(app.buttons["Connect"].isEnabled)
+    }
+
     func testRejectsInvalidAddress() {
         let app = XCUIApplication()
         app.launchArguments = ["-lastConsoleHost", ""] + fixedLocale

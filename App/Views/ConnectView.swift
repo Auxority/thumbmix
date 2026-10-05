@@ -23,6 +23,12 @@ struct ConnectView: View {
                     TextField("192.168.1.50", text: $address)
                         .accessibilityIdentifier("console-ip")
                         .keyboardType(.decimalPad)
+                        // The decimal pad offers the region's separator: a comma in the Netherlands.
+                        // An IP address never holds one, so a comma is always a dot the user meant.
+                        .onChange(of: address) { _, typed in
+                            let dotted = typed.replacingOccurrences(of: ",", with: ".")
+                            if dotted != typed { address = dotted }
+                        }
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
                         .font(.title3.monospacedDigit())
