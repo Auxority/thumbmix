@@ -1,0 +1,116 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "%@ is a %@. Thumbmix supports the Midas M32 only." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ is a %2$@. Thumbmix supports the Midas M32 only."
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "192.168.1.50" : {
+
+    },
+    "Band" : {
+
+    },
+    "Connect" : {
+
+    },
+    "Connecting…" : {
+
+    },
+    "Console IP" : {
+
+    },
+    "Disconnect" : {
+
+    },
+    "Disconnected — retrying" : {
+
+    },
+    "EQ curve" : {
+
+    },
+    "GR %@ dB" : {
+
+    },
+    "Hidden" : {
+
+    },
+    "Mute" : {
+
+    },
+    "No channels assigned to this DCA." : {
+
+    },
+    "No console answered. Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix." : {
+
+    },
+    "No preamp: this channel reads from an internal source." : {
+
+    },
+    "No reply from %@. Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix." : {
+
+    },
+    "Off" : {
+
+    },
+    "On" : {
+
+    },
+    "Scan this network" : {
+
+    },
+    "Scanning…" : {
+
+    },
+    "Section" : {
+
+    },
+    "Shared with %@" : {
+
+    },
+    "Show unused" : {
+
+    },
+    "Shown" : {
+
+    },
+    "Syncing %lld%%" : {
+
+    },
+    "the console" : {
+
+    },
+    "This phone has no Wi-Fi address. Join the console's Wi-Fi network, then scan again." : {
+
+    },
+    "Thumbmix" : {
+
+    },
+    "Unmute" : {
+
+    },
+    "Unused" : {
+
+    }
+  },
+  "version" : "1.0"
+}

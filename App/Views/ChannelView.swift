@@ -18,7 +18,7 @@ struct ChannelView: View {
             ChannelHeader(strip: strip, mirror: mirror)
             if !tabs.isEmpty {
                 Picker("Section", selection: $tab) {
-                    ForEach(tabs) { Text($0.rawValue).tag($0) }
+                    ForEach(tabs) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
             }

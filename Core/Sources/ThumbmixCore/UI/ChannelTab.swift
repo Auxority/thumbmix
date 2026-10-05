@@ -3,6 +3,11 @@ public enum ChannelTab: String, CaseIterable, Identifiable, Sendable {
 
     public var id: Self { self }
 
+    /// The catalog key; also the English title.
+    public var titleKey: String { rawValue }
+
+    public var title: String { CoreStrings.text(String.LocalizationValue(titleKey)) }
+
     public static func tabs(for kind: StripKind) -> [ChannelTab] {
         switch kind {
         case .input: [.input, .gate, .eq, .comp, .sends]

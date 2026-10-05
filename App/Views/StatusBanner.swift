@@ -17,7 +17,7 @@ struct StatusBanner: View {
         }
     }
 
-    private func banner(_ text: String, _ color: Color) -> some View {
+    private func banner(_ text: LocalizedStringKey, _ color: Color) -> some View {
         Text(text)
             .font(.subheadline.weight(.semibold))
             .frame(maxWidth: .infinity)

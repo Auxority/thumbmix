@@ -10,7 +10,7 @@ public enum ValueText {
             let option = options[Swift.min(Swift.max(Int(value), 0), options.count - 1)]
             return spec.unit == .ratio ? option + ":1" : option
         case .toggle:
-            return value >= 1 ? "On" : "Off"
+            return value >= 1 ? CoreStrings.text("On") : CoreStrings.text("Off")
         default:
             break
         }

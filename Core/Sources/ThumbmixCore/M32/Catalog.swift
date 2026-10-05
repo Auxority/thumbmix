@@ -12,29 +12,29 @@ public enum Catalog {
     private static let attack = ParamScale.linear(min: 0, max: 120, step: 1)
 
     public static func fader(_ strip: StripID) -> ParamSpec {
-        ParamSpec(strip.fader, "Fader", .fader, .decibels, reset: 0)
+        ParamSpec(strip.fader, CoreStrings.text("Fader"), .fader, .decibels, reset: 0)
     }
 
     /// `on` = 1 means the strip is live; mute is `on` = 0.
     public static func on(_ strip: StripID) -> ParamSpec {
-        ParamSpec(strip.on, "On", .toggle, .plain)
+        ParamSpec(strip.on, CoreStrings.text("On"), .toggle, .plain)
     }
 
     public static func pan(_ strip: StripID) -> ParamSpec? {
-        strip.pan.map { ParamSpec($0, "Pan", .linear(min: -100, max: 100, step: 2), .pan, reset: 0) }
+        strip.pan.map { ParamSpec($0, CoreStrings.text("Pan"), .linear(min: -100, max: 100, step: 2), .pan, reset: 0) }
     }
 
     public static func trim(_ strip: StripID) -> ParamSpec {
-        ParamSpec(strip.prefix + "/preamp/trim", "Trim", .linear(min: -18, max: 18, step: 0.25), .decibels, reset: 0)
+        ParamSpec(strip.prefix + "/preamp/trim", CoreStrings.text("Trim"), .linear(min: -18, max: 18, step: 0.25), .decibels, reset: 0)
     }
 
     /// No reset: a double-tap jumping preamp gain could cause feedback.
     public static func headampGain(_ index: Int) -> ParamSpec {
-        ParamSpec(headamp(index) + "/gain", "Gain", .linear(min: -12, max: 60, step: 0.5), .decibels)
+        ParamSpec(headamp(index) + "/gain", CoreStrings.text("Gain"), .linear(min: -12, max: 60, step: 0.5), .decibels)
     }
 
     public static func headampPhantom(_ index: Int) -> ParamSpec {
-        ParamSpec(headamp(index) + "/phantom", "48V", .toggle, .plain)
+        ParamSpec(headamp(index) + "/phantom", CoreStrings.text("48V"), .toggle, .plain)
     }
 
     /// The console answers which headamp (0-127) feeds input `n`, or -1 for internal sources (doc p.43).
@@ -47,42 +47,42 @@ public enum Catalog {
     public static func gate(_ strip: StripID) -> GateSpecs {
         let p = strip.prefix + "/gate/"
         return GateSpecs(
-            on: ParamSpec(p + "on", "Gate", .toggle, .plain),
-            mode: ParamSpec(p + "mode", "Mode", .choice(gateModes), .plain),
-            threshold: ParamSpec(p + "thr", "Threshold", .linear(min: -80, max: 0, step: 0.5), .decibels),
-            range: ParamSpec(p + "range", "Range", .linear(min: 3, max: 60, step: 1), .decibelAmount),
-            attack: ParamSpec(p + "attack", "Attack", attack, .milliseconds),
-            hold: ParamSpec(p + "hold", "Hold", hold, .milliseconds),
-            release: ParamSpec(p + "release", "Release", release, .milliseconds)
+            on: ParamSpec(p + "on", CoreStrings.text("Gate"), .toggle, .plain),
+            mode: ParamSpec(p + "mode", CoreStrings.text("Mode"), .choice(gateModes), .plain),
+            threshold: ParamSpec(p + "thr", CoreStrings.text("Threshold"), .linear(min: -80, max: 0, step: 0.5), .decibels),
+            range: ParamSpec(p + "range", CoreStrings.text("Range"), .linear(min: 3, max: 60, step: 1), .decibelAmount),
+            attack: ParamSpec(p + "attack", CoreStrings.text("Attack"), attack, .milliseconds),
+            hold: ParamSpec(p + "hold", CoreStrings.text("Hold"), hold, .milliseconds),
+            release: ParamSpec(p + "release", CoreStrings.text("Release"), release, .milliseconds)
         )
     }
 
     public static func dynamics(_ strip: StripID) -> DynamicsSpecs {
         let p = strip.prefix + "/dyn/"
         return DynamicsSpecs(
-            on: ParamSpec(p + "on", "Comp", .toggle, .plain),
-            threshold: ParamSpec(p + "thr", "Threshold", .linear(min: -60, max: 0, step: 0.5), .decibels),
-            ratio: ParamSpec(p + "ratio", "Ratio", .choice(ratios), .ratio),
-            knee: ParamSpec(p + "knee", "Knee", .linear(min: 0, max: 5, step: 1), .plain),
-            attack: ParamSpec(p + "attack", "Attack", attack, .milliseconds),
-            hold: ParamSpec(p + "hold", "Hold", hold, .milliseconds),
-            release: ParamSpec(p + "release", "Release", release, .milliseconds),
-            makeup: ParamSpec(p + "mgain", "Makeup", .linear(min: 0, max: 24, step: 0.5), .decibelAmount)
+            on: ParamSpec(p + "on", CoreStrings.text("Comp"), .toggle, .plain),
+            threshold: ParamSpec(p + "thr", CoreStrings.text("Threshold"), .linear(min: -60, max: 0, step: 0.5), .decibels),
+            ratio: ParamSpec(p + "ratio", CoreStrings.text("Ratio"), .choice(ratios), .ratio),
+            knee: ParamSpec(p + "knee", CoreStrings.text("Knee"), .linear(min: 0, max: 5, step: 1), .plain),
+            attack: ParamSpec(p + "attack", CoreStrings.text("Attack"), attack, .milliseconds),
+            hold: ParamSpec(p + "hold", CoreStrings.text("Hold"), hold, .milliseconds),
+            release: ParamSpec(p + "release", CoreStrings.text("Release"), release, .milliseconds),
+            makeup: ParamSpec(p + "mgain", CoreStrings.text("Makeup"), .linear(min: 0, max: 24, step: 0.5), .decibelAmount)
         )
     }
 
     public static func eqOn(_ strip: StripID) -> ParamSpec {
-        ParamSpec(strip.prefix + "/eq/on", "EQ", .toggle, .plain)
+        ParamSpec(strip.prefix + "/eq/on", CoreStrings.text("EQ"), .toggle, .plain)
     }
 
     public static func eqBand(_ strip: StripID, _ band: Int) -> EQBandSpecs {
         let p = strip.prefix + "/eq/\(band)/"
         let types = [.mainStereo, .mainMono].contains(strip.kind) ? mainEQTypes : eqTypes
         return EQBandSpecs(
-            type: ParamSpec(p + "type", "Type", .choice(types), .plain),
-            frequency: ParamSpec(p + "f", "Freq", .log(min: 20, max: 20_000, steps: 201), .hertz),
-            gain: ParamSpec(p + "g", "Gain", .linear(min: -15, max: 15, step: 0.25), .decibels, reset: 0),
-            q: ParamSpec(p + "q", "Q", .log(min: 10, max: 0.3, steps: 72), .plain)
+            type: ParamSpec(p + "type", CoreStrings.text("Type"), .choice(types), .plain),
+            frequency: ParamSpec(p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz),
+            gain: ParamSpec(p + "g", CoreStrings.text("Gain"), .linear(min: -15, max: 15, step: 0.25), .decibels, reset: 0),
+            q: ParamSpec(p + "q", CoreStrings.text("Q"), .log(min: 10, max: 0.3, steps: 72), .plain)
         )
     }
 

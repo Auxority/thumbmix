@@ -62,7 +62,7 @@ private struct GroupChips: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(StripGroup.allCases) { group in
-                    Button(group.rawValue) { selection = group }
+                    Button(group.title) { selection = group }
                         .font(.subheadline.weight(.semibold))
                         .padding(.horizontal, 14)
                         .frame(height: 36)
