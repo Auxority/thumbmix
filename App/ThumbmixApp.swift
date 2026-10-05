@@ -16,6 +16,7 @@ struct ThumbmixApp: App {
 
 struct RootView: View {
     let model: AppModel
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Group {
@@ -27,5 +28,8 @@ struct RootView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .task { model.connectToLastConsole() }
+        .onChange(of: scenePhase) { old, new in
+            if old == .background, new != .background { model.wake() }
+        }
     }
 }

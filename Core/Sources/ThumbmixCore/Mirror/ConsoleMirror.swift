@@ -24,6 +24,10 @@ public final class ConsoleMirror {
     @ObservationIgnored private var sync: InitialSync?
     @ObservationIgnored private var pendingSends: [String: OSCArgument] = [:]
     @ObservationIgnored private var heldUntil: [String: ContinuousClock.Instant] = [:]
+    @ObservationIgnored private var editing: Set<String> = []
+    @ObservationIgnored private var rereadAt: [String: ContinuousClock.Instant] = [:]
+    @ObservationIgnored private let auditAddresses: [String]
+    @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
     @ObservationIgnored private let log = Logger(subsystem: "thumbmix", category: "mirror")
 
@@ -31,9 +35,12 @@ public final class ConsoleMirror {
     static let editHold: Duration = .milliseconds(300)
     static let sendInterval: Duration = .milliseconds(20)
 
-    public init(link: ConsoleLink, addresses: [String] = Catalog.syncAddresses()) {
+    /// `auditAddresses` are re-read one per tick while live, so a push that never arrived (lost renewal,
+    /// console client limit) is corrected within seconds instead of showing a stale value as live.
+    public init(link: ConsoleLink, addresses: [String] = Catalog.syncAddresses(), auditAddresses: [String] = Catalog.auditAddresses()) {
         self.link = link
         self.addresses = addresses
+        self.auditAddresses = auditAddresses
         for address in addresses { cells[address] = ParamCell() }
         for kind in StripKind.allCases {
             for strip in StripID.all(kind) { meterCells[strip] = MeterCell() }
@@ -78,9 +85,31 @@ public final class ConsoleMirror {
             log.notice("edit ignored while \(String(describing: self.status), privacy: .public): \(address, privacy: .public)")
             return
         }
+        // Never act on a value the console never told us: a drag would start from a guess and jump the desk.
+        guard cell(address).argument != nil else {
+            log.notice("edit ignored for unread \(address, privacy: .public)")
+            return
+        }
         cell(address).argument = argument
         heldUntil[address] = .now + Self.editHold
         pendingSends[address] = argument
+    }
+
+    /// The user's finger owns a control from touch-down until shortly after release.
+    public func beginEdit(_ address: String) {
+        editing.insert(address)
+    }
+
+    /// Pushes ignored during the gesture are gone, so the value is read back once the hold ends.
+    public func endEdit(_ address: String) {
+        editing.remove(address)
+        let holdEnds = ContinuousClock.now + Self.editHold
+        heldUntil[address] = holdEnds
+        rereadAt[address] = holdEnds
+    }
+
+    public func wake() {
+        link.wake()
     }
 
     func apply(_ message: OSCMessage) {
@@ -88,13 +117,21 @@ public final class ConsoleMirror {
             applyMeters(message)
             return
         }
-        guard let cell = cells[message.address], let argument = message.arguments.first else { return }
+        guard let cell = cells[message.address], let argument = message.arguments.first.flatMap(Self.sanitised) else { return }
         if sync != nil {
             sync?.received(message.address)
             pumpSync()
         }
+        if editing.contains(message.address) { return }
         if let held = heldUntil[message.address], held > .now { return }
         cell.argument = argument
+    }
+
+    /// Every cell float is a 0...1 position; NaN or out-of-range values would crash or break the drawing.
+    private static func sanitised(_ argument: OSCArgument) -> OSCArgument? {
+        guard case let .float(value) = argument else { return argument }
+        guard value.isFinite else { return nil }
+        return .float(min(max(value, 0), 1))
     }
 
     private func applyMeters(_ message: OSCMessage) {
@@ -112,6 +149,23 @@ public final class ConsoleMirror {
         for (address, argument) in pendingSends { link.send(OSCMessage(address, [argument])) }
         pendingSends.removeAll()
         if sync != nil { pumpSync() }
+        guard isLive else { return }
+        sendDueRereads()
+        sendNextAudit()
+    }
+
+    private func sendDueRereads() {
+        let now = ContinuousClock.now
+        for (address, due) in rereadAt where due <= now {
+            rereadAt[address] = nil
+            link.send(OSCMessage(address))
+        }
+    }
+
+    private func sendNextAudit() {
+        guard !auditAddresses.isEmpty else { return }
+        link.send(OSCMessage(auditAddresses[auditIndex]))
+        auditIndex = (auditIndex + 1) % auditAddresses.count
     }
 
     private func linkChanged(_ state: LinkState) {

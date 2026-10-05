@@ -5,7 +5,8 @@ import Testing
 extension LinkTiming {
     static let fast = LinkTiming(
         identifyTimeout: .milliseconds(600), tick: .milliseconds(50),
-        renewEvery: .milliseconds(300), probeWhenQuietFor: .milliseconds(100), lostAfter: .milliseconds(300)
+        renewEvery: .milliseconds(300), probeWhenQuietFor: .milliseconds(100), lostAfter: .milliseconds(300),
+        restartAfterLost: .milliseconds(300)
     )
 }
 
@@ -75,5 +76,42 @@ struct ConsoleLinkTests {
 
         #expect(await eventually { received.contains(OSCMessage("/ch/03/mix/on", [.int(0)])) })
         #expect(!received.contains { $0.address == "/info" })
+    }
+
+    @Test func twoRenewalsFitInsideTheConsoleExpiry() {
+        // /xremote and /meters expire after 10 s; one lost renewal must not lapse them.
+        #expect(LinkTiming.console.renewEvery * 2 < .seconds(10))
+    }
+
+    @Test func stayingLostRebuildsTheSocket() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
+        defer { link.stop() }
+        link.start()
+        #expect(await eventually { if case .live = link.state { true } else { false } })
+
+        fake.silent = true
+        #expect(await eventually { link.state == .lost })
+        #expect(await eventually { link.transportGeneration > 0 })
+
+        fake.silent = false
+        #expect(await eventually { if case .live = link.state { true } else { false } })
+    }
+
+    @Test func wakeMarksLostUntilTheConsoleAnswersAgain() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
+        defer { link.stop() }
+        link.start()
+        #expect(await eventually { if case .live = link.state { true } else { false } })
+        let generation = link.transportGeneration
+
+        link.wake()
+
+        #expect(link.state == .lost)
+        #expect(link.transportGeneration == generation + 1)
+        #expect(await eventually { if case .live = link.state { true } else { false } })
     }
 }

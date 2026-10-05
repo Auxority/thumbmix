@@ -101,12 +101,16 @@ struct EQGraph: View {
                 if !isDragging {
                     isDragging = true
                     draggedBand = nearestBand(to: value.startLocation, in: size)
-                    if let draggedBand { selectedBand = draggedBand }
+                    if let draggedBand {
+                        selectedBand = draggedBand
+                        pointAddresses(of: draggedBand).forEach(mirror.beginEdit)
+                    }
                 }
                 guard let draggedBand else { return }
                 move(band: draggedBand, to: value.location, in: size)
             }
             .onEnded { _ in
+                if let draggedBand { pointAddresses(of: draggedBand).forEach(mirror.endEdit) }
                 isDragging = false
                 draggedBand = nil
             }
@@ -116,12 +120,24 @@ struct EQGraph: View {
         MagnifyGesture()
             .onChanged { value in
                 let q = Catalog.eqBand(strip, selectedBand).q
-                if pinchStartQ == nil { pinchStartQ = mirror.normalized(q) ?? 0.5 }
+                if pinchStartQ == nil {
+                    guard let current = mirror.normalized(q) else { return }
+                    pinchStartQ = current
+                    mirror.beginEdit(q.address)
+                }
                 // Spreading the fingers widens the band; on the M32's Q scale, wider is a higher position.
                 let next = (pinchStartQ ?? 0.5) + Float(log2(value.magnification)) * 0.25
                 mirror.set(q.address, q.scale.argument(fromNormalized: next))
             }
-            .onEnded { _ in pinchStartQ = nil }
+            .onEnded { _ in
+                if pinchStartQ != nil { mirror.endEdit(Catalog.eqBand(strip, selectedBand).q.address) }
+                pinchStartQ = nil
+            }
+    }
+
+    private func pointAddresses(of band: Int) -> [String] {
+        let specs = Catalog.eqBand(strip, band)
+        return [specs.frequency.address, specs.gain.address]
     }
 
     /// Only a touch near a point grabs it, so a stray touch on the graph changes nothing.

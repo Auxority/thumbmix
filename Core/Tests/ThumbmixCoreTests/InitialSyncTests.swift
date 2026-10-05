@@ -29,6 +29,19 @@ struct InitialSyncTests {
         #expect(sync.progress == 0.5)
     }
 
+    @Test func defaultRetriesOutlastAShortWiFiDrop() {
+        let sync = InitialSync(addresses: ["/a"])
+        var now = ContinuousClock.now
+        _ = sync.due(now: now)
+        for _ in 1...5 {
+            now += .milliseconds(400)
+            #expect(sync.due(now: now) == ["/a"])
+        }
+        sync.received("/a")
+        #expect(sync.isDone)
+        #expect(sync.missing.isEmpty)
+    }
+
     @Test func ignoresRepliesNotAskedFor() {
         let sync = InitialSync(addresses: ["/a"], window: 8, timeout: .milliseconds(300), maxTries: 3)
         sync.received("/zzz")

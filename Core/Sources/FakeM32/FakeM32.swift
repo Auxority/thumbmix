@@ -22,6 +22,7 @@ public final class FakeM32: @unchecked Sendable {
     private var startContinuation: CheckedContinuation<UInt16, Error>?
     private var modelStorage: String
     private var isSilent = false
+    private var isIgnoringXremote = false
     private var getsToDrop = 0
     private var sets: [OSCMessage] = []
 
@@ -67,6 +68,12 @@ public final class FakeM32: @unchecked Sendable {
     public var silent: Bool {
         get { queue.sync { isSilent } }
         set { queue.sync { isSilent = newValue } }
+    }
+
+    /// Like a console that already has its maximum of `/xremote` clients: no pushes for this client.
+    public var ignoresXremote: Bool {
+        get { queue.sync { isIgnoringXremote } }
+        set { queue.sync { isIgnoringXremote = newValue } }
     }
 
     public func dropNextGets(_ count: Int) { queue.sync { getsToDrop = count } }
@@ -120,6 +127,7 @@ public final class FakeM32: @unchecked Sendable {
         case "/info":
             send(OSCMessage("/info", [.string("V2.07"), .string("osc-server"), .string(modelStorage), .string("4.06")]), to: client)
         case "/xremote":
+            guard !isIgnoringXremote else { return }
             client.remoteUntil = Date().addingTimeInterval(10)
         case "/meters":
             guard case var .string(bank)? = message.arguments.first else { return }

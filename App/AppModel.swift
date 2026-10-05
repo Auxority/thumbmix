@@ -30,6 +30,11 @@ final class AppModel {
         connect(to: lastHost)
     }
 
+    /// Coming back from the background: anything could have changed on the desk meanwhile.
+    func wake() {
+        mirror?.wake()
+    }
+
     func disconnect() {
         mirror?.stop()
         mirror = nil
