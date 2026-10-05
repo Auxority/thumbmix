@@ -70,13 +70,13 @@ public struct StripID: Hashable, Sendable, Identifiable {
 
     public var defaultName: String {
         switch kind {
-        case .input: "Ch \(number)"
-        case .auxIn: "Aux \(number)"
-        case .fxReturn: "FX \(number)"
-        case .bus: "Bus \(number)"
-        case .mainStereo: "Main LR"
-        case .mainMono: "Main M"
-        case .dca: "DCA \(number)"
+        case .input: CoreStrings.text("Ch \(number)")
+        case .auxIn: CoreStrings.text("Aux \(number)")
+        case .fxReturn: CoreStrings.text("FX \(number)")
+        case .bus: CoreStrings.text("Bus \(number)")
+        case .mainStereo: CoreStrings.text("Main LR")
+        case .mainMono: CoreStrings.text("Main M")
+        case .dca: CoreStrings.text("DCA \(number)")
         }
     }
 

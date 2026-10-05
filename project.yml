@@ -4,6 +4,7 @@ options:
   deploymentTarget:
     iOS: "17.0"
   createIntermediateGroups: true
+  developmentLanguage: en
 packages:
   ThumbmixCore:
     path: Core
@@ -13,6 +14,8 @@ settings:
     TARGETED_DEVICE_FAMILY: "1"
     CODE_SIGN_IDENTITY: "-"
     CODE_SIGN_STYLE: Manual
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
 targets:
   Thumbmix:
     type: application

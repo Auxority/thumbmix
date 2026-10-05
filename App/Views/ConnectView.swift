@@ -75,12 +75,12 @@ struct ConnectView: View {
 
     /// iOS reports a denied Local Network permission as plain silence, so "no reply" names both causes.
     private func message(for failure: LinkFailure) -> String {
-        let host = model.host ?? "the console"
+        let host = model.host ?? String(localized: "the console")
         switch failure {
         case .noReply:
-            return "No reply from \(host). Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix."
+            return String(localized: "No reply from \(host). Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix.")
         case let .notAnM32(consoleModel):
-            return "\(host) is a \(consoleModel). Thumbmix supports the Midas M32 only."
+            return String(localized: "\(host) is a \(consoleModel). Thumbmix supports the Midas M32 only.")
         }
     }
 }

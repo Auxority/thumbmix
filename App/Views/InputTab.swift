@@ -30,8 +30,8 @@ struct InputTab: View {
     @ViewBuilder private var sharedWarning: some View {
         let sharing = mirror.inputsSharingHeadamp(withInput: strip.number)
         if !sharing.isEmpty {
-            Label("Shared with " + sharing.map { mirror.name(StripID(.input, $0)) }.joined(separator: ", "),
-                  systemImage: "exclamationmark.triangle.fill")
+            let names = sharing.map { mirror.name(StripID(.input, $0)) }.formatted(.list(type: .and))
+            Label("Shared with \(names)", systemImage: "exclamationmark.triangle.fill")
                 .labelStyle(.titleOnly)
                 .font(.callout)
                 .foregroundStyle(.yellow)
