@@ -16,6 +16,9 @@ concurrency:
 
 jobs:
   release:
+    # Lint and tests are not repeated here: main only takes PRs whose CI `check` passed on an up-to-date branch
+    # (branch protection, admins included). A manual run from another branch would skip that gate, so refuse it.
+    if: github.ref == 'refs/heads/main'
     # Same Xcode build (27.0, 27A266a) as the development Mac, so CI compiles what the local tests proved.
     # `xcode-27` is a GitHub preview image (runner-images#14404); fall back to `macos-26` (Xcode 26.6) if it misbehaves.
     runs-on: xcode-27
@@ -31,14 +34,8 @@ jobs:
           xcodebuild -version
           swift --version
 
-      - name: Install XcodeGen and SwiftLint
-        run: brew install xcodegen swiftlint
-
-      - name: Lint
-        run: scripts/lint.sh
-
-      - name: Test Core
-        run: swift test --package-path Core
+      - name: Install XcodeGen
+        run: brew install xcodegen
 
       - name: Build unsigned IPA
         run: scripts/build-ipa.sh
