@@ -40,6 +40,7 @@ struct ChannelView: View {
         case .members: MembersTab(dca: strip.number, mirror: mirror)
         case .gate: GateTab(strip: strip, mirror: mirror)
         case .comp: CompTab(strip: strip, mirror: mirror)
+        case .eq: EQTab(strip: strip, mirror: mirror)
         default: EmptyView()
         }
     }
