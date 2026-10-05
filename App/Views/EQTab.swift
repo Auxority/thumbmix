@@ -174,3 +174,9 @@ private struct BandPoint: View {
             .overlay(Text("\(number)").font(.caption.bold()).foregroundStyle(isSelected ? .black : .white))
     }
 }
+
+#if DEBUG
+#Preview {
+    EQTab(strip: StripID(.input, 1), mirror: .preview()).padding().background(Theme.background)
+}
+#endif

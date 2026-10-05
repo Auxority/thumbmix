@@ -26,7 +26,7 @@ public final class FakeM32: @unchecked Sendable {
     private var getsToDrop = 0
     private var sets: [OSCMessage] = []
 
-    public init(port: UInt16 = 0, model: String = "M32", state: [String: OSCArgument] = FakeState.demo()) throws {
+    public init(port: UInt16 = 0, model: String = "M32", state: [String: OSCArgument] = DemoState.values()) throws {
         let parameters = NWParameters.udp
         parameters.requiredLocalEndpoint = .hostPort(host: "127.0.0.1", port: NWEndpoint.Port(rawValue: port) ?? .any)
         parameters.allowLocalEndpointReuse = true

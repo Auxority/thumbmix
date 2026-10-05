@@ -55,3 +55,13 @@ struct SendRow: View {
         }
     }
 }
+
+#if DEBUG
+#Preview("Sends") {
+    SendsTab(strip: StripID(.input, 13), mirror: .preview()).padding().background(Theme.background)
+}
+
+#Preview("Fed by") {
+    FedByTab(bus: StripID(.bus, 1), mirror: .preview()).padding().background(Theme.background)
+}
+#endif

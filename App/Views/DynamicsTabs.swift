@@ -67,3 +67,13 @@ private struct DynamicsMeter: View {
         .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
     }
 }
+
+#if DEBUG
+#Preview("Gate") {
+    GateTab(strip: StripID(.input, 1), mirror: .preview()).padding().background(Theme.background)
+}
+
+#Preview("Comp") {
+    CompTab(strip: StripID(.input, 1), mirror: .preview()).padding().background(Theme.background)
+}
+#endif

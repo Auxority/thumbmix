@@ -29,3 +29,9 @@ struct MembersTab: View {
         }
     }
 }
+
+#if DEBUG
+#Preview {
+    MembersTab(dca: 1, mirror: .preview()).padding().background(Theme.background)
+}
+#endif
