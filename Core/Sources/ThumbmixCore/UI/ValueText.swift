@@ -1,7 +1,8 @@
 import Foundation
 
+/// Values as the engineer reads them, in the phone's locale (decimal comma on a Dutch phone).
 public enum ValueText {
-    public static func format(_ normalized: Float?, _ spec: ParamSpec) -> String {
+    public static func format(_ normalized: Float?, _ spec: ParamSpec, locale: Locale = .current) -> String {
         guard let normalized else { return "—" }
         let value = spec.scale.value(fromNormalized: normalized)
         switch spec.scale {
@@ -14,30 +15,36 @@ public enum ValueText {
             break
         }
         switch spec.unit {
-        case .decibels: return decibels(value)
-        case .decibelAmount: return String(format: "%.1f dB", value)
-        case .hertz: return value < 1000 ? String(format: "%.0f Hz", value) : String(format: "%.2f kHz", value / 1000)
-        case .milliseconds: return milliseconds(value)
-        case .percent: return String(format: "%.0f%%", value)
+        case .decibels: return decibels(value, locale: locale)
+        case .decibelAmount: return number(value, digits: 1, locale) + " dB"
+        case .hertz: return value < 1000 ? number(value, digits: 0, locale) + " Hz" : number(value / 1000, digits: 2, locale) + " kHz"
+        case .milliseconds: return milliseconds(value, locale)
+        case .percent: return number(value, digits: 0, locale) + "%"
         case .pan: return pan(value)
-        case .ratio, .plain: return String(format: "%.1f", value)
+        case .ratio, .plain: return number(value, digits: 1, locale)
         }
     }
 
     /// Rounds before choosing the sign so the console's 0 dB (stored as -0.0098) never reads "−0.0".
-    public static func decibels(_ value: Double) -> String {
+    public static func decibels(_ value: Double, locale: Locale = .current) -> String {
         guard value.isFinite else { return "−∞ dB" }
         let rounded = (value * 10).rounded() / 10
-        guard rounded != 0 else { return "0.0 dB" }
-        return (rounded > 0 ? "+" : "−") + String(format: "%.1f dB", abs(rounded))
+        guard rounded != 0 else { return number(0, digits: 1, locale) + " dB" }
+        return (rounded > 0 ? "+" : "−") + number(abs(rounded), digits: 1, locale) + " dB"
     }
 
-    private static func milliseconds(_ value: Double) -> String {
-        switch value {
-        case ..<10: String(format: "%.2f ms", value)
-        case ..<100: String(format: "%.1f ms", value)
-        default: String(format: "%.0f ms", value)
+    /// No thousands separator: "4000 ms" reads better on a fader than "4,000 ms" or "4.000 ms".
+    public static func number(_ value: Double, digits: Int, _ locale: Locale = .current) -> String {
+        value.formatted(.number.precision(.fractionLength(digits)).grouping(.never).locale(locale))
+    }
+
+    private static func milliseconds(_ value: Double, _ locale: Locale) -> String {
+        let digits = switch value {
+        case ..<10: 2
+        case ..<100: 1
+        default: 0
         }
+        return number(value, digits: digits, locale) + " ms"
     }
 
     private static func pan(_ value: Double) -> String {

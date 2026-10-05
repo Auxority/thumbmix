@@ -7,9 +7,9 @@ import Testing
 struct DecibelAmountTests {
     @Test func amountsReadWithoutASign() {
         let strip = StripID(.input, 1)
-        #expect(ValueText.format(0.5, Catalog.gate(strip).range) == "31.5 dB")
-        #expect(ValueText.format(0.5, Catalog.dynamics(strip).makeup) == "12.0 dB")
-        #expect(ValueText.format(1, Catalog.trim(strip)) == "+18.0 dB")
+        #expect(ValueText.format(0.5, Catalog.gate(strip).range, locale: .testEnglish) == "31.5 dB")
+        #expect(ValueText.format(0.5, Catalog.dynamics(strip).makeup, locale: .testEnglish) == "12.0 dB")
+        #expect(ValueText.format(1, Catalog.trim(strip), locale: .testEnglish) == "+18.0 dB")
     }
 }
 
