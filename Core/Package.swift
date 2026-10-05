@@ -9,6 +9,8 @@ let package = Package(
     ],
     targets: [
         .target(name: "ThumbmixCore"),
-        .testTarget(name: "ThumbmixCoreTests", dependencies: ["ThumbmixCore"]),
+        .target(name: "FakeM32", dependencies: ["ThumbmixCore"]),
+        .executableTarget(name: "fake-m32", dependencies: ["FakeM32"]),
+        .testTarget(name: "ThumbmixCoreTests", dependencies: ["ThumbmixCore", "FakeM32"]),
     ]
 )
