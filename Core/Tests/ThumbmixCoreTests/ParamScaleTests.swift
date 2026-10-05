@@ -1,8 +1,11 @@
 import Testing
+
 @testable import ThumbmixCore
 
 struct ParamScaleTests {
-    @Test(arguments: [(0.75, 0.0), (0.825, 3.0), (0.5, -10.0), (0.25, -30.0), (0.0625, -60.0), (1.0, 10.0)])
+    @Test(arguments: [
+        (0.75, 0.0), (0.825, 3.0), (0.5, -10.0), (0.25, -30.0), (0.0625, -60.0), (1.0, 10.0),
+    ])
     func faderLawMatchesDocBreakpoints(wire: Double, decibels: Double) {
         #expect(abs(FaderLaw.decibels(fromWire: wire) - decibels) < 0.001)
         #expect(abs(FaderLaw.wire(fromDecibels: decibels) - wire) < 0.0001)
@@ -48,7 +51,9 @@ struct ParamScaleTests {
     }
 
     @Test func choiceTravelsAsInt() {
-        let ratio = ParamScale.choice(["1.1", "1.3", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "7.0", "10", "20", "100"])
+        let ratio = ParamScale.choice([
+            "1.1", "1.3", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "7.0", "10", "20", "100",
+        ])
         #expect(ratio.argument(fromNormalized: Float(3) / 11) == .int(3))
         #expect(ratio.normalized(from: .int(3)) == Float(3) / 11)
         #expect(ratio.value(fromNormalized: Float(3) / 11) == 3)

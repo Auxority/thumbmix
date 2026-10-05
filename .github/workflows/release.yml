@@ -34,6 +34,9 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
+      - name: Lint
+        run: scripts/lint.sh
+
       - name: Test Core
         run: swift test --package-path Core
 

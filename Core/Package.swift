@@ -6,7 +6,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v17), .macOS(.v14)],
     products: [
-        .library(name: "ThumbmixCore", targets: ["ThumbmixCore"]),
+        .library(name: "ThumbmixCore", targets: ["ThumbmixCore"])
     ],
     targets: [
         .target(name: "ThumbmixCore", resources: [.process("Resources")]),

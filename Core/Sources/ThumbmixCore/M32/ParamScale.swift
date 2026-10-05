@@ -13,9 +13,9 @@ public enum ParamScale: Equatable, Sendable {
         switch self {
         case .fader: 1024
         case .sendLevel: 161
-        case let .linear(low, high, step): Int(((high - low) / step).rounded()) + 1
-        case let .log(_, _, steps): steps
-        case let .choice(options): options.count
+        case .linear(let low, let high, let step): Int(((high - low) / step).rounded()) + 1
+        case .log(_, _, let steps): steps
+        case .choice(let options): options.count
         case .toggle: 2
         }
     }
@@ -31,8 +31,8 @@ public enum ParamScale: Equatable, Sendable {
         let position = Double(Swift.min(Swift.max(normalized, 0), 1))
         switch self {
         case .fader, .sendLevel: return FaderLaw.decibels(fromWire: position)
-        case let .linear(low, high, _): return low + position * (high - low)
-        case let .log(low, high, _): return low * pow(high / low, position)
+        case .linear(let low, let high, _): return low + position * (high - low)
+        case .log(let low, let high, _): return low * pow(high / low, position)
         case .choice, .toggle: return (position * Double(steps - 1)).rounded()
         }
     }
@@ -41,8 +41,9 @@ public enum ParamScale: Equatable, Sendable {
         let position: Double
         switch self {
         case .fader, .sendLevel: position = FaderLaw.wire(fromDecibels: value)
-        case let .linear(low, high, _): position = (value - low) / (high - low)
-        case let .log(low, high, _): position = Foundation.log(value / low) / Foundation.log(high / low)
+        case .linear(let low, let high, _): position = (value - low) / (high - low)
+        case .log(let low, let high, _):
+            position = Foundation.log(value / low) / Foundation.log(high / low)
         case .choice, .toggle: position = value / Double(steps - 1)
         }
         return snap(Float(position))

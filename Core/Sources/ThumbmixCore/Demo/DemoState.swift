@@ -3,7 +3,8 @@
 public enum DemoState {
     private static let band: [(String, Int32)] = [
         ("Kick", 1), ("Snare", 1), ("Hi-hat", 1), ("Tom 1", 1), ("Tom 2", 1), ("OH L", 1), ("OH R", 1),
-        ("Bass", 4), ("Gtr L", 3), ("Gtr R", 3), ("Keys L", 2), ("Keys R", 2), ("Vox 1", 5), ("Vox 2", 5),
+        ("Bass", 4), ("Gtr L", 3), ("Gtr R", 3), ("Keys L", 2), ("Keys R", 2), ("Vox 1", 5),
+        ("Vox 2", 5),
     ]
 
     public static func values() -> [String: OSCArgument] {
@@ -30,7 +31,9 @@ public enum DemoState {
             state[strip.name] = .string("Mon \(bus)")
             state[strip.color] = .int(6)
             state[strip.fader] = unity
-            for vox in [13, 14] { state[Catalog.sendLevel(from: StripID(.input, vox), toBus: bus).address] = .float(0.75) }
+            for vox in [13, 14] {
+                state[Catalog.sendLevel(from: StripID(.input, vox), toBus: bus).address] = .float(0.75)
+            }
         }
         for (number, name) in [(1, "Rev L"), (2, "Rev R")] {
             let strip = StripID(.fxReturn, number)

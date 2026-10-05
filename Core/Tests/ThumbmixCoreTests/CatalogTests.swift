@@ -1,4 +1,5 @@
 import Testing
+
 @testable import ThumbmixCore
 
 struct CatalogTests {
@@ -41,9 +42,11 @@ struct CatalogTests {
     }
 
     @Test func mainEQHasExtraTypes() {
-        guard case let .choice(main) = Catalog.eqBand(StripID(.mainStereo), 1).type.scale,
-              case let .choice(bus) = Catalog.eqBand(StripID(.bus, 1), 1).type.scale else {
-            Issue.record("EQ type must be a choice"); return
+        guard case .choice(let main) = Catalog.eqBand(StripID(.mainStereo), 1).type.scale,
+            case .choice(let bus) = Catalog.eqBand(StripID(.bus, 1), 1).type.scale
+        else {
+            Issue.record("EQ type must be a choice")
+            return
         }
         #expect(main.count == 14)
         #expect(bus.count == 6)

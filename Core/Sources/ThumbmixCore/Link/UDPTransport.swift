@@ -28,9 +28,11 @@ public final class UDPTransport: @unchecked Sendable {
     }
 
     public func send(_ message: OSCMessage) {
-        connection.send(content: OSCCodec.encode(message), completion: .contentProcessed { [log] error in
-            if let error { log.error("send failed: \(error.localizedDescription, privacy: .public)") }
-        })
+        connection.send(
+            content: OSCCodec.encode(message),
+            completion: .contentProcessed { [log] error in
+                if let error { log.error("send failed: \(error.localizedDescription, privacy: .public)") }
+            })
     }
 
     public func cancel() {
@@ -42,8 +44,9 @@ public final class UDPTransport: @unchecked Sendable {
         connection.receiveMessage { [weak self] data, _, _, error in
             guard let self else { return }
             if let data {
-                do { continuation.yield(try OSCCodec.decode(data)) }
-                catch { log.debug("dropped malformed packet: \(String(describing: error), privacy: .public)") }
+                do { continuation.yield(try OSCCodec.decode(data)) } catch {
+                    log.debug("dropped malformed packet: \(String(describing: error), privacy: .public)")
+                }
             }
             if let error {
                 log.error("receive stopped: \(error.localizedDescription, privacy: .public)")

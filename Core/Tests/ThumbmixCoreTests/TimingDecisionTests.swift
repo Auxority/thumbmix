@@ -1,4 +1,5 @@
 import Testing
+
 @testable import ThumbmixCore
 
 /// Timing decisions driven with explicit instants: no sleeping, no dependence on runner speed.
@@ -11,7 +12,9 @@ struct LinkSupervisorTests {
 
     @Test func freshLinkDoesNothing() {
         var supervisor = supervisor()
-        #expect(supervisor.tick(now: start + .milliseconds(500), isLive: true, isLost: false) == LinkSupervisor.Actions())
+        #expect(
+            supervisor.tick(now: start + .milliseconds(500), isLive: true, isLost: false)
+                == LinkSupervisor.Actions())
     }
 
     @Test func quietConsoleIsProbedBeforeItIsLost() {
@@ -29,7 +32,8 @@ struct LinkSupervisorTests {
     @Test func hearingTheConsoleKeepsItLive() {
         var supervisor = supervisor()
         supervisor.heard(at: start + .seconds(2))
-        #expect(!supervisor.tick(now: start + .milliseconds(3100), isLive: true, isLost: false).markLost)
+        #expect(
+            !supervisor.tick(now: start + .milliseconds(3100), isLive: true, isLost: false).markLost)
     }
 
     @Test func stayingLostRebuildsTheSocketAfterTheInterval() {

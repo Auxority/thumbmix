@@ -1,5 +1,6 @@
 import FakeM32
 import Testing
+
 @testable import ThumbmixCore
 
 struct DiscoveryTests {
@@ -19,7 +20,9 @@ struct DiscoveryTests {
         #expect(Discovery.isUsableIPv4(host))
     }
 
-    @Test(arguments: ["", "192.168.1", "192.168.1.300", "m32.local", "1.2.3.4; rm"]) func invalidIPv4(_ host: String) {
+    @Test(arguments: ["", "192.168.1", "192.168.1.300", "m32.local", "1.2.3.4; rm"]) func invalidIPv4(
+        _ host: String
+    ) {
         #expect(!Discovery.isUsableIPv4(host))
     }
 

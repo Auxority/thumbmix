@@ -1,6 +1,7 @@
 import FakeM32
 import Foundation
 import Testing
+
 @testable import ThumbmixCore
 
 @MainActor
@@ -52,7 +53,10 @@ struct TransportTests {
         transport.send(OSCMessage("/meters", [.string("/meters/1")]))
 
         let reply = await recorder.wait(for: "/meters/1")
-        guard case let .blob(blob)? = reply?.arguments.first else { Issue.record("no meter blob"); return }
+        guard case .blob(let blob)? = reply?.arguments.first else {
+            Issue.record("no meter blob")
+            return
+        }
         #expect(MeterBlob.floats(from: blob).count == 96)
     }
 }

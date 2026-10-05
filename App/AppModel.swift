@@ -9,7 +9,7 @@ final class AppModel {
     private static let lastHostKey = "lastConsoleHost"
 
     var failure: LinkFailure? {
-        guard case let .failed(failure)? = mirror?.status else { return nil }
+        guard case .failed(let failure)? = mirror?.status else { return nil }
         return failure
     }
 

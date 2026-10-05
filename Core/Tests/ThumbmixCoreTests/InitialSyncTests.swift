@@ -1,10 +1,12 @@
 import Testing
+
 @testable import ThumbmixCore
 
 @MainActor
 struct InitialSyncTests {
     @Test func keepsAWindowInFlight() {
-        let sync = InitialSync(addresses: ["/a", "/b", "/c"], window: 2, timeout: .milliseconds(300), maxTries: 3)
+        let sync = InitialSync(
+            addresses: ["/a", "/b", "/c"], window: 2, timeout: .milliseconds(300), maxTries: 3)
         let now = ContinuousClock.now
         #expect(sync.due(now: now) == ["/a", "/b"])
         sync.received("/a")
@@ -23,7 +25,8 @@ struct InitialSyncTests {
     }
 
     @Test func progressCountsAnswered() {
-        let sync = InitialSync(addresses: ["/a", "/b"], window: 8, timeout: .milliseconds(300), maxTries: 3)
+        let sync = InitialSync(
+            addresses: ["/a", "/b"], window: 8, timeout: .milliseconds(300), maxTries: 3)
         _ = sync.due(now: .now)
         sync.received("/a")
         #expect(sync.progress == 0.5)

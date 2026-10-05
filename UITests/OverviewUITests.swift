@@ -23,7 +23,9 @@ final class OverviewUITests: XCTestCase {
         let before = fader.value as? String
 
         fader.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5))
-            .press(forDuration: 0.05, thenDragTo: fader.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5)))
+            .press(
+                forDuration: 0.05,
+                thenDragTo: fader.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5)))
 
         XCTAssertNotEqual(fader.value as? String, before)
     }
@@ -56,7 +58,9 @@ final class OverviewUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 2))
 
         row.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5))
-            .press(forDuration: 0.05, thenDragTo: row.coordinate(withNormalizedOffset: CGVector(dx: 0.0, dy: 0.5)))
+            .press(
+                forDuration: 0.05,
+                thenDragTo: row.coordinate(withNormalizedOffset: CGVector(dx: 0.0, dy: 0.5)))
 
         XCTAssertTrue(app.buttons["Ch 17"].exists)
         XCTAssertEqual(row.value as? String, "−∞ dB")
@@ -64,8 +68,11 @@ final class OverviewUITests: XCTestCase {
 
     func testRowsGrowWithLargerText() {
         app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", "127.0.0.1",
-                               "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityL"] + fixedLocale
+        app.launchArguments =
+            [
+                "-lastConsoleHost", "127.0.0.1",
+                "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityL",
+            ] + fixedLocale
         app.launch()
         XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
 

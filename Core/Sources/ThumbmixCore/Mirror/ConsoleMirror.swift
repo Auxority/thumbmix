@@ -35,7 +35,10 @@ public final class ConsoleMirror {
 
     /// `auditAddresses` are re-read one per tick while live, so a push that never arrived (lost renewal,
     /// console client limit) is corrected within seconds instead of showing a stale value as live.
-    public init(link: ConsoleLink, addresses: [String] = Catalog.syncAddresses(), auditAddresses: [String] = Catalog.auditAddresses()) {
+    public init(
+        link: ConsoleLink, addresses: [String] = Catalog.syncAddresses(),
+        auditAddresses: [String] = Catalog.auditAddresses()
+    ) {
         self.link = link
         self.addresses = addresses
         self.auditAddresses = auditAddresses
@@ -44,7 +47,8 @@ public final class ConsoleMirror {
             for strip in StripID.all(kind) { meterCells[strip] = MeterCell() }
         }
         // The doc doesn't say preamp routing is pushed, so it is re-read with every renewal.
-        link.renewals = [OSCMessage("/xremote")] + MeterBanks.subscriptions
+        link.renewals =
+            [OSCMessage("/xremote")] + MeterBanks.subscriptions
             + Catalog.headampIndexAddresses.map { OSCMessage($0) }
         link.onMessage = { [weak self] in self?.apply($0) }
         link.onState = { [weak self] in self?.linkChanged($0) }
@@ -52,20 +56,21 @@ public final class ConsoleMirror {
 
     public func start() {
         link.start()
-        tasks.append(Task { [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: Self.sendInterval)
-                guard let self else { return }
-                self.tick()
-            }
-        })
+        tasks.append(
+            Task { [weak self] in
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: Self.sendInterval)
+                    guard let self else { return }
+                    self.tick()
+                }
+            })
     }
 
     /// True while the send loop and link run; tests read it.
     var isRunning: Bool { !tasks.isEmpty }
 
     public func stop() {
-        tasks.forEach { $0.cancel() }
+        for task in tasks { task.cancel() }
         tasks = []
         link.stop()
     }
@@ -84,7 +89,9 @@ public final class ConsoleMirror {
 
     public func set(_ address: String, _ argument: OSCArgument) {
         guard isLive else {
-            log.notice("edit ignored while \(String(describing: self.status), privacy: .public): \(address, privacy: .public)")
+            log.notice(
+                "edit ignored while \(String(describing: self.status), privacy: .public): \(address, privacy: .public)"
+            )
             return
         }
         // Never act on a value the console never told us: a drag would start from a guess and jump the desk.
@@ -115,7 +122,9 @@ public final class ConsoleMirror {
             applyMeters(message)
             return
         }
-        guard let cell = cells[message.address], let argument = message.arguments.first.flatMap(Self.sanitised) else { return }
+        guard let cell = cells[message.address],
+            let argument = message.arguments.first.flatMap(Self.sanitised)
+        else { return }
         // A reply of another type (",i" where the parameter is ",f") is garbage, not a new value.
         if let known = cell.argument, !known.hasSameType(as: argument) { return }
         if sync != nil {
@@ -128,20 +137,23 @@ public final class ConsoleMirror {
 
     /// Every cell float is a 0...1 position; NaN or out-of-range values would crash or break the drawing.
     private static func sanitised(_ argument: OSCArgument) -> OSCArgument? {
-        guard case let .float(value) = argument else { return argument }
+        guard case .float(let value) = argument else { return argument }
         guard value.isFinite else { return nil }
         return .float(min(max(value, 0), 1))
     }
 
     private func applyMeters(_ message: OSCMessage) {
-        guard case let .blob(blob)? = message.arguments.first else { return }
-        let readings = MeterBanks.readings(address: message.address, values: MeterBlob.floats(from: blob))
+        guard case .blob(let blob)? = message.arguments.first else { return }
+        let readings = MeterBanks.readings(
+            address: message.address, values: MeterBlob.floats(from: blob))
         for (strip, reading) in readings {
             guard let cell = meterCells[strip] else { continue }
             // Explicit equality checks: older Observation versions notify on every write, which redraws idle meters at 20 Hz.
             if cell.level != reading.level { cell.level = reading.level }
             if let gate = reading.gateGain, cell.gateGain != gate { cell.gateGain = gate }
-            if let dynamics = reading.dynamicsGain, cell.dynamicsGain != dynamics { cell.dynamicsGain = dynamics }
+            if let dynamics = reading.dynamicsGain, cell.dynamicsGain != dynamics {
+                cell.dynamicsGain = dynamics
+            }
         }
     }
 
@@ -173,7 +185,7 @@ public final class ConsoleMirror {
         case .lost:
             sync = nil
             status = .lost
-        case let .failed(failure):
+        case .failed(let failure):
             status = .failed(failure)
             // Nothing more will come from this console; don't keep a socket and a 50 Hz loop running.
             stop()
@@ -197,7 +209,9 @@ public final class ConsoleMirror {
             if status != .syncing(progress) { status = .syncing(progress) }
             return
         }
-        if !sync.missing.isEmpty { log.warning("sync done; \(sync.missing.count) addresses never answered") }
+        if !sync.missing.isEmpty {
+            log.warning("sync done; \(sync.missing.count) addresses never answered")
+        }
         log.info("sync done")
         self.sync = nil
         status = .live

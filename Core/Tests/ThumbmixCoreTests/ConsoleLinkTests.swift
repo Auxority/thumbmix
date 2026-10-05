@@ -1,5 +1,6 @@
 import FakeM32
 import Testing
+
 @testable import ThumbmixCore
 
 /// Short enough to keep the suite quick, with margins wide enough for a slow CI runner.

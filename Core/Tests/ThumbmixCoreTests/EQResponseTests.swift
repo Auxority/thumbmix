@@ -1,4 +1,5 @@
 import Testing
+
 @testable import ThumbmixCore
 
 struct EQResponseTests {
@@ -20,7 +21,9 @@ struct EQResponseTests {
     }
 
     @Test func crossoverTypesDrawFlat() {
-        #expect(EQResponse.decibels(at: 1000, bands: [EQBandState(typeIndex: 9, frequency: 1000, gain: 6, q: 2)]) == 0)
+        #expect(
+            EQResponse.decibels(
+                at: 1000, bands: [EQBandState(typeIndex: 9, frequency: 1000, gain: 6, q: 2)]) == 0)
     }
 
     @Test func bandsAdd() {

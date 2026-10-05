@@ -16,7 +16,8 @@ struct MembersTab: View {
                 }
                 ForEach(members) { strip in
                     HStack(spacing: 10) {
-                        RoundedRectangle(cornerRadius: 3).fill(Theme.color(mirror.color(strip))).frame(width: 6, height: 28)
+                        RoundedRectangle(cornerRadius: 3).fill(Theme.color(mirror.color(strip))).frame(
+                            width: 6, height: 28)
                         Text(mirror.name(strip)).font(.headline)
                         Spacer()
                         Text(strip.defaultName).font(.caption).foregroundStyle(Theme.secondaryText)
@@ -31,7 +32,7 @@ struct MembersTab: View {
 }
 
 #if DEBUG
-#Preview {
-    MembersTab(dca: 1, mirror: .preview()).padding().background(Theme.background)
-}
+    #Preview {
+        MembersTab(dca: 1, mirror: .preview()).padding().background(Theme.background)
+    }
 #endif

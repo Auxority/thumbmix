@@ -2,13 +2,15 @@ import FakeM32
 import Foundation
 import Observation
 import Testing
+
 @testable import ThumbmixCore
 
 struct DecibelAmountTests {
     @Test func amountsReadWithoutASign() {
         let strip = StripID(.input, 1)
         #expect(ValueText.format(0.5, Catalog.gate(strip).range, locale: .testEnglish) == "31.5 dB")
-        #expect(ValueText.format(0.5, Catalog.dynamics(strip).makeup, locale: .testEnglish) == "12.0 dB")
+        #expect(
+            ValueText.format(0.5, Catalog.dynamics(strip).makeup, locale: .testEnglish) == "12.0 dB")
         #expect(ValueText.format(1, Catalog.trim(strip), locale: .testEnglish) == "+18.0 dB")
     }
 }
@@ -53,7 +55,8 @@ struct MirrorRobustnessTests {
         #expect(!changed.raised)
 
         // Control: a real change must still notify, or the check above proves nothing.
-        mirror.apply(OSCMessage("/meters/1", [.blob(MeterBlob.encode(Array(repeating: 0.25, count: 96)))]))
+        mirror.apply(
+            OSCMessage("/meters/1", [.blob(MeterBlob.encode(Array(repeating: 0.25, count: 96)))]))
         #expect(changed.raised)
     }
 
@@ -70,7 +73,8 @@ struct MirrorRobustnessTests {
     @Test func resyncDropsHoldsFromBeforeTheOutage() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
-        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast), auditAddresses: [])
+        let mirror = ConsoleMirror(
+            link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast), auditAddresses: [])
         mirror.start()
         defer { mirror.stop() }
         #expect(await eventually(timeout: .seconds(10)) { mirror.isLive })

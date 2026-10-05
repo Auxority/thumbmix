@@ -74,7 +74,8 @@ struct EQGraph: View {
         for step in 0...120 {
             let x = Double(step) / 120
             let decibels = EQResponse.decibels(at: 20 * pow(1000, x), bands: bands)
-            let point = CGPoint(x: x * size.width, y: (1 - (min(max(decibels, -15), 15) + 15) / 30) * size.height)
+            let point = CGPoint(
+                x: x * size.width, y: (1 - (min(max(decibels, -15), 15) + 15) / 30) * size.height)
             if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
         }
         return path
@@ -171,12 +172,13 @@ private struct BandPoint: View {
         Circle()
             .fill(isSelected ? Color.white : Theme.raised)
             .frame(width: size, height: size)
-            .overlay(Text("\(number)").font(.caption.bold()).foregroundStyle(isSelected ? .black : .white))
+            .overlay(
+                Text("\(number)").font(.caption.bold()).foregroundStyle(isSelected ? .black : .white))
     }
 }
 
 #if DEBUG
-#Preview {
-    EQTab(strip: StripID(.input, 1), mirror: .preview()).padding().background(Theme.background)
-}
+    #Preview {
+        EQTab(strip: StripID(.input, 1), mirror: .preview()).padding().background(Theme.background)
+    }
 #endif

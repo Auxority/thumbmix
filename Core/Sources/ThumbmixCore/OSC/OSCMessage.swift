@@ -30,7 +30,9 @@ public struct OSCMessage: Equatable, Sendable {
     }
 
     public func string(at index: Int) -> String? {
-        guard arguments.indices.contains(index), case let .string(value) = arguments[index] else { return nil }
+        guard arguments.indices.contains(index), case .string(let value) = arguments[index] else {
+            return nil
+        }
         return value
     }
 }

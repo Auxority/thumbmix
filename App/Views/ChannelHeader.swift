@@ -13,7 +13,9 @@ struct ChannelHeader: View {
                 Text(mirror.name(strip)).font(.title2.bold()).lineLimit(1)
                 Spacer()
             }
-            ParameterRow(spec: Catalog.fader(strip), mirror: mirror, accent: color, height: 72, meter: mirror.meter(strip))
+            ParameterRow(
+                spec: Catalog.fader(strip), mirror: mirror, accent: color, height: 72,
+                meter: mirror.meter(strip))
             HStack(spacing: 10) {
                 NudgeButton(label: "−1 dB") { nudge(by: -1) }
                 NudgeButton(label: "+1 dB") { nudge(by: 1) }

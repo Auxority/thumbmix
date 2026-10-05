@@ -26,9 +26,12 @@ public final class FakeM32: @unchecked Sendable {
     private var getsToDrop = 0
     private var sets: [OSCMessage] = []
 
-    public init(port: UInt16 = 0, model: String = "M32", state: [String: OSCArgument] = DemoState.values()) throws {
+    public init(
+        port: UInt16 = 0, model: String = "M32", state: [String: OSCArgument] = DemoState.values()
+    ) throws {
         let parameters = NWParameters.udp
-        parameters.requiredLocalEndpoint = .hostPort(host: "127.0.0.1", port: NWEndpoint.Port(rawValue: port) ?? .any)
+        parameters.requiredLocalEndpoint = .hostPort(
+            host: "127.0.0.1", port: NWEndpoint.Port(rawValue: port) ?? .any)
         parameters.allowLocalEndpointReuse = true
         listener = try NWListener(using: parameters)
         self.state = state
@@ -51,7 +54,7 @@ public final class FakeM32: @unchecked Sendable {
     public func stop() {
         queue.sync {
             meterTimer?.cancel()
-            clients.values.forEach { $0.connection.cancel() }
+            for client in clients.values { client.connection.cancel() }
             clients = [:]
             listener.cancel()
         }
@@ -97,7 +100,7 @@ public final class FakeM32: @unchecked Sendable {
         case .ready:
             startContinuation?.resume(returning: listener.port?.rawValue ?? 0)
             startContinuation = nil
-        case let .failed(error):
+        case .failed(let error):
             startContinuation?.resume(throwing: error)
             startContinuation = nil
         default:
@@ -123,18 +126,30 @@ public final class FakeM32: @unchecked Sendable {
         guard !isSilent else { return }
         switch message.address {
         case "/xinfo":
-            send(OSCMessage("/xinfo", [.string("127.0.0.1"), .string("Fake M32"), .string(modelStorage), .string("4.06")]), to: client)
+            send(
+                OSCMessage(
+                    "/xinfo",
+                    [.string("127.0.0.1"), .string("Fake M32"), .string(modelStorage), .string("4.06")]),
+                to: client)
         case "/info":
-            send(OSCMessage("/info", [.string("V2.07"), .string("osc-server"), .string(modelStorage), .string("4.06")]), to: client)
+            send(
+                OSCMessage(
+                    "/info",
+                    [.string("V2.07"), .string("osc-server"), .string(modelStorage), .string("4.06")]),
+                to: client)
         case "/xremote":
             guard !isIgnoringXremote else { return }
             client.remoteUntil = Date().addingTimeInterval(10)
         case "/meters":
-            guard case var .string(bank)? = message.arguments.first else { return }
+            guard case .string(var bank)? = message.arguments.first else { return }
             if !bank.hasPrefix("/") { bank = "/" + bank }
             client.meterBanksUntil[bank] = Date().addingTimeInterval(10)
         default:
-            if message.arguments.isEmpty { answerGet(message.address, client) } else { applySet(message, from: client) }
+            if message.arguments.isEmpty {
+                answerGet(message.address, client)
+            } else {
+                applySet(message, from: client)
+            }
         }
     }
 
