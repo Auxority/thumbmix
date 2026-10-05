@@ -23,9 +23,7 @@ public final class ConsoleMirror {
     @ObservationIgnored private var meterCells: [StripID: MeterCell] = [:]
     @ObservationIgnored private var sync: InitialSync?
     @ObservationIgnored private var pendingSends: [String: OSCArgument] = [:]
-    @ObservationIgnored private var heldUntil: [String: ContinuousClock.Instant] = [:]
-    @ObservationIgnored private var editing: Set<String> = []
-    @ObservationIgnored private var rereadAt: [String: ContinuousClock.Instant] = [:]
+    @ObservationIgnored private var holds = EditHolds(hold: ConsoleMirror.editHold)
     @ObservationIgnored private let auditAddresses: [String]
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
@@ -95,21 +93,17 @@ public final class ConsoleMirror {
             return
         }
         cell(address).argument = argument
-        heldUntil[address] = .now + Self.editHold
+        holds.edited(address, now: .now)
         pendingSends[address] = argument
     }
 
     /// The user's finger owns a control from touch-down until shortly after release.
     public func beginEdit(_ address: String) {
-        editing.insert(address)
+        holds.begin(address)
     }
 
-    /// Pushes ignored during the gesture are gone, so the value is read back once the hold ends.
     public func endEdit(_ address: String) {
-        editing.remove(address)
-        let holdEnds = ContinuousClock.now + Self.editHold
-        heldUntil[address] = holdEnds
-        rereadAt[address] = holdEnds
+        holds.end(address, now: .now)
     }
 
     public func wake() {
@@ -128,8 +122,7 @@ public final class ConsoleMirror {
             sync?.received(message.address)
             pumpSync()
         }
-        if editing.contains(message.address) { return }
-        if let held = heldUntil[message.address], held > .now { return }
+        if holds.isHeld(message.address, now: .now) { return }
         cell.argument = argument
     }
 
@@ -162,11 +155,7 @@ public final class ConsoleMirror {
     }
 
     private func sendDueRereads() {
-        let now = ContinuousClock.now
-        for (address, due) in rereadAt where due <= now {
-            rereadAt[address] = nil
-            link.send(OSCMessage(address))
-        }
+        for address in holds.takeDueRereads(now: .now) { link.send(OSCMessage(address)) }
     }
 
     private func sendNextAudit() {
@@ -195,7 +184,7 @@ public final class ConsoleMirror {
         log.info("sync started: \(self.addresses.count) addresses")
         sync = InitialSync(addresses: addresses)
         // An edit made just before an outage may never have reached the console; the resync is the truth.
-        heldUntil.removeAll()
+        holds.clearTimedHolds()
         status = .syncing(0)
         pumpSync()
     }

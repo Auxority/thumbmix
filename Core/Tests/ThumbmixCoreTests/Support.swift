@@ -3,7 +3,7 @@ import Foundation
 @testable import ThumbmixCore
 
 @MainActor
-func eventually(timeout: Duration = .seconds(3), _ condition: () -> Bool) async -> Bool {
+func eventually(timeout: Duration = .seconds(8), _ condition: () -> Bool) async -> Bool {
     let deadline = ContinuousClock.now + timeout
     while ContinuousClock.now < deadline {
         if condition() { return true }

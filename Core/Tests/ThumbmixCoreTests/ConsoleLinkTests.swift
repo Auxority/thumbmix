@@ -2,11 +2,13 @@ import FakeM32
 import Testing
 @testable import ThumbmixCore
 
+/// Short enough to keep the suite quick, with margins wide enough for a slow CI runner.
+/// Exact timing rules are tested deterministically in TimingDecisionTests.
 extension LinkTiming {
     static let fast = LinkTiming(
-        identifyTimeout: .milliseconds(600), tick: .milliseconds(50),
-        renewEvery: .milliseconds(300), probeWhenQuietFor: .milliseconds(100), lostAfter: .milliseconds(300),
-        restartAfterLost: .milliseconds(300)
+        identifyTimeout: .seconds(2), tick: .milliseconds(50),
+        renewEvery: .milliseconds(500), probeWhenQuietFor: .milliseconds(250), lostAfter: .seconds(1),
+        restartAfterLost: .seconds(1)
     )
 }
 

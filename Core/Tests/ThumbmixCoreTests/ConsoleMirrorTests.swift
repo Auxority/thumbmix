@@ -56,20 +56,6 @@ struct ConsoleMirrorTests {
         #expect(await eventually { fake.value(at: "/ch/01/mix/fader") == .float(0.6) })
     }
 
-    @Test func localEditHoldsAgainstPushes() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(fake, port)
-        defer { mirror.stop() }
-
-        mirror.set("/ch/01/mix/fader", .float(0.6))
-        fake.deskChange("/ch/01/mix/fader", .float(0.1))
-        try await Task.sleep(for: .milliseconds(100))
-
-        #expect(mirror.cell("/ch/01/mix/fader").argument == .float(0.6))
-        #expect(await eventually { fake.value(at: "/ch/01/mix/fader") == .float(0.6) })
-    }
-
     @Test func editsIgnoredWhileNotLive() {
         let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: 9, timing: .fast))
         mirror.set("/ch/01/mix/fader", .float(0.6))

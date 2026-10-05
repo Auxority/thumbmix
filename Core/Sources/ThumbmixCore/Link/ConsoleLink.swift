@@ -71,9 +71,7 @@ public final class ConsoleLink {
     private let timing: LinkTiming
     private let log = Logger(subsystem: "thumbmix", category: "link")
     private var info: ConsoleInfo?
-    private var lastHeard = ContinuousClock.now
-    private var lastRenewal = ContinuousClock.now
-    private var lastRestart = ContinuousClock.now
+    private var supervisor: LinkSupervisor
     private var tasks: [Task<Void, Never>] = []
 
     public init(host: String, port: UInt16 = 10023, timing: LinkTiming = .console) {
@@ -81,6 +79,7 @@ public final class ConsoleLink {
         self.port = port
         transport = UDPTransport(host: host, port: port)
         self.timing = timing
+        supervisor = LinkSupervisor(timing: timing, now: .now)
     }
 
     public func start() {
@@ -123,13 +122,13 @@ public final class ConsoleLink {
         transport.cancel()
         transport = UDPTransport(host: host, port: port)
         transportGeneration += 1
-        lastRestart = .now
+        supervisor.restarted(at: .now)
         startTransport()
         transport.send(OSCMessage("/info"))
     }
 
     private func received(_ message: OSCMessage) {
-        lastHeard = .now
+        supervisor.heard(at: .now)
         if state == .lost, let info {
             state = .live(info)
             renew()
@@ -167,25 +166,21 @@ public final class ConsoleLink {
         tasks.append(Task { [weak self] in await self?.supervise() })
     }
 
-    /// One loop owns renewals and liveness so their timing can't drift apart.
+    /// One loop carries out the supervisor's decisions, so renewals and liveness can't drift apart.
     private func supervise() async {
         while !Task.isCancelled {
             try? await Task.sleep(for: timing.tick)
-            let now = ContinuousClock.now
-            let quiet = now - lastHeard
-            if quiet > timing.lostAfter, case .live = state {
-                state = .lost
-                lastRestart = now
-            }
-            if state == .lost, now - lastRestart >= timing.restartAfterLost { restartTransport() }
-            // An idle console sends nothing, so ask for something before deciding it is gone.
-            if quiet > timing.probeWhenQuietFor { transport.send(OSCMessage("/info")) }
-            if now - lastRenewal >= timing.renewEvery { renew() }
+            let isLive = if case .live = state { true } else { false }
+            let actions = supervisor.tick(now: .now, isLive: isLive, isLost: state == .lost)
+            if actions.markLost { state = .lost }
+            if actions.restartSocket { restartTransport() }
+            if actions.probe { transport.send(OSCMessage("/info")) }
+            if actions.renew { renew() }
         }
     }
 
     private func renew() {
-        lastRenewal = .now
+        supervisor.renewed(at: .now)
         renewals.forEach(transport.send)
     }
 }
