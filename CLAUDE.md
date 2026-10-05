@@ -1,6 +1,8 @@
 # Thumbmix
 
-iPhone remote for the Midas M32 over OSC/UDP. `Core/` (Swift package: protocol, state, UI maths, all unit-tested) and `App/` (thin SwiftUI layer). The README covers install, develop and release commands.
+iPhone remote for the Midas M32 over OSC/UDP. `Core/` (Swift package: protocol, state, UI maths, all unit-tested) and `App/` (thin SwiftUI layer).
+
+Read `README.md` before building or running the app, starting `fake-m32`, running `m32-probe`, building the IPA, or checking work against the real-console acceptance checklist: it holds those commands and that list.
 
 ## The safety rule
 
