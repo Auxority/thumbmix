@@ -1,0 +1,27 @@
+import SwiftUI
+import ThumbmixCore
+
+struct StatusBanner: View {
+    let status: MirrorStatus
+
+    var body: some View {
+        switch status {
+        case .live, .failed:
+            EmptyView()
+        case .connecting:
+            banner("Connecting…", Theme.raised)
+        case let .syncing(progress):
+            banner("Syncing \(Int(progress * 100))%", Color(red: 0.2, green: 0.35, blue: 0.8))
+        case .lost:
+            banner("Disconnected — retrying", Theme.muteRed)
+        }
+    }
+
+    private func banner(_ text: String, _ color: Color) -> some View {
+        Text(text)
+            .font(.subheadline.weight(.semibold))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(color)
+    }
+}
