@@ -6,6 +6,7 @@ enum Theme {
     static let background = Color.black
     static let track = Color(white: 0.11)
     static let raised = Color(white: 0.18)
+    static let selected = Color(white: 0.3)
     static let secondaryText = Color(white: 0.6)
     static let muteRed = Color(red: 0.95, green: 0.2, blue: 0.2)
 

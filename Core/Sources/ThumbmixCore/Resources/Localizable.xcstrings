@@ -340,6 +340,17 @@
         }
       }
     },
+    "Mix" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mix"
+          }
+        }
+      }
+    },
     "Mode" : {
       "localizations" : {
         "en" : {
