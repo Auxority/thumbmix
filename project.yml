@@ -41,7 +41,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.thumbmix.app
-        # The release workflow reads MARKETING_VERSION for the tag and overrides the build number per run.
+        # Local builds only: the release workflow sets the version from the commit titles
+        # (scripts/release-version.sh) and the build number from the run number.
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"
     scheme:

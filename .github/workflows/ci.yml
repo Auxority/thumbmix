@@ -37,5 +37,8 @@ jobs:
       - name: Lint
         run: scripts/lint.sh
 
+      - name: Check release versioning
+        run: scripts/test-next-version.sh
+
       - name: Test Core
         run: swift test --package-path Core
