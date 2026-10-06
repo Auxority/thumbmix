@@ -50,6 +50,7 @@ struct ConnectView: View {
                     systemImage: "dot.radiowaves.left.and.right")
             }
             .disabled(isScanning)
+            offlineButton
             ForEach(found) { console in
                 Button {
                     model.connect(to: console.host)
@@ -74,6 +75,19 @@ struct ConnectView: View {
         }
         .padding(16)
         .onAppear { address = model.lastHost ?? "" }
+    }
+
+    @ViewBuilder private var offlineButton: some View {
+        Button {
+            Task { await model.startOffline() }
+        } label: {
+            Label("Try offline (demo console)", systemImage: "slider.horizontal.3")
+        }
+        if model.offlineFailed {
+            Text("The demo console couldn't start. Try again, or restart Thumbmix.")
+                .font(.callout)
+                .foregroundStyle(.yellow)
+        }
     }
 
     private var trimmedAddress: String { address.trimmingCharacters(in: .whitespaces) }

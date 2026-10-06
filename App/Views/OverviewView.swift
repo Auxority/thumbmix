@@ -38,6 +38,7 @@ struct OverviewView: View {
             .background(Theme.background)
             .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
             .navigationTitle("Thumbmix")
+            .demoTitle("Thumbmix")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("Disconnect", action: onDisconnect) }

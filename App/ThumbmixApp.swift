@@ -22,6 +22,7 @@ struct RootView: View {
         Group {
             if let mirror = model.mirror, model.failure == nil {
                 OverviewView(mirror: mirror, onDisconnect: model.disconnect)
+                    .environment(\.isDemoConsole, model.isOffline)
             } else {
                 ConnectView(model: model)
             }

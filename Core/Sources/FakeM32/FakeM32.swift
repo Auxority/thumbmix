@@ -2,7 +2,7 @@ import Foundation
 import Network
 import ThumbmixCore
 
-/// Stands in for an M32 in tests and the simulator: answers gets, applies sets, pushes changes to
+/// Stands in for an M32 in tests, the simulator and the app's Offline mode: answers gets, applies sets, pushes changes to
 /// `/xremote` clients and streams synthetic meters. All mutable state is touched only on `queue`.
 public final class FakeM32: @unchecked Sendable {
     /// Only touched on `queue`, which Network.framework's callbacks also run on.

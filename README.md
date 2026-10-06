@@ -26,6 +26,8 @@ SideStore re-signs apps every 7 days. A free Apple ID allows 3 active sideloaded
 
 Join the console's Wi-Fi. Then tap **Scan this network** or type the M32's IP address. Thumbmix reconnects to the last console automatically.
 
+No console nearby? **Try offline (demo console)** runs a demo M32 inside the app, so every screen works without a mixer. A DEMO pill in the title bar shows it isn't a real desk, and each visit starts from a fresh demo desk.
+
 ## Develop
 
 ```bash

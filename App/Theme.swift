@@ -9,6 +9,7 @@ enum Theme {
     static let selected = Color(white: 0.3)
     static let secondaryText = Color(white: 0.6)
     static let muteRed = Color(red: 0.95, green: 0.2, blue: 0.2)
+    static let demoPurple = Color(red: 0.6, green: 0.3, blue: 0.85)
 
     /// Inverted scribble strips get their base colour: the inversion is an LCD effect, not a different colour.
     static func color(_ console: ConsoleColor) -> Color {
