@@ -1,10 +1,16 @@
-# Every push to main (including a merged PR) becomes a GitHub Release with an unsigned IPA for SideStore.
+# A push to main (a merged PR) with a feat or fix commit becomes a GitHub Release with an unsigned IPA for
+# SideStore, versioned from the commit titles (scripts/next-version.sh). A manual run releases a version you
+# type, such as 1.0.0 or 1.0.0-rc.1. Everything below 1.0.0, and every -rc, is marked as a pre-release.
 name: Release
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 1.0.0 or 1.0.0-rc.1 (empty: from the commit titles)"
+        required: false
 
 permissions:
   contents: write
@@ -28,26 +34,44 @@ jobs:
       DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the tags and commits since the last release decide the version
+
+      - name: Decide the version
+        id: version
+        env:
+          REQUESTED: ${{ inputs.version }}
+        run: |
+          version=$(scripts/release-version.sh "$REQUESTED")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Version: ${version:-none (no feat or fix since the last release)}"
 
       - name: Show toolchain
+        if: steps.version.outputs.version != ''
         run: |
           xcodebuild -version
           swift --version
 
       - name: Install XcodeGen
+        if: steps.version.outputs.version != ''
         run: brew install xcodegen
 
       - name: Build unsigned IPA
+        if: steps.version.outputs.version != ''
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: scripts/build-ipa.sh
 
       - name: Publish release
+        if: steps.version.outputs.version != ''
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          version=$(grep -m1 'MARKETING_VERSION:' project.yml | awk -F'"' '{print $2}')
-          test -n "$version" || { echo "MARKETING_VERSION not found in project.yml" >&2; exit 1; }
-          tag="v${version}-${BUILD_NUMBER}"
-          gh release create "$tag" build/ipa/Thumbmix.ipa \
+          prerelease=()
+          case "$VERSION" in 0.* | *-*) prerelease=(--prerelease) ;; esac
+          gh release create "v${VERSION}" build/ipa/Thumbmix.ipa \
             --target "$GITHUB_SHA" \
-            --title "Thumbmix ${version} (build ${BUILD_NUMBER})" \
-            --generate-notes
+            --title "Thumbmix ${VERSION} (build ${BUILD_NUMBER})" \
+            --generate-notes \
+            ${prerelease[@]+"${prerelease[@]}"}

@@ -43,7 +43,7 @@ OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unoffic
 - **Edit holds in tests**: for `ConsoleMirror.editHold` after the app's own edit, pushes for that address are ignored. A test that simulates a later desk change waits that out first.
 - **Mirrored parameters**: `CatalogTests.syncListIsCompleteAndUnique` pins the sync address count. A new mirrored parameter updates that count and its per-strip comment, and gets a typed default in `DemoState` (the fallback is `.float(0.5)`, wrong for int parameters).
 - **Merging**: `main` is protected (required `check`, branch up to date) and PRs are rebase-merged. Before rebasing a pushed branch, compare it with `origin/<branch>`: GitHub's "Update branch" adds commits there. A conflict in `App/Localizable.xcstrings` resolves by taking `main`'s version and running `scripts/strings.sh`.
-- **Releases**: every push to `main` publishes `v<MARKETING_VERSION>-<run number>` with the IPA. The release job builds only; lint and tests are the PR `check`'s job. Bump `MARKETING_VERSION` in `project.yml` for a new version.
+- **Releases**: commit titles set the version, so keep them conventional. On `main`, a `feat:` publishes the next minor version, only `fix:`/`perf:` the next patch, anything else nothing (`scripts/next-version.sh`); before 1.0 a breaking change bumps only the minor. 1.0.0 and release candidates (`1.0.0-rc.1`) are manual runs of the release workflow with the version typed in. Every 0.x and `-rc` is a pre-release. The release job builds only; lint and tests are the PR `check`'s job.
 - **Tools**: `brew install xcodegen swiftlint`; `swift format` ships with Xcode.
 
 ## Local-only context
