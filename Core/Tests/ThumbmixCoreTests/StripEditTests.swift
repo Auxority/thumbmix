@@ -47,7 +47,7 @@ struct StripEditTests {
         let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast))
         mirror.start()
         defer { mirror.stop() }
-        #expect(await eventually(timeout: .seconds(10)) { mirror.isLive })
+        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
         let drums = StripID(.dca, 1)
 
         mirror.edit(drums, name: "Kit", color: ConsoleColor(base: .green, inverted: false), icon: 11)
