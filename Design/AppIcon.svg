@@ -1,0 +1,25 @@
+<!-- Thumbmix app icon master: three faders on the app's black, the middle one pressed and lit red.
+     Full bleed, because iOS rounds the corners. Render with scripts/render-icon.sh. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="graphite" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#2c2c31"/>
+      <stop offset="1" stop-color="#09090b"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset=".35" stop-color="#ff4d5e" stop-opacity=".6"/>
+      <stop offset="1" stop-color="#ff4d5e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="100" height="100" fill="url(#graphite)"/>
+  <g fill="#fff" fill-opacity=".14">
+    <rect x="25" y="18" width="8" height="64" rx="4"/>
+    <rect x="46" y="18" width="8" height="64" rx="4"/>
+    <rect x="67" y="18" width="8" height="64" rx="4"/>
+  </g>
+  <rect x="46" y="33" width="8" height="49" rx="4" fill="#ff4d5e" fill-opacity=".6"/>
+  <circle cx="50" cy="33.5" r="25" fill="url(#glow)"/>
+  <rect x="19" y="52" width="20" height="11" rx="5.5" fill="#6b6b72"/>
+  <rect x="61" y="42" width="20" height="11" rx="5.5" fill="#6b6b72"/>
+  <rect x="38" y="27" width="24" height="13" rx="6.5" fill="#ff4d5e"/>
+</svg>
