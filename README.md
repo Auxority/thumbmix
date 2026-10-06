@@ -35,6 +35,7 @@ scripts/lint.sh                             # style (swift-format) and complexit
 swift test --package-path Core              # protocol, state and UI maths
 scripts/ui-test.sh                          # the UI suite, against a freshly started fake-m32
 scripts/strings.sh                          # refresh the app's String Catalog after changing text
+scripts/render-icon.sh                      # render Design/AppIcon.svg into the app icon (brew install librsvg imagemagick)
 swift run --package-path Core fake-m32      # a fake M32 on 127.0.0.1:10023 for the simulator
 xcodegen generate && open Thumbmix.xcodeproj
 ```

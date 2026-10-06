@@ -41,6 +41,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.thumbmix.app
+        # One 1024 px icon (App/Assets.xcassets), rendered from Design/AppIcon.svg by scripts/render-icon.sh.
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Local builds only: the release workflow sets the version from the commit titles
         # (scripts/release-version.sh) and the build number from the run number.
         MARKETING_VERSION: "0.1.0"

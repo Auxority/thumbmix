@@ -22,7 +22,11 @@ xcodebuild archive \
   -destination 'generic/platform=iOS' -archivePath build/ipa/Thumbmix.xcarchive \
   CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
   CURRENT_PROJECT_VERSION="$build_number" ${version_setting[@]+"${version_setting[@]}"}
+app=build/ipa/Thumbmix.xcarchive/Products/Applications/Thumbmix.app
+# Without a compiled icon SideStore and the home screen show a blank tile, and the build still succeeds.
+icon=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconName" "$app/Info.plist" 2> /dev/null || true)
+[ "$icon" = "AppIcon" ] || { echo "The app has no AppIcon (CFBundleIconName: '${icon}')" >&2; exit 1; }
 mkdir -p build/ipa/Payload
-cp -R build/ipa/Thumbmix.xcarchive/Products/Applications/Thumbmix.app build/ipa/Payload/
+cp -R "$app" build/ipa/Payload/
 (cd build/ipa && zip -qr Thumbmix.ipa Payload)
 echo "Built build/ipa/Thumbmix.ipa"
