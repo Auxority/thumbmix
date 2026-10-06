@@ -2,7 +2,10 @@ import SwiftUI
 import ThumbmixCore
 
 struct OverviewView: View {
-    private static let listTop = "list-top"
+    private struct ListIdentity: Hashable {
+        let group: StripGroup
+        let showUnused: Bool
+    }
 
     let mirror: ConsoleMirror
     let onDisconnect: () -> Void
@@ -15,23 +18,19 @@ struct OverviewView: View {
         NavigationStack {
             VStack(spacing: 10) {
                 GroupChips(selection: $group)
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(spacing: 6) {
-                            Color.clear.frame(height: 0).id(Self.listTop)
-                            ForEach(visibleStrips) { strip in
-                                StripRow(strip: strip, mirror: mirror) { openStrip = strip }
-                            }
+                ScrollView {
+                    LazyVStack(spacing: 6) {
+                        ForEach(visibleStrips) { strip in
+                            StripRow(strip: strip, mirror: mirror) { openStrip = strip }
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.bottom, 12)
                     }
-                    // A new list starts at its top: hiding unused strips from far down otherwise left
-                    // the old offset pointing past the shorter list, showing only black. A reconnect
-                    // refreshes too but keeps the position, so the list never moves under a finger.
-                    .onChange(of: group) { proxy.scrollTo(Self.listTop, anchor: .top) }
-                    .onChange(of: showUnused) { proxy.scrollTo(Self.listTop, anchor: .top) }
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 12)
                 }
+                // Each list gets its own scroll view, so it starts where a list naturally starts. Keeping
+                // one left the old offset past a shorter list (only black), and scrolling it to a top
+                // anchor shifted the rows on iOS 27. A reconnect keeps the position: no list moves under a finger.
+                .id(ListIdentity(group: group, showUnused: showUnused))
                 .disabled(!mirror.isLive)
                 .opacity(mirror.isLive ? 1 : 0.4)
             }

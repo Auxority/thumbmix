@@ -42,6 +42,30 @@ final class OverviewUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Kick"].isHittable)
     }
 
+    /// Switching from far down the inputs to a short group kept the old offset, past that group's end:
+    /// the list showed only black.
+    func testSwitchingToAShortGroupFromFarDownShowsTheList() {
+        launch()
+        // Flicked, and the chip tapped while the list still glides, as a thumb does.
+        for _ in 0..<3 { app.swipeUp(velocity: .fast) }
+        app.buttons["DCA"].tap()
+        XCTAssertTrue(app.buttons["Drums"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Drums"].isHittable)
+    }
+
+    /// Showing the unused buses moved the used ones up by a few points on iOS 27: the list was
+    /// scrolled to an anchor at its very top instead of starting where a list naturally starts.
+    func testShowingUnusedKeepsTheRowsInPlace() {
+        launch()
+        app.buttons["Buses"].tap()
+        let mon1 = app.buttons["Mon 1"]
+        XCTAssertTrue(mon1.waitForExistence(timeout: 2))
+        let before = mon1.frame.minY
+        app.buttons["Unused"].tap()
+        XCTAssertTrue(app.buttons["Bus 5"].waitForExistence(timeout: 2))
+        XCTAssertEqual(mon1.frame.minY, before, accuracy: 0.5)
+    }
+
     func testVerticalSwipeScrollsInsteadOfMovingFaders() {
         launch()
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
