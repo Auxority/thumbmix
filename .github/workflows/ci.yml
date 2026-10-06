@@ -1,15 +1,20 @@
 # Every pull request: style and the Core test suite, on the same toolchain as the release job.
+# Also every push to main: a PR can only restore its own caches and main's, so without a run on main
+# every new PR's first run compiled Core from scratch.
 name: CI
 
 on:
   pull_request:
+  push:
+    branches: [main]
 
 permissions:
   contents: read
 
-# A new push to a PR makes the run for its previous commit pointless, so that run is stopped.
+# A new push to a PR makes the run for its previous commit pointless, so that run is stopped. On main each
+# push keeps its own run, so the newest cache is always saved.
 concurrency:
-  group: ci-${{ github.event.pull_request.number }}
+  group: ci-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -22,8 +27,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Most of the Test Core step was compiling from scratch. Swift compares file contents, not just
-      # dates, so a restored build skips unchanged files even after a fresh checkout. Caches made on a PR
-      # serve that PR's later runs; the key changes with the Xcode build so a toolchain update starts clean.
+      # dates, so a restored build skips unchanged files even after a fresh checkout. Main's cache serves every
+      # new PR, a PR's own cache its later runs; the key changes with the Xcode build so a toolchain update
+      # starts clean.
       - name: Restore the Core build
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
