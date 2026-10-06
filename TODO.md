@@ -13,10 +13,23 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] Walk the acceptance checklist in `README.md`.
 - [ ] Check on a device that VoiceOver's swipe up/down adjusts parameter rows. XCUITest can't drive it.
 
+## Fixes
+
+- [ ] **Title and DEMO pill get truncated** on strip screens: the back button ("Thumbmix"), the title and the pill don't fit next to each other. Mock a layout that keeps all three readable on the iPhone SE.
+
 ## Features
 
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
-- [ ] **Matrix group.** Show Matrix 1–6 (overview chip and a basic strip screen) so they can be renamed too.
+- [ ] **Matrix group.** Show Matrix 1–6 (overview chip and a basic strip screen), so they can be renamed and mixed too.
+- [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
+- [ ] **Gain and Trim together.** Show both on every input that has a preamp, not one or the other: the engineer uses both (this reverses #5's choice). Internal sources keep Trim only.
+- [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
+- [ ] **Solo** per channel.
+- [ ] **Delay** per channel.
+- [ ] **Inserts** per channel.
+- [ ] **Dynamics before or after the EQ:** the toggle that moves the compressor ahead of the EQ.
+- [ ] **More compressor settings:** auto time, the key filter frequency, and the detector and envelope (peak/rms, lin/log). Comp/exp already shows as Mode.
+- [ ] **Gate key filter.** Lower priority than the compressor's.
 - [ ] **Reset bands for buses and mains** (6 bands). Needs the engineer's default for each band. Inputs use PEQ at 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz, Q 1.7, 0 dB.
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
 
@@ -24,7 +37,8 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 - [ ] A 7th strip tab: switch the bottom tabs (`StripTabBar`) to scrolling chips (mock "T5"). Six chips are ≈ 55 pt wide on the iPhone SE; seven would be too narrow for "Sends".
 - [ ] Spectrum: also show what comes in (pre-EQ) as a faint second glow (mock "V2"). Only if the single post-EQ glow proves too little.
-- [ ] Parameters the app doesn't read yet: gate key source and filter; compressor detector, envelope, position, mix and auto.
+- [ ] Other parameters the app doesn't read yet: the gate key source, and the compressor mix.
+- [ ] **Roles, far future:** a first-run choice between musician/vocalist and mixing engineer. An engineer gets the whole desk; a musician gets only their own mix bus (an in-ear or wedge mix).
 
 ## Known limits
 
