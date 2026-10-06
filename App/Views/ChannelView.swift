@@ -23,6 +23,7 @@ struct ChannelView: View {
             if tabs.count > 1 { StripTabBar(tabs: tabs, selection: $tab) }
         }
         .navigationTitle(strip.defaultName)
+        .demoTitle(strip.defaultName)
         .navigationBarTitleDisplayMode(.inline)
     }
 

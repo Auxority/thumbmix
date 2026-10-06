@@ -15,6 +15,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Features
 
+- [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
 - [ ] **Matrix group.** Show Matrix 1–6 (overview chip and a basic strip screen) so they can be renamed too.
 - [ ] **Reset bands for buses and mains** (6 bands). Needs the engineer's default for each band. Inputs use PEQ at 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz, Q 1.7, 0 dB.
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.

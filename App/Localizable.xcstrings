@@ -64,6 +64,9 @@
     "Console IP" : {
 
     },
+    "DEMO" : {
+
+    },
     "Disconnect" : {
 
     },
@@ -157,10 +160,16 @@
     "the console" : {
 
     },
+    "The demo console couldn't start. Try again, or restart Thumbmix." : {
+
+    },
     "This phone has no Wi-Fi address. Join the console's Wi-Fi network, then scan again." : {
 
     },
     "Thumbmix" : {
+
+    },
+    "Try offline (demo console)" : {
 
     },
     "Unmute" : {

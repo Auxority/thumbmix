@@ -24,6 +24,9 @@ targets:
     dependencies:
       - package: ThumbmixCore
         product: ThumbmixCore
+      # Offline mode runs the fake console inside the app, so every screen can be tried without a desk.
+      - package: ThumbmixCore
+        product: FakeM32
     info:
       path: App/Info.plist
       properties:
