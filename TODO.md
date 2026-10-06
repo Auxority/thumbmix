@@ -25,7 +25,6 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] A 7th strip tab: switch the bottom tabs (`StripTabBar`) to scrolling chips (mock "T5"). Six chips are ≈ 55 pt wide on the iPhone SE; seven would be too narrow for "Sends".
 - [ ] Spectrum: also show what comes in (pre-EQ) as a faint second glow (mock "V2"). Only if the single post-EQ glow proves too little.
 - [ ] Parameters the app doesn't read yet: gate key source and filter; compressor detector, envelope, position, mix and auto.
-- [ ] CI: also run the `check` on `main`, so a new PR's first run starts with a warm cache (about 10 s saved, at one extra run per merge).
 
 ## Known limits
 
