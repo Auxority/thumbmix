@@ -33,10 +33,35 @@ final class ChannelUITests: XCTestCase {
         XCTAssertEqual(fader.value as? String, "0.0 dB")
     }
 
+    /// Mix holds the full controls; every other tab keeps a slim fader and mute, to pull a channel mid-EQ.
+    func testOtherTabsKeepTheFaderAndMuteInReach() {
+        launch()
+        open("Kick")
+        app.buttons["EQ"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["/ch/01/mix/fader"].exists)
+        XCTAssertTrue(app.buttons["mute-/ch/01/mix/on"].exists)
+        XCTAssertFalse(app.buttons["+1 dB"].exists, "the nudges live on the Mix tab")
+        saveScreenshot("slim-mix-row")
+    }
+
+    /// The tabs sit under the thumb, each at least Apple's 44 pt touch target.
+    func testTabsSitAtTheBottomWithFullSizeTargets() {
+        launch()
+        open("Kick")
+        let screenHeight = app.windows.firstMatch.frame.height
+        for title in ["Mix", "Input", "Gate", "EQ", "Comp", "Sends"] {
+            let tab = app.buttons[title].frame
+            XCTAssertGreaterThanOrEqual(tab.height, 44, title)
+            XCTAssertGreaterThanOrEqual(tab.width, 44, title)
+            XCTAssertGreaterThan(tab.minY, screenHeight * 0.8, title)
+        }
+    }
+
     /// Like the desk, a preamp channel offers Gain and 48V; trim is for digital sources only (doc fn.18).
     func testPreampChannelShowsGainNotTrim() {
         launch()
         open("Vox 2")
+        app.buttons["Input"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["/headamp/044/gain"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["toggle-/headamp/044/phantom"].exists)
         XCTAssertTrue(app.staticTexts["Shared with Vox 1"].exists)
@@ -48,7 +73,8 @@ final class ChannelUITests: XCTestCase {
         launch()
         app.buttons["Unused"].tap()
         app.swipeUp()
-        app.buttons["Ch 15"].tap()
+        open("Ch 15")
+        app.buttons["Input"].tap()
         XCTAssertTrue(
             app.staticTexts["No preamp: this channel reads from an internal source."].waitForExistence(
                 timeout: 3))
@@ -98,6 +124,7 @@ final class ChannelUITests: XCTestCase {
         launch()
         app.buttons["DCA"].tap()
         open("Drums")
+        app.buttons["Members"].tap()
         XCTAssertTrue(app.staticTexts["Snare"].exists)
         XCTAssertFalse(app.staticTexts["Bass"].exists)
     }
@@ -280,6 +307,7 @@ final class ChannelUITests: XCTestCase {
         launch()
         app.buttons["Buses"].tap()
         open("Mon 1")
+        app.buttons["EQ"].tap()
         XCTAssertTrue(app.buttons["6"].waitForExistence(timeout: 2))
         XCTAssertFalse(app.buttons["LC"].exists, "buses have no low cut")
     }

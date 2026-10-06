@@ -100,10 +100,10 @@ struct UIMathTests {
     }
 
     @Test func tabsPerKind() {
-        #expect(ChannelTab.tabs(for: .input) == [.input, .gate, .eq, .comp, .sends])
-        #expect(ChannelTab.tabs(for: .bus) == [.eq, .comp, .fedBy])
-        #expect(ChannelTab.tabs(for: .mainMono) == [.eq, .comp])
-        #expect(ChannelTab.tabs(for: .dca) == [.members])
-        #expect(ChannelTab.tabs(for: .fxReturn).isEmpty)
+        #expect(ChannelTab.tabs(for: .input) == [.mix, .input, .gate, .eq, .comp, .sends])
+        #expect(ChannelTab.tabs(for: .bus) == [.mix, .eq, .comp, .fedBy])
+        #expect(ChannelTab.tabs(for: .mainMono) == [.mix, .eq, .comp])
+        #expect(ChannelTab.tabs(for: .dca) == [.mix, .members])
+        #expect(ChannelTab.tabs(for: .fxReturn) == [.mix])
     }
 }
