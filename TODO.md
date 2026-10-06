@@ -24,6 +24,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
 - [ ] **Gain and Trim together.** Show both on every input that has a preamp, not one or the other: the engineer uses both (this reverses #5's choice). Internal sources keep Trim only.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
+- [ ] revisit **Unused** approach
 - [ ] **Solo** per channel.
 - [ ] **Delay** per channel.
 - [ ] **Inserts** per channel.
