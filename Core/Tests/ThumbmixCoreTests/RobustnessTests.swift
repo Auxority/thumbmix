@@ -77,7 +77,7 @@ struct MirrorRobustnessTests {
             link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast), auditAddresses: [])
         mirror.start()
         defer { mirror.stop() }
-        #expect(await eventually(timeout: .seconds(10)) { mirror.isLive })
+        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
         let fader = "/ch/01/mix/fader"
         let consoleValue = fake.value(at: fader)
 
@@ -88,7 +88,7 @@ struct MirrorRobustnessTests {
         mirror.wake()
         fake.silent = false
 
-        #expect(await eventually(timeout: .seconds(10)) { mirror.isLive })
+        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
         #expect(mirror.cell(fader).argument == consoleValue)
     }
 }

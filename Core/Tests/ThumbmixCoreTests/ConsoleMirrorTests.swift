@@ -8,7 +8,7 @@ struct ConsoleMirrorTests {
     private func liveMirror(_ fake: FakeM32, _ port: UInt16) async -> ConsoleMirror {
         let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast))
         mirror.start()
-        _ = await eventually(timeout: .seconds(10)) { mirror.isLive }
+        _ = await eventually(timeout: syncTimeout) { mirror.isLive }
         return mirror
     }
 
@@ -150,7 +150,7 @@ struct ConsoleMirrorTests {
             auditAddresses: ["/ch/02/mix/fader"])
         mirror.start()
         defer { mirror.stop() }
-        #expect(await eventually(timeout: .seconds(10)) { mirror.isLive })
+        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
 
         fake.deskChange("/ch/02/mix/fader", .float(0.5))
 
@@ -166,7 +166,7 @@ struct ConsoleMirrorTests {
         mirror.wake()
 
         #expect(mirror.status == .lost)
-        #expect(await eventually(timeout: .seconds(10)) { mirror.isLive })
+        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
     }
 
     @Test func lostThenResyncs() async throws {
@@ -180,6 +180,6 @@ struct ConsoleMirrorTests {
         #expect(!mirror.isLive)
 
         fake.silent = false
-        #expect(await eventually(timeout: .seconds(10)) { mirror.isLive })
+        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
     }
 }
