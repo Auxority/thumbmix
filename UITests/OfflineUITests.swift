@@ -16,7 +16,7 @@ final class OfflineUITests: XCTestCase {
         startOffline(app)
         XCTAssertTrue(app.staticTexts["DEMO"].exists, "the overview says it's the demo")
         app.buttons["Kick"].tap()
-        XCTAssertTrue(app.staticTexts["DEMO"].waitForExistence(timeout: 3), "so does a strip screen")
+        XCTAssertTrue(app.staticTexts["DEMO"].appears(within: 3), "so does a strip screen")
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
         app.buttons["+1 dB"].tap()
         XCTAssertEqual(fader.value as? String, "+1.0 dB")
@@ -26,16 +26,16 @@ final class OfflineUITests: XCTestCase {
         app.buttons["Disconnect"].tap()
         startOffline(app)
         app.buttons["Kick"].tap()
-        XCTAssertTrue(fader.waitForExistence(timeout: 3))
+        XCTAssertTrue(fader.appears(within: 3))
         XCTAssertEqual(fader.value as? String, "0.0 dB", "a new visit starts from a fresh demo desk")
     }
 
     private func startOffline(_ app: XCUIApplication) {
         let offline = app.buttons["Try offline (demo console)"]
-        XCTAssertTrue(offline.waitForExistence(timeout: 5))
+        XCTAssertTrue(offline.appears(within: 5))
         offline.tap()
         // Names show while the sync still runs and the rows are disabled; a tap then does nothing.
-        let live = expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: app.buttons["Kick"])
-        wait(for: [live], timeout: 15)
+        let kick = app.buttons["Kick"]
+        XCTAssertTrue(eventually(within: 15) { kick.exists && kick.isEnabled })
     }
 }

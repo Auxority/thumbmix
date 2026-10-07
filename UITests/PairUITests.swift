@@ -13,10 +13,10 @@ final class PairUITests: XCTestCase {
         app = XCUIApplication()
         app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
         app.launch()
-        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
         app.swipeUp()
         app.buttons["Gtr"].tap()
-        XCTAssertTrue(app.buttons["+1 dB"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["+1 dB"].appears(within: 3))
     }
 
     private func element(_ identifier: String) -> XCUIElement {
@@ -35,7 +35,7 @@ final class PairUITests: XCTestCase {
         XCTAssertFalse(app.buttons["side-R"].exists)
         saveScreenshot("pair-mix")
         app.buttons["EQ"].tap()
-        XCTAssertTrue(element("/ch/09/eq/1/f").waitForExistence(timeout: 2))
+        XCTAssertTrue(element("/ch/09/eq/1/f").appears(within: 2))
         XCTAssertFalse(app.buttons["side-R"].exists, "the desk links the EQ")
     }
 
@@ -45,29 +45,29 @@ final class PairUITests: XCTestCase {
         app = XCUIApplication()
         app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
         app.launch()
-        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
         app.buttons["Buses"].tap()
         app.buttons["Mon 3"].tap()
         let link = app.buttons["link-button"]
-        XCTAssertTrue(link.waitForExistence(timeout: 3))
+        XCTAssertTrue(link.appears(within: 3))
         XCTAssertEqual(link.label, "Stereo link with Mon 4 · Bus 4")
 
         link.tap()
         let alert = app.alerts["Link Mon 3 and Mon 4?"]
-        XCTAssertTrue(alert.waitForExistence(timeout: 2))
+        XCTAssertTrue(alert.appears(within: 2))
         XCTAssertTrue(alert.staticTexts["They'll work as one stereo channel."].exists)
         saveScreenshot("link-alert")
         alert.buttons["Link"].tap()
-        XCTAssertTrue(app.navigationBars["Bus 3-4"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.navigationBars["Bus 3-4"].appears(within: 3))
         XCTAssertEqual(app.buttons["edit-strip"].value as? String, "Mon")
         XCTAssertEqual(link.label, "Unlink Mon 3 · Bus 3 and Mon 4 · Bus 4")
 
         link.tap()
         let unlink = app.alerts["Unlink Mon 3 and Mon 4?"]
-        XCTAssertTrue(unlink.waitForExistence(timeout: 2))
+        XCTAssertTrue(unlink.appears(within: 2))
         XCTAssertTrue(unlink.staticTexts["Each can be set on its own again."].exists)
         unlink.buttons["Unlink"].tap()
-        XCTAssertTrue(app.navigationBars["Bus 3"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.navigationBars["Bus 3"].appears(within: 3))
     }
 
     /// Linking only couples what the desk's Link Preferences tick: the alert says what stays separate.
@@ -77,12 +77,12 @@ final class PairUITests: XCTestCase {
         app = XCUIApplication()
         app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
         app.launch()
-        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
         app.buttons["Buses"].tap()
         app.buttons["Mon 3"].tap()
         app.buttons["link-button"].tap()
         let alert = app.alerts["Link Mon 3 and Mon 4?"]
-        XCTAssertTrue(alert.waitForExistence(timeout: 2))
+        XCTAssertTrue(alert.appears(within: 2))
         XCTAssertTrue(alert.staticTexts["They'll work as one stereo channel.\nEQ stays separate."].exists)
         alert.buttons["Cancel"].tap()
         XCTAssertTrue(app.navigationBars["Bus 3"].exists, "Cancel leaves the desk as it was")
@@ -93,7 +93,7 @@ final class PairUITests: XCTestCase {
         launchAndOpenGuitars()
         app.buttons["edit-strip"].tap()
         let left = app.textFields["strip-name"]
-        XCTAssertTrue(left.waitForExistence(timeout: 3))
+        XCTAssertTrue(left.appears(within: 3))
         XCTAssertEqual(left.value as? String, "Gtr L")
         XCTAssertEqual(app.textFields["strip-name-partner"].value as? String, "Gtr R")
         XCTAssertTrue(app.buttons["color-green"].exists)
@@ -106,10 +106,10 @@ final class PairUITests: XCTestCase {
         addTeardownBlock { DeskChange.set("/config/linkcfg/dyn", 1) }
         launchAndOpenGuitars()
         app.buttons["Comp"].tap()
-        XCTAssertTrue(app.staticTexts["Dynamics aren't linked on the desk."].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["Dynamics aren't linked on the desk."].appears(within: 2))
         XCTAssertTrue(element("/ch/09/dyn/thr").exists)
         app.buttons["side-R"].tap()
-        XCTAssertTrue(element("/ch/10/dyn/thr").waitForExistence(timeout: 2))
+        XCTAssertTrue(element("/ch/10/dyn/thr").appears(within: 2))
         XCTAssertFalse(element("/ch/09/dyn/thr").exists)
         saveScreenshot("pair-comp-unlinked")
         app.buttons["EQ"].tap()

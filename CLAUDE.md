@@ -23,6 +23,8 @@ OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unoffic
 
 `scripts/lint.sh` clean, `swift test --package-path Core` green, and `scripts/ui-test.sh` green: it runs the UI suite on the **iPhone SE (3rd generation)** simulator (375 pt wide, like the target iPhone 11 Pro) against a freshly started `fake-m32`, and refuses to run while another fake holds port 10023. Every change ships a test that failed first.
 
+The full UI suite takes minutes, so run it once, on the final code, before pushing. While iterating, run only the classes the change touches: `scripts/ui-test.sh -only-testing:ThumbmixUITests/PairUITests`. A change that UI can't see (Core logic with its own tests, docs, CI) doesn't need it.
+
 ## How we work
 
 - **New UI starts with a mock.** Show the options side by side in the browser (the superpowers visual companion) and build the one the user picks; they choose layouts by seeing them.
@@ -40,6 +42,7 @@ OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unoffic
 - **Hooks** (`.claude/settings.json`): an edited Swift file is formatted with `swift format` straight away, and edits inside `Thumbmix.xcodeproj` are blocked.
 - **Fake state**: `fake-m32` keeps every set it receives, from tests and from a simulator app alike, so state-dependent tests fail against a used fake. `scripts/ui-test.sh` starts a fresh one; close the app in other simulators too, or it writes to that fake. A UI test that edits picks a channel no other test reads.
 - **375 pt screen edge**: on the iPhone SE the rows under the EQ graph start below the screen's bottom edge. A UI test scrolls by dragging from a visible row (the Type dropdown), never by swiping a hidden one.
+- **UI waits**: use `appears(within:)` and `eventually(within:)` (`UITests/Waiting.swift`), never `waitForExistence` or a predicate expectation: those look again only once a second, which was a third of the suite's time.
 - **Edit holds in tests**: for `ConsoleMirror.editHold` after the app's own edit, pushes for that address are ignored. A test that simulates a later desk change waits that out first.
 - **Mirrored parameters**: `CatalogTests.syncListIsCompleteAndUnique` pins the sync address count. A new mirrored parameter updates that count and its per-strip comment, and gets a typed default in `DemoState` (the fallback is `.float(0.5)`, wrong for int parameters).
 - **Merging**: `main` is protected (required `check`) and PRs are rebase-merged. A branch need not be up to date with `main` to merge; the `check` run on `main` after each merge catches two PRs that break only together (a pinned count like `CatalogTests`' sync count is the usual one). Before rebasing a pushed branch, compare it with `origin/<branch>`: GitHub's "Update branch" adds commits there. A conflict in `App/Localizable.xcstrings` resolves by taking `main`'s version and running `scripts/strings.sh`.
