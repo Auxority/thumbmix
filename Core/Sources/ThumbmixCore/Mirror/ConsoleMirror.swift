@@ -16,6 +16,8 @@ public enum MirrorStatus: Equatable, Sendable {
 public final class ConsoleMirror {
     public internal(set) var status: MirrorStatus = .connecting
     public var isLive: Bool { status == .live }
+    /// Sections whose partner didn't follow the app's edit this session; see ConsoleMirror+Link.
+    public internal(set) var sectionsSeenUnlinked: Set<LinkSection> = []
 
     @ObservationIgnored private(set) var cells: [String: ParamCell] = [:]
     @ObservationIgnored let link: ConsoleLink
@@ -26,7 +28,8 @@ public final class ConsoleMirror {
     @ObservationIgnored private var meterCells: [StripID: MeterCell] = [:]
     @ObservationIgnored private var sync: InitialSync?
     @ObservationIgnored private var pendingSends: [String: OSCArgument] = [:]
-    @ObservationIgnored private var holds = EditHolds(hold: ConsoleMirror.editHold)
+    @ObservationIgnored var holds = EditHolds(hold: ConsoleMirror.editHold)
+    @ObservationIgnored var linkCopies = LinkCopyCheck()
     @ObservationIgnored private let auditAddresses: [String]
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
@@ -102,6 +105,20 @@ public final class ConsoleMirror {
             log.notice("edit ignored for unread \(address, privacy: .public)")
             return
         }
+        write(address, argument)
+        if let partner = partnerAddress(of: address) { followLinkedEdit(partner, argument) }
+    }
+
+    /// The desk copies a shared section to the linked partner, but may not push that copy back: the partner is
+    /// re-read and checked. A desk that turns out not to copy gets both sides written by the app.
+    private func followLinkedEdit(_ partner: String, _ argument: OSCArgument) {
+        // Writing an unread partner would show a value the desk never sent.
+        guard linkCopies.deskCopies else { return cell(partner).argument == nil ? () : write(partner, argument) }
+        linkCopies.expect(partner, argument)
+        holds.rereadSoon(partner, now: .now)
+    }
+
+    func write(_ address: String, _ argument: OSCArgument) {
         cell(address).argument = argument
         holds.edited(address, now: .now)
         pendingSends[address] = argument
@@ -139,7 +156,17 @@ public final class ConsoleMirror {
             pumpSync()
         }
         if holds.isHeld(message.address, now: .now) { return }
+        store(argument, in: cell, at: message.address)
+    }
+
+    private func store(_ argument: OSCArgument, in cell: ParamCell, at address: String) {
+        let old = cell.argument
         cell.argument = argument
+        if let old, old != argument { linkSettingChanged(address) }
+        guard let wanted = linkCopies.received(address, argument, now: .now), let section = linkSection(of: address)
+        else { return }
+        log.warning("\(address, privacy: .public) didn't follow a linked edit (\(section.rawValue, privacy: .public))")
+        partnerDidNotFollow(address, wanted: wanted, section: section)
     }
 
     /// Every cell float is a 0...1 position; NaN or out-of-range values would crash or break the drawing.
@@ -174,7 +201,10 @@ public final class ConsoleMirror {
     }
 
     private func sendDueRereads() {
-        for address in holds.takeDueRereads(now: .now) { link.send(OSCMessage(address)) }
+        for address in holds.takeDueRereads(now: .now) {
+            linkCopies.rereadSent(address, now: .now)
+            link.send(OSCMessage(address))
+        }
     }
 
     private func sendNextAudit() {
@@ -191,6 +221,7 @@ public final class ConsoleMirror {
             startSync()
         case .lost:
             sync = nil
+            linkCopies.forget()
             status = .lost
         case .failed(let failure):
             status = .failed(failure)
@@ -204,6 +235,8 @@ public final class ConsoleMirror {
         sync = InitialSync(addresses: addresses)
         // An edit made just before an outage may never have reached the console; the resync is the truth.
         holds.clearTimedHolds()
+        linkCopies.forget()
+        sectionsSeenUnlinked.removeAll()
         status = .syncing(0)
         pumpSync()
     }

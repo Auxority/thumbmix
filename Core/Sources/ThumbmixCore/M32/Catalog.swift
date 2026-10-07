@@ -137,12 +137,18 @@ public enum Catalog {
     /// Every address the mirror reads on connect, names first so the overview fills in early.
     public static func syncAddresses() -> [String] {
         StripKind.allCases.flatMap(StripID.all).flatMap(addresses(of:)) + headampAddresses() + rtaAddresses
+            + linkAddresses
     }
+
+    /// Every pair's link switch and the four Link Preferences: they decide how the overview and tabs look.
+    public static let linkAddresses =
+        StripKind.allCases.flatMap(StripID.all).filter { $0 == $0.oddSide }.compactMap(\.linkAddress)
+        + LinkSection.allCases.map(\.preferenceAddress)
 
     /// Read on connect so the desk's own RTA setting is known before the app borrows it.
     private static let rtaAddresses = [RTA.source, RTA.position]
 
-    private static func addresses(of strip: StripID) -> [String] {
+    static func addresses(of strip: StripID) -> [String] {
         [strip.name, strip.color, strip.icon, strip.fader, strip.on] + [strip.pan, strip.dcaMask].compactMap { $0 }
             + inputAddresses(strip) + dynamicsAddresses(strip) + eqAddresses(strip) + sendAddresses(strip)
     }
@@ -175,7 +181,7 @@ public enum Catalog {
     /// The RTA setting is audited too: the doc doesn't say a change on the desk is pushed, and releasing
     /// the RTA must not overwrite a choice the engineer made on the desk meanwhile.
     public static func auditAddresses() -> [String] {
-        rtaAddresses
+        rtaAddresses + linkAddresses
             + StripKind.allCases.flatMap(StripID.all).flatMap { strip in
                 [strip.name, strip.color, strip.fader, strip.on] + [strip.pan].compactMap { $0 }
             }

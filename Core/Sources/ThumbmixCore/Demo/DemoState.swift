@@ -37,6 +37,17 @@ public enum DemoState {
         state[Catalog.headampIndex(forInput: 14)] = state[Catalog.headampIndex(forInput: 13)]
         state[Catalog.headampIndex(forInput: 15)] = .int(-1)
         state[Catalog.headampIndex(forInput: 16)] = .int(-1)
+        // Guitars and keys are stereo pairs, panned hard left and right as linking leaves them.
+        for odd in [9, 11] { link(StripID(.input, odd), in: &state) }
+    }
+
+    private static func link(_ odd: StripID, in state: inout [String: OSCArgument]) {
+        guard let address = odd.linkAddress, let even = odd.partner, let left = odd.pan, let right = even.pan else {
+            return
+        }
+        state[address] = .int(1)
+        state[left] = .float(0)
+        state[right] = .float(1)
     }
 
     /// Monitor mixes 1-4, each fed by both vocals at 0 dB.
@@ -65,6 +76,9 @@ public enum DemoState {
     static func defaultValue(for address: String) -> OSCArgument {
         // Every input reads from the matching AES50-A preamp (headamps 32-63), like a DL32 patched 1:1.
         if address.hasPrefix("/-ha/") { return .int(Int32(32 + (Int(address.split(separator: "/")[1]) ?? 0))) }
+        // Every Link Preference ticked, every pair unlinked: a desk after a reset (assumed; m32-probe section 7).
+        if address.hasPrefix("/config/linkcfg/") { return .int(1) }
+        if address.hasPrefix("/config/") { return .int(0) }
         return defaultsBySuffix.first { address.hasSuffix($0.suffix) }?.value ?? .float(0.5)
     }
 }

@@ -42,6 +42,16 @@
         }
       }
     },
+    "Aux %lld-%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aux %lld-%lld"
+          }
+        }
+      }
+    },
     "Bass & guitar" : {
       "localizations" : {
         "en" : {
@@ -68,6 +78,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bus %lld"
+          }
+        }
+      }
+    },
+    "Bus %lld-%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus %lld-%lld"
           }
         }
       }
@@ -99,6 +119,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ch %lld"
+          }
+        }
+      }
+    },
+    "Ch %lld-%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ch %lld-%lld"
           }
         }
       }
@@ -202,6 +232,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "FX %lld"
+          }
+        }
+      }
+    },
+    "FX %lld-%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FX %lld-%lld"
           }
         }
       }

@@ -4,6 +4,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## On the real M32
 
+- [ ] **Before using stereo pairs live:** link two channels on the desk, then move the pair's fader in Thumbmix. Does the desk move the other side by itself? The app writes one side and trusts the desk to copy it, then re-reads the other side. If a fader, mute or send didn't follow, the app writes both sides from then on; if anything else didn't follow (gain, EQ incl. low cut, dynamics: unverified), it shows that section per side and writes nothing. Either way it logs "didn't follow a linked edit". No test can tell: the fake console was written to copy.
 - [ ] Run `m32-probe` with Mixing Station connected, and record each answer in a comment where the code depends on it:
   - Section 2: does `/xremote` push to a 7th+ client? The doc mentions a 4-client limit.
   - Section 3: the headamp feeding each input.
