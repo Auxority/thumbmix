@@ -29,16 +29,27 @@ struct StripRow: View {
         Button(action: onOpen) {
             HStack(spacing: 8) {
                 RoundedRectangle(cornerRadius: 3).fill(color).frame(width: 6, height: 40)
-                Text(mirror.name(strip))
-                    .font(.headline)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(mirror.name(strip))
+                        .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                    if !number.isEmpty {
+                        Text(number).font(.caption2).foregroundStyle(Theme.secondaryText)
+                    }
+                }
                 Spacer(minLength: 0)
             }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(mirror.name(strip))
+        .accessibilityValue(number)
+    }
+
+    /// The number printed on the desk; the mains have none.
+    private var number: String {
+        [.mainStereo, .mainMono].contains(strip.kind) ? "" : "\(strip.number)"
     }
 
     @ViewBuilder private var faderAndMute: some View {

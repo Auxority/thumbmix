@@ -57,15 +57,15 @@ final class ChannelUITests: XCTestCase {
         }
     }
 
-    /// Like the desk, a preamp channel offers Gain and 48V; trim is for digital sources only (doc fn.18).
-    func testPreampChannelShowsGainNotTrim() {
+    /// The engineer sets both on a preamp channel: Gain and 48V for the preamp, Trim for the channel.
+    func testPreampChannelShowsGainAndTrim() {
         launch()
         open("Vox 2")
         app.buttons["Input"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["/headamp/044/gain"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["toggle-/headamp/044/phantom"].exists)
         XCTAssertTrue(app.staticTexts["Shared with Vox 1"].exists)
-        XCTAssertFalse(app.descendants(matching: .any)["/ch/14/preamp/trim"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["/ch/14/preamp/trim"].exists)
         saveScreenshot("task-13-input")
     }
 
