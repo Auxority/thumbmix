@@ -55,7 +55,15 @@ struct OverviewView: View {
             .onChange(of: group) { refreshVisibleItems() }
             .onChange(of: showUnused) { refreshVisibleItems() }
             .onChange(of: mirror.status) { refreshVisibleItems() }
-            .onChange(of: linkState) { refreshVisibleItems() }
+            .onChange(of: linkState) { refreshOnceNoFingerIsDown() }
+        }
+    }
+
+    /// A link changed on the desk mid-drag would rebuild the row under the finger; the list regroups once it lifts.
+    private func refreshOnceNoFingerIsDown() {
+        Task {
+            while mirror.isFingerDown { try? await Task.sleep(for: .milliseconds(100)) }
+            refreshVisibleItems()
         }
     }
 
