@@ -14,9 +14,13 @@ struct TransportTests {
         defer { transport.cancel() }
         let recorder = MessageRecorder(transport.messages)
 
-        transport.send(OSCMessage("/info"))
-
-        let reply = await recorder.wait(for: "/info")
+        // UDP may drop one datagram, and a busy CI runner can take longer than one wait: ask again, like the
+        // app's sync does. A single /info with a 2 s wait failed on CI under load (PR #33's run).
+        var reply: OSCMessage?
+        for _ in 1...5 where reply == nil {
+            transport.send(OSCMessage("/info"))
+            reply = await recorder.wait(for: "/info")
+        }
         #expect(reply?.string(at: 2) == "M32")
     }
 
