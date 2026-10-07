@@ -6,7 +6,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 - [ ] Run `m32-probe` with Mixing Station connected, and record each answer in a comment where the code depends on it:
   - Section 2: does `/xremote` push to a 7th+ client? The doc mentions a 4-client limit.
-  - Section 3: the headamp feeding each input.
+  - Section 3: what feeds each input (local preamp, AES50, card such as Dante, USB; Rec or Playback routing), and the gain/trim question. Since #26 the app shows Trim on every input, but the doc lists trim as "digital sources only". On the desk: does a preamp channel offer Trim, and does it change the level? Does a card channel offer only Trim? Does Playback mode change that? Then decide: keep #26, revert it, or show Trim only for card inputs and in Playback mode.
   - Section 4: the DCA bit order.
   - Section 5: the DCA meter slots.
   - Section 6: does `/meters/15` follow `/-prefs/rta/source`, and does "after EQ" include the low cut and the compressor?
