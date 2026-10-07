@@ -41,18 +41,23 @@ struct SpectrumGlow: View {
     }
 }
 
-/// Says the desk's RTA is borrowed, only while spectrum data is actually arriving.
+/// Says the desk's RTA is borrowed only once spectrum data actually arrives. The line is always there: appearing
+/// with the first data, it pushed the rows under it down a line just after the tab opened.
 struct RTAStatus: View {
     let spectrum: SpectrumCell
     let name: String
 
     var body: some View {
-        if !spectrum.decibels.isEmpty {
-            Text("RTA follows \(name) (after EQ)")
-                .font(.caption2)
-                .foregroundStyle(Theme.secondaryText)
-                .frame(maxWidth: .infinity)
-                .accessibilityIdentifier("rta-status")
+        Group {
+            if spectrum.decibels.isEmpty {
+                Text("RTA: waiting for the desk…")
+            } else {
+                Text("RTA follows \(name) (after EQ)")
+            }
         }
+        .font(.caption2)
+        .foregroundStyle(Theme.secondaryText)
+        .frame(maxWidth: .infinity)
+        .accessibilityIdentifier("rta-status")
     }
 }
