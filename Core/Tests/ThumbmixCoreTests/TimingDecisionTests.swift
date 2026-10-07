@@ -81,6 +81,16 @@ struct EditHoldsTests {
         #expect(!holds.isHeld("/f", now: now + .milliseconds(400)))
     }
 
+    /// The overview waits for this before it regroups rows after a link change.
+    @Test func aFingerIsDownOnlyDuringAGesture() {
+        var holds = EditHolds(hold: hold)
+        #expect(!holds.isFingerDown)
+        holds.begin("/f")
+        #expect(holds.isFingerDown)
+        holds.end("/f", now: now)
+        #expect(!holds.isFingerDown, "the brief hold after release is not a finger")
+    }
+
     @Test func resyncClearsTimedHoldsButNotActiveGestures() {
         var holds = EditHolds(hold: hold)
         holds.edited("/a", now: now)

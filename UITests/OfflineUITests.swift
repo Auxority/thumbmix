@@ -34,6 +34,8 @@ final class OfflineUITests: XCTestCase {
         let offline = app.buttons["Try offline (demo console)"]
         XCTAssertTrue(offline.waitForExistence(timeout: 5))
         offline.tap()
-        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
+        // Names show while the sync still runs and the rows are disabled; a tap then does nothing.
+        let live = expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: app.buttons["Kick"])
+        wait(for: [live], timeout: 15)
     }
 }

@@ -9,6 +9,8 @@ struct ParameterRow: View {
     var accent: Color = .white
     var height: CGFloat = 48
     var meter: MeterCell?
+    /// A linked pair's left side, drawn above `meter` (the right side).
+    var upperMeter: MeterCell?
 
     @State private var dragStart: Float?
     @State private var unityTicks = 0
@@ -26,6 +28,7 @@ struct ParameterRow: View {
                         .fill(accent.opacity(dragStart == nil ? 0.28 : 0.45))
                         .frame(width: geometry.size.width * CGFloat(position ?? 0))
                     if let meter { MeterLine(cell: meter, width: geometry.size.width) }
+                    if let upperMeter { MeterLine(cell: upperMeter, width: geometry.size.width).padding(.bottom, 5) }
                 }
             }
             HStack {

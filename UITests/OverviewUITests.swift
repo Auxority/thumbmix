@@ -128,6 +128,21 @@ final class OverviewUITests: XCTestCase {
         XCTAssertEqual(app.buttons["LR"].value as? String, "", "a main bus has no number")
     }
 
+    /// The demo desk links Gtr L/R (9-10): one row named by what both names share, numbered with both channels.
+    func testALinkedPairIsOneRow() {
+        launch()
+        app.swipeUp()
+        let pair = app.buttons["Gtr"]
+        XCTAssertTrue(pair.waitForExistence(timeout: 2))
+        XCTAssertEqual(pair.value as? String, "9-10")
+        XCTAssertFalse(app.buttons["Gtr L"].exists)
+        XCTAssertFalse(app.buttons["Gtr R"].exists)
+        saveScreenshot("pair-row")
+        pair.tap()
+        XCTAssertTrue(app.buttons["+1 dB"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["/ch/09/mix/fader"].exists, "the pair opens on its odd side")
+    }
+
     func testChipsSwitchGroups() {
         launch()
         app.buttons["Buses"].tap()

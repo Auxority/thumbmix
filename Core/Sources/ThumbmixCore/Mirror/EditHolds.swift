@@ -32,6 +32,8 @@ struct EditHolds {
         rereadAt[address] = now + hold
     }
 
+    var isFingerDown: Bool { !editing.isEmpty }
+
     func isHeld(_ address: String, now: ContinuousClock.Instant) -> Bool {
         if editing.contains(address) { return true }
         guard let until = heldUntil[address] else { return false }
