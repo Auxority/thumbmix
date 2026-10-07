@@ -51,8 +51,9 @@ final class ConnectUITests: XCTestCase {
     }
 
     func testConnectsToFakeAndSyncs() {
+        guard let desk = TestDesk.start(for: self) else { return }
         let app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
+        app.launchArguments = desk.connect + fixedLocale
         app.launch()
 
         XCTAssertTrue(app.buttons["Kick"].appears(within: 15))

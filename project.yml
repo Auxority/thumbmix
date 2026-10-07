@@ -55,6 +55,11 @@ targets:
     sources: [UITests]
     dependencies:
       - target: Thumbmix
+      # Each test runs its own fake desk inside the test runner (UITests/TestDesk.swift).
+      - package: ThumbmixCore
+        product: ThumbmixCore
+      - package: ThumbmixCore
+        product: FakeM32
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

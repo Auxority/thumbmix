@@ -21,10 +21,19 @@ final class AppModel {
 
     var lastHost: String? { UserDefaults.standard.string(forKey: Self.lastHostKey) }
 
+    /// A real M32 always listens on 10023. UI tests pass `-consolePort` to reach the fake desk each test starts.
+    private static var consolePort: UInt16 {
+        #if DEBUG
+            let port = UserDefaults.standard.integer(forKey: "consolePort")
+            if (1...65535).contains(port) { return UInt16(port) }
+        #endif
+        return 10023
+    }
+
     func connect(to host: String) {
         guard Discovery.isUsableIPv4(host) else { return }
         disconnect()
-        let mirror = ConsoleMirror(link: ConsoleLink(host: host))
+        let mirror = ConsoleMirror(link: ConsoleLink(host: host, port: Self.consolePort))
         mirror.start()
         self.mirror = mirror
         self.host = host
