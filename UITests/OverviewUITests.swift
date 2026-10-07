@@ -117,6 +117,17 @@ final class OverviewUITests: XCTestCase {
         saveScreenshot("dynamic-type-overview")
     }
 
+    /// The engineer finds a channel by its number on the desk as often as by its name.
+    func testEachRowShowsItsChannelNumber() {
+        launch()
+        XCTAssertEqual(app.buttons["Kick"].value as? String, "1")
+        XCTAssertEqual(app.buttons["Vox 2"].value as? String, "14")
+        saveScreenshot("channel-numbers")
+        app.buttons["Main"].tap()
+        XCTAssertTrue(app.buttons["LR"].waitForExistence(timeout: 2))
+        XCTAssertEqual(app.buttons["LR"].value as? String, "", "a main bus has no number")
+    }
+
     func testChipsSwitchGroups() {
         launch()
         app.buttons["Buses"].tap()
