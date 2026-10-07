@@ -298,9 +298,26 @@ final class ChannelUITests: XCTestCase {
         open("Kick")
         app.buttons["EQ"].tap()
         let status = app.staticTexts["rta-status"]
-        XCTAssertTrue(status.waitForExistence(timeout: 5))
-        XCTAssertEqual(status.label, "RTA follows Kick (after EQ)")
+        let following = expectation(
+            for: NSPredicate(format: "label == %@", "RTA follows Kick (after EQ)"), evaluatedWith: status)
+        wait(for: [following], timeout: 5)
         saveScreenshot("eq-spectrum")
+    }
+
+    /// The RTA status line appeared only once spectrum data came in, pushing everything under it down a line:
+    /// Reset bands showed for a moment, then jumped.
+    func testNothingMovesWhenTheSpectrumArrives() {
+        launch()
+        open("Kick")
+        app.buttons["EQ"].tap()
+        let reset = app.buttons["Reset bands"]
+        XCTAssertTrue(reset.waitForExistence(timeout: 2))
+        let before = reset.frame.minY
+        let following = expectation(
+            for: NSPredicate(format: "label == %@", "RTA follows Kick (after EQ)"),
+            evaluatedWith: app.staticTexts["rta-status"])
+        wait(for: [following], timeout: 5)
+        XCTAssertEqual(reset.frame.minY, before, accuracy: 0.5)
     }
 
     func testBusEQHasSixBands() {
