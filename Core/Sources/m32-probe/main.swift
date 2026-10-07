@@ -62,14 +62,10 @@ print(
     pushes.isEmpty
         ? "RESULT: NO pushes. The /xremote client limit may be reached." : "RESULT: pushes arrive.")
 
-// Trim is shown only for internal sources; a non-zero trim on a preamp channel would be hidden in the app.
-print("\n== 3. Preamp feeding each input (/-ha/NN/index; 32-79 = AES50-A, -1 = internal) and its trim (0.5 = 0 dB)")
+print("\n== 3. Preamp feeding each input (/-ha/NN/index; 32-79 = AES50-A, -1 = internal)")
 for input in 1...32 {
     let headamp = await ask(Catalog.headampIndex(forInput: input))
-    let trim = await ask(Catalog.trim(StripID(.input, input)).address)
-    print(
-        String(format: "ch %02d -> ", input) + (headamp.map(describe) ?? "NO REPLY") + "   trim "
-            + (trim.map(describe) ?? "NO REPLY"))
+    print(String(format: "ch %02d -> ", input) + (headamp.map(describe) ?? "NO REPLY"))
 }
 
 print("\n== 4. Names and DCA masks: compare with the DCA assignments on the desk")

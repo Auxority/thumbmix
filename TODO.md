@@ -6,7 +6,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 - [ ] Run `m32-probe` with Mixing Station connected, and record each answer in a comment where the code depends on it:
   - Section 2: does `/xremote` push to a 7th+ client? The doc mentions a 4-client limit.
-  - Section 3: the headamp feeding each input, and whether any preamp channel has a non-zero trim (the app hides trim there).
+  - Section 3: the headamp feeding each input.
   - Section 4: the DCA bit order.
   - Section 5: the DCA meter slots.
   - Section 6: does `/meters/15` follow `/-prefs/rta/source`, and does "after EQ" include the low cut and the compressor?
@@ -26,7 +26,6 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
 - [ ] **Matrix group.** Show Matrix 1–6 (overview chip and a basic strip screen), so they can be renamed and mixed too.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
-- [ ] **Gain and Trim together.** Show both on every input that has a preamp, not one or the other: the engineer uses both (this reverses #5's choice). Internal sources keep Trim only.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
 - [ ] revisit **Unused** approach
 - [ ] **Solo** per channel.

@@ -9,7 +9,6 @@ struct InputTab: View {
         ScrollView {
             VStack(spacing: 8) {
                 InputMeter(cell: mirror.meter(strip))
-                // Like the desk: a preamp channel's level is set by its gain, and trim is for digital sources only (doc fn.18).
                 if let headamp = mirror.headamp(forInput: strip.number) {
                     ParameterRow(spec: Catalog.headampGain(headamp), mirror: mirror)
                     sharedWarning
@@ -23,8 +22,9 @@ struct InputTab: View {
                         .font(.callout)
                         .foregroundStyle(Theme.secondaryText)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    ParameterRow(spec: Catalog.trim(strip), mirror: mirror)
                 }
+                // Engineers trim preamp channels too, so Trim shows on every input, not only digital sources.
+                ParameterRow(spec: Catalog.trim(strip), mirror: mirror)
             }
         }
     }
