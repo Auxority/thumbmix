@@ -91,6 +91,16 @@ struct LinkModelTests {
         #expect(mirror.partnerAddress(of: "/headamp/050/gain") == nil, "feeds no linked input")
     }
 
+    /// A headamp feeding two inputs can't say which pair an edit belongs to; no guess is made.
+    @Test func aSharedHeadampHasNoPartner() {
+        mirror.apply(OSCMessage("/config/linkcfg/hadly", [.int(1)]))
+        mirror.apply(OSCMessage("/config/chlink/9-10", [.int(1)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 9), [.int(40)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 10), [.int(41)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 3), [.int(40)]))
+        #expect(mirror.partnerAddress(of: "/headamp/040/gain") == nil)
+    }
+
     @Test func pairNameFromBothSides() {
         mirror.apply(OSCMessage("/ch/09/config/name", [.string("Gtr L")]))
         mirror.apply(OSCMessage("/ch/10/config/name", [.string("Gtr R")]))

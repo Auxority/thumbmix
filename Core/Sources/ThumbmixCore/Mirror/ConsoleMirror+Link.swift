@@ -37,14 +37,33 @@ extension ConsoleMirror {
         return PairName.make(odd: rawName(odd), even: rawName(even), fallback: strip.pairDefaultName)
     }
 
-    /// Linking makes the desk pan the sides hard left and right, so both pans are read back afterwards.
     public func setLinked(_ strip: StripID, _ linked: Bool) {
         guard let address = strip.linkAddress else { return }
         set(address, .int(linked ? 1 : 0))
-        for side in [strip.oddSide, strip.oddSide.partner].compactMap({ $0 }) {
-            if let pan = side.pan { holds.rereadSoon(pan, now: .now) }
+        rereadPair(strip.oddSide)
+    }
+
+    /// A link or Link Preference that changed, here or on the desk, decides what the screens show next.
+    func linkSettingChanged(_ address: String) {
+        if let section = LinkSection.allCases.first(where: { $0.preferenceAddress == address }) {
+            sectionsSeenUnlinked.remove(section)
+        } else if let odd = Self.pairsByLinkAddress[address] {
+            rereadPair(odd)
         }
     }
+
+    /// Linking pans the sides apart and may copy the odd side's settings, and the desk may not push any of it:
+    /// both strips are read back, spread out so the desk isn't flooded.
+    private func rereadPair(_ odd: StripID) {
+        let addresses = [odd, odd.partner].compactMap { $0 }.flatMap(Catalog.addresses(of:))
+        for (index, address) in addresses.enumerated() {
+            holds.rereadSoon(address, now: .now + .milliseconds(5 * index))
+        }
+    }
+
+    private static let pairsByLinkAddress = Dictionary(
+        uniqueKeysWithValues: StripKind.allCases.flatMap(StripID.all).filter { $0 == $0.oddSide }
+            .compactMap { odd in odd.linkAddress.map { ($0, odd) } })
 
     /// The partner's copy of `address` when the desk copies this edit to it; nil otherwise.
     func partnerAddress(of address: String) -> String? {
@@ -55,11 +74,13 @@ extension ConsoleMirror {
         return partner.prefix + suffix
     }
 
-    /// "/headamp/040/gain" → the same parameter on the headamp feeding the linked partner input.
+    /// "/headamp/040/gain" → the same parameter on the headamp feeding the linked partner input. A headamp feeding
+    /// several inputs can't say which pair the edit is for, so it gets no partner.
     private func partnerHeadampAddress(of address: String) -> String? {
         let parts = address.split(separator: "/", maxSplits: 2)
-        guard isShared(.gainDelay), parts.count == 3, let index = Int(parts[1]),
-            let input = (1...32).first(where: { headamp(forInput: $0) == index }),
+        guard isShared(.gainDelay), parts.count == 3, let index = Int(parts[1]) else { return nil }
+        let inputs = (1...32).filter { headamp(forInput: $0) == index }
+        guard inputs.count == 1, let input = inputs.first,
             isLinked(StripID(.input, input)), let partner = StripID(.input, input).partner,
             let partnerIndex = headamp(forInput: partner.number), partnerIndex != index
         else { return nil }

@@ -21,6 +21,13 @@ struct PairNameTests {
     @Test func nothingSharedOrAMidWordCutShowsTheOddName() {
         #expect(PairName.make(odd: "Keys", even: "Pad", fallback: "Ch 7-8") == "Keys")
         #expect(PairName.make(odd: "Guitar", even: "Guiro", fallback: "Ch 7-8") == "Guitar")
+        #expect(PairName.make(odd: "Pal", even: "Par", fallback: "Ch 7-8") == "Pal", "a lowercase l/r is part of a word")
+    }
+
+    /// A cut inside a number or word backs off to the last word boundary.
+    @Test func aCutInsideANumberBacksOffToTheWord() {
+        #expect(PairName.make(odd: "Ch 1", even: "Ch 12", fallback: "Ch 7-8") == "Ch")
+        #expect(PairName.make(odd: "Vox 10", even: "Vox 11", fallback: "Ch 7-8") == "Vox")
     }
 
     @Test func oneNamedSideNamesThePair() {

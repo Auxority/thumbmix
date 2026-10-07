@@ -112,7 +112,8 @@ public final class ConsoleMirror {
     /// The desk copies a shared section to the linked partner, but may not push that copy back: the partner is
     /// re-read and checked. A desk that turns out not to copy gets both sides written by the app.
     private func followLinkedEdit(_ partner: String, _ argument: OSCArgument) {
-        guard linkCopies.deskCopies else { return write(partner, argument) }
+        // Writing an unread partner would show a value the desk never sent.
+        guard linkCopies.deskCopies else { return cell(partner).argument == nil ? () : write(partner, argument) }
         linkCopies.expect(partner, argument)
         holds.rereadSoon(partner, now: .now)
     }
@@ -159,10 +160,11 @@ public final class ConsoleMirror {
     }
 
     private func store(_ argument: OSCArgument, in cell: ParamCell, at address: String) {
+        let old = cell.argument
         cell.argument = argument
-        guard let wanted = linkCopies.received(address, argument), let section = linkSection(of: address) else {
-            return
-        }
+        if let old, old != argument { linkSettingChanged(address) }
+        guard let wanted = linkCopies.received(address, argument, now: .now), let section = linkSection(of: address)
+        else { return }
         log.warning("\(address, privacy: .public) didn't follow a linked edit (\(section.rawValue, privacy: .public))")
         partnerDidNotFollow(address, wanted: wanted, section: section)
     }
@@ -200,7 +202,7 @@ public final class ConsoleMirror {
 
     private func sendDueRereads() {
         for address in holds.takeDueRereads(now: .now) {
-            linkCopies.rereadSent(address)
+            linkCopies.rereadSent(address, now: .now)
             link.send(OSCMessage(address))
         }
     }
@@ -219,6 +221,7 @@ public final class ConsoleMirror {
             startSync()
         case .lost:
             sync = nil
+            linkCopies.forget()
             status = .lost
         case .failed(let failure):
             status = .failed(failure)
@@ -232,6 +235,8 @@ public final class ConsoleMirror {
         sync = InitialSync(addresses: addresses)
         // An edit made just before an outage may never have reached the console; the resync is the truth.
         holds.clearTimedHolds()
+        linkCopies.forget()
+        sectionsSeenUnlinked.removeAll()
         status = .syncing(0)
         pumpSync()
     }

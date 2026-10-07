@@ -11,20 +11,26 @@ public enum PairName {
         }
     }
 
-    /// Cut only at a word boundary: "Guitar"/"Guiro" share "Gui", which names neither.
+    /// Cut only at a word boundary: "Guitar"/"Guiro" share "Gui", which names neither. A cut inside a word or number
+    /// backs off to the last separator: "Ch 1"/"Ch 12" → "Ch".
     private static func sharedStart(_ odd: String, _ even: String) -> String? {
-        let common = String(zip(odd, even).prefix { $0 == $1 }.map(\.0))
-        guard !common.isEmpty, endsAtBoundary(common, odd, even) else { return nil }
+        var common = String(zip(odd, even).prefix { $0 == $1 }.map(\.0))
+        if !endsAtBoundary(common, odd, even) {
+            guard let cut = common.lastIndex(where: isSeparator) else { return nil }
+            common = String(common[...cut])
+        }
         let trimmed = String(common.reversed().drop(while: isSeparator).reversed())
         return trimmed.isEmpty ? nil : trimmed
     }
 
-    /// A boundary is a separator, a digit or a name's end after the shared part, or a lone L/R that differs ("OHL"/"OHR").
+    /// A boundary is a separator or a name's end after the shared part, a digit after letters ("Synth1"/"Synth2"),
+    /// or a capital L and R that differ ("OHL"/"OHR"; "Pal"/"Par" is one word).
     private static func endsAtBoundary(_ common: String, _ odd: String, _ even: String) -> Bool {
         if common.last.map(isSeparator) == true { return true }
-        let rests = [odd, even].map { $0.dropFirst(common.count) }
-        if rests.allSatisfy({ ["L", "R"].contains($0.uppercased()) }) { return true }
-        return rests.allSatisfy { rest in rest.first.map { isSeparator($0) || $0.isNumber } ?? true }
+        let rests = [odd, even].map { String($0.dropFirst(common.count)) }
+        if Set(rests) == ["L", "R"] { return true }
+        let insideNumber = common.last?.isNumber == true
+        return rests.allSatisfy { rest in rest.first.map { isSeparator($0) || ($0.isNumber && !insideNumber) } ?? true }
     }
 
     private static func isSeparator(_ character: Character) -> Bool {
