@@ -27,6 +27,7 @@ public final class ConsoleMirror {
     @ObservationIgnored private var sync: InitialSync?
     @ObservationIgnored private var pendingSends: [String: OSCArgument] = [:]
     @ObservationIgnored var holds = EditHolds(hold: ConsoleMirror.editHold)
+    @ObservationIgnored private var linkCopies = LinkCopyCheck()
     @ObservationIgnored private let auditAddresses: [String]
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
@@ -102,11 +103,22 @@ public final class ConsoleMirror {
             log.notice("edit ignored for unread \(address, privacy: .public)")
             return
         }
+        write(address, argument)
+        if let partner = partnerAddress(of: address) { followLinkedEdit(partner, argument) }
+    }
+
+    /// The desk copies a shared section to the linked partner, but may not push that copy back: the partner is
+    /// re-read and checked. A desk that turns out not to copy gets both sides written by the app.
+    private func followLinkedEdit(_ partner: String, _ argument: OSCArgument) {
+        guard linkCopies.deskCopies else { return write(partner, argument) }
+        linkCopies.expect(partner, argument)
+        holds.rereadSoon(partner, now: .now)
+    }
+
+    private func write(_ address: String, _ argument: OSCArgument) {
         cell(address).argument = argument
         holds.edited(address, now: .now)
         pendingSends[address] = argument
-        // The desk copies a shared section to the linked partner but may not push that change back to us.
-        if let partner = partnerAddress(of: address) { holds.rereadSoon(partner, now: .now) }
     }
 
     /// The user's finger owns a control from touch-down until shortly after release.
@@ -141,7 +153,15 @@ public final class ConsoleMirror {
             pumpSync()
         }
         if holds.isHeld(message.address, now: .now) { return }
+        store(argument, in: cell, at: message.address)
+    }
+
+    /// A linked partner that didn't follow the app's edit is put right at once.
+    private func store(_ argument: OSCArgument, in cell: ParamCell, at address: String) {
         cell.argument = argument
+        guard let repair = linkCopies.received(address, argument) else { return }
+        log.warning("desk didn't copy a linked edit to \(address, privacy: .public); writing both sides")
+        write(address, repair)
     }
 
     /// Every cell float is a 0...1 position; NaN or out-of-range values would crash or break the drawing.
@@ -176,7 +196,10 @@ public final class ConsoleMirror {
     }
 
     private func sendDueRereads() {
-        for address in holds.takeDueRereads(now: .now) { link.send(OSCMessage(address)) }
+        for address in holds.takeDueRereads(now: .now) {
+            linkCopies.rereadSent(address)
+            link.send(OSCMessage(address))
+        }
     }
 
     private func sendNextAudit() {

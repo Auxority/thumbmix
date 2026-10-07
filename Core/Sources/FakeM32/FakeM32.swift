@@ -23,6 +23,7 @@ public final class FakeM32: @unchecked Sendable {
     private var modelStorage: String
     private var isSilent = false
     private var isIgnoringXremote = false
+    private var isCopyingLinkedEdits = true
     private var getsToDrop = 0
     private var sets: [OSCMessage] = []
 
@@ -77,6 +78,12 @@ public final class FakeM32: @unchecked Sendable {
     public var ignoresXremote: Bool {
         get { queue.sync { isIgnoringXremote } }
         set { queue.sync { isIgnoringXremote = newValue } }
+    }
+
+    /// Off plays a desk that doesn't copy an OSC edit to the linked partner (still unconfirmed either way).
+    public var copiesLinkedEdits: Bool {
+        get { queue.sync { isCopyingLinkedEdits } }
+        set { queue.sync { isCopyingLinkedEdits = newValue } }
     }
 
     public func dropNextGets(_ count: Int) { queue.sync { getsToDrop = count } }
@@ -178,7 +185,7 @@ public final class FakeM32: @unchecked Sendable {
     /// when a pair is linked. Encodes the user's desk observations; m32-probe section 7 checks them.
     private func linkEffects(of message: OSCMessage) -> [OSCMessage] {
         if Catalog.linkAddresses.contains(message.address) { return linkingPans(message) }
-        guard let (strip, suffix) = StripID.linkable(from: message.address),
+        guard isCopyingLinkedEdits, let (strip, suffix) = StripID.linkable(from: message.address),
             let section = LinkSection.of(suffix: suffix), state[section.preferenceAddress] == .int(1),
             let link = strip.linkAddress, state[link] == .int(1), let partner = strip.partner
         else { return [] }

@@ -22,6 +22,25 @@ struct LinkSyncTests {
         #expect(!fake.receivedSets.contains { $0.address == gtrR.address }, "the app wrote one side only")
     }
 
+    /// Unconfirmed on a real desk: if it doesn't copy an OSC edit to the partner, the app repairs the partner
+    /// once the re-read shows it, then writes both sides itself for the rest of the session.
+    @Test func aDeskThatDoesNotCopyGetsBothSidesWritten() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        fake.copiesLinkedEdits = false
+        let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
+        let gtrL = Catalog.fader(StripID(.input, 9)).address
+        let gtrR = Catalog.fader(StripID(.input, 10)).address
+
+        mirror.set(gtrL, .float(0.25))
+        #expect(await eventually { fake.value(at: gtrR) == .float(0.25) }, "the partner is repaired")
+
+        mirror.set(gtrL, .float(0.6))
+        #expect(await eventually { fake.receivedSets.contains(OSCMessage(gtrR, [.float(0.6)])) }, "written directly")
+        #expect(mirror.cell(gtrR).argument == .float(0.6))
+    }
+
     @Test func panIsNotCopied() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
