@@ -219,11 +219,24 @@ public final class FakeM32: @unchecked Sendable {
         guard !isSilent else { return }
         let now = Date()
         let time = now.timeIntervalSince(started)
+        let afterEQ = rtaAfterEQ()
         for client in clients.values {
             for (bank, until) in client.meterBanksUntil where until > now {
-                send(OSCMessage(bank, [.blob(FakeState.meterBlob(bank: bank, time: time))]), to: client)
+                send(OSCMessage(bank, [.blob(FakeState.meterBlob(bank: bank, time: time, afterEQ: afterEQ))]), to: client)
             }
         }
+    }
+
+    /// With the RTA "after EQ" on a strip, the curve the app draws for that strip's EQ and low cut. Whether the
+    /// desk's "after EQ" includes the low cut is open (m32-probe section 6); the demo assumes it does.
+    private func rtaAfterEQ() -> (Double) -> Double {
+        guard state[RTA.position] == .int(RTA.afterEQ), case .int(let source)? = state[RTA.source],
+            let strip = StripKind.allCases.flatMap(StripID.all).first(where: { $0.rtaSource == source })
+        else { return { _ in 0 } }
+        let values = state
+        let bands = EQReading.bands(strip) { values[$0] }
+        let lowCut = EQReading.lowCut(strip) { values[$0] }
+        return { hertz in EQReading.decibels(at: hertz, bands: bands, lowCut: lowCut) }
     }
 
     private func send(_ message: OSCMessage, to client: Client) {

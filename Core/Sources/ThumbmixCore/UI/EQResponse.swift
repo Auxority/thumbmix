@@ -93,31 +93,52 @@ public struct LowCutState: Equatable, Sendable {
     }
 }
 
-extension ConsoleMirror {
-    /// nil when the strip has no low cut, it is off, or its values were never read: the graph draws no cut.
-    public func lowCut(_ strip: StripID) -> LowCutState? {
-        guard let specs = Catalog.lowCut(strip), cell(specs.on.address).argument == .int(1),
-            let frequency = normalized(specs.frequency), let slope = normalized(specs.slope)
+/// A strip's EQ and low cut from raw desk values, wherever they are kept: the mirror's cells for the graph, the
+/// fake console's state for the offline demo's "after EQ" spectrum.
+public enum EQReading {
+    /// nil when the strip has no low cut, it is off, or its values were never read: no cut is drawn.
+    public static func lowCut(_ strip: StripID, value: (String) -> OSCArgument?) -> LowCutState? {
+        guard let specs = Catalog.lowCut(strip), value(specs.on.address) == .int(1),
+            let frequency = normalized(specs.frequency, value), let slope = normalized(specs.slope, value)
         else { return nil }
         return LowCutState(
             frequency: specs.frequency.scale.value(fromNormalized: frequency),
             slopeIndex: Int(specs.slope.scale.value(fromNormalized: slope)))
     }
 
-    /// Empty when the strip's EQ is off, so the graph draws flat.
-    public func eqBands(_ strip: StripID) -> [EQBandState] {
-        guard strip.eqBandCount > 0, cell(Catalog.eqOn(strip).address).argument == .int(1) else {
-            return []
+    /// Empty when the strip's EQ is off, so the curve is flat.
+    public static func bands(_ strip: StripID, value: (String) -> OSCArgument?) -> [EQBandState] {
+        guard strip.eqBandCount > 0, value(Catalog.eqOn(strip).address) == .int(1) else { return [] }
+        func real(_ spec: ParamSpec, _ fallback: Float) -> Double {
+            spec.scale.value(fromNormalized: normalized(spec, value) ?? fallback)
         }
         return (1...strip.eqBandCount).map { band in
             let specs = Catalog.eqBand(strip, band)
             return EQBandState(
-                typeIndex: Int(specs.type.scale.value(fromNormalized: normalized(specs.type) ?? 0)),
-                frequency: specs.frequency.scale.value(fromNormalized: normalized(specs.frequency) ?? 0.5),
-                gain: specs.gain.scale.value(fromNormalized: normalized(specs.gain) ?? 0.5),
-                q: specs.q.scale.value(fromNormalized: normalized(specs.q) ?? 0.5)
-            )
+                typeIndex: Int(real(specs.type, 0)), frequency: real(specs.frequency, 0.5),
+                gain: real(specs.gain, 0.5), q: real(specs.q, 0.5))
         }
+    }
+
+    /// The curve's level at `hertz`: the bands plus the low cut.
+    public static func decibels(at hertz: Double, bands: [EQBandState], lowCut: LowCutState?) -> Double {
+        EQResponse.decibels(at: hertz, bands: bands) + (lowCut?.decibels(at: hertz) ?? 0)
+    }
+
+    private static func normalized(_ spec: ParamSpec, _ value: (String) -> OSCArgument?) -> Float? {
+        value(spec.address).flatMap(spec.scale.normalized(from:))
+    }
+}
+
+extension ConsoleMirror {
+    /// nil when the strip has no low cut, it is off, or its values were never read: the graph draws no cut.
+    public func lowCut(_ strip: StripID) -> LowCutState? {
+        EQReading.lowCut(strip) { cell($0).argument }
+    }
+
+    /// Empty when the strip's EQ is off, so the graph draws flat.
+    public func eqBands(_ strip: StripID) -> [EQBandState] {
+        EQReading.bands(strip) { cell($0).argument }
     }
 
     /// Puts every band back to `Catalog.eqDefaults`; a no-op on strips without defaults.

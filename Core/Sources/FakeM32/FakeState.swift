@@ -4,18 +4,21 @@ import ThumbmixCore
 /// Synthetic meters for the fake console; the desk state itself is `DemoState` in ThumbmixCore.
 public enum FakeState {
     /// The RTA bank has its own packing (Int16 dB values); every other bank is floats.
-    public static func meterBlob(bank: String, time: Double) -> Data {
+    /// `afterEQ` adds the analysed channel's EQ (in dB, by frequency) to the RTA spectrum, like the desk's "after EQ".
+    public static func meterBlob(bank: String, time: Double, afterEQ: (Double) -> Double = { _ in 0 }) -> Data {
         bank == RTA.bank
-            ? MeterBlob.encodeRTA(spectrum(time: time)) : MeterBlob.encode(meterValues(bank: bank, time: time))
+            ? MeterBlob.encodeRTA(spectrum(time: time, afterEQ: afterEQ))
+            : MeterBlob.encode(meterValues(bank: bank, time: time))
     }
 
     /// A falling pink-ish spectrum with a slowly sweeping bump, so the glow visibly moves in the simulator.
-    public static func spectrum(time: Double) -> [Float] {
+    public static func spectrum(time: Double, afterEQ: (Double) -> Double = { _ in 0 }) -> [Float] {
         (0..<RTA.bandCount).map { band in
             let position = Double(band) / Double(RTA.bandCount - 1)
             let bump = 14 * exp(-pow((position - 0.3 - 0.15 * sin(time * 0.7)) * 6, 2))
             let flicker = 3 * sin(time * 9 + Double(band))
-            return Float(max(-24 - 40 * position + bump + flicker, -100))
+            let eq = afterEQ(RTA.bandFrequency(band))
+            return Float(max(-24 - 40 * position + bump + flicker + eq, -100))
         }
     }
 
