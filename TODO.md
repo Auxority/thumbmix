@@ -11,6 +11,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
   - Section 4: the DCA bit order.
   - Section 5: the DCA meter slots.
   - Section 6: does `/meters/15` follow `/-prefs/rta/source`, and does "after EQ" include the low cut and the compressor?
+  - Section 7: stereo links. Which side moves when a linked fader moves in Mixing Station, what linking copies besides the pans, whether an unticked Link Preference keeps the sides apart, which preference governs sends (assumed Mute/Fader) and the low cut (assumed EQ), and the preferences' factory defaults (the demo assumes all ticked).
 - [ ] Walk the acceptance checklist in `README.md`.
 - [ ] Check on a device that VoiceOver's swipe up/down adjusts parameter rows. XCUITest can't drive it.
 
@@ -25,7 +26,9 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 ## Features
 
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
-- [ ] **Matrix group.** Show Matrix 1–6 (overview chip and a basic strip screen), so they can be renamed and mixed too.
+- [ ] **48V as a button beside the Gain row** (mock R2), the same height, red when on, like MUTE beside a fader. Switching phantom power on or off asks first with the system alert ("Turn on 48V for Vox 2?"), plus "Also powers Vox 1 (same preamp)." when the preamp is shared.
+- [ ] **Reset bands asks with the system alert** like linking does, instead of today's confirmation sheet, so every "are you sure" in the app looks the same.
+- [ ] **Matrix group.** Show Matrix 1–6 (overview chip and a basic strip screen), so they can be renamed and mixed too. Add their stereo links (`/config/mtxlink/1-2` … `5-6`) to `StripLink.swift` then.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
 - [ ] revisit **Unused** approach
@@ -40,6 +43,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Maybe later
 
+- [ ] A linked pair's pan as one track with an L and an R handle (mock "B"): a picture of the stereo image. Today it's two rows, "Pan · Gtr L" and "Pan · Gtr R"; revisit if those feel clunky.
 - [ ] A 7th strip tab: switch the bottom tabs (`StripTabBar`) to scrolling chips (mock "T5"). Six chips are ≈ 55 pt wide on the iPhone SE; seven would be too narrow for "Sends".
 - [ ] Spectrum: also show what comes in (pre-EQ) as a faint second glow (mock "V2"). Only if the single post-EQ glow proves too little.
 - [ ] Other parameters the app doesn't read yet: the gate key source, and the compressor mix.

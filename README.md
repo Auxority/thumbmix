@@ -50,6 +50,8 @@ xcodegen generate && open Thumbmix.xcodeproj
 - whether `/xremote` pushes arrive while other remotes are connected
 - which preamp feeds each input
 - the DCA bit order and the meter layout
+- how stereo links behave: the Link Preferences, which side moves when a linked fader moves, what linking copies,
+  and whether an unticked preference really keeps the sides apart (it asks you to act on the desk)
 
 ## Acceptance checklist (real M32)
 
@@ -60,6 +62,7 @@ xcodegen generate && open Thumbmix.xcodeproj
 5. Gain on an input changes the matching DL32 preamp. Phantom power toggles, and trim works.
 6. Gate, EQ and compressor edits are audible or visible on the desk.
 7. Sends and Fed by match the desk's sends-on-fader.
+8. A pair linked on the desk shows as one row; linking and unlinking from the app's Mix tab does the same on the desk.
 8. Power off the access point: the app shows Disconnected and disables its controls. Restore power: the app resyncs and re-enables them.
 
 ## Credits
