@@ -33,6 +33,17 @@ func ask(_ address: String) async -> OSCMessage? {
     return nil
 }
 
+/// Everything the desk pushes for `seconds` while the engineer acts, with /xremote renewed before it lapses.
+@MainActor
+func listen(seconds: Int) async -> [OSCMessage] {
+    recorder.clear()
+    for elapsed in 0..<seconds {
+        if elapsed % 9 == 0 { transport.send(OSCMessage("/xremote")) }
+        try? await Task.sleep(for: .seconds(1))
+    }
+    return recorder.messages.filter { !$0.address.hasPrefix("/meters") }
+}
+
 func zeroPadded(_ text: String, to width: Int) -> String {
     String(repeating: "0", count: max(0, width - text.count)) + text
 }
@@ -143,4 +154,34 @@ if case .blob(let blob)? = recorder.last(address: RTA.bank)?.arguments.first {
 } else {
     print("\(RTA.bank) NO REPLY: the spectrum is not streamed to remotes.")
 }
+
+// The app models stereo links from the user's desk observations and a forum/video summary (notes spec); these
+// answers go in comments at StripLink.swift (LinkSection.of) and FakeM32.linkEffects.
+print("\n== 7. Stereo links")
+for address in Catalog.linkAddresses {
+    let reply = await ask(address)
+    if address.contains("linkcfg") || reply?.arguments.first == .int(1) { print(reply.map(describe) ?? "\(address) NO REPLY") }
+}
+print("(linkcfg 1 = ticked in Setup > config > Link Preferences; pairs listed only when linked)")
+
+print("\n7a. In MIXING STATION (not on the desk), move the fader of a linked pair during the next 15 seconds...")
+let faders = await listen(seconds: 15).filter { $0.address.hasSuffix("/mix/fader") }
+print("faders pushed: " + Set(faders.map(\.address)).sorted().joined(separator: ", "))
+print("RESULT: both sides listed = the desk (or Mixing Station) moved the partner; one side = nobody did.")
+
+print("\n7b. On the DESK, link two channels you don't use during the next 20 seconds...")
+let linking = await listen(seconds: 20)
+for push in linking where push.address.contains("link") || push.address.hasSuffix("/mix/pan") { print("  " + describe(push)) }
+print("RESULT: the pans show what linking set; any other pushes above are settings the desk copied.")
+
+print("\n7c. On the DESK, untick EQ Link, then change band 1 gain of one side of a linked pair (25 seconds)...")
+let eqEdits = await listen(seconds: 25).filter { $0.address.hasSuffix("/eq/1/g") }
+print("band 1 gains pushed: " + Set(eqEdits.map(\.address)).sorted().joined(separator: ", "))
+print("RESULT: one side = an unticked preference separates the sides (the app's L | R switch is right).")
+
+print("\n7d. On the DESK, untick Mute/Fader Link, then move a send (bus 1) of a linked pair (20 seconds)...")
+let sends = await listen(seconds: 20).filter { $0.address.hasSuffix("/mix/01/level") }
+print("bus 1 sends pushed: " + Set(sends.map(\.address)).sorted().joined(separator: ", "))
+print("RESULT: one side = sends follow Mute/Fader Link (the app's guess); both = they're always linked.")
+print("Tick EQ Link and Mute/Fader Link again before the show.")
 transport.cancel()
