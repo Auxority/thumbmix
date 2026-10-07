@@ -23,6 +23,7 @@ struct MixTab: View {
             } else {
                 panRow(strip, title: nil)
             }
+            if strip.linkAddress != nil { LinkButton(strip: strip, mirror: mirror) }
         }
     }
 

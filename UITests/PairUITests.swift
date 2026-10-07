@@ -39,6 +39,55 @@ final class PairUITests: XCTestCase {
         XCTAssertFalse(app.buttons["side-R"].exists, "the desk links the EQ")
     }
 
+    /// Uses Mon 3 and Mon 4: the fake keeps every change, and no other test reads those buses.
+    func testLinkAndUnlinkFromTheMixTab() {
+        addTeardownBlock { DeskChange.set("/config/buslink/3-4", 0) }
+        app = XCUIApplication()
+        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
+        app.launch()
+        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
+        app.buttons["Buses"].tap()
+        app.buttons["Mon 3"].tap()
+        let link = app.buttons["link-button"]
+        XCTAssertTrue(link.waitForExistence(timeout: 3))
+        XCTAssertEqual(link.label, "Stereo link with Mon 4 · Bus 4")
+
+        link.tap()
+        let alert = app.alerts["Link Mon 3 and Mon 4?"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 2))
+        XCTAssertTrue(alert.staticTexts["They'll work as one stereo channel."].exists)
+        saveScreenshot("link-alert")
+        alert.buttons["Link"].tap()
+        XCTAssertTrue(app.navigationBars["Bus 3-4"].waitForExistence(timeout: 3))
+        XCTAssertEqual(app.buttons["edit-strip"].value as? String, "Mon")
+        XCTAssertEqual(link.label, "Unlink Mon 3 · Bus 3 and Mon 4 · Bus 4")
+
+        link.tap()
+        let unlink = app.alerts["Unlink Mon 3 and Mon 4?"]
+        XCTAssertTrue(unlink.waitForExistence(timeout: 2))
+        XCTAssertTrue(unlink.staticTexts["Each can be set on its own again."].exists)
+        unlink.buttons["Unlink"].tap()
+        XCTAssertTrue(app.navigationBars["Bus 3"].waitForExistence(timeout: 3))
+    }
+
+    /// Linking only couples what the desk's Link Preferences tick: the alert says what stays separate.
+    func testTheLinkAlertSaysWhatStaysSeparate() {
+        DeskChange.set("/config/linkcfg/eq", 0)
+        addTeardownBlock { DeskChange.set("/config/linkcfg/eq", 1) }
+        app = XCUIApplication()
+        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
+        app.launch()
+        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
+        app.buttons["Buses"].tap()
+        app.buttons["Mon 3"].tap()
+        app.buttons["link-button"].tap()
+        let alert = app.alerts["Link Mon 3 and Mon 4?"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 2))
+        XCTAssertTrue(alert.staticTexts["They'll work as one stereo channel.\nEQ stays separate."].exists)
+        alert.buttons["Cancel"].tap()
+        XCTAssertTrue(app.navigationBars["Bus 3"].exists, "Cancel leaves the desk as it was")
+    }
+
     /// Each side keeps its own name on the desk; the pair gets one colour and icon.
     func testEditStripNamesBothSides() {
         launchAndOpenGuitars()
