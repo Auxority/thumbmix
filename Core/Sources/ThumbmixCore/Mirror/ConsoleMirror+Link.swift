@@ -31,6 +31,12 @@ extension ConsoleMirror {
         return StripID.linkable(from: address).flatMap { LinkSection.of(suffix: $0.suffix) }
     }
 
+    /// The section a linked pair's tab must show per side, because the desk doesn't link it; nil shows it once.
+    public func unlinkedSection(of tab: ChannelTab, for strip: StripID) -> LinkSection? {
+        guard isLinked(strip), let section = tab.linkSection, !isShared(section) else { return nil }
+        return section
+    }
+
     public func pairName(_ strip: StripID) -> String {
         let odd = strip.oddSide
         let even = odd.partner ?? odd

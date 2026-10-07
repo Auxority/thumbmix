@@ -4,6 +4,8 @@ import ThumbmixCore
 struct EQTab: View {
     let strip: StripID
     let mirror: ConsoleMirror
+    /// The other side of a pair whose EQ isn't linked: its curve is drawn faint.
+    var ghost: StripID?
     @State private var band = 1
     @State private var isConfirmingReset = false
     @Environment(\.scenePhase) private var scenePhase
@@ -13,7 +15,7 @@ struct EQTab: View {
         // One scroll view for the whole tab: a fixed graph left the rows a sliver of their own to scroll in.
         ScrollView {
             VStack(spacing: 8) {
-                EQGraph(strip: strip, mirror: mirror, selectedBand: $band)
+                EQGraph(strip: strip, mirror: mirror, selectedBand: $band, ghost: ghost)
                     .frame(height: 190)
                 RTAStatus(spectrum: mirror.spectrum, name: mirror.name(strip))
                 HStack(spacing: 8) {

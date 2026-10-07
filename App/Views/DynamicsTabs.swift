@@ -4,6 +4,8 @@ import ThumbmixCore
 struct GateTab: View {
     let strip: StripID
     let mirror: ConsoleMirror
+    /// The other side of a pair whose dynamics aren't linked: its curve is drawn faint.
+    var ghost: StripID?
 
     var body: some View {
         let gate = Catalog.gate(strip)
@@ -16,7 +18,8 @@ struct GateTab: View {
                 if let curve = curve(gate) {
                     TransferGraph(
                         output: curve.output, threshold: curve.threshold, meter: mirror.meter(strip),
-                        reduction: \.gateGain, identifier: "gate-graph", label: "Gate curve")
+                        reduction: \.gateGain, identifier: "gate-graph", label: "Gate curve",
+                        ghostOutput: ghost.flatMap { self.curve(Catalog.gate($0)) }?.output)
                 }
                 ForEach([gate.threshold, gate.range, gate.attack, gate.hold, gate.release]) {
                     ParameterRow(spec: $0, mirror: mirror)
@@ -37,6 +40,8 @@ struct GateTab: View {
 struct CompTab: View {
     let strip: StripID
     let mirror: ConsoleMirror
+    /// The other side of a pair whose dynamics aren't linked: its curve is drawn faint.
+    var ghost: StripID?
 
     var body: some View {
         let dynamics = Catalog.dynamics(strip)
@@ -49,7 +54,8 @@ struct CompTab: View {
                 if let curve = curve(dynamics) {
                     TransferGraph(
                         output: curve.output, threshold: curve.threshold, meter: mirror.meter(strip),
-                        reduction: \.dynamicsGain, identifier: "comp-graph", label: "Compressor curve")
+                        reduction: \.dynamicsGain, identifier: "comp-graph", label: "Compressor curve",
+                        ghostOutput: ghost.flatMap { self.curve(Catalog.dynamics($0)) }?.output)
                 }
                 ForEach([
                     dynamics.threshold, dynamics.ratio, dynamics.knee, dynamics.attack, dynamics.hold,

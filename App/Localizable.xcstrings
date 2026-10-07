@@ -76,13 +76,25 @@
     "Done" : {
 
     },
+    "Dynamics aren't linked on the desk." : {
+
+    },
     "Edit name, colour and icon" : {
 
     },
     "EQ curve" : {
 
     },
+    "EQ isn't linked on the desk." : {
+
+    },
     "Every band goes back to PEQ at 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz, Q 1.7, 0 dB." : {
+
+    },
+    "Fader and mute aren't linked on the desk." : {
+
+    },
+    "Gain and delay aren't linked on the desk." : {
 
     },
     "Gate curve" : {
@@ -107,6 +119,9 @@
 
     },
     "Name" : {
+
+    },
+    "Name · %@" : {
 
     },
     "No channels assigned to this DCA." : {
@@ -146,6 +161,9 @@
 
     },
     "Search icons" : {
+
+    },
+    "Sends aren't linked on the desk." : {
 
     },
     "Shared with %@" : {
