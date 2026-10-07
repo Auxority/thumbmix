@@ -17,6 +17,10 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 - [ ] **Title and DEMO pill get truncated** on strip screens: the back button ("Thumbmix"), the title and the pill don't fit next to each other. Mock a layout that keeps all three readable on the iPhone SE.
 
+## Performance
+
+- [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 17.0: iPhone XS/XR, SE 2nd gen). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
+
 ## Features
 
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
