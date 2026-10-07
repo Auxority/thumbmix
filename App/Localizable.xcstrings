@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ and %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ and %2$@"
+          }
+        }
+      }
+    },
     "%@ is a %@. Thumbmix supports the Midas M32 only." : {
       "localizations" : {
         "en" : {
@@ -79,6 +89,9 @@
     "Dynamics aren't linked on the desk." : {
 
     },
+    "Each can be set on its own again." : {
+
+    },
     "Edit name, colour and icon" : {
 
     },
@@ -114,6 +127,19 @@
     },
     "LC" : {
 
+    },
+    "Link" : {
+
+    },
+    "Link %@ and %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Link %1$@ and %2$@?"
+          }
+        }
+      }
     },
     "Mute" : {
 
@@ -175,6 +201,12 @@
     "Shown" : {
 
     },
+    "Stereo link" : {
+
+    },
+    "Stereo link %@" : {
+
+    },
     "Syncing %lld%%" : {
 
     },
@@ -182,6 +214,9 @@
 
     },
     "The demo console couldn't start. Try again, or restart Thumbmix." : {
+
+    },
+    "They'll work as one stereo channel." : {
 
     },
     "This phone has no Wi-Fi address. Join the console's Wi-Fi network, then scan again." : {
@@ -193,10 +228,29 @@
     "Try offline (demo console)" : {
 
     },
+    "Unlink" : {
+
+    },
+    "Unlink %@" : {
+
+    },
+    "Unlink %@ and %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Unlink %1$@ and %2$@?"
+          }
+        }
+      }
+    },
     "Unmute" : {
 
     },
     "Unused" : {
+
+    },
+    "with %@" : {
 
     }
   },

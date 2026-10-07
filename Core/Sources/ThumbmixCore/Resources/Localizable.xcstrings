@@ -133,6 +133,56 @@
         }
       }
     },
+    "%@ stay separate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ stay separate."
+          }
+        }
+      }
+    },
+    "%@ stays separate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ stays separate."
+          }
+        }
+      }
+    },
+    "dynamics" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dynamics"
+          }
+        }
+      }
+    },
+    "fader and mute" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fader and mute"
+          }
+        }
+      }
+    },
+    "gain and delay" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gain and delay"
+          }
+        }
+      }
+    },
     "Comp" : {
       "localizations" : {
         "en" : {
