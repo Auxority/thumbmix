@@ -62,11 +62,36 @@ print(
     pushes.isEmpty
         ? "RESULT: NO pushes. The /xremote client limit may be reached." : "RESULT: pushes arrive.")
 
-print("\n== 3. Preamp feeding each input (/-ha/NN/index; 32-79 = AES50-A, -1 = internal)")
-for input in 1...32 {
-    let headamp = await ask(Catalog.headampIndex(forInput: input))
-    print(String(format: "ch %02d -> ", input) + (headamp.map(describe) ?? "NO REPLY"))
+// Since #26 the app shows trim on every input; the doc lists /ch/NN/preamp/trim as "(digital sources only)" (p.25).
+// These answers decide whether that stays, or trim shows only for card (e.g. Dante) inputs or in playback mode.
+print("\n== 3. Inputs: where each channel's signal comes from, its preamp gain and its trim")
+print(await ask("/config/routing/routswitch").map(describe) ?? "routswitch NO REPLY")
+print("(routswitch 0 = Rec: inputs use the IN blocks; 1 = Playback: they use the PLAY blocks)")
+for bank in ["IN", "PLAY"] {
+    for block in ["1-8", "9-16", "17-24", "25-32"] {
+        let address = "/config/routing/\(bank)/\(block)"
+        print(await ask(address).map(describe) ?? "\(address) NO REPLY")
+    }
 }
+print("(blocks: 0-3 = local preamps AN, 4-9 = AES50-A, 10-15 = AES50-B, 16-19 = CARD (e.g. Dante), 20-23 = USB)")
+for input in 1...32 {
+    let strip = StripID(.input, input)
+    let feed = await ask(strip.prefix + "/config/source")
+    let headamp = await ask(Catalog.headampIndex(forInput: input))
+    var gain: OSCMessage?
+    if case .int(let index)? = headamp?.arguments.first, (0...127).contains(index) {
+        gain = await ask(Catalog.headampGain(Int(index)).address)
+    }
+    let trim = await ask(Catalog.trim(strip).address)
+    let values = [feed, headamp, gain, trim].map { $0.map { describe($0).split(separator: " ").dropFirst().joined() } }
+    print(
+        String(format: "ch %02d", input) + " source " + (values[0] ?? "?") + "  headamp " + (values[1] ?? "?")
+            + "  gain " + (values[2] ?? "-") + "  trim " + (values[3] ?? "?"))
+}
+print("(source 1-32 = In01-32; headamp -1 = no preamp; gain and trim 0.5 = 0 dB)")
+print("RESULT: on the desk, open the preamp page of a channel fed by a preamp (AN or AES50) and of one fed by the")
+print("card, in Rec and in Playback: note whether the desk offers Gain, Trim or both. Turn trim on a preamp channel")
+print("and listen: does it change the level?")
 
 print("\n== 4. Names and DCA masks: compare with the DCA assignments on the desk")
 for input in 1...32 {
