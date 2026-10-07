@@ -1,10 +1,15 @@
 # A push to main (a merged PR) with a feat or fix commit becomes a GitHub Release with an unsigned IPA for
-# SideStore, versioned from the commit titles (scripts/next-version.sh). A manual run releases a version you
-# type, such as 1.0.0 or 1.0.0-rc.1. Everything below 1.0.0, and every -rc, is marked as a pre-release.
+# SideStore, versioned from the commit titles (scripts/next-version.sh), once CI's `check` passed on that
+# commit. A manual run releases a version you type, such as 1.0.0 or 1.0.0-rc.1. Everything below 1.0.0, and
+# every -rc, is marked as a pre-release.
 name: Release
 
 on:
-  push:
+  # After CI on main, not on the push itself: a PR may merge without main's latest commits (branch protection
+  # doesn't require an up-to-date branch), so two PRs that only break together must turn main red, not ship.
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
     inputs:
@@ -22,9 +27,11 @@ concurrency:
 
 jobs:
   release:
-    # Lint and tests are not repeated here: main only takes PRs whose CI `check` passed on an up-to-date branch
-    # (branch protection, admins included). A manual run from another branch would skip that gate, so refuse it.
-    if: github.ref == 'refs/heads/main'
+    # Lint and tests are not repeated here: this runs only after CI's `check` passed on main's push. A manual
+    # run from another branch would skip that gate, so refuse it.
+    if: >-
+      github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
     # Same Xcode build (27.0, 27A266a) as the development Mac, so CI compiles what the local tests proved.
     # `xcode-27` is a GitHub preview image (runner-images#14404); fall back to `macos-26` (Xcode 26.6) if it misbehaves.
     runs-on: xcode-27
@@ -35,6 +42,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # The commit CI checked, not whatever main is by now.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0 # the tags and commits since the last release decide the version
 
       - name: Decide the version
@@ -67,11 +76,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
+          # The commit that was checked out and built; GITHUB_SHA is main's newest under workflow_run.
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           prerelease=()
           case "$VERSION" in 0.* | *-*) prerelease=(--prerelease) ;; esac
           gh release create "v${VERSION}" build/ipa/Thumbmix.ipa \
-            --target "$GITHUB_SHA" \
+            --target "$RELEASE_SHA" \
             --title "Thumbmix ${VERSION} (build ${BUILD_NUMBER})" \
             --generate-notes \
             ${prerelease[@]+"${prerelease[@]}"}
