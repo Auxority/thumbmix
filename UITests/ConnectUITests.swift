@@ -13,7 +13,7 @@ final class ConnectUITests: XCTestCase {
         app.launch()
 
         let field = app.textFields["console-ip"]
-        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        XCTAssertTrue(field.appears(within: 5))
         field.tap()
         field.typeText("192,168,1,50")
         XCTAssertEqual(field.value as? String, "192.168.1.50")
@@ -26,7 +26,7 @@ final class ConnectUITests: XCTestCase {
         app.launch()
 
         let field = app.textFields["console-ip"]
-        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        XCTAssertTrue(field.appears(within: 5))
         field.tap()
         field.typeText("192.168.1")
         XCTAssertFalse(app.buttons["Connect"].isEnabled)
@@ -41,7 +41,7 @@ final class ConnectUITests: XCTestCase {
         app.launch()
 
         let field = app.textFields["console-ip"]
-        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        XCTAssertTrue(field.appears(within: 5))
         field.tap()
         field.typeText("10.0.0.1")
         let connect = app.buttons["Connect"]
@@ -55,7 +55,7 @@ final class ConnectUITests: XCTestCase {
         app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
         app.launch()
 
-        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
     }
 }
 

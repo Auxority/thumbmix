@@ -13,13 +13,13 @@ final class OverviewUITests: XCTestCase {
         app = XCUIApplication()
         app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
         app.launch()
-        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
     }
 
     func testHorizontalDragMovesTheFader() {
         launch()
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
-        XCTAssertTrue(fader.waitForExistence(timeout: 5))
+        XCTAssertTrue(fader.appears(within: 5))
         let before = fader.value as? String
 
         fader.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5))
@@ -38,7 +38,7 @@ final class OverviewUITests: XCTestCase {
         for _ in 0..<4 { app.swipeUp() }
         XCTAssertFalse(app.buttons["Kick"].isHittable)
         app.buttons["Unused"].tap()
-        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Kick"].appears(within: 2))
         XCTAssertTrue(app.buttons["Kick"].isHittable)
     }
 
@@ -49,7 +49,7 @@ final class OverviewUITests: XCTestCase {
         // Flicked, and the chip tapped while the list still glides, as a thumb does.
         for _ in 0..<3 { app.swipeUp(velocity: .fast) }
         app.buttons["DCA"].tap()
-        XCTAssertTrue(app.buttons["Drums"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Drums"].appears(within: 2))
         XCTAssertTrue(app.buttons["Drums"].isHittable)
     }
 
@@ -59,10 +59,10 @@ final class OverviewUITests: XCTestCase {
         launch()
         app.buttons["Buses"].tap()
         let mon1 = app.buttons["Mon 1"]
-        XCTAssertTrue(mon1.waitForExistence(timeout: 2))
+        XCTAssertTrue(mon1.appears(within: 2))
         let before = mon1.frame.minY
         app.buttons["Unused"].tap()
-        XCTAssertTrue(app.buttons["Bus 5"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Bus 5"].appears(within: 2))
         XCTAssertEqual(mon1.frame.minY, before, accuracy: 0.5)
     }
 
@@ -84,14 +84,14 @@ final class OverviewUITests: XCTestCase {
         app.buttons["Unused"].tap()
         app.swipeUp()
         app.swipeUp()
-        XCTAssertTrue(app.buttons["Ch 20"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Ch 20"].appears(within: 2))
     }
 
     func testRowStaysWhileItsFaderIsPulledDown() {
         launch()
         app.swipeUp()
         let row = app.descendants(matching: .any)["/ch/17/mix/fader"]
-        XCTAssertTrue(row.waitForExistence(timeout: 2))
+        XCTAssertTrue(row.appears(within: 2))
 
         row.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5))
             .press(
@@ -110,7 +110,7 @@ final class OverviewUITests: XCTestCase {
                 "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityL",
             ] + fixedLocale
         app.launch()
-        XCTAssertTrue(app.buttons["Kick"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
 
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
         XCTAssertGreaterThan(fader.frame.height, 70)
@@ -124,7 +124,7 @@ final class OverviewUITests: XCTestCase {
         XCTAssertEqual(app.buttons["Vox 2"].value as? String, "14")
         saveScreenshot("channel-numbers")
         app.buttons["Main"].tap()
-        XCTAssertTrue(app.buttons["LR"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["LR"].appears(within: 2))
         XCTAssertEqual(app.buttons["LR"].value as? String, "", "a main bus has no number")
     }
 
@@ -133,20 +133,20 @@ final class OverviewUITests: XCTestCase {
         launch()
         app.swipeUp()
         let pair = app.buttons["Gtr"]
-        XCTAssertTrue(pair.waitForExistence(timeout: 2))
+        XCTAssertTrue(pair.appears(within: 2))
         XCTAssertEqual(pair.value as? String, "9-10")
         XCTAssertFalse(app.buttons["Gtr L"].exists)
         XCTAssertFalse(app.buttons["Gtr R"].exists)
         saveScreenshot("pair-row")
         pair.tap()
-        XCTAssertTrue(app.buttons["+1 dB"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["+1 dB"].appears(within: 3))
         XCTAssertTrue(app.descendants(matching: .any)["/ch/09/mix/fader"].exists, "the pair opens on its odd side")
     }
 
     func testChipsSwitchGroups() {
         launch()
         app.buttons["Buses"].tap()
-        XCTAssertTrue(app.buttons["Mon 1"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Mon 1"].appears(within: 2))
     }
 
     func testMuteToggles() {
