@@ -26,7 +26,7 @@ public final class ConsoleMirror {
     @ObservationIgnored private var meterCells: [StripID: MeterCell] = [:]
     @ObservationIgnored private var sync: InitialSync?
     @ObservationIgnored private var pendingSends: [String: OSCArgument] = [:]
-    @ObservationIgnored private var holds = EditHolds(hold: ConsoleMirror.editHold)
+    @ObservationIgnored var holds = EditHolds(hold: ConsoleMirror.editHold)
     @ObservationIgnored private let auditAddresses: [String]
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
@@ -105,6 +105,8 @@ public final class ConsoleMirror {
         cell(address).argument = argument
         holds.edited(address, now: .now)
         pendingSends[address] = argument
+        // The desk copies a shared section to the linked partner but may not push that change back to us.
+        if let partner = partnerAddress(of: address) { holds.rereadSoon(partner, now: .now) }
     }
 
     /// The user's finger owns a control from touch-down until shortly after release.

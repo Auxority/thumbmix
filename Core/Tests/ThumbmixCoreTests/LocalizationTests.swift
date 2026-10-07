@@ -27,6 +27,7 @@ struct LocalizationTests {
     @Test func formatsAndNamesAreInTheCatalog() {
         let keys =
             ["Bus %lld", "Ch %lld", "Aux %lld", "FX %lld", "DCA %lld", "Main LR", "Main M", "On", "Off"]
+            + ["Ch %lld-%lld", "Aux %lld-%lld", "FX %lld-%lld", "Bus %lld-%lld"]
             + ChannelTab.allCases.map(\.titleKey) + StripGroup.allCases.map(\.titleKey)
         for key in keys {
             #expect(isInCatalog(key), "missing \(key)")

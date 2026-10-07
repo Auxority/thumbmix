@@ -167,6 +167,30 @@ public final class FakeM32: @unchecked Sendable {
         state[message.address] = message.arguments[0]
         sets.append(message)
         push(message, except: sender)
+        for effect in linkEffects(of: message) {
+            state[effect.address] = effect.arguments[0]
+            // Assumed: the desk doesn't echo changes an OSC set caused, so the sender must read them back.
+            push(effect, except: sender)
+        }
+    }
+
+    /// What a linked desk changes by itself after a set: the partner's copy of a shared section, and the pans
+    /// when a pair is linked. Encodes the user's desk observations; m32-probe section 7 checks them.
+    private func linkEffects(of message: OSCMessage) -> [OSCMessage] {
+        if Catalog.linkAddresses.contains(message.address) { return linkingPans(message) }
+        guard let (strip, suffix) = StripID.linkable(from: message.address),
+            let section = LinkSection.of(suffix: suffix), state[section.preferenceAddress] == .int(1),
+            let link = strip.linkAddress, state[link] == .int(1), let partner = strip.partner
+        else { return [] }
+        return [OSCMessage(partner.prefix + suffix, message.arguments)]
+    }
+
+    private func linkingPans(_ message: OSCMessage) -> [OSCMessage] {
+        guard message.arguments.first == .int(1),
+            let odd = StripKind.allCases.flatMap(StripID.all).first(where: { $0.linkAddress == message.address }),
+            let left = odd.pan, let right = odd.partner?.pan
+        else { return [] }
+        return [OSCMessage(left, [.float(0)]), OSCMessage(right, [.float(1)])]
     }
 
     private func push(_ message: OSCMessage, except sender: Client?) {

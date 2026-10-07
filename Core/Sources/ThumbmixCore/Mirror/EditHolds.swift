@@ -26,6 +26,12 @@ struct EditHolds {
         heldUntil[address] = max(heldUntil[address] ?? now, now + hold)
     }
 
+    /// A value the desk changes as a side effect of the app's edit (a linked partner) and may not push back.
+    /// Each further edit moves the read later, so a drag ends with one read, not one per frame.
+    mutating func rereadSoon(_ address: String, now: ContinuousClock.Instant) {
+        rereadAt[address] = now + hold
+    }
+
     func isHeld(_ address: String, now: ContinuousClock.Instant) -> Bool {
         if editing.contains(address) { return true }
         guard let until = heldUntil[address] else { return false }
