@@ -3,19 +3,24 @@ import ThumbmixCore
 
 /// The scribble-strip label: name, colour and icon. Edited as a draft and sent together on Done,
 /// so the desk's strip doesn't flicker through every keystroke and Cancel leaves the desk untouched.
+/// A linked pair keeps a name per side on the desk, and gets one colour and icon written to both.
 struct EditStripSheet: View {
     let strip: StripID
     let mirror: ConsoleMirror
     @Environment(\.dismiss) private var dismiss
     @State private var name: String
+    @State private var partnerName: String
     @State private var color: ConsoleColor
     @State private var icon: Int
     @State private var search = ""
+    private let partner: StripID?
 
     init(strip: StripID, mirror: ConsoleMirror) {
         self.strip = strip
         self.mirror = mirror
+        partner = mirror.isLinked(strip) ? strip.partner : nil
         _name = State(initialValue: mirror.rawName(strip))
+        _partnerName = State(initialValue: partner.map(mirror.rawName) ?? "")
         _color = State(initialValue: mirror.color(strip))
         _icon = State(initialValue: mirror.icon(strip).number)
     }
@@ -24,7 +29,14 @@ struct EditStripSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    nameField
+                    if let partner {
+                        NameField(title: "Name · \(strip.defaultName)", placeholder: strip.defaultName, name: $name)
+                        NameField(
+                            title: "Name · \(partner.defaultName)", placeholder: partner.defaultName,
+                            name: $partnerName, identifier: "strip-name-partner")
+                    } else {
+                        NameField(title: "Name", placeholder: strip.defaultName, name: $name)
+                    }
                     StripColorPicker(color: $color)
                     IconPicker(selection: $icon, search: $search)
                 }
@@ -33,13 +45,14 @@ struct EditStripSheet: View {
             // Dragging the sheet puts the keyboard away, so search results under it can be reached.
             .scrollDismissesKeyboard(.interactively)
             .background(Theme.background)
-            .navigationTitle(strip.defaultName)
+            .navigationTitle(partner == nil ? strip.defaultName : strip.pairDefaultName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         mirror.edit(strip, name: name, color: color, icon: icon)
+                        if let partner { mirror.edit(partner, name: partnerName, color: color, icon: icon) }
                         dismiss()
                     }
                     .fontWeight(.bold)
@@ -48,13 +61,20 @@ struct EditStripSheet: View {
             }
         }
     }
+}
 
-    private var nameField: some View {
+private struct NameField: View {
+    let title: LocalizedStringKey
+    let placeholder: String
+    @Binding var name: String
+    var identifier = "strip-name"
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionLabel("Name")
+            SectionLabel(title)
             HStack {
-                TextField(strip.defaultName, text: $name)
-                    .accessibilityIdentifier("strip-name")
+                TextField(placeholder, text: $name)
+                    .accessibilityIdentifier(identifier)
                     .autocorrectionDisabled()
                     .onChange(of: name) { _, typed in
                         let allowed = StripName.typed(typed)

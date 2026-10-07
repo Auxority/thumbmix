@@ -5,6 +5,8 @@ import ThumbmixCore
 struct MixTab: View {
     let strip: StripID
     let mirror: ConsoleMirror
+    /// The other side of a linked pair: the fader is shared, but each side keeps its own pan.
+    var panPartner: StripID?
 
     var body: some View {
         VStack(spacing: 10) {
@@ -16,9 +18,17 @@ struct MixTab: View {
                 NudgeButton(label: "+1 dB") { nudge(by: 1) }
                 MuteButton(strip: strip, mirror: mirror, title: "MUTE", width: 96, height: 52)
             }
-            if let pan = Catalog.pan(strip) {
-                ParameterRow(spec: pan, mirror: mirror, height: 44)
+            if let panPartner {
+                ForEach([strip, panPartner]) { side in panRow(side, title: "Pan · \(mirror.name(side))") }
+            } else {
+                panRow(strip, title: nil)
             }
+        }
+    }
+
+    @ViewBuilder private func panRow(_ side: StripID, title: String?) -> some View {
+        if let pan = Catalog.pan(side) {
+            ParameterRow(spec: pan, mirror: mirror, title: title, height: 44)
         }
     }
 

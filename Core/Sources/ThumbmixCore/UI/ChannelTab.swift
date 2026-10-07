@@ -15,6 +15,17 @@ public enum ChannelTab: String, CaseIterable, Identifiable, Sendable {
 
     public var title: String { CoreStrings.text(String.LocalizationValue(titleKey)) }
 
+    /// The Link Preference that decides whether a linked pair shows this tab once or per side.
+    public var linkSection: LinkSection? {
+        switch self {
+        case .mix, .sends: .faderMute
+        case .input: .gainDelay
+        case .eq: .eq
+        case .gate, .comp: .dynamics
+        case .fedBy, .members: nil
+        }
+    }
+
     /// Every strip opens on Mix: its full fader, nudges, mute and pan. The other tabs keep a slim fader and mute.
     public static func tabs(for kind: StripKind) -> [ChannelTab] {
         switch kind {

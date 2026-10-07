@@ -11,6 +11,8 @@ struct EQGraph: View {
     let strip: StripID
     let mirror: ConsoleMirror
     @Binding var selectedBand: Int
+    /// The other side of a pair whose EQ isn't linked: its curve is drawn faint.
+    var ghost: StripID?
     @State private var grab: Grab?
     @State private var isDragging = false
 
@@ -27,12 +29,17 @@ struct EQGraph: View {
         // Read the bands here, not inside Canvas: Observation only tracks reads made during body.
         let bands = mirror.eqBands(strip)
         let lowCut = mirror.lowCut(strip)
+        let ghostCurve = ghost.map { (bands: mirror.eqBands($0), lowCut: mirror.lowCut($0)) }
         GeometryReader { geometry in
             let size = geometry.size
             ZStack {
                 Canvas { context, canvasSize in drawGrid(in: context, size: canvasSize) }
                 SpectrumGlow(spectrum: mirror.spectrum, color: Theme.color(mirror.color(strip)))
                 Canvas { context, canvasSize in
+                    if let ghostCurve {
+                        let path = curve(ghostCurve.bands, ghostCurve.lowCut, in: canvasSize)
+                        context.stroke(path, with: .color(.white.opacity(0.3)), lineWidth: 2)
+                    }
                     context.stroke(curve(bands, lowCut, in: canvasSize), with: .color(.white), lineWidth: 2)
                     if let lowCut {
                         let cutPart = curve(bands, lowCut, in: canvasSize, upTo: lowCut.frequency * 2)

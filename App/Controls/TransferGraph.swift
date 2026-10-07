@@ -13,13 +13,18 @@ struct TransferGraph: View {
     let reduction: KeyPath<MeterCell, Float>
     let identifier: String
     let label: LocalizedStringKey
+    /// The other side of a pair whose sides can differ, drawn faint under this side's curve.
+    var ghostOutput: ((Double) -> Double)?
 
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
                 Canvas { context, size in
                     drawReference(in: context, size: size)
-                    context.stroke(curve(in: size), with: .color(.white), lineWidth: 2)
+                    if let ghostOutput {
+                        context.stroke(curve(ghostOutput, in: size), with: .color(.white.opacity(0.3)), lineWidth: 2)
+                    }
+                    context.stroke(curve(output, in: size), with: .color(.white), lineWidth: 2)
                 }
                 LevelDot(meter: meter, output: output)
             }
@@ -33,7 +38,7 @@ struct TransferGraph: View {
         .background(Theme.track, in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func curve(in size: CGSize) -> Path {
+    private func curve(_ output: (Double) -> Double, in size: CGSize) -> Path {
         var path = Path()
         for step in 0...160 {
             let input = Self.floor * (1 - Double(step) / 160)
