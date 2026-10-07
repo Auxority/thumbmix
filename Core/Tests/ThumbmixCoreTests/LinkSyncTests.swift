@@ -41,6 +41,27 @@ struct LinkSyncTests {
         #expect(mirror.cell(gtrR).argument == .float(0.6))
     }
 
+    /// Only fader, mute and sends are seen linked on the desk; the rest is unverified, so a partner that didn't
+    /// follow is never overwritten: the app shows that section per side instead.
+    @Test func anUnverifiedSectionThatDoesNotFollowIsShownPerSideNotWritten() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        fake.copiesLinkedEdits = false
+        let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
+        let gainL = Catalog.eqBand(StripID(.input, 9), 2).gain.address
+        let gainR = Catalog.eqBand(StripID(.input, 10), 2).gain.address
+        let before = fake.value(at: gainR)
+        #expect(mirror.isShared(.eq))
+
+        mirror.set(gainL, .float(0.9))
+
+        #expect(await eventually { !mirror.isShared(.eq) }, "EQ now shows per side")
+        #expect(fake.value(at: gainR) == before)
+        #expect(!fake.receivedSets.contains { $0.address == gainR })
+        #expect(mirror.partnerAddress(of: gainL) == nil, "no more re-reads of a side that's set on its own")
+    }
+
     @Test func panIsNotCopied() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }

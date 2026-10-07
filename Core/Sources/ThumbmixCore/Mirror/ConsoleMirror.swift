@@ -16,6 +16,8 @@ public enum MirrorStatus: Equatable, Sendable {
 public final class ConsoleMirror {
     public internal(set) var status: MirrorStatus = .connecting
     public var isLive: Bool { status == .live }
+    /// Sections whose partner didn't follow the app's edit this session; see ConsoleMirror+Link.
+    public internal(set) var sectionsSeenUnlinked: Set<LinkSection> = []
 
     @ObservationIgnored private(set) var cells: [String: ParamCell] = [:]
     @ObservationIgnored let link: ConsoleLink
@@ -27,7 +29,7 @@ public final class ConsoleMirror {
     @ObservationIgnored private var sync: InitialSync?
     @ObservationIgnored private var pendingSends: [String: OSCArgument] = [:]
     @ObservationIgnored var holds = EditHolds(hold: ConsoleMirror.editHold)
-    @ObservationIgnored private var linkCopies = LinkCopyCheck()
+    @ObservationIgnored var linkCopies = LinkCopyCheck()
     @ObservationIgnored private let auditAddresses: [String]
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
@@ -115,7 +117,7 @@ public final class ConsoleMirror {
         holds.rereadSoon(partner, now: .now)
     }
 
-    private func write(_ address: String, _ argument: OSCArgument) {
+    func write(_ address: String, _ argument: OSCArgument) {
         cell(address).argument = argument
         holds.edited(address, now: .now)
         pendingSends[address] = argument
@@ -156,12 +158,13 @@ public final class ConsoleMirror {
         store(argument, in: cell, at: message.address)
     }
 
-    /// A linked partner that didn't follow the app's edit is put right at once.
     private func store(_ argument: OSCArgument, in cell: ParamCell, at address: String) {
         cell.argument = argument
-        guard let repair = linkCopies.received(address, argument) else { return }
-        log.warning("desk didn't copy a linked edit to \(address, privacy: .public); writing both sides")
-        write(address, repair)
+        guard let wanted = linkCopies.received(address, argument), let section = linkSection(of: address) else {
+            return
+        }
+        log.warning("\(address, privacy: .public) didn't follow a linked edit (\(section.rawValue, privacy: .public))")
+        partnerDidNotFollow(address, wanted: wanted, section: section)
     }
 
     /// Every cell float is a 0...1 position; NaN or out-of-range values would crash or break the drawing.

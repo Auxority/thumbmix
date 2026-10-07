@@ -22,12 +22,13 @@ struct LinkCopyCheckTests {
         #expect(check.deskCopies)
     }
 
-    @Test func aPartnerLeftBehindIsRepairedAndFlipsTheMode() {
+    /// What a partner left behind means depends on the section, so the mirror decides; the check only reports it.
+    @Test func aPartnerLeftBehindReportsWhatItShouldHaveBeen() {
         var check = LinkCopyCheck()
         check.expect(partner, .float(0.25))
         check.rereadSent(partner)
         #expect(check.received(partner, .float(0.75)) == .float(0.25))
-        #expect(!check.deskCopies)
+        #expect(check.deskCopies)
     }
 
     /// Pushes during a drag carry older values; only the answer to the re-read is judged.

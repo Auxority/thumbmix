@@ -1,8 +1,9 @@
 /// Whether the desk copies the app's edit of a linked pair to the partner, as it does for its own controls.
-/// Unconfirmed on a real M32, so the app checks: it writes one side, re-reads the partner, and when the partner
-/// didn't follow it repairs it and writes both sides from then on. Pure, so the decision is tested without a desk.
+/// Unconfirmed on a real M32, so the app checks: it writes one side, re-reads the partner, and hears from here
+/// when the partner didn't follow (the mirror decides what that means). Pure, so it is tested without a desk.
 struct LinkCopyCheck {
-    private(set) var deskCopies = true
+    /// Cleared once fader, mute or a send didn't follow: from then on the app writes both sides itself.
+    var deskCopies = true
     private var expected: [String: OSCArgument] = [:]
     private var awaiting: [String: OSCArgument] = [:]
 
@@ -17,10 +18,9 @@ struct LinkCopyCheck {
         if let value = expected.removeValue(forKey: address) { awaiting[address] = value }
     }
 
-    /// The value to write to the partner when it didn't follow; nil when it did or nothing was awaited.
+    /// The value the partner should have had when it didn't follow; nil when it did or nothing was awaited.
     mutating func received(_ address: String, _ value: OSCArgument) -> OSCArgument? {
         guard let wanted = awaiting.removeValue(forKey: address), !value.isClose(to: wanted) else { return nil }
-        deskCopies = false
         return wanted
     }
 }

@@ -8,9 +8,27 @@ extension ConsoleMirror {
         return cell(address).argument == .int(1)
     }
 
-    /// Unread counts as separate: each side then shows its own value, which is never wrong.
+    /// Unread counts as separate: each side then shows its own value, which is never wrong. So does a section whose
+    /// partner didn't follow the app's edit, whatever the preference says.
     public func isShared(_ section: LinkSection) -> Bool {
-        cell(section.preferenceAddress).argument == .int(1)
+        cell(section.preferenceAddress).argument == .int(1) && !sectionsSeenUnlinked.contains(section)
+    }
+
+    /// Fader, mute and sends are seen linked on the desk, so a partner left behind means the desk doesn't copy OSC
+    /// edits: it is put right and both sides are written from then on. Every other section is unverified (m32-probe
+    /// section 7): it is shown per side instead, and nothing is written.
+    func partnerDidNotFollow(_ address: String, wanted: OSCArgument, section: LinkSection) {
+        guard section == .faderMute else {
+            sectionsSeenUnlinked.insert(section)
+            return
+        }
+        linkCopies.deskCopies = false
+        write(address, wanted)
+    }
+
+    func linkSection(of address: String) -> LinkSection? {
+        if address.hasPrefix("/headamp/") { return .gainDelay }
+        return StripID.linkable(from: address).flatMap { LinkSection.of(suffix: $0.suffix) }
     }
 
     public func pairName(_ strip: StripID) -> String {
