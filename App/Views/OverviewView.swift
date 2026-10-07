@@ -12,7 +12,7 @@ struct OverviewView: View {
     @State private var group: StripGroup = .inputs
     @State private var showUnused = false
     @State private var openStrip: StripID?
-    @State private var visibleStrips: [StripID] = []
+    @State private var visibleItems: [OverviewItem] = []
 
     var body: some View {
         NavigationStack {
@@ -20,8 +20,8 @@ struct OverviewView: View {
                 GroupChips(selection: $group)
                 ScrollView {
                     LazyVStack(spacing: 6) {
-                        ForEach(visibleStrips) { strip in
-                            StripRow(strip: strip, mirror: mirror) { openStrip = strip }
+                        ForEach(visibleItems) { item in
+                            StripRow(item: item, mirror: mirror) { openStrip = item.opens }
                         }
                     }
                     .padding(.horizontal, 12)
@@ -51,17 +51,23 @@ struct OverviewView: View {
             .navigationDestination(item: $openStrip) { strip in
                 ChannelView(strip: strip, mirror: mirror)
             }
-            .onAppear(perform: refreshVisibleStrips)
-            .onChange(of: group) { refreshVisibleStrips() }
-            .onChange(of: showUnused) { refreshVisibleStrips() }
-            .onChange(of: mirror.status) { refreshVisibleStrips() }
+            .onAppear(perform: refreshVisibleItems)
+            .onChange(of: group) { refreshVisibleItems() }
+            .onChange(of: showUnused) { refreshVisibleItems() }
+            .onChange(of: mirror.status) { refreshVisibleItems() }
+            .onChange(of: linkState) { refreshVisibleItems() }
         }
     }
 
-    /// Filtered only when the view, group, toggle or connection changes, never per fader move:
+    /// Linking or unlinking a pair, here or on the desk, merges or splits rows.
+    private var linkState: [OSCArgument?] {
+        Catalog.linkAddresses.map { mirror.cell($0).argument }
+    }
+
+    /// Filtered only when the view, group, toggle, connection or links change, never per fader move:
     /// a row must not vanish under the finger when an unnamed fader reaches -inf.
-    private func refreshVisibleStrips() {
-        visibleStrips = group.strips.filter { showUnused || !mirror.isUnused($0) }
+    private func refreshVisibleItems() {
+        visibleItems = mirror.overviewItems(group.strips, showUnused: showUnused)
     }
 }
 
