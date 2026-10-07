@@ -62,6 +62,24 @@ struct LinkSyncTests {
         #expect(mirror.partnerAddress(of: gainL) == nil, "no more re-reads of a side that's set on its own")
     }
 
+    /// A linked input's gain lives on its headamp, not its strip: the partner's headamp follows, so the Input tab
+    /// keeps showing the pair once instead of switching to per-side mid-drag.
+    @Test func aGainEditReachesTheLinkedPartnersHeadamp() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
+        let left = try #require(mirror.headamp(forInput: 9))
+        let right = try #require(mirror.headamp(forInput: 10))
+        let gainR = Catalog.headampGain(right).address
+
+        mirror.set(Catalog.headampGain(left).address, .float(0.7))
+
+        #expect(await eventually { mirror.cell(gainR).argument == .float(0.7) })
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(mirror.isShared(.gainDelay))
+    }
+
     @Test func panIsNotCopied() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
