@@ -14,8 +14,8 @@ struct MixTab: View {
                 spec: Catalog.fader(strip), mirror: mirror, accent: Theme.color(mirror.color(strip)), height: 72,
                 meter: mirror.meter(strip))
             HStack(spacing: 10) {
-                NudgeButton(label: "−1 dB") { nudge(by: -1) }
-                NudgeButton(label: "+1 dB") { nudge(by: 1) }
+                NudgeButton(label: "−1 dB", fader: Catalog.fader(strip).address, mirror: mirror) { nudge(by: -1) }
+                NudgeButton(label: "+1 dB", fader: Catalog.fader(strip).address, mirror: mirror) { nudge(by: 1) }
                 MuteButton(strip: strip, mirror: mirror, title: "MUTE", width: 96, height: 52)
             }
             if let panPartner {
@@ -56,21 +56,49 @@ struct SlimMixRow: View {
     }
 }
 
+/// Steps once on touch-down and repeats while held (`NudgeRepeat`). The finger owns the fader for the whole hold,
+/// so the desk's echoes of earlier steps can't pull it back mid-hold.
 private struct NudgeButton: View {
     let label: LocalizedStringKey
-    let action: () -> Void
+    let fader: String
+    let mirror: ConsoleMirror
+    let step: () -> Void
+    @State private var repeating: Task<Void, Never>?
     @ScaledMetric private var minHeight: CGFloat = 52
 
     var body: some View {
-        Button(action: action) {
-            Text(label)
-                .font(.headline.monospacedDigit())
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .frame(maxWidth: .infinity, minHeight: minHeight)
-                .background(Theme.raised, in: RoundedRectangle(cornerRadius: 10))
+        Text(label)
+            .font(.headline.monospacedDigit())
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .frame(maxWidth: .infinity, minHeight: minHeight)
+            .background(repeating == nil ? Theme.raised : Theme.selected, in: RoundedRectangle(cornerRadius: 10))
+            .contentShape(Rectangle())
+            .gesture(DragGesture(minimumDistance: 0).onChanged { _ in press() }.onEnded { _ in release() })
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction { step() }
+    }
+
+    private func press() {
+        guard repeating == nil else { return }
+        mirror.beginEdit(fader)
+        step()
+        repeating = Task { await repeatWhileHeld() }
+    }
+
+    private func release() {
+        repeating?.cancel()
+        repeating = nil
+        mirror.endEdit(fader)
+    }
+
+    private func repeatWhileHeld() async {
+        let start = ContinuousClock.now
+        try? await Task.sleep(for: NudgeRepeat.firstRepeat)
+        while !Task.isCancelled {
+            step()
+            try? await Task.sleep(for: NudgeRepeat.interval(afterHolding: .now - start))
         }
-        .buttonStyle(.plain)
     }
 }
 

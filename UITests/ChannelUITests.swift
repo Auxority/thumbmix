@@ -16,6 +16,19 @@ final class ChannelUITests: DeskUITestCase {
         XCTAssertEqual(fader.value as? String, "−5.0 dB")
     }
 
+    /// Held, a nudge keeps stepping 1 dB (mock A): a one-second hold moves several dB, still on whole steps.
+    func testHoldingANudgeRepeats() {
+        launch()
+        open("Kick")
+        let fader = element("/ch/01/mix/fader")
+        XCTAssertEqual(fader.value as? String, "0.0 dB")
+        app.buttons["+1 dB"].press(forDuration: 1.2)
+        let shown = fader.value as? String ?? ""
+        let decibels = Double(shown.replacingOccurrences(of: " dB", with: "").replacingOccurrences(of: "+", with: ""))
+        XCTAssertGreaterThanOrEqual(decibels ?? 0, 3, "a 1.2 s hold should repeat, shows \(shown)")
+        XCTAssertTrue(shown.hasSuffix(".0 dB"), "steps stay whole from 0 dB, shows \(shown)")
+    }
+
     /// Mix holds the full controls; every other tab keeps a slim fader and mute, to pull a channel mid-EQ.
     func testOtherTabsKeepTheFaderAndMuteInReach() {
         launch()
