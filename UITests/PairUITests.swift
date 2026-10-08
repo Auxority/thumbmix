@@ -2,25 +2,12 @@ import XCTest
 
 /// The demo desk links Gtr L/R (ch 9-10) with every Link Preference ticked.
 @MainActor
-final class PairUITests: XCTestCase {
-    private var app: XCUIApplication!
-
-    override func setUp() {
-        continueAfterFailure = false
-    }
-
+final class PairUITests: DeskUITestCase {
     private func launchAndOpenGuitars() {
-        app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
-        app.launch()
-        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
+        launch()
         app.swipeUp()
         app.buttons["Gtr"].tap()
         XCTAssertTrue(app.buttons["+1 dB"].appears(within: 3))
-    }
-
-    private func element(_ identifier: String) -> XCUIElement {
-        app.descendants(matching: .any)[identifier]
     }
 
     /// One fader and mute for both sides, but the desk keeps a pan per side.
@@ -39,13 +26,8 @@ final class PairUITests: XCTestCase {
         XCTAssertFalse(app.buttons["side-R"].exists, "the desk links the EQ")
     }
 
-    /// Uses Mon 3 and Mon 4: the fake keeps every change, and no other test reads those buses.
     func testLinkAndUnlinkFromTheMixTab() {
-        addTeardownBlock { DeskChange.set("/config/buslink/3-4", 0) }
-        app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
-        app.launch()
-        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
+        launch()
         app.buttons["Buses"].tap()
         app.buttons["Mon 3"].tap()
         let link = app.buttons["link-button"]
@@ -72,12 +54,8 @@ final class PairUITests: XCTestCase {
 
     /// Linking only couples what the desk's Link Preferences tick: the alert says what stays separate.
     func testTheLinkAlertSaysWhatStaysSeparate() {
-        DeskChange.set("/config/linkcfg/eq", 0)
-        addTeardownBlock { DeskChange.set("/config/linkcfg/eq", 1) }
-        app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
-        app.launch()
-        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
+        desk.change("/config/linkcfg/eq", 0)
+        launch()
         app.buttons["Buses"].tap()
         app.buttons["Mon 3"].tap()
         app.buttons["link-button"].tap()
@@ -102,8 +80,7 @@ final class PairUITests: XCTestCase {
 
     /// The engineer unticks Dynamics Link on the desk: Gate and Comp now show one side at a time.
     func testAnUnlinkedSectionShowsOneSideAtATime() {
-        DeskChange.set("/config/linkcfg/dyn", 0)
-        addTeardownBlock { DeskChange.set("/config/linkcfg/dyn", 1) }
+        desk.change("/config/linkcfg/dyn", 0)
         launchAndOpenGuitars()
         app.buttons["Comp"].tap()
         XCTAssertTrue(app.staticTexts["Dynamics aren't linked on the desk."].appears(within: 2))

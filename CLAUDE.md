@@ -21,7 +21,7 @@ OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unoffic
 
 ## Done means
 
-`scripts/lint.sh` clean, `swift test --package-path Core` green, and `scripts/ui-test.sh` green: it runs the UI suite on the **iPhone SE (3rd generation)** simulator (375 pt wide, like the target iPhone 11 Pro) against a freshly started `fake-m32`, and refuses to run while another fake holds port 10023. Every change ships a test that failed first.
+`scripts/lint.sh` clean, `swift test --package-path Core` green, and `scripts/ui-test.sh` green: it runs the UI suite on the **iPhone SE (3rd generation)** simulator (375 pt wide, like the target iPhone 11 Pro), three test classes at a time on clones of it; each test talks to its own fake desk (`UITests/TestDesk.swift`). Every change ships a test that failed first.
 
 The full UI suite takes minutes, so run it once, on the final code, before pushing. While iterating, run only the classes the change touches: `scripts/ui-test.sh -only-testing:ThumbmixUITests/PairUITests`. A change that UI can't see (Core logic with its own tests, docs, CI) doesn't need it.
 
@@ -40,7 +40,7 @@ The full UI suite takes minutes, so run it once, on the final code, before pushi
 - **Previews** use `ConsoleMirror.preview()`, which exists only in DEBUG: wrap every `#Preview` in `#if DEBUG` or the release IPA fails to build.
 - **Project file**: `Thumbmix.xcodeproj` is generated; edit `project.yml` and run `xcodegen generate`.
 - **Hooks** (`.claude/settings.json`): an edited Swift file is formatted with `swift format` straight away, and edits inside `Thumbmix.xcodeproj` are blocked.
-- **Fake state**: `fake-m32` keeps every set it receives, from tests and from a simulator app alike, so state-dependent tests fail against a used fake. `scripts/ui-test.sh` starts a fresh one; close the app in other simulators too, or it writes to that fake. A UI test that edits picks a channel no other test reads.
+- **Fake state**: a UI test subclasses `DeskUITestCase`, which starts a fresh fake desk per test on a free port and passes it to the app (`-consolePort`, Debug builds only). To play a change made on the desk, call `desk.change(...)`, before `launch()` when the app should start with it. A long class slows the whole run, since a class runs on one simulator: split one that grows past ~10 tests. The standalone `fake-m32` keeps every set it receives, so a simulator app run by hand against it may need a restart of the fake.
 - **375 pt screen edge**: on the iPhone SE the rows under the EQ graph start below the screen's bottom edge. A UI test scrolls by dragging from a visible row (the Type dropdown), never by swiping a hidden one.
 - **UI waits**: use `appears(within:)` and `eventually(within:)` (`UITests/Waiting.swift`), never `waitForExistence` or a predicate expectation: those look again only once a second, which was a third of the suite's time.
 - **Edit holds in tests**: for `ConsoleMirror.editHold` after the app's own edit, pushes for that address are ignored. A test that simulates a later desk change waits that out first.

@@ -33,14 +33,14 @@ No console nearby? **Try offline (demo console)** runs a demo M32 inside the app
 ```bash
 scripts/lint.sh                             # style (swift-format) and complexity/size limits (SwiftLint)
 swift test --package-path Core              # protocol, state and UI maths
-scripts/ui-test.sh                          # the UI suite, against a freshly started fake-m32
+scripts/ui-test.sh                          # the UI suite, each test against its own fake desk
 scripts/strings.sh                          # refresh the app's String Catalog after changing text
 scripts/render-icon.sh                      # render Design/AppIcon.svg into the app icon (brew install librsvg imagemagick)
 swift run --package-path Core fake-m32      # a fake M32 on 127.0.0.1:10023 for the simulator
 xcodegen generate && open Thumbmix.xcodeproj
 ```
 
-`scripts/ui-test.sh` runs the UI tests on the iPhone SE (3rd generation) simulator, which is 375 pt wide like the iPhone 11 Pro. It starts its own `fake-m32` (the fake keeps every value it is sent, so a used one fails tests) and stops it afterwards, so stop any fake you have running first. Extra arguments go to `xcodebuild`, e.g. `-only-testing:ThumbmixUITests/ChannelUITests`; `UI_TEST_DESTINATION` (an `xcodebuild -destination` value) picks another simulator. The full log lands in `build/ui-test.log`. To save screenshots for a layout check, prefix the command with `TEST_RUNNER_SCREENSHOT_DIR="$PWD/build/screens"`.
+`scripts/ui-test.sh` runs the UI tests on the iPhone SE (3rd generation) simulator, which is 375 pt wide like the iPhone 11 Pro. It runs three test classes at a time on clones of that simulator, and each test starts its own fake desk inside the test runner, so a `fake-m32` you have running doesn't matter. `UI_TEST_WORKERS` sets how many clones. Extra arguments go to `xcodebuild`, e.g. `-only-testing:ThumbmixUITests/ChannelUITests`; `UI_TEST_DESTINATION` (an `xcodebuild -destination` value) picks another simulator. The full log lands in `build/ui-test.log`. To save screenshots for a layout check, prefix the command with `TEST_RUNNER_SCREENSHOT_DIR="$PWD/build/screens"`.
 
 ## Check a real console
 

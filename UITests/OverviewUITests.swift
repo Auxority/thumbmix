@@ -1,21 +1,7 @@
 import XCTest
 
 @MainActor
-final class OverviewUITests: XCTestCase {
-    private var app: XCUIApplication!
-
-    override func setUp() {
-        continueAfterFailure = false
-    }
-
-    /// Launched per test rather than in setUp: the setUp override is nonisolated, XCUIApplication is main-actor.
-    private func launch() {
-        app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", "127.0.0.1"] + fixedLocale
-        app.launch()
-        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
-    }
-
+final class OverviewUITests: DeskUITestCase {
     func testHorizontalDragMovesTheFader() {
         launch()
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
@@ -103,14 +89,7 @@ final class OverviewUITests: XCTestCase {
     }
 
     func testRowsGrowWithLargerText() {
-        app = XCUIApplication()
-        app.launchArguments =
-            [
-                "-lastConsoleHost", "127.0.0.1",
-                "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityL",
-            ] + fixedLocale
-        app.launch()
-        XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
+        launch(["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityL"])
 
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
         XCTAssertGreaterThan(fader.frame.height, 70)
