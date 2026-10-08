@@ -29,6 +29,16 @@ final class ChannelUITests: DeskUITestCase {
         XCTAssertTrue(shown.hasSuffix(".0 dB"), "steps stay whole from 0 dB, shows \(shown)")
     }
 
+    /// A finger that slides off a held nudge stops it, like any button: the fader must not keep climbing.
+    func testSlidingOffAHeldNudgeStopsIt() {
+        launch()
+        open("Kick")
+        let fader = element("/ch/01/mix/fader")
+        app.buttons["+1 dB"].press(
+            forDuration: 0.1, thenDragTo: app.staticTexts["Kick"], withVelocity: .fast, thenHoldForDuration: 1.5)
+        XCTAssertEqual(fader.value as? String, "+1.0 dB")
+    }
+
     /// Mix holds the full controls; every other tab keeps a slim fader and mute, to pull a channel mid-EQ.
     func testOtherTabsKeepTheFaderAndMuteInReach() {
         launch()

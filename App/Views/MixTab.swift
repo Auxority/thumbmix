@@ -63,8 +63,15 @@ private struct NudgeButton: View {
     let fader: String
     let mirror: ConsoleMirror
     let step: () -> Void
-    @State private var repeating: Task<Void, Never>?
+    /// Reset by SwiftUI when the touch ends and also when the system cancels it (a call, Notification Center),
+    /// which `onEnded` never reports: a repeat that outlived the finger would run the fader up to +10 dB.
+    @GestureState private var isPressed = false
+    @State private var ownsFader = false
+    @Environment(\.scenePhase) private var scenePhase
     @ScaledMetric private var minHeight: CGFloat = 52
+
+    /// Further than this from where it landed, the finger has slid off and lets go, like on any button.
+    private static let slideOff: CGFloat = 44
 
     var body: some View {
         Text(label)
@@ -72,26 +79,36 @@ private struct NudgeButton: View {
             .lineLimit(1)
             .minimumScaleFactor(0.6)
             .frame(maxWidth: .infinity, minHeight: minHeight)
-            .background(repeating == nil ? Theme.raised : Theme.selected, in: RoundedRectangle(cornerRadius: 10))
+            .background(isHeld ? Theme.selected : Theme.raised, in: RoundedRectangle(cornerRadius: 10))
             .contentShape(Rectangle())
-            .gesture(DragGesture(minimumDistance: 0).onChanged { _ in press() }.onEnded { _ in release() })
+            .gesture(
+                DragGesture(minimumDistance: 0).updating($isPressed) { drag, pressed, _ in
+                    pressed = hypot(drag.translation.width, drag.translation.height) < Self.slideOff
+                }
+            )
+            .onChange(of: isHeld) { _, held in held ? press() : release() }
+            .task(id: isHeld) { if isHeld { await repeatWhileHeld() } }
+            .onDisappear(perform: release)
             .accessibilityAddTraits(.isButton)
             .accessibilityAction { step() }
     }
 
+    /// Leaving the foreground lets go too, whatever the gesture reports.
+    private var isHeld: Bool { isPressed && scenePhase == .active }
+
     private func press() {
-        guard repeating == nil else { return }
         mirror.beginEdit(fader)
+        ownsFader = true
         step()
-        repeating = Task { await repeatWhileHeld() }
     }
 
     private func release() {
-        repeating?.cancel()
-        repeating = nil
+        guard ownsFader else { return }
+        ownsFader = false
         mirror.endEdit(fader)
     }
 
+    /// Runs as the view's task for a held button, so letting go, leaving the screen or the app cancels it.
     private func repeatWhileHeld() async {
         let start = ContinuousClock.now
         try? await Task.sleep(for: NudgeRepeat.firstRepeat)
