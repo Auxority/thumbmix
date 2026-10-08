@@ -100,3 +100,15 @@ struct EditHoldsTests {
         #expect(holds.isHeld("/b", now: now))
     }
 }
+
+/// A held ±1 dB button (mock A): one step on touch-down, repeats after 0.4 s, every 150 ms, every 50 ms after 1.5 s.
+struct NudgeRepeatTests {
+    @Test func aTapIsOneStepAndTheFirstRepeatWaits() {
+        #expect(NudgeRepeat.firstRepeat == .milliseconds(400))
+    }
+
+    @Test(arguments: [(400, 150), (1499, 150), (1500, 50), (6000, 50)])
+    func repeatsSpeedUpAfterAHoldOfOneAndAHalfSeconds(heldMilliseconds: Int, intervalMilliseconds: Int) {
+        #expect(NudgeRepeat.interval(afterHolding: .milliseconds(heldMilliseconds)) == .milliseconds(intervalMilliseconds))
+    }
+}

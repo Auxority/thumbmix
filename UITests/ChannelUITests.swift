@@ -11,6 +11,32 @@ final class ChannelUITests: DeskUITestCase {
         XCTAssertEqual(fader.value as? String, "+1.0 dB")
         app.buttons["−1 dB"].tap()
         XCTAssertEqual(fader.value as? String, "0.0 dB")
+        // The grid's rounding used to pile up: by the third tap the fader showed −3.1 dB.
+        for _ in 1...5 { app.buttons["−1 dB"].tap() }
+        XCTAssertEqual(fader.value as? String, "−5.0 dB")
+    }
+
+    /// Held, a nudge keeps stepping 1 dB (mock A): a one-second hold moves several dB, still on whole steps.
+    func testHoldingANudgeRepeats() {
+        launch()
+        open("Kick")
+        let fader = element("/ch/01/mix/fader")
+        XCTAssertEqual(fader.value as? String, "0.0 dB")
+        app.buttons["+1 dB"].press(forDuration: 1.2)
+        let shown = fader.value as? String ?? ""
+        let decibels = Double(shown.replacingOccurrences(of: " dB", with: "").replacingOccurrences(of: "+", with: ""))
+        XCTAssertGreaterThanOrEqual(decibels ?? 0, 3, "a 1.2 s hold should repeat, shows \(shown)")
+        XCTAssertTrue(shown.hasSuffix(".0 dB"), "steps stay whole from 0 dB, shows \(shown)")
+    }
+
+    /// A finger that slides off a held nudge stops it, like any button: the fader must not keep climbing.
+    func testSlidingOffAHeldNudgeStopsIt() {
+        launch()
+        open("Kick")
+        let fader = element("/ch/01/mix/fader")
+        app.buttons["+1 dB"].press(
+            forDuration: 0.1, thenDragTo: app.staticTexts["Kick"], withVelocity: .fast, thenHoldForDuration: 1.5)
+        XCTAssertEqual(fader.value as? String, "+1.0 dB")
     }
 
     /// Mix holds the full controls; every other tab keeps a slim fader and mute, to pull a channel mid-EQ.

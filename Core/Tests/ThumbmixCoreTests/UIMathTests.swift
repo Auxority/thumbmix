@@ -26,6 +26,20 @@ struct UIMathTests {
         #expect(RelativeDrag.nudged(0, byDecibels: 1, scale: .fader) > 0)
     }
 
+    /// Each tap snaps to the 1024-step grid; adding 1 dB to the snapped value let the rounding pile up, so the
+    /// display drifted to x.1 and x.2 after a few taps. Every tap must move exactly 1 dB from what was shown,
+    /// also from an in-between value left by a drag.
+    @Test(arguments: [(0.0, 1.0, 10), (0.0, -1.0, 20), (-3.4, 1.0, 10), (-3.4, -1.0, 6)])
+    func repeatedNudgesMoveExactlyOneDecibel(start: Double, delta: Double, taps: Int) {
+        var position = ParamScale.fader.normalized(forValue: start)
+        for tap in 1...taps {
+            position = RelativeDrag.nudged(position, byDecibels: delta, scale: .fader)
+            let shown = ParamScale.fader.value(fromNormalized: position)
+            let expected = start + delta * Double(tap)
+            #expect(abs(shown - expected) < 0.05, "tap \(tap) should show \(expected) dB, shows \(shown)")
+        }
+    }
+
     @Test func decibelText() {
         #expect(
             ValueText.format(ParamScale.fader.normalized(forValue: 0), fader, locale: .testEnglish)

@@ -33,6 +33,20 @@ func ask(_ address: String) async -> OSCMessage? {
     return nil
 }
 
+/// The desk's text for a node, e.g. "ch/01/mix" → "/ch/01/mix ON -12.5 OFF +0 OFF -oo". The reply's address
+/// is "node", without the slash (doc p.80).
+@MainActor
+func askNode(_ path: String) async -> String? {
+    for _ in 1...3 {
+        recorder.clear()
+        transport.send(OSCMessage("/node", [.string(path)]))
+        if case .string(let text)? = await recorder.wait(for: "node", timeout: .milliseconds(500))?.arguments.first {
+            return text.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+    }
+    return nil
+}
+
 /// Everything the desk pushes for `seconds` while the engineer acts, with /xremote renewed before it lapses.
 @MainActor
 func listen(seconds: Int) async -> [OSCMessage] {
@@ -184,4 +198,26 @@ let sends = await listen(seconds: 20).filter { $0.address.hasSuffix("/mix/01/lev
 print("bus 1 sends pushed: " + Set(sends.map(\.address)).sorted().joined(separator: ", "))
 print("RESULT: one side = sends follow Mute/Fader Link (the app's guess); both = they're always linked.")
 print("Tick EQ Link and Mute/Fader Link again before the show.")
+
+// The app shows each fader step as the doc's table has it (p.145, FaderLaw.shownDecibels), including a detent
+// that reads 0 from -0.09 to +0.07 dB and two steps rounded the other way. The desk's own text checks that.
+print("\n== 8. Fader text: with the desk's encoder, set a few input faders to about 0 dB, -8.6 and -23.2 first")
+var faderMismatches = 0
+for input in 1...32 {
+    let strip = StripID(.input, input)
+    guard case .float(let wire)? = await ask(strip.fader)?.arguments.first,
+        let node = await askNode(String(strip.prefix.dropFirst()) + "/mix")
+    else {
+        print(String(format: "ch %02d NO REPLY", input))
+        continue
+    }
+    // The mix node lists on, fader, stereo, pan, mono, mono level; the fader is the third word.
+    let deskText = node.split(separator: " ").dropFirst(2).first.map(String.init) ?? "?"
+    let desk = deskText == "-oo" ? -Double.infinity : Double(deskText)
+    let app = FaderLaw.shownDecibels(fromWire: Double(wire))
+    if desk != app { faderMismatches += 1 }
+    let step = Int((Double(wire) * 1023).rounded())
+    print(String(format: "ch %02d step %4d ", input, step) + "desk \(deskText) app \(app)" + (desk == app ? "" : "  <- DIFFERS"))
+}
+print("RESULT: \(faderMismatches) of 32 differ. Each DIFFERS line goes in FaderLaw.deskExceptions (by step).")
 transport.cancel()
