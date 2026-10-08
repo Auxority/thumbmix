@@ -10,6 +10,34 @@ final class PairUITests: DeskUITestCase {
         XCTAssertTrue(app.buttons["+1 dB"].appears(within: 3))
     }
 
+    /// With Gain/Delay linked, the desk switches 48V on both sides: the alert says so before it happens.
+    func testPhantomPowerOnALinkedPairNamesThePartner() {
+        launchAndOpenGuitars()
+        app.buttons["Input"].tap()
+        let phantom = app.buttons["toggle-/headamp/040/phantom"]
+        XCTAssertTrue(phantom.appears(within: 2))
+        phantom.tap()
+        let alert = app.alerts["Turn on 48V for Gtr L?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        XCTAssertTrue(alert.staticTexts["Also powers Gtr R (linked)."].exists)
+        saveScreenshot("phantom-linked-alert")
+        alert.buttons["Cancel"].tap()
+    }
+
+    /// An unticked Gain/Delay Link keeps each side's preamp apart: no partner in the alert.
+    func testPhantomPowerWithoutGainLinkNamesNoPartner() {
+        desk.change("/config/linkcfg/hadly", 0)
+        launchAndOpenGuitars()
+        app.buttons["Input"].tap()
+        let phantom = app.buttons["toggle-/headamp/040/phantom"]
+        XCTAssertTrue(phantom.appears(within: 2))
+        phantom.tap()
+        let alert = app.alerts["Turn on 48V for Gtr L?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        XCTAssertFalse(alert.staticTexts["Also powers Gtr R (linked)."].exists)
+        alert.buttons["Cancel"].tap()
+    }
+
     /// One fader and mute for both sides, but the desk keeps a pan per side.
     func testAPairOpensAsOneStereoStrip() {
         launchAndOpenGuitars()

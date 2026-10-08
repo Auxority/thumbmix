@@ -77,11 +77,14 @@ final class EQUITests: DeskUITestCase {
         // Drag from the Type row: on a 375 pt phone the rows below it can start past the screen's bottom edge.
         let type = app.buttons["/ch/02/eq/1/type"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         type.press(forDuration: 0.05, thenDragTo: type.withOffset(CGVector(dx: 0, dy: -300)))
+        // The system alert, like every other "are you sure" in the app.
         app.buttons["Reset bands"].tap()
-        app.buttons["Cancel"].tap()
+        let alert = app.alerts["Reset all 4 bands of Snare?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        alert.buttons["Cancel"].tap()
         XCTAssertEqual(frequency.value as? String, "632 Hz")
         app.buttons["Reset bands"].tap()
-        app.buttons["Reset all 4 bands"].tap()
+        alert.buttons["Reset"].tap()
         XCTAssertEqual(frequency.value as? String, "91.4 Hz")
     }
 

@@ -53,6 +53,9 @@
     "192.168.1.50" : {
 
     },
+    "Also powers %@ (linked)." : {
+
+    },
     "Also powers %@ (same input)." : {
 
     },
@@ -102,9 +105,6 @@
 
     },
     "EQ isn't linked on the desk." : {
-
-    },
-    "Every band goes back to PEQ at 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz, Q 1.7, 0 dB." : {
 
     },
     "Fader and mute aren't linked on the desk." : {
@@ -171,8 +171,18 @@
     "On" : {
 
     },
-    "Reset all %lld bands" : {
+    "Reset" : {
 
+    },
+    "Reset all %lld bands of %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reset all %1$lld bands of %2$@?"
+          }
+        }
+      }
     },
     "Reset bands" : {
 

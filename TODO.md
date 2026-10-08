@@ -12,14 +12,13 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
   - Section 4: the DCA bit order.
   - Section 5: the DCA meter slots.
   - Section 6: does `/meters/15` follow `/-prefs/rta/source`, and does "after EQ" include the low cut and the compressor?
-  - Section 7: stereo links. Which side moves when a linked fader moves in Mixing Station, what linking copies besides the pans, whether an unticked Link Preference keeps the sides apart, which preference governs sends (assumed Mute/Fader) and the low cut (assumed EQ), and the preferences' factory defaults (the demo assumes all ticked).
+  - Section 7: stereo links. Which side moves when a linked fader moves in Mixing Station, what linking copies besides the pans, whether an unticked Link Preference keeps the sides apart, which preference governs sends (assumed Mute/Fader) and the low cut (assumed EQ), and the preferences' factory defaults (the demo assumes all ticked). Also: does switching 48V on one side of a pair with Gain/Delay linked switch the partner's too? The 48V alert assumes it does.
   - Section 8: fader text. Does the desk's own dB text match the app's for every input fader? The app follows the doc's table (p.145), incl. a 0 dB detent and two odd steps (−8.7, −23.2). Set faders near 0, −8.6 and −23.2 with the desk's encoder first; each DIFFERS line goes in `FaderLaw.deskExceptions`. Untested: the fake desk doesn't answer `/node`.
 - [ ] Walk the acceptance checklist in `README.md`.
 - [ ] Check on a device that VoiceOver's swipe up/down adjusts parameter rows. XCUITest can't drive it.
 
 ## Fixes
 
-- [ ] **−1 dB / +1 dB nudges drift.** The first taps land on whole dB, later ones on x.1 and then x.2. Likely cause: `RelativeDrag.nudged` adds 1 dB to the current value and snaps it to the 1024-step fader grid (≈ 0.04 dB per step above −10 dB), so each tap's rounding error adds up. Fix idea: nudge to the next whole dB, then snap.
 
 - [ ] **Title and DEMO pill get truncated** on strip screens: the back button ("Thumbmix"), the title and the pill don't fit next to each other. Mock a layout that keeps all three readable on the iPhone SE.
 - [ ] **Gain doesn't change the input level in Offline mode.** The demo meters are a time-based animation (`FakeState.meterBlob`) that ignores the desk state, so turning Gain up or down moves nothing. The input meter should follow the headamp gain (and trim), so gain staging can be tried offline.
@@ -34,10 +33,10 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Double level meter on the Input tab.** To settle first: a twin L/R meter for a linked pair (like its overview row), or one meter fewer (the fader row above already shows a level)?
 - [ ] **Input meter marks at −18 dBFS and 0 dBFS?** A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
-- [ ] **The 48V alert names a linked partner.** When the pair's Gain/Delay is linked on the desk, switching 48V on one side switches the other too: say so in the alert, e.g. "Also powers Gtr R (linked).", like the shared-input line.
+- [x] **The 48V alert names a linked partner.** When the pair's Gain/Delay is linked on the desk, the alert adds "Also powers Gtr R (linked).", like the shared-input line.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
 - [x] **48V as a button beside the Gain row** (mock R2), the same height, red when on, like MUTE beside a fader. Switching phantom power on or off asks first with the system alert ("Turn on 48V for Vox 2?"), plus "Also powers Vox 1 (same input)." when two channels share an input.
-- [ ] **Reset bands asks with the system alert** like linking does, instead of today's confirmation sheet, so every "are you sure" in the app looks the same.
+- [x] **Reset bands asks with the system alert** ("Reset all 4 bands of Kick?"), like linking and 48V. It names no frequencies: they mean little to non-technical users, and engineers know their desk.
 - [x] **Matrix group.** Matrix 1–6 have a chip (last in the row, so DCA and Main stay on an iPhone SE screen) and a strip screen with Mix, EQ (6 bands), Comp and Fed by (the buses and both mains). They link in pairs (`/config/mtxlink/1-2` … `5-6`).
 - [ ] **Sends to the matrices from a bus or main screen**, like an input's Sends tab. Today they're set only from the matrix's Fed by tab.
 - [ ] **Matrix send pan and tap** (`/bus/NN/mix/01/pan`, `…/type`, on the odd sends): needed to feed a stereo matrix pair properly. Neither Fed by tab shows them yet.

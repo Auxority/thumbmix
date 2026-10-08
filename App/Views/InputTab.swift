@@ -69,7 +69,7 @@ private struct PhantomButton: View {
             Button("Cancel", role: .cancel) {}
             Button(isOn ? "Turn Off" : "Turn On") { mirror.set(spec.address, .int(isOn ? 0 : 1)) }
         } message: {
-            sharedLine
+            if !alsoPowers.isEmpty { Text(verbatim: alsoPowers.joined(separator: "\n")) }
         }
     }
 
@@ -78,12 +78,23 @@ private struct PhantomButton: View {
         return isOn ? Text("Turn off 48V for \(name)?") : Text("Turn on 48V for \(name)?")
     }
 
-    @ViewBuilder private var sharedLine: some View {
+    /// Everyone else this switch powers: channels on the same input, and the linked partner.
+    private var alsoPowers: [String] {
+        [sharedInputLine, linkedPartnerLine].compactMap { $0 }
+    }
+
+    private var sharedInputLine: String? {
         let sharing = mirror.inputsSharingHeadamp(withInput: strip.number)
-        if !sharing.isEmpty {
-            let names = sharing.map { mirror.name(StripID(.input, $0)) }.formatted(.list(type: .and))
-            Text("Also powers \(names) (same input).")
-        }
+        guard !sharing.isEmpty else { return nil }
+        let names = sharing.map { mirror.name(StripID(.input, $0)) }.formatted(.list(type: .and))
+        return String(localized: "Also powers \(names) (same input).")
+    }
+
+    /// The desk copies Gain/Delay to a linked partner; the doc doesn't say 48V goes with it (m32-probe section 7).
+    /// Warning about a switch that may not happen is safer than staying silent about one that does.
+    private var linkedPartnerLine: String? {
+        guard mirror.isLinked(strip), mirror.isShared(.gainDelay), let partner = strip.partner else { return nil }
+        return String(localized: "Also powers \(mirror.name(partner)) (linked).")
     }
 }
 
