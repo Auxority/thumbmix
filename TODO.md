@@ -18,6 +18,8 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Fixes
 
+- [ ] **−1 dB / +1 dB nudges drift.** The first taps land on whole dB, later ones on x.1 and then x.2. Likely cause: `RelativeDrag.nudged` adds 1 dB to the current value and snaps it to the 1024-step fader grid (≈ 0.04 dB per step above −10 dB), so each tap's rounding error adds up. Fix idea: nudge to the next whole dB, then snap.
+
 - [ ] **Title and DEMO pill get truncated** on strip screens: the back button ("Thumbmix"), the title and the pill don't fit next to each other. Mock a layout that keeps all three readable on the iPhone SE.
 - [ ] **Gain doesn't change the input level in Offline mode.** The demo meters are a time-based animation (`FakeState.meterBlob`) that ignores the desk state, so turning Gain up or down moves nothing. The input meter should follow the headamp gain (and trim), so gain staging can be tried offline.
 
