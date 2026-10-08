@@ -24,11 +24,13 @@ public enum RelativeDrag {
         }
     }
 
-    /// Lands on a whole dB: the grid's rounding (up to 0.02 dB above −10 dB) would otherwise add up tap after tap.
+    /// Moves from the value as shown (to 0.1 dB): the grid's rounding (up to 0.02 dB above −10 dB) would
+    /// otherwise add up tap after tap, drifting the display to x.1 and x.2.
     public static func nudged(_ normalized: Float, byDecibels delta: Double, scale: ParamScale)
         -> Float
     {
         let current = scale.value(fromNormalized: normalized)
-        return scale.normalized(forValue: ((current.isFinite ? current : -90) + delta).rounded())
+        let shown = ((current.isFinite ? current : -90) * 10).rounded() / 10
+        return scale.normalized(forValue: shown + delta)
     }
 }
