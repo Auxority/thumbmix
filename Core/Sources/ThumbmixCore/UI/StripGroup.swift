@@ -1,5 +1,5 @@
-/// The overview's filter chips. Matrix comes last, after the mains that feed it: on a 375 pt screen a seventh
-/// chip ahead of DCA would push DCA and Main past the edge.
+/// The overview's filter chips. Matrix comes last, after the buses and mains that feed it: on a 375 pt screen the
+/// last chip needs a swipe, and Main is used far more during a show.
 public enum StripGroup: String, CaseIterable, Identifiable, Sendable {
     case inputs = "Inputs"
     case aux = "Aux"
