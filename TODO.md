@@ -19,6 +19,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 ## Fixes
 
 - [ ] **Title and DEMO pill get truncated** on strip screens: the back button ("Thumbmix"), the title and the pill don't fit next to each other. Mock a layout that keeps all three readable on the iPhone SE.
+- [ ] **Gain doesn't change the input level in Offline mode.** The demo meters are a time-based animation (`FakeState.meterBlob`) that ignores the desk state, so turning Gain up or down moves nothing. The input meter should follow the headamp gain (and trim), so gain staging can be tried offline.
 
 ## Performance
 
@@ -26,6 +27,10 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Features
 
+- [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
+- [ ] **Double level meter on the Input tab.** To settle first: a twin L/R meter for a linked pair (like its overview row), or one meter fewer (the fader row above already shows a level)?
+- [ ] **Input meter marks at −18 dBFS and 0 dBFS?** A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
+- [ ] **The 48V alert names a linked partner.** When the pair's Gain/Delay is linked on the desk, switching 48V on one side switches the other too: say so in the alert, e.g. "Also powers Gtr R (linked).", like the shared-input line.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
 - [x] **48V as a button beside the Gain row** (mock R2), the same height, red when on, like MUTE beside a fader. Switching phantom power on or off asks first with the system alert ("Turn on 48V for Vox 2?"), plus "Also powers Vox 1 (same input)." when two channels share an input.
 - [ ] **Reset bands asks with the system alert** like linking does, instead of today's confirmation sheet, so every "are you sure" in the app looks the same.
