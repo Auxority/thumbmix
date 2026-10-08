@@ -39,7 +39,8 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [x] **48V as a button beside the Gain row** (mock R2), the same height, red when on, like MUTE beside a fader. Switching phantom power on or off asks first with the system alert ("Turn on 48V for Vox 2?"), plus "Also powers Vox 1 (same input)." when two channels share an input.
 - [x] **Reset bands asks with the system alert** ("Reset all 4 bands of Kick?"), like linking and 48V. It names no frequencies: they mean little to non-technical users, and engineers know their desk.
 - [x] **Matrix group.** Matrix 1–6 have a chip (last in the row, so DCA and Main stay on an iPhone SE screen) and a strip screen with Mix, EQ (6 bands), Comp and Fed by (the buses and both mains). They link in pairs (`/config/mtxlink/1-2` … `5-6`).
-- [ ] **Sends to the matrices from a bus or main screen**, like an input's Sends tab. Today they're set only from the matrix's Fed by tab.
+- [ ] **Fed by on Main LR and Main M.** Like a bus's Fed by: every input, aux in, FX return and bus with its LR switch on (`/…/mix/st`), and for Main M those with mono on (`/…/mix/mono`) with their mono level (`/…/mix/mlevel`). Matrices can't feed the mains; they're fed by them.
+- [x] **Sends to the matrices from a bus or main screen** (mock B): buses get Mix · EQ · Comp · Sends · Fed by, the mains Mix · EQ · Comp · Sends, with one row per matrix.
 - [ ] **Matrix send pan and tap** (`/bus/NN/mix/01/pan`, `…/type`, on the odd sends): needed to feed a stereo matrix pair properly. Neither Fed by tab shows them yet.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.

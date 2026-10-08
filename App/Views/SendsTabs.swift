@@ -1,7 +1,7 @@
 import SwiftUI
 import ThumbmixCore
 
-/// Where this channel goes: one row per bus, named and coloured like the bus on the desk.
+/// Where this strip goes: one row per bus (from a channel) or matrix (from a bus or main), named and coloured as on the desk.
 struct SendsTab: View {
     let strip: StripID
     let mirror: ConsoleMirror
