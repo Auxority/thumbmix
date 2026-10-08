@@ -11,6 +11,9 @@ final class ChannelUITests: DeskUITestCase {
         XCTAssertEqual(fader.value as? String, "+1.0 dB")
         app.buttons["−1 dB"].tap()
         XCTAssertEqual(fader.value as? String, "0.0 dB")
+        // The grid's rounding used to pile up: by the third tap the fader showed −3.1 dB.
+        for _ in 1...5 { app.buttons["−1 dB"].tap() }
+        XCTAssertEqual(fader.value as? String, "−5.0 dB")
     }
 
     /// Mix holds the full controls; every other tab keeps a slim fader and mute, to pull a channel mid-EQ.
