@@ -25,6 +25,8 @@ OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unoffic
 
 The full UI suite takes minutes, so run it once, on the final code, before pushing. While iterating, run only the classes the change touches: `scripts/ui-test.sh -only-testing:ThumbmixUITests/PairUITests`. A change that UI can't see (Core logic with its own tests, docs, CI) doesn't need it.
 
+When `scripts/ui-test.sh` stops before any test with "Failed to clone device … stuck in creation state", run the suite on the SE itself, one test at a time (≈ 4 min): `xcodebuild test -project Thumbmix.xcodeproj -scheme Thumbmix -destination id=<SE id> -parallel-testing-enabled NO`. The SE id is the first `iPhone SE (3rd generation)` in `xcrun simctl list devices available`, as the script picks it. For screenshots, `mkdir -p build/screens` first: `saveScreenshot` doesn't create it.
+
 ## How we work
 
 - **New UI starts with a mock.** Show the options side by side in the browser (the superpowers visual companion) and build the one the user picks; they choose layouts by seeing them.
@@ -47,6 +49,7 @@ The full UI suite takes minutes, so run it once, on the final code, before pushi
 - **Mirrored parameters**: `CatalogTests.syncListIsCompleteAndUnique` pins the sync address count. A new mirrored parameter updates that count and its per-strip comment, and gets a typed default in `DemoState` (the fallback is `.float(0.5)`, wrong for int parameters).
 - **Merging**: `main` is protected (required `check`) and PRs are rebase-merged. A branch need not be up to date with `main` to merge; the `check` run on `main` after each merge catches two PRs that break only together (a pinned count like `CatalogTests`' sync count is the usual one). Before rebasing a pushed branch, compare it with `origin/<branch>`: GitHub's "Update branch" adds commits there. A conflict in `App/Localizable.xcstrings` resolves by taking `main`'s version and running `scripts/strings.sh`.
 - **Releases**: commit titles set the version, so keep them conventional. On `main`, a `feat:` publishes the next minor version, only `fix:`/`perf:` the next patch, anything else nothing (`scripts/next-version.sh`); before 1.0 a breaking change bumps only the minor. 1.0.0 and release candidates (`1.0.0-rc.1`) are manual runs of the release workflow with the version typed in. Every 0.x and `-rc` is a pre-release. The release job builds only; lint and tests are the PR `check`'s job.
+- **Clicking through by hand**: use the `iPhone SE (3rd generation) iOS 27` simulator; the iOS 17.4 one ignores clicks. Xcode 27 ships no Simulator.app: its window opens with `open /Applications/Xcode.app/Contents/Applications/DeviceHub.app`. Build with `xcodebuild build … -destination id=<iOS 27 SE id> -derivedDataPath build/dd-run`, start `swift run --package-path Core fake-m32` in the background, then `xcrun simctl install <id> build/dd-run/Build/Products/Debug-iphonesimulator/Thumbmix.app` and `xcrun simctl launch --terminate-running-process <id> dev.thumbmix.app -lastConsoleHost 127.0.0.1 -consolePort 10023`.
 - **Tools**: `brew install xcodegen swiftlint`; `swift format` ships with Xcode.
 
 ## Local-only context
