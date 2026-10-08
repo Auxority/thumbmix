@@ -27,6 +27,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Features
 
+- [ ] **Group chips within thumb reach.** Move the overview's Inputs/Aux/FX/Buses/DCA/Main chips (`GroupChips`, now at the top) down, so they can be reached easily one-handed with the thumb. Mock it first; the Matrix chip joins that row.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Double level meter on the Input tab.** To settle first: a twin L/R meter for a linked pair (like its overview row), or one meter fewer (the fader row above already shows a level)?
 - [ ] **Input meter marks at −18 dBFS and 0 dBFS?** A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
