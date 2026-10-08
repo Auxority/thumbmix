@@ -52,3 +52,5 @@ The full UI suite takes minutes, so run it once, on the final code, before pushi
 ## Local-only context
 
 `SPEC.md` and `notes/` (design spec, plan, protocol research with sources, and Maillot's protocol PDF) live in the original checkout and are git-excluded on purpose. Read them when present; they never get committed. When the PDF is missing, its link is on Maillot's X32 page (https://sites.google.com/site/patrickmaillot/x32).
+
+Mocks live in `notes/mocks/<date>-<topic>/`, one HTML fragment per question with the options side by side; the spec in `notes/` names the option the user picked. The visual companion writes them inside the session's worktree (`.superpowers/brainstorm/*/content/`), which goes when the worktree does: copy them to `notes/mocks/` once the user has picked. To show one again, wrap the fragment in a page (`<!doctype html>`, dark background) and open it.
