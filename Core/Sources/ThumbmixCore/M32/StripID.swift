@@ -1,16 +1,30 @@
 import Foundation
 
 public enum StripKind: String, CaseIterable, Sendable {
-    case input, auxIn, fxReturn, bus, mainStereo, mainMono, dca
+    case input, auxIn, fxReturn, bus, matrix, mainStereo, mainMono, dca
 
     public var count: Int {
         switch self {
         case .input: 32
         case .auxIn, .fxReturn, .dca: 8
         case .bus: 16
+        case .matrix: 6
         case .mainStereo, .mainMono: 1
         }
     }
+
+    /// The mixes this kind's `/mix/NN` sends feed: inputs, aux ins and FX returns feed the buses; buses and
+    /// mains feed the matrices (doc p.32-37).
+    public var sendTarget: StripKind? {
+        switch self {
+        case .input, .auxIn, .fxReturn: .bus
+        case .bus, .mainStereo, .mainMono: .matrix
+        case .matrix, .dca: nil
+        }
+    }
+
+    /// The kinds that send to this one.
+    public var feeders: [StripKind] { StripKind.allCases.filter { $0.sendTarget == self } }
 }
 
 /// One channel strip on the console. `number` is 1-based, as printed on the desk.
@@ -36,6 +50,7 @@ public struct StripID: Hashable, Sendable, Identifiable {
         case .auxIn: "/auxin/" + twoDigits
         case .fxReturn: "/fxrtn/" + twoDigits
         case .bus: "/bus/" + twoDigits
+        case .matrix: "/mtx/" + twoDigits
         case .mainStereo: "/main/st"
         case .mainMono: "/main/m"
         case .dca: "/dca/\(number)"
@@ -56,15 +71,14 @@ public struct StripID: Hashable, Sendable, Identifiable {
         [.input, .auxIn, .fxReturn, .bus].contains(kind) ? prefix + "/grp/dca" : nil
     }
 
-    public var sendsToBuses: Bool { [.input, .auxIn, .fxReturn].contains(kind) }
     public var hasGate: Bool { kind == .input }
-    public var hasDynamics: Bool { [.input, .bus, .mainStereo, .mainMono].contains(kind) }
+    public var hasDynamics: Bool { [.input, .bus, .matrix, .mainStereo, .mainMono].contains(kind) }
 
     /// Aux ins and FX returns have a 4-band EQ on the desk, but v1 shows only their header.
     public var eqBandCount: Int {
         switch kind {
         case .input: 4
-        case .bus, .mainStereo, .mainMono: 6
+        case .bus, .matrix, .mainStereo, .mainMono: 6
         case .auxIn, .fxReturn, .dca: 0
         }
     }
@@ -75,6 +89,7 @@ public struct StripID: Hashable, Sendable, Identifiable {
         case .auxIn: CoreStrings.text("Aux \(number)")
         case .fxReturn: CoreStrings.text("FX \(number)")
         case .bus: CoreStrings.text("Bus \(number)")
+        case .matrix: CoreStrings.text("Matrix \(number)")
         case .mainStereo: CoreStrings.text("Main LR")
         case .mainMono: CoreStrings.text("Main M")
         case .dca: CoreStrings.text("DCA \(number)")

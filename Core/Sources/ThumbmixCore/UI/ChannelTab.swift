@@ -30,7 +30,7 @@ public enum ChannelTab: String, CaseIterable, Identifiable, Sendable {
     public static func tabs(for kind: StripKind) -> [ChannelTab] {
         switch kind {
         case .input: [.mix, .input, .gate, .eq, .comp, .sends]
-        case .bus: [.mix, .eq, .comp, .fedBy]
+        case .bus, .matrix: [.mix, .eq, .comp, .fedBy]
         case .mainStereo, .mainMono: [.mix, .eq, .comp]
         case .dca: [.mix, .members]
         case .auxIn, .fxReturn: [.mix]

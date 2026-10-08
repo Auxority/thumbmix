@@ -33,7 +33,7 @@ public enum MeterBanks {
     private static let layouts: [String: Layout] = [
         "/meters/0": Layout(minimumCount: 48, read: auxAndFXReturns),
         "/meters/1": Layout(minimumCount: 96, read: inputs),
-        "/meters/2": Layout(minimumCount: 49, read: busesAndMains),
+        "/meters/2": Layout(minimumCount: 49, read: busesMatricesAndMains),
         "/meters/5": Layout(minimumCount: 24, read: dcas),
     ]
 
@@ -50,11 +50,13 @@ public enum MeterBanks {
             })
     }
 
-    private static func busesAndMains(_ v: [Float]) -> [StripID: MeterReading] {
-        var readings = Dictionary(
-            uniqueKeysWithValues: (0..<16).map {
-                (StripID(.bus, $0 + 1), MeterReading(level: v[$0], dynamicsGain: v[25 + $0]))
-            })
+    /// Levels: 16 buses, 6 matrices, LR, M; then the same strips' dynamics gain from slot 25.
+    private static func busesMatricesAndMains(_ v: [Float]) -> [StripID: MeterReading] {
+        let buses = (0..<16).map { (StripID(.bus, $0 + 1), MeterReading(level: v[$0], dynamicsGain: v[25 + $0])) }
+        let matrices = (0..<6).map {
+            (StripID(.matrix, $0 + 1), MeterReading(level: v[16 + $0], dynamicsGain: v[41 + $0]))
+        }
+        var readings = Dictionary(uniqueKeysWithValues: buses + matrices)
         readings[StripID(.mainStereo)] = MeterReading(level: max(v[22], v[23]), dynamicsGain: v[47])
         readings[StripID(.mainMono)] = MeterReading(level: v[24], dynamicsGain: v[48])
         return readings

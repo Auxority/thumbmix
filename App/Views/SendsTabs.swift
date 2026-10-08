@@ -9,24 +9,24 @@ struct SendsTab: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 6) {
-                ForEach(StripID.all(.bus)) { bus in
+                ForEach(strip.kind.sendTarget.map(StripID.all) ?? []) { target in
                     SendRow(
-                        source: strip, bus: bus.number, title: mirror.name(bus),
-                        accent: Theme.color(mirror.color(bus)), mirror: mirror)
+                        source: strip, target: target, title: mirror.name(target),
+                        accent: Theme.color(mirror.color(target)), mirror: mirror)
                 }
             }
         }
     }
 }
 
-/// What feeds this bus: sends-on-fader across inputs, aux ins and FX returns.
+/// What feeds this bus or matrix: the sends of every kind that feeds it (`StripKind.feeders`).
 struct FedByTab: View {
-    let bus: StripID
+    let target: StripID
     let mirror: ConsoleMirror
     @State private var showUnused = false
 
     var body: some View {
-        let sources = [StripKind.input, .auxIn, .fxReturn]
+        let sources = target.kind.feeders
             .flatMap(StripID.all)
             .filter { showUnused || !mirror.isUnused($0) }
         ScrollView {
@@ -36,7 +36,7 @@ struct FedByTab: View {
                     .padding(.horizontal, 4)
                 ForEach(sources) { source in
                     SendRow(
-                        source: source, bus: bus.number, title: mirror.name(source),
+                        source: source, target: target, title: mirror.name(source),
                         accent: Theme.color(mirror.color(source)), mirror: mirror)
                 }
             }
@@ -46,7 +46,7 @@ struct FedByTab: View {
 
 struct SendRow: View {
     let source: StripID
-    let bus: Int
+    let target: StripID
     let title: String
     let accent: Color
     let mirror: ConsoleMirror
@@ -55,10 +55,10 @@ struct SendRow: View {
         HStack(spacing: 8) {
             // Green like every other "on" chip: a red source colour would read as mute.
             ToggleChip(
-                spec: Catalog.sendOn(from: source, toBus: bus), mirror: mirror, title: "On", onColor: .green
+                spec: Catalog.sendOn(from: source, to: target), mirror: mirror, title: "On", onColor: .green
             )
             ParameterRow(
-                spec: Catalog.sendLevel(from: source, toBus: bus), mirror: mirror, title: title,
+                spec: Catalog.sendLevel(from: source, to: target), mirror: mirror, title: title,
                 accent: accent)
         }
     }
@@ -70,6 +70,10 @@ struct SendRow: View {
     }
 
     #Preview("Fed by") {
-        FedByTab(bus: StripID(.bus, 1), mirror: .preview()).padding().background(Theme.background)
+        FedByTab(target: StripID(.bus, 1), mirror: .preview()).padding().background(Theme.background)
+    }
+
+    #Preview("Matrix fed by") {
+        FedByTab(target: StripID(.matrix, 1), mirror: .preview()).padding().background(Theme.background)
     }
 #endif

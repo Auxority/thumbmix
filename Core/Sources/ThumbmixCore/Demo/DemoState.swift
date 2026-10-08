@@ -12,6 +12,7 @@ public enum DemoState {
         addBand(to: &state)
         addMonitors(to: &state)
         addReturnsDCAsAndMain(to: &state)
+        addFill(to: &state)
         return state
     }
 
@@ -54,7 +55,7 @@ public enum DemoState {
     private static func addMonitors(to state: inout [String: OSCArgument]) {
         for bus in 1...4 {
             patch(StripID(.bus, bus), "Mon \(bus)", color: 6, in: &state)
-            for vox in [13, 14] { state[Catalog.sendLevel(from: StripID(.input, vox), toBus: bus).address] = .float(0.75) }
+            for vox in [13, 14] { state[Catalog.sendLevel(from: StripID(.input, vox), to: StripID(.bus, bus)).address] = .float(0.75) }
         }
     }
 
@@ -63,6 +64,13 @@ public enum DemoState {
         patch(StripID(.fxReturn, 2), "Rev R", color: 5, in: &state)
         for (number, name) in [(1, "Drums"), (2, "Band"), (3, "Vox")] { patch(StripID(.dca, number), name, color: 0, in: &state) }
         patch(StripID(.mainStereo), "LR", color: 0, in: &state)
+    }
+
+    /// Matrix 1 feeds a front fill from the main mix at 0 dB.
+    private static func addFill(to state: inout [String: OSCArgument]) {
+        let fill = StripID(.matrix, 1)
+        patch(fill, "Fill", color: 7, in: &state)
+        state[Catalog.sendLevel(from: StripID(.mainStereo), to: fill).address] = .float(0.75)
     }
 
     /// First matching suffix wins; anything else is a continuous parameter at mid-travel.

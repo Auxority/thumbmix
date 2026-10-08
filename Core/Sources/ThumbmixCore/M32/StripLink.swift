@@ -1,7 +1,6 @@
 import Foundation
 
-/// Odd/even stereo pairs. The desk can link inputs, aux ins, FX returns, buses and matrices (doc p.19);
-/// matrices join once the app shows them.
+/// Odd/even stereo pairs. The desk can link inputs, aux ins, FX returns, buses and matrices (doc p.19).
 extension StripID {
     /// The desk's link switch for this strip's pair, nil where the desk can't link.
     public var linkAddress: String? {
@@ -26,6 +25,7 @@ extension StripID {
         case .auxIn: return CoreStrings.text("Aux \(odd)-\(even)")
         case .fxReturn: return CoreStrings.text("FX \(odd)-\(even)")
         case .bus: return CoreStrings.text("Bus \(odd)-\(even)")
+        case .matrix: return CoreStrings.text("Matrix \(odd)-\(even)")
         default: return CoreStrings.text("Ch \(odd)-\(even)")
         }
     }
@@ -40,7 +40,7 @@ extension StripID {
     }
 
     private static let kindsByPath: [String: StripKind] = [
-        "ch": .input, "auxin": .auxIn, "fxrtn": .fxReturn, "bus": .bus,
+        "ch": .input, "auxin": .auxIn, "fxrtn": .fxReturn, "bus": .bus, "mtx": .matrix,
     ]
 
     private var linkGroup: String? {
@@ -49,6 +49,7 @@ extension StripID {
         case .auxIn: "auxlink"
         case .fxReturn: "fxlink"
         case .bus: "buslink"
+        case .matrix: "mtxlink"
         case .mainStereo, .mainMono, .dca: nil
         }
     }

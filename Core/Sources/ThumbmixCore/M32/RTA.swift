@@ -29,6 +29,7 @@ extension StripID {
         case .auxIn: Int32(33 + number)
         case .fxReturn: Int32(41 + number)
         case .bus: Int32(49 + number)
+        case .matrix: Int32(65 + number)
         case .mainStereo: 72
         case .mainMono: 73
         case .dca: nil

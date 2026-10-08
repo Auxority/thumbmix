@@ -70,7 +70,7 @@ private struct ChannelTabContent: View {
         case .comp: CompTab(strip: strip, mirror: mirror, ghost: ghost)
         case .eq: EQTab(strip: strip, mirror: mirror, ghost: ghost)
         case .sends: SendsTab(strip: strip, mirror: mirror)
-        case .fedBy: FedByTab(bus: strip, mirror: mirror)
+        case .fedBy: FedByTab(target: strip, mirror: mirror)
         }
     }
 }

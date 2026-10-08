@@ -107,7 +107,7 @@ public enum Catalog {
 
     public static func eqBand(_ strip: StripID, _ band: Int) -> EQBandSpecs {
         let p = strip.prefix + "/eq/\(band)/"
-        let types = [.mainStereo, .mainMono].contains(strip.kind) ? mainEQTypes : eqTypes
+        let types = [.matrix, .mainStereo, .mainMono].contains(strip.kind) ? mainEQTypes : eqTypes
         return EQBandSpecs(
             type: ParamSpec(p + "type", CoreStrings.text("Type"), .choice(types), .plain),
             frequency: ParamSpec(
@@ -126,12 +126,13 @@ public enum Catalog {
         return [91.4, 418, 1910, 8730].map { EQBandState(typeIndex: 2, frequency: $0, gain: 0, q: 1.7) }
     }
 
-    public static func sendLevel(from strip: StripID, toBus bus: Int) -> ParamSpec {
-        ParamSpec(sendPrefix(strip, bus) + "/level", CoreStrings.text("Bus \(bus)"), .sendLevel, .decibels, reset: 0)
+    /// `target` is a bus for inputs, aux ins and FX returns, a matrix for buses and mains (`StripKind.sendTarget`).
+    public static func sendLevel(from strip: StripID, to target: StripID) -> ParamSpec {
+        ParamSpec(sendPrefix(strip, target) + "/level", target.defaultName, .sendLevel, .decibels, reset: 0)
     }
 
-    public static func sendOn(from strip: StripID, toBus bus: Int) -> ParamSpec {
-        ParamSpec(sendPrefix(strip, bus) + "/on", CoreStrings.text("On"), .toggle, .plain)
+    public static func sendOn(from strip: StripID, to target: StripID) -> ParamSpec {
+        ParamSpec(sendPrefix(strip, target) + "/on", CoreStrings.text("On"), .toggle, .plain)
     }
 
     /// Every address the mirror reads on connect, names first so the overview fills in early.
@@ -169,8 +170,10 @@ public enum Catalog {
     }
 
     private static func sendAddresses(_ strip: StripID) -> [String] {
-        guard strip.sendsToBuses else { return [] }
-        return (1...16).flatMap { [sendLevel(from: strip, toBus: $0).address, sendOn(from: strip, toBus: $0).address] }
+        guard let target = strip.kind.sendTarget else { return [] }
+        return StripID.all(target).flatMap {
+            [sendLevel(from: strip, to: $0).address, sendOn(from: strip, to: $0).address]
+        }
     }
 
     private static func headampAddresses() -> [String] {
@@ -190,7 +193,7 @@ public enum Catalog {
     private static func headamp(_ index: Int) -> String {
         "/headamp/" + String(format: "%03d", index)
     }
-    private static func sendPrefix(_ strip: StripID, _ bus: Int) -> String {
-        strip.prefix + "/mix/" + String(format: "%02d", bus)
+    private static func sendPrefix(_ strip: StripID, _ target: StripID) -> String {
+        strip.prefix + "/mix/" + String(format: "%02d", target.number)
     }
 }

@@ -29,7 +29,9 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
 - [x] **48V as a button beside the Gain row** (mock R2), the same height, red when on, like MUTE beside a fader. Switching phantom power on or off asks first with the system alert ("Turn on 48V for Vox 2?"), plus "Also powers Vox 1 (same input)." when two channels share an input.
 - [ ] **Reset bands asks with the system alert** like linking does, instead of today's confirmation sheet, so every "are you sure" in the app looks the same.
-- [ ] **Matrix group.** Show Matrix 1–6 (overview chip and a basic strip screen), so they can be renamed and mixed too. Add their stereo links (`/config/mtxlink/1-2` … `5-6`) to `StripLink.swift` then.
+- [x] **Matrix group.** Matrix 1–6 have a chip (last in the row, so DCA and Main stay on an iPhone SE screen) and a strip screen with Mix, EQ (6 bands), Comp and Fed by (the buses and both mains). They link in pairs (`/config/mtxlink/1-2` … `5-6`).
+- [ ] **Sends to the matrices from a bus or main screen**, like an input's Sends tab. Today they're set only from the matrix's Fed by tab.
+- [ ] **Matrix send pan and tap** (`/bus/NN/mix/01/pan`, `…/type`, on the odd sends): needed to feed a stereo matrix pair properly. Neither Fed by tab shows them yet.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
 - [ ] revisit **Unused** approach
