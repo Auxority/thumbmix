@@ -53,6 +53,9 @@
     "192.168.1.50" : {
 
     },
+    "Also powers %@ (same input)." : {
+
+    },
     "Band" : {
 
     },
@@ -192,7 +195,7 @@
     "Sends aren't linked on the desk." : {
 
     },
-    "Shared with %@" : {
+    "Shares an input with %@" : {
 
     },
     "Show unused" : {
@@ -226,6 +229,18 @@
 
     },
     "Try offline (demo console)" : {
+
+    },
+    "Turn Off" : {
+
+    },
+    "Turn off 48V for %@?" : {
+
+    },
+    "Turn On" : {
+
+    },
+    "Turn on 48V for %@?" : {
 
     },
     "Unlink" : {

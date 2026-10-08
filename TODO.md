@@ -27,7 +27,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 ## Features
 
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
-- [ ] **48V as a button beside the Gain row** (mock R2), the same height, red when on, like MUTE beside a fader. Switching phantom power on or off asks first with the system alert ("Turn on 48V for Vox 2?"), plus "Also powers Vox 1 (same preamp)." when the preamp is shared.
+- [x] **48V as a button beside the Gain row** (mock R2), the same height, red when on, like MUTE beside a fader. Switching phantom power on or off asks first with the system alert ("Turn on 48V for Vox 2?"), plus "Also powers Vox 1 (same input)." when two channels share an input.
 - [ ] **Reset bands asks with the system alert** like linking does, instead of today's confirmation sheet, so every "are you sure" in the app looks the same.
 - [ ] **Matrix group.** Show Matrix 1–6 (overview chip and a basic strip screen), so they can be renamed and mixed too. Add their stereo links (`/config/mtxlink/1-2` … `5-6`) to `StripLink.swift` then.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
