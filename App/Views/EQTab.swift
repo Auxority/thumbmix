@@ -63,12 +63,9 @@ struct EQTab: View {
             .font(.subheadline.weight(.semibold))
             .frame(maxWidth: .infinity, minHeight: 44)
             .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
-            .confirmationDialog(
-                "Every band goes back to PEQ at 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz, Q 1.7, 0 dB.",
-                isPresented: $isConfirmingReset, titleVisibility: .visible
-            ) {
-                Button("Reset all \(bandCount) bands", role: .destructive) { mirror.resetEQBands(strip) }
+            .alert("Reset all \(bandCount) bands of \(mirror.name(strip))?", isPresented: $isConfirmingReset) {
                 Button("Cancel", role: .cancel) {}
+                Button("Reset", role: .destructive) { mirror.resetEQBands(strip) }
             }
     }
 }
