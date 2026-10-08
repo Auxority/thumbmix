@@ -49,11 +49,23 @@ public enum Catalog {
         )
     }
 
-    /// No reset: a double-tap jumping preamp gain could cause feedback.
+    /// A jump in preamp gain can cause feedback, so its reset asks first.
     public static func headampGain(_ index: Int) -> ParamSpec {
         ParamSpec(
             headamp(index) + "/gain", CoreStrings.text("Gain"), .linear(min: -12, max: 60, step: 0.5),
-            .decibels)
+            .decibels, reset: 0, resetPrompt: CoreStrings.text("Reset the preamp gain to 0 dB?"))
+    }
+
+    /// Only input channels have a delay (doc p.25). Its reset asks first: it would undo a time alignment mid-show.
+    public static func delay(_ strip: StripID) -> DelaySpecs? {
+        guard strip.kind == .input else { return nil }
+        let p = strip.prefix + "/delay/"
+        return DelaySpecs(
+            on: ParamSpec(p + "on", CoreStrings.text("Delay"), .toggle, .plain),
+            time: ParamSpec(
+                p + "time", CoreStrings.text("Time"), .linear(min: 0.3, max: 500, step: 0.1), .delayTime,
+                reset: 0.3, resetPrompt: CoreStrings.text("Reset the delay to 0.3 ms?"))
+        )
     }
 
     public static func headampPhantom(_ index: Int) -> ParamSpec {
@@ -157,7 +169,7 @@ public enum Catalog {
     private static func inputAddresses(_ strip: StripID) -> [String] {
         guard strip.hasGate else { return [] }
         return [trim(strip).address] + gate(strip).all.map(\.address) + [headampIndex(forInput: strip.number)]
-            + (lowCut(strip)?.all.map(\.address) ?? [])
+            + (lowCut(strip)?.all.map(\.address) ?? []) + (delay(strip)?.all.map(\.address) ?? [])
     }
 
     private static func dynamicsAddresses(_ strip: StripID) -> [String] {

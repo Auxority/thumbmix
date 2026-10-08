@@ -59,6 +59,12 @@
     "Also powers %@ (same input)." : {
 
     },
+    "Also resets %@ (linked)." : {
+
+    },
+    "Also resets %@ (same input)." : {
+
+    },
     "Band" : {
 
     },

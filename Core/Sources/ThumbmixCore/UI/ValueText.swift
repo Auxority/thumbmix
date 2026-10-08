@@ -26,6 +26,7 @@ public enum ValueText {
         case .decibelAmount: return number(value, digits: 1, locale) + " dB"
         case .hertz: return hertz(value, locale)
         case .milliseconds: return milliseconds(value, locale)
+        case .delayTime: return milliseconds(value, locale) + " · " + distance(milliseconds: value, locale)
         case .percent: return number(value, digits: 0, locale) + "%"
         case .pan: return pan(value)
         case .ratio, .plain: return number(value, digits: 1, locale)
@@ -59,6 +60,14 @@ public enum ValueText {
             default: 0
             }
         return number(value, digits: digits, locale) + " ms"
+    }
+
+    /// How far sound travels in that time (343 m/s, at 20 °C), for lining up a fill by its distance.
+    /// Feet on a phone set to US units.
+    private static func distance(milliseconds: Double, _ locale: Locale) -> String {
+        let metres = milliseconds * 0.343
+        guard locale.measurementSystem == .us else { return number(metres, digits: 1, locale) + " m" }
+        return number(metres * 3.28084, digits: 1, locale) + " ft"
     }
 
     private static func pan(_ value: Double) -> String {

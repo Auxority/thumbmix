@@ -8,6 +8,13 @@ extension ConsoleMirror {
         return cell(address).argument == .int(1)
     }
 
+    /// The side that a Gain/Delay change (gain, 48V, trim, delay) also reaches on the desk; nil when the strip isn't
+    /// linked or the preference keeps the sides apart. Whether 48V follows too is unverified (m32-probe section 7).
+    public func gainDelayPartner(of strip: StripID) -> StripID? {
+        guard isLinked(strip), isShared(.gainDelay) else { return nil }
+        return strip.partner
+    }
+
     /// Unread counts as separate: each side then shows its own value, which is never wrong. So does a section whose
     /// partner didn't follow the app's edit, whatever the preference says.
     public func isShared(_ section: LinkSection) -> Bool {

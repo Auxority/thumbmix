@@ -19,8 +19,12 @@ struct LocalizationTests {
         ]
         specs += [Catalog.pan(strip)].compactMap { $0 }
         specs += Catalog.gate(strip).all + Catalog.dynamics(strip).all + Catalog.eqBand(strip, 1).all
+        specs += Catalog.delay(strip)?.all ?? []
         for spec in specs {
             #expect(isInCatalog(spec.label), "missing \(spec.label)")
+        }
+        for prompt in [Catalog.delay(strip)?.time, Catalog.headampGain(0)].compactMap({ $0?.resetPrompt }) {
+            #expect(isInCatalog(prompt), "missing \(prompt)")
         }
     }
 
