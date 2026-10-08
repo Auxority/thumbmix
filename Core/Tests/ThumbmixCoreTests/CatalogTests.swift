@@ -25,8 +25,8 @@ struct CatalogTests {
     }
 
     @Test func sendAndHeadampAddresses() {
-        #expect(Catalog.sendLevel(from: StripID(.input, 1), toBus: 16).address == "/ch/01/mix/16/level")
-        #expect(Catalog.sendOn(from: StripID(.fxReturn, 1), toBus: 2).address == "/fxrtn/01/mix/02/on")
+        #expect(Catalog.sendLevel(from: StripID(.input, 1), to: StripID(.bus, 16)).address == "/ch/01/mix/16/level")
+        #expect(Catalog.sendOn(from: StripID(.fxReturn, 1), to: StripID(.bus, 2)).address == "/fxrtn/01/mix/02/on")
         #expect(Catalog.headampGain(32).address == "/headamp/032/gain")
         #expect(Catalog.headampPhantom(5).address == "/headamp/005/phantom")
         #expect(Catalog.headampIndex(forInput: 1) == "/-ha/00/index")
@@ -63,9 +63,10 @@ struct CatalogTests {
 
     @Test func syncListIsCompleteAndUnique() {
         let addresses = Catalog.syncAddresses()
-        // 32 inputs x 77 + 8 aux x 39 + 8 FX x 39 + 16 buses x 41 + LR 40 + M 39 + 8 DCAs x 5 + 128 headamps x 2
-        // + /-prefs/rta/source and /pos + 16 + 4 + 4 + 8 link pairs + 4 Link Preferences
-        #expect(addresses.count == 4157)
+        // 32 inputs x 77 + 8 aux x 39 + 8 FX x 39 + 16 buses x 53 + 6 matrices x 39 + LR 52 + M 51 + 8 DCAs x 5
+        // + 128 headamps x 2 + /-prefs/rta/source and /pos + 16 + 4 + 4 + 8 + 3 link pairs + 4 Link Preferences
+        // (a bus or main has 12 matrix-send addresses)
+        #expect(addresses.count == 4610)
         #expect(Set(addresses).count == addresses.count)
     }
 

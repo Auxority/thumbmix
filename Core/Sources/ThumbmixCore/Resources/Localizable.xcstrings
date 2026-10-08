@@ -1,6 +1,26 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ stay separate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ stay separate."
+          }
+        }
+      }
+    },
+    "%@ stays separate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ stays separate."
+          }
+        }
+      }
+    },
     "48V" : {
       "localizations" : {
         "en" : {
@@ -133,56 +153,6 @@
         }
       }
     },
-    "%@ stay separate." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ stay separate."
-          }
-        }
-      }
-    },
-    "%@ stays separate." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ stays separate."
-          }
-        }
-      }
-    },
-    "dynamics" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "dynamics"
-          }
-        }
-      }
-    },
-    "fader and mute" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "fader and mute"
-          }
-        }
-      }
-    },
-    "gain and delay" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "gain and delay"
-          }
-        }
-      }
-    },
     "Comp" : {
       "localizations" : {
         "en" : {
@@ -224,6 +194,16 @@
         }
       }
     },
+    "dynamics" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dynamics"
+          }
+        }
+      }
+    },
     "EQ" : {
       "localizations" : {
         "en" : {
@@ -240,6 +220,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fader"
+          }
+        }
+      }
+    },
+    "fader and mute" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fader and mute"
           }
         }
       }
@@ -302,6 +292,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gain"
+          }
+        }
+      }
+    },
+    "gain and delay" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gain and delay"
           }
         }
       }
@@ -415,6 +415,37 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Makeup"
+          }
+        }
+      }
+    },
+    "Matrix" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matrix"
+          }
+        }
+      }
+    },
+    "Matrix %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matrix %lld"
+          }
+        }
+      }
+    },
+    "Matrix %lld-%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matrix %lld-%lld"
           }
         }
       }

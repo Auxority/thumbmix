@@ -87,7 +87,7 @@ struct UIMathTests {
     @Test func groups() {
         #expect(StripGroup.inputs.strips.count == 32)
         #expect(StripGroup.main.strips == [StripID(.mainStereo), StripID(.mainMono)])
-        #expect(StripGroup.allCases.map(\.rawValue) == ["Inputs", "Aux", "FX", "Buses", "DCA", "Main"])
+        #expect(StripGroup.allCases.map(\.rawValue) == ["Inputs", "Aux", "FX", "Buses", "DCA", "Main", "Matrix"])
     }
 
     @Test func meterScale() {
