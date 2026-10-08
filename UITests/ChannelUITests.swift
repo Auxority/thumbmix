@@ -64,9 +64,41 @@ final class ChannelUITests: XCTestCase {
         app.buttons["Input"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["/headamp/044/gain"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["toggle-/headamp/044/phantom"].exists)
-        XCTAssertTrue(app.staticTexts["Shared with Vox 1"].exists)
+        XCTAssertTrue(app.staticTexts["Shares an input with Vox 1"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["/ch/14/preamp/trim"].exists)
         saveScreenshot("task-13-input")
+    }
+
+    /// 48V sits beside Gain like MUTE beside a fader, and every switch asks first: phantom power can harm a mic.
+    /// Ends switched off again, as the demo desk started.
+    func testPhantomPowerAsksBeforeSwitching() {
+        launch()
+        open("Vox 2")
+        app.buttons["Input"].tap()
+        let phantom = app.buttons["toggle-/headamp/044/phantom"]
+        let gain = app.descendants(matching: .any)["/headamp/044/gain"]
+        XCTAssertTrue(phantom.appears(within: 2))
+        XCTAssertEqual(phantom.value as? String, "Off")
+        XCTAssertEqual(phantom.frame.midY, gain.frame.midY, accuracy: 2, "beside the Gain row")
+
+        phantom.tap()
+        let turnOn = app.alerts["Turn on 48V for Vox 2?"]
+        XCTAssertTrue(turnOn.appears(within: 2))
+        XCTAssertTrue(turnOn.staticTexts["Also powers Vox 1 (same input)."].exists)
+        saveScreenshot("phantom-alert")
+        turnOn.buttons["Cancel"].tap()
+        XCTAssertEqual(phantom.value as? String, "Off", "Cancel leaves the desk as it was")
+
+        phantom.tap()
+        turnOn.buttons["Turn On"].tap()
+        XCTAssertTrue(eventually(within: 2) { phantom.value as? String == "On" })
+        saveScreenshot("phantom-on")
+
+        phantom.tap()
+        let turnOff = app.alerts["Turn off 48V for Vox 2?"]
+        XCTAssertTrue(turnOff.appears(within: 2))
+        turnOff.buttons["Turn Off"].tap()
+        XCTAssertTrue(eventually(within: 2) { phantom.value as? String == "Off" })
     }
 
     func testInternalSourceShowsTrimNotGain() {
