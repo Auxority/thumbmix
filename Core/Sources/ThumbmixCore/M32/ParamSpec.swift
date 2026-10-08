@@ -1,6 +1,7 @@
 public enum ParamUnit: Sendable {
     /// `decibels` is a signed level or gain; `decibelAmount` is a size (gate range, makeup) and reads without a sign.
-    case decibels, decibelAmount, hertz, milliseconds, percent, ratio, pan, plain
+    /// `delayTime` is milliseconds plus the distance sound travels in that time.
+    case decibels, decibelAmount, hertz, milliseconds, delayTime, percent, ratio, pan, plain
 }
 
 public struct ParamSpec: Sendable, Identifiable, Equatable {
@@ -10,15 +11,19 @@ public struct ParamSpec: Sendable, Identifiable, Equatable {
     public let unit: ParamUnit
     /// What a double-tap restores, in real units; nil means double-tap does nothing.
     public let resetValue: Double?
+    /// Asked with the system alert before a double-tap resets; nil resets at once.
+    public let resetPrompt: String?
 
     public init(
-        _ address: String, _ label: String, _ scale: ParamScale, _ unit: ParamUnit, reset: Double? = nil
+        _ address: String, _ label: String, _ scale: ParamScale, _ unit: ParamUnit, reset: Double? = nil,
+        resetPrompt: String? = nil
     ) {
         self.address = address
         self.label = label
         self.scale = scale
         self.unit = unit
         self.resetValue = reset
+        self.resetPrompt = resetPrompt
     }
 
     public var id: String { address }
@@ -38,6 +43,11 @@ public struct GateSpecs: Sendable {
 public struct DynamicsSpecs: Sendable {
     public let on, mode, threshold, ratio, knee, attack, hold, release, makeup: ParamSpec
     public var all: [ParamSpec] { [on, mode, threshold, ratio, knee, attack, hold, release, makeup] }
+}
+
+public struct DelaySpecs: Sendable, Equatable {
+    public let on, time: ParamSpec
+    public var all: [ParamSpec] { [on, time] }
 }
 
 public struct LowCutSpecs: Sendable {

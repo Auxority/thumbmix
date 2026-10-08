@@ -72,7 +72,7 @@ public enum LinkSection: String, CaseIterable, Sendable {
         if suffix == "/mix/pan" { return nil }
         if suffix.hasPrefix("/mix/") { return .faderMute }
         if suffix.hasPrefix("/eq/") || suffix.hasPrefix("/preamp/hp") { return .eq }
-        if suffix.hasPrefix("/preamp/") { return .gainDelay }
+        if suffix.hasPrefix("/preamp/") || suffix.hasPrefix("/delay/") { return .gainDelay }
         if suffix.hasPrefix("/gate/") || suffix.hasPrefix("/dyn/") { return .dynamics }
         return nil
     }

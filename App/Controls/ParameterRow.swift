@@ -14,6 +14,7 @@ struct ParameterRow: View {
 
     @State private var dragStart: Float?
     @State private var unityTicks = 0
+    @State private var isConfirmingReset = false
     /// Grows the row with the user's text size, so large type isn't clipped.
     @ScaledMetric private var sizeScale: CGFloat = 1
 
@@ -58,6 +59,10 @@ struct ParameterRow: View {
         .accessibilityLabel(title.flatMap { $0.isEmpty ? nil : $0 } ?? spec.label)
         .accessibilityValue(text)
         .accessibilityAdjustableAction(adjust)
+        .alert(Text(verbatim: spec.resetPrompt ?? ""), isPresented: $isConfirmingReset) {
+            Button("Cancel", role: .cancel) {}
+            Button("Reset", role: .destructive, action: applyReset)
+        }
     }
 
     /// VoiceOver swipe up/down: dragging isn't available to a VoiceOver user, so the row steps instead.
@@ -101,7 +106,13 @@ struct ParameterRow: View {
         mirror.set(spec.address, spec.scale.argument(fromNormalized: new))
     }
 
+    /// A spec with a reset prompt asks first: a double-tap is as easy to hit by accident as a drag.
     private func reset() {
+        guard spec.resetValue != nil else { return }
+        if spec.resetPrompt == nil { applyReset() } else { isConfirmingReset = true }
+    }
+
+    private func applyReset() {
         guard let value = spec.resetValue else { return }
         mirror.set(
             spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))

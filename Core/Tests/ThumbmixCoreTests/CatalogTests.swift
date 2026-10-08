@@ -63,17 +63,19 @@ struct CatalogTests {
 
     @Test func syncListIsCompleteAndUnique() {
         let addresses = Catalog.syncAddresses()
-        // 32 inputs x 77 + 8 aux x 39 + 8 FX x 39 + 16 buses x 53 + 6 matrices x 39 + LR 52 + M 51 + 8 DCAs x 5
+        // 32 inputs x 79 + 8 aux x 39 + 8 FX x 39 + 16 buses x 53 + 6 matrices x 39 + LR 52 + M 51 + 8 DCAs x 5
         // + 128 headamps x 2 + /-prefs/rta/source and /pos + 16 + 4 + 4 + 8 + 3 link pairs + 4 Link Preferences
         // (a bus or main has 12 matrix-send addresses)
-        #expect(addresses.count == 4610)
+        #expect(addresses.count == 4674)
         #expect(Set(addresses).count == addresses.count)
     }
 
     @Test func unityExistsForDecibelControlsWithZeroReset() {
         #expect(Catalog.fader(StripID(.input, 1)).unityNormalized == Float(767) / 1023)
         #expect(Catalog.eqBand(StripID(.input, 1), 1).gain.unityNormalized == 0.5)
-        #expect(Catalog.headampGain(0).unityNormalized == nil)
+        #expect(Catalog.headampGain(0).unityNormalized == Float(24) / 144, "preamp gain resets to 0 dB, so it ticks there")
+        #expect(Catalog.trim(StripID(.input, 1)).unityNormalized == 0.5)
+        #expect(Catalog.gate(StripID(.input, 1)).threshold.unityNormalized == nil, "no reset, no tick")
     }
 
     @Test func colors() {

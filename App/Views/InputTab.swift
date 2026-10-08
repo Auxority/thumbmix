@@ -23,7 +23,16 @@ struct InputTab: View {
                 }
                 // Engineers trim preamp channels too, so Trim shows on every input, not only digital sources.
                 ParameterRow(spec: Catalog.trim(strip), mirror: mirror)
+                if let delay = Catalog.delay(strip) { delayRow(delay) }
             }
+        }
+    }
+
+    /// Mock C: like the low cut on the EQ tab, an on/off chip beside the time, which also reads as a distance.
+    private func delayRow(_ delay: DelaySpecs) -> some View {
+        HStack(spacing: 8) {
+            ToggleChip(spec: delay.on, mirror: mirror, onColor: .green)
+            ParameterRow(spec: delay.time, mirror: mirror)
         }
     }
 
