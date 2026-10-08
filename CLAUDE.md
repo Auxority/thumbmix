@@ -17,7 +17,7 @@ A remote that shows a stale or guessed value as live makes the engineer's next d
 
 ## Protocol facts
 
-OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unofficial X32/M32 OSC Remote Protocol* (v4.09), cited by page in the code. Look facts up there; the fake console (`FakeM32`) encodes assumptions, not the real desk. Behaviour the doc leaves open (the `/xremote` client limit, whether the desk echoes a sender's own sets, DCA bit order, DCA meter slots) is answered by `m32-probe` on real hardware; record the answer in a comment where the code depends on it.
+OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unofficial X32/M32 OSC Remote Protocol* (v4.09), cited by page in the code. Look facts up there: grep `notes/maillot-v4.09.txt`, its `pdftotext -layout` text, and cite the page; the fake console (`FakeM32`) encodes assumptions, not the real desk. Behaviour the doc leaves open (the `/xremote` client limit, whether the desk echoes a sender's own sets, DCA bit order, DCA meter slots) is answered by `m32-probe` on real hardware; record the answer in a comment where the code depends on it.
 
 ## Done means
 
@@ -44,6 +44,7 @@ When `scripts/ui-test.sh` stops before any test with "Failed to clone device …
 - **Hooks** (`.claude/settings.json`): an edited Swift file is formatted with `swift format` straight away, and edits inside `Thumbmix.xcodeproj` are blocked.
 - **Fake state**: a UI test subclasses `DeskUITestCase`, which starts a fresh fake desk per test on a free port and passes it to the app (`-consolePort`, Debug builds only). To play a change made on the desk, call `desk.change(...)`, before `launch()` when the app should start with it. A long class slows the whole run, since a class runs on one simulator: split one that grows past ~10 tests. The standalone `fake-m32` keeps every set it receives, so a simulator app run by hand against it may need a restart of the fake.
 - **375 pt screen edge**: on the iPhone SE the rows under the EQ graph start below the screen's bottom edge. A UI test scrolls by dragging from a visible row (the Type dropdown), never by swiping a hidden one.
+- **Held gestures**: `onEnded` never runs when the system cancels a touch (a call, Notification Center). Anything that repeats or holds an edit follows `@GestureState` and stops when the scene leaves `.active`; test the slide-off with `press(forDuration:thenDragTo:withVelocity:thenHoldForDuration:)`.
 - **UI waits**: use `appears(within:)` and `eventually(within:)` (`UITests/Waiting.swift`), never `waitForExistence` or a predicate expectation: those look again only once a second, which was a third of the suite's time.
 - **Edit holds in tests**: for `ConsoleMirror.editHold` after the app's own edit, pushes for that address are ignored. A test that simulates a later desk change waits that out first.
 - **Mirrored parameters**: `CatalogTests.syncListIsCompleteAndUnique` pins the sync address count. A new mirrored parameter updates that count and its per-strip comment, and gets a typed default in `DemoState` (the fallback is `.float(0.5)`, wrong for int parameters).
