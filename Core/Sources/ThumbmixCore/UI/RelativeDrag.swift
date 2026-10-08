@@ -24,13 +24,15 @@ public enum RelativeDrag {
         }
     }
 
-    /// Moves from the value as shown (to 0.1 dB): the grid's rounding (up to 0.02 dB above −10 dB) would
-    /// otherwise add up tap after tap, drifting the display to x.1 and x.2.
+    /// Moves from the value as shown (to 0.1 dB, faders as the desk shows them): the grid's rounding (up to
+    /// 0.02 dB above −10 dB) would otherwise add up tap after tap, drifting the display to x.1 and x.2.
     public static func nudged(_ normalized: Float, byDecibels delta: Double, scale: ParamScale)
         -> Float
     {
-        let current = scale.value(fromNormalized: normalized)
-        let shown = ((current.isFinite ? current : -90) * 10).rounded() / 10
-        return scale.normalized(forValue: shown + delta)
+        let shown =
+            scale == .fader
+            ? FaderLaw.shownDecibels(fromWire: Double(normalized))
+            : (scale.value(fromNormalized: normalized) * 10).rounded() / 10
+        return scale.normalized(forValue: (shown.isFinite ? shown : -90) + delta)
     }
 }

@@ -8,6 +8,7 @@ public enum ValueText {
         guard let normalized else { return "—" }
         let value = spec.scale.value(fromNormalized: normalized)
         switch spec.scale {
+        case .fader: return decibels(FaderLaw.shownDecibels(fromWire: Double(normalized)), locale: locale)
         case .choice(let options): return choice(options, index: value, unit: spec.unit)
         case .toggle: return value >= 1 ? CoreStrings.text("On") : CoreStrings.text("Off")
         default: return measurement(value, unit: spec.unit, locale: locale)

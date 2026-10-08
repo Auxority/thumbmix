@@ -52,6 +52,7 @@ xcodegen generate && open Thumbmix.xcodeproj
 - the DCA bit order and the meter layout
 - how stereo links behave: the Link Preferences, which side moves when a linked fader moves, what linking copies,
   and whether an unticked preference really keeps the sides apart (it asks you to act on the desk)
+- whether the desk's own dB text for each input fader matches what the app shows
 
 ## Acceptance checklist (real M32)
 

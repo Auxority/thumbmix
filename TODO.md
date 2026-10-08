@@ -13,6 +13,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
   - Section 5: the DCA meter slots.
   - Section 6: does `/meters/15` follow `/-prefs/rta/source`, and does "after EQ" include the low cut and the compressor?
   - Section 7: stereo links. Which side moves when a linked fader moves in Mixing Station, what linking copies besides the pans, whether an unticked Link Preference keeps the sides apart, which preference governs sends (assumed Mute/Fader) and the low cut (assumed EQ), and the preferences' factory defaults (the demo assumes all ticked).
+  - Section 8: fader text. Does the desk's own dB text match the app's for every input fader? The app follows the doc's table (p.145), incl. a 0 dB detent and two odd steps (−8.7, −23.2). Set faders near 0, −8.6 and −23.2 with the desk's encoder first; each DIFFERS line goes in `FaderLaw.deskExceptions`. Untested: the fake desk doesn't answer `/node`.
 - [ ] Walk the acceptance checklist in `README.md`.
 - [ ] Check on a device that VoiceOver's swipe up/down adjusts parameter rows. XCUITest can't drive it.
 
