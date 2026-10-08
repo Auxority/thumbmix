@@ -11,6 +11,8 @@ struct ParameterRow: View {
     var meter: MeterCell?
     /// A linked pair's left side, drawn above `meter` (the right side).
     var upperMeter: MeterCell?
+    /// Under the reset question: who else the reset reaches, e.g. a linked partner.
+    var resetNote: String?
 
     @State private var dragStart: Float?
     @State private var unityTicks = 0
@@ -62,6 +64,8 @@ struct ParameterRow: View {
         .alert(Text(verbatim: spec.resetPrompt ?? ""), isPresented: $isConfirmingReset) {
             Button("Cancel", role: .cancel) {}
             Button("Reset", role: .destructive, action: applyReset)
+        } message: {
+            if let resetNote { Text(verbatim: resetNote) }
         }
     }
 
