@@ -11,7 +11,7 @@ struct InputTab: View {
                 InputMeter(cell: mirror.meter(strip))
                 if let headamp = mirror.headamp(forInput: strip.number) {
                     HStack(spacing: 8) {
-                        ParameterRow(spec: Catalog.headampGain(headamp), mirror: mirror, resetNote: reach.alsoResets)
+                        ParameterRow(spec: Catalog.headampGain(headamp), mirror: mirror)
                         PhantomButton(spec: Catalog.headampPhantom(headamp), strip: strip, mirror: mirror)
                     }
                     sharedWarning
@@ -32,11 +32,9 @@ struct InputTab: View {
     private func delayRow(_ delay: DelaySpecs) -> some View {
         HStack(spacing: 8) {
             ToggleChip(spec: delay.on, mirror: mirror, onColor: .green)
-            ParameterRow(spec: delay.time, mirror: mirror, resetNote: reach.partnerAlsoResets)
+            ParameterRow(spec: delay.time, mirror: mirror)
         }
     }
-
-    private var reach: PreampReach { PreampReach(strip, mirror) }
 
     @ViewBuilder private var sharedWarning: some View {
         let sharing = mirror.inputsSharingHeadamp(withInput: strip.number)
@@ -91,7 +89,7 @@ private struct PhantomButton: View {
 
 }
 
-/// Who else a change on this input's Input tab reaches, named in its alerts: channels on the same input (one
+/// Who else switching 48V reaches, named in its alert: channels on the same input (one
 /// preamp), and the partner when the desk links Gain/Delay. Warning about a change that may not happen there
 /// (48V on the partner is unverified) is safer than staying silent about one that does.
 @MainActor private struct PreampReach {
@@ -104,22 +102,11 @@ private struct PhantomButton: View {
         partner = mirror.gainDelayPartner(of: strip).map { mirror.name($0) }
     }
 
-    /// For 48V and preamp gain, which belong to the preamp every channel on that input shares.
+    /// 48V belongs to the preamp every channel on that input shares.
     var alsoPowers: String? {
         lines(
             sameInput.map { String(localized: "Also powers \($0) (same input).") },
             partner.map { String(localized: "Also powers \($0) (linked).") })
-    }
-
-    var alsoResets: String? {
-        lines(
-            sameInput.map { String(localized: "Also resets \($0) (same input).") },
-            partner.map { String(localized: "Also resets \($0) (linked).") })
-    }
-
-    /// For the delay, which belongs to the channel, not the preamp: only the linked partner shares it.
-    var partnerAlsoResets: String? {
-        partner.map { String(localized: "Also resets \($0) (linked).") }
     }
 
     private func lines(_ candidates: String?...) -> String? {

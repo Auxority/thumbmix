@@ -141,6 +141,13 @@ extension ConsoleMirror {
         EQReading.bands(strip) { cell($0).argument }
     }
 
+    /// false on a cut filter, whose Gain and Q do nothing; nil until the desk sent the band's type.
+    public func eqBandShapesLevel(_ strip: StripID, _ band: Int) -> Bool? {
+        let type = Catalog.eqBand(strip, band).type
+        guard let position = normalized(type), case .choice(let names) = type.scale else { return nil }
+        return Catalog.eqTypeShapesLevel(names[Int(type.scale.value(fromNormalized: position))])
+    }
+
     /// Puts every band back to `Catalog.eqDefaults`; a no-op on strips without defaults.
     public func resetEQBands(_ strip: StripID) {
         for index in (Catalog.eqDefaults(strip) ?? []).indices { resetEQBand(strip, index + 1) }

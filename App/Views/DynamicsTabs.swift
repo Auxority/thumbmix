@@ -13,7 +13,7 @@ struct GateTab: View {
             VStack(spacing: 8) {
                 HStack(spacing: 8) {
                     ToggleChip(spec: gate.on, mirror: mirror, onColor: .green)
-                    ParameterRow(spec: gate.mode, mirror: mirror)
+                    ChoiceMenu(spec: gate.mode, mirror: mirror)
                 }
                 if let curve = curve(gate) {
                     TransferGraph(
@@ -49,7 +49,7 @@ struct CompTab: View {
             VStack(spacing: 8) {
                 HStack(spacing: 8) {
                     ToggleChip(spec: dynamics.on, mirror: mirror, onColor: .green)
-                    ParameterRow(spec: dynamics.mode, mirror: mirror)
+                    ChoiceMenu(spec: dynamics.mode, mirror: mirror)
                 }
                 if let curve = curve(dynamics) {
                     TransferGraph(
@@ -62,6 +62,11 @@ struct CompTab: View {
                     dynamics.release, dynamics.makeup,
                 ]) {
                     ParameterRow(spec: $0, mirror: mirror)
+                }
+                // Set and forget: below the settings an engineer rides.
+                HStack(spacing: 8) {
+                    ChoiceMenu(spec: dynamics.detector, mirror: mirror)
+                    ChoiceMenu(spec: dynamics.envelope, mirror: mirror)
                 }
             }
         }

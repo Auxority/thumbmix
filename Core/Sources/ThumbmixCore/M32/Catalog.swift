@@ -4,6 +4,8 @@ import Foundation
 public enum Catalog {
     public static let gateModes = ["EXP2", "EXP3", "EXP4", "GATE", "DUCK"]
     public static let dynamicsModes = ["COMP", "EXP"]
+    public static let dynamicsDetectors = ["PEAK", "RMS"]
+    public static let dynamicsEnvelopes = ["LIN", "LOG"]
     public static let ratios = [
         "1.1", "1.3", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "7.0", "10", "20", "100",
     ]
@@ -49,14 +51,13 @@ public enum Catalog {
         )
     }
 
-    /// A jump in preamp gain can cause feedback, so its reset asks first.
     public static func headampGain(_ index: Int) -> ParamSpec {
         ParamSpec(
             headamp(index) + "/gain", CoreStrings.text("Gain"), .linear(min: -12, max: 60, step: 0.5),
-            .decibels, reset: 0, resetPrompt: CoreStrings.text("Reset the preamp gain to 0 dB?"))
+            .decibels, reset: 0)
     }
 
-    /// Only input channels have a delay (doc p.25). Its reset asks first: it would undo a time alignment mid-show.
+    /// Only input channels have a delay (doc p.25).
     public static func delay(_ strip: StripID) -> DelaySpecs? {
         guard strip.kind == .input else { return nil }
         let p = strip.prefix + "/delay/"
@@ -64,7 +65,7 @@ public enum Catalog {
             on: ParamSpec(p + "on", CoreStrings.text("Delay"), .toggle, .plain),
             time: ParamSpec(
                 p + "time", CoreStrings.text("Time"), .linear(min: 0.3, max: 500, step: 0.1), .delayTime,
-                reset: 0.3, resetPrompt: CoreStrings.text("Reset the delay to 0.3 ms?"))
+                reset: 0.3)
         )
     }
 
@@ -83,7 +84,12 @@ public enum Catalog {
         let p = strip.prefix + "/gate/"
         return GateSpecs(
             on: ParamSpec(p + "on", CoreStrings.text("Gate"), .toggle, .plain),
-            mode: ParamSpec(p + "mode", CoreStrings.text("Mode"), .choice(gateModes), .plain),
+            mode: ParamSpec(
+                p + "mode", CoreStrings.text("Mode"), .choice(gateModes), .plain,
+                optionNames: [
+                    CoreStrings.text("Expander 1:2"), CoreStrings.text("Expander 1:3"),
+                    CoreStrings.text("Expander 1:4"), CoreStrings.text("Gate"), CoreStrings.text("Ducker"),
+                ]),
             threshold: ParamSpec(
                 p + "thr", CoreStrings.text("Threshold"), .linear(min: -80, max: 0, step: 0.5), .decibels),
             range: ParamSpec(
@@ -98,18 +104,29 @@ public enum Catalog {
         let p = strip.prefix + "/dyn/"
         return DynamicsSpecs(
             on: ParamSpec(p + "on", CoreStrings.text("Comp"), .toggle, .plain),
-            mode: ParamSpec(p + "mode", CoreStrings.text("Mode"), .choice(dynamicsModes), .plain),
+            mode: ParamSpec(
+                p + "mode", CoreStrings.text("Mode"), .choice(dynamicsModes), .plain,
+                optionNames: [CoreStrings.text("Compressor"), CoreStrings.text("Expander")]),
             threshold: ParamSpec(
                 p + "thr", CoreStrings.text("Threshold"), .linear(min: -60, max: 0, step: 0.5), .decibels),
-            ratio: ParamSpec(p + "ratio", CoreStrings.text("Ratio"), .choice(ratios), .ratio),
+            ratio: ParamSpec(
+                p + "ratio", CoreStrings.text("Ratio"), .choice(ratios), .ratio,
+                reset: ratios.firstIndex(of: "3.0").map(Double.init)),
             knee: ParamSpec(
                 p + "knee", CoreStrings.text("Knee"), .linear(min: 0, max: 5, step: 1), .plain),
             attack: ParamSpec(p + "attack", CoreStrings.text("Attack"), attack, .milliseconds),
             hold: ParamSpec(p + "hold", CoreStrings.text("Hold"), hold, .milliseconds),
             release: ParamSpec(p + "release", CoreStrings.text("Release"), release, .milliseconds),
             makeup: ParamSpec(
-                p + "mgain", CoreStrings.text("Makeup"), .linear(min: 0, max: 24, step: 0.5), .decibelAmount
-            )
+                p + "mgain", CoreStrings.text("Makeup gain"), .linear(min: 0, max: 24, step: 0.5),
+                .decibelAmount, reset: 0),
+            // RMS follows the signal's average level, PEAK its peaks: "average level" says that without the maths.
+            detector: ParamSpec(
+                p + "det", CoreStrings.text("Detector"), .choice(dynamicsDetectors), .plain,
+                optionNames: [CoreStrings.text("Peak level"), CoreStrings.text("Average level")]),
+            envelope: ParamSpec(
+                p + "env", CoreStrings.text("Envelope"), .choice(dynamicsEnvelopes), .plain,
+                optionNames: [CoreStrings.text("Linear"), CoreStrings.text("Logarithmic")])
         )
     }
 
@@ -117,26 +134,41 @@ public enum Catalog {
         ParamSpec(strip.prefix + "/eq/on", CoreStrings.text("EQ"), .toggle, .plain)
     }
 
+    /// A band row's double-tap restores what Reset bands writes, at once like a double-tap on the graph's point.
     public static func eqBand(_ strip: StripID, _ band: Int) -> EQBandSpecs {
         let p = strip.prefix + "/eq/\(band)/"
         let types = [.matrix, .mainStereo, .mainMono].contains(strip.kind) ? mainEQTypes : eqTypes
+        let target = eqDefaults(strip).flatMap { $0.indices.contains(band - 1) ? $0[band - 1] : nil }
         return EQBandSpecs(
             type: ParamSpec(p + "type", CoreStrings.text("Type"), .choice(types), .plain),
             frequency: ParamSpec(
-                p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz),
+                p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz,
+                reset: target?.frequency),
             gain: ParamSpec(
                 p + "g", CoreStrings.text("Gain"), .linear(min: -15, max: 15, step: 0.25), .decibels,
                 reset: 0),
-            q: ParamSpec(p + "q", CoreStrings.text("Q"), .log(min: 10, max: 0.3, steps: 72), .plain)
+            q: ParamSpec(
+                p + "q", CoreStrings.text("Q"), .log(min: 10, max: 0.3, steps: 72), .plain, reset: target?.q)
         )
     }
 
-    /// The engineer's channel EQ starting point, restored by reset: four PEQs at 91.4 Hz, 418 Hz, 1.91 kHz
-    /// and 8.73 kHz, Q 1.7, 0 dB. Buses and mains have six bands and no agreed defaults yet.
+    /// The engineer's EQ starting points, restored by Reset bands and a row's double-tap: PEQs at Q 1.7, 0 dB.
+    /// Six-band strips use the desk's steps nearest the engineer's 55.1, 152, 418, 1150, 3170 and 8730 Hz;
+    /// compare them with the real desk (TODO). PEQ is type 2 in both type lists.
     public static func eqDefaults(_ strip: StripID) -> [EQBandState]? {
-        guard strip.kind == .input else { return nil }
-        return [91.4, 418, 1910, 8730].map { EQBandState(typeIndex: 2, frequency: $0, gain: 0, q: 1.7) }
+        let frequencies: [Double] =
+            switch strip.eqBandCount {
+            case 4: [91.4, 418, 1910, 8730]
+            case 6: [54.5, 153.5, 418, 1140, 3210, 8730]
+            default: []
+            }
+        guard !frequencies.isEmpty else { return nil }
+        return frequencies.map { EQBandState(typeIndex: 2, frequency: $0, gain: 0, q: 1.7) }
     }
+
+    /// Cut filters (LCut, HCut, the mains' BU6…LR24) have no level to shape, so Gain and Q do nothing there.
+    /// The doc lists gain and Q for every type without saying so: assumed, to check on the desk (TODO).
+    public static func eqTypeShapesLevel(_ name: String) -> Bool { ["LShv", "PEQ", "VEQ", "HShv"].contains(name) }
 
     /// `target` is a bus for inputs, aux ins and FX returns, a matrix for buses and mains (`StripKind.sendTarget`).
     public static func sendLevel(from strip: StripID, to target: StripID) -> ParamSpec {

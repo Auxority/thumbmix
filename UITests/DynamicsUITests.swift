@@ -18,12 +18,66 @@ final class DynamicsUITests: DeskUITestCase {
         saveScreenshot("task-14-gate")
     }
 
-    func testCompTabShowsRatioAndMakeup() {
+    func testCompTabShowsRatioAndMakeupGain() {
         launch()
         open("Kick")
         app.buttons["Comp"].tap()
         XCTAssertEqual(app.descendants(matching: .any)["/ch/01/dyn/ratio"].value as? String, "2.0:1")
-        XCTAssertTrue(app.descendants(matching: .any)["/ch/01/dyn/mgain"].exists)
+        XCTAssertEqual(app.descendants(matching: .any)["/ch/01/dyn/mgain"].label, "Makeup gain")
+    }
+
+    /// Dragging past half the row to flip a two-way choice was easy to miss; a list shows both.
+    func testCompModeIsADropdown() {
+        launch()
+        open("Kick")
+        app.buttons["Comp"].tap()
+        pick("Expander", in: "/ch/01/dyn/mode", from: "COMP", to: "EXP")
+    }
+
+    func testGateModeIsADropdown() {
+        launch()
+        open("Kick")
+        app.buttons["Gate"].tap()
+        pick("Ducker", in: "/ch/01/gate/mode", from: "GATE", to: "DUCK")
+    }
+
+    func testDetectorAndEnvelopeAreDropdowns() {
+        launch()
+        open("Snare")
+        app.buttons["Comp"].tap()
+        pick("Average level", in: "/ch/02/dyn/det", from: "PEAK", to: "RMS")
+        pick("Linear", in: "/ch/02/dyn/env", from: "LOG", to: "LIN")
+        saveScreenshot("comp-dropdowns")
+    }
+
+    /// Like the EQ rows: a double-tap resets at once, no question.
+    func testDoubleTapResetsMakeupGainAndRatioAtOnce() {
+        launch()
+        open("Tom 1")
+        app.buttons["Comp"].tap()
+        let makeup = app.descendants(matching: .any)["/ch/04/dyn/mgain"]
+        XCTAssertTrue(makeup.appears(within: 2))
+        XCTAssertEqual(makeup.value as? String, "12.0 dB")
+        makeup.doubleTap()
+        XCTAssertTrue(eventually(within: 2) { makeup.value as? String == "0.0 dB" })
+
+        let ratio = app.descendants(matching: .any)["/ch/04/dyn/ratio"]
+        XCTAssertEqual(ratio.value as? String, "2.0:1")
+        ratio.doubleTap()
+        XCTAssertTrue(eventually(within: 2) { ratio.value as? String == "3.0:1" })
+        XCTAssertEqual(app.alerts.count, 0)
+    }
+
+    /// The open list says the choice in words; the closed row shows the desk's name for it.
+    private func pick(_ item: String, in address: String, from current: String, to deskName: String) {
+        let menu = app.buttons[address]
+        XCTAssertTrue(menu.appears(within: 2), address)
+        XCTAssertEqual(menu.value as? String, current)
+        menu.tap()
+        let option = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", item)).firstMatch
+        XCTAssertTrue(option.appears(within: 2), item)
+        option.tap()
+        XCTAssertTrue(eventually(within: 2) { menu.value as? String == deskName }, address)
     }
 
     func testGateAndCompDrawTheirCurves() {

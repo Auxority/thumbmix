@@ -11,17 +11,17 @@ struct ParameterRow: View {
     var meter: MeterCell?
     /// A linked pair's left side, drawn above `meter` (the right side).
     var upperMeter: MeterCell?
-    /// Under the reset question: who else the reset reaches, e.g. a linked partner.
-    var resetNote: String?
 
     @State private var dragStart: Float?
     @State private var unityTicks = 0
-    @State private var isConfirmingReset = false
+    /// `.disabled` doesn't reach the UIKit pan area, so the row checks it itself.
+    @Environment(\.isEnabled) private var isEnabled
     /// Grows the row with the user's text size, so large type isn't clipped.
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
-        let position = mirror.normalized(spec)
+        // A disabled row shows no value: a number would suggest it still does something.
+        let position = isEnabled ? mirror.normalized(spec) : nil
         let text = ValueText.format(position, spec)
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 10).fill(Theme.track)
@@ -55,23 +55,18 @@ struct ParameterRow: View {
         }
         .frame(height: height * sizeScale)
         .clipShape(RoundedRectangle(cornerRadius: 10))
+        .opacity(isEnabled ? 1 : 0.38)
         .sensoryFeedback(.selection, trigger: unityTicks)
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier(spec.address)
         .accessibilityLabel(title.flatMap { $0.isEmpty ? nil : $0 } ?? spec.label)
         .accessibilityValue(text)
         .accessibilityAdjustableAction(adjust)
-        .alert(Text(verbatim: spec.resetPrompt ?? ""), isPresented: $isConfirmingReset) {
-            Button("Cancel", role: .cancel) {}
-            Button("Reset", role: .destructive, action: applyReset)
-        } message: {
-            if let resetNote { Text(verbatim: resetNote) }
-        }
     }
 
     /// VoiceOver swipe up/down: dragging isn't available to a VoiceOver user, so the row steps instead.
     private func adjust(_ direction: AccessibilityAdjustmentDirection) {
-        guard let current = mirror.normalized(spec) else { return }
+        guard isEnabled, let current = mirror.normalized(spec) else { return }
         let step =
             switch direction {
             case .increment: 1
@@ -87,7 +82,7 @@ struct ParameterRow: View {
 
     /// No value read yet means no drag: starting from a guess would jump the desk.
     private func beginDrag() {
-        guard let current = mirror.normalized(spec) else { return }
+        guard isEnabled, let current = mirror.normalized(spec) else { return }
         dragStart = current
         mirror.beginEdit(spec.address)
     }
@@ -110,14 +105,8 @@ struct ParameterRow: View {
         mirror.set(spec.address, spec.scale.argument(fromNormalized: new))
     }
 
-    /// A spec with a reset prompt asks first: a double-tap is as easy to hit by accident as a drag.
     private func reset() {
-        guard spec.resetValue != nil else { return }
-        if spec.resetPrompt == nil { applyReset() } else { isConfirmingReset = true }
-    }
-
-    private func applyReset() {
-        guard let value = spec.resetValue else { return }
+        guard isEnabled, let value = spec.resetValue else { return }
         mirror.set(
             spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
     }
