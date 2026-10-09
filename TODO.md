@@ -14,6 +14,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
   - Section 6: does `/meters/15` follow `/-prefs/rta/source`, and does "after EQ" include the low cut and the compressor?
   - Section 7: stereo links. Which side moves when a linked fader moves in Mixing Station, what linking copies besides the pans, whether an unticked Link Preference keeps the sides apart, which preference governs sends (assumed Mute/Fader) and the low cut (assumed EQ), and the preferences' factory defaults (the demo assumes all ticked). Also: does switching 48V on one side of a pair with Gain/Delay linked switch the partner's too? The 48V alert assumes it does.
   - Section 8: fader text. Does the desk's own dB text match the app's for every input fader? The app follows the doc's table (p.145), incl. a 0 dB detent and two odd steps (−8.7, −23.2). Set faders near 0, −8.6 and −23.2 with the desk's encoder first; each DIFFERS line goes in `FaderLaw.deskExceptions`. Untested: the fake desk doesn't answer `/node`.
+- [ ] **EQ defaults and cut filters.** (a) Reset bands on a bus or main, then compare the six frequencies with what the desk shows: the app writes the desk steps nearest the engineer's 55.1, 152, 418, 1150, 3170 and 8730 Hz (54.5, 153, 418, 1.14k, 3.21k, 8.73k). Fix `Catalog.eqDefaults` if the desk shows other values. (b) Set a band to LCut, HCut and (on a main) BU12: do Gain and Q really do nothing? The app disables both rows there (`Catalog.eqTypeShapesLevel`); the doc lists gain and Q for every type without saying.
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
 - [ ] Walk the acceptance checklist in `README.md`.
 - [ ] Check on a device that VoiceOver's swipe up/down adjusts parameter rows. XCUITest can't drive it.
@@ -59,9 +60,12 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [x] **Delay** per channel (mock C): below Trim on the Input tab, an on/off chip and the time in ms and distance (343 m/s; feet on US-region phones). It follows the Gain/Delay link. A double-tap resets it to 0.3 ms, and preamp gain to 0 dB, after a system confirmation.
 - [ ] **Inserts** per channel.
 - [ ] **Dynamics before or after the EQ:** the toggle that moves the compressor ahead of the EQ.
-- [ ] **More compressor settings:** auto time, the key filter frequency, and the detector and envelope (peak/rms, lin/log). Comp/exp already shows as Mode.
+- [ ] **More compressor settings:** auto time and the key filter frequency.
+- [x] **Comp and Gate Mode, Detector and Envelope as dropdowns**, like EQ Type: no more dragging past half a row to flip a choice. "Makeup" reads "Makeup gain".
+- [x] **Double-tap resets on the Comp and EQ rows.** Makeup gain goes to 0 dB at once; Ratio (3:1), an EQ band's Freq (its default), Q (1.7) and Gain (0 dB) ask first: a reset that can make the channel louder asks.
+- [x] **A cut filter's Gain and Q are disabled** (LCut, HCut, and BU6…LR24 on matrices and mains): dimmed, still in place, and the graph's drag and pinch leave them alone.
 - [ ] **Gate key filter.** Lower priority than the compressor's.
-- [ ] **Reset bands for buses and mains** (6 bands). Needs the engineer's default for each band. Inputs use PEQ at 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz, Q 1.7, 0 dB.
+- [x] **Reset bands for buses, matrices and mains** (6 bands): PEQ at 54.5 Hz, 153 Hz, 418 Hz, 1.14 kHz, 3.21 kHz and 8.73 kHz, Q 1.7, 0 dB. Inputs keep 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz.
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
 
 ## Maybe later
