@@ -54,9 +54,12 @@ struct TransportTests {
         defer { transport.cancel() }
         let recorder = MessageRecorder(transport.messages)
 
-        transport.send(OSCMessage("/meters", [.string("/meters/1")]))
-
-        let reply = await recorder.wait(for: "/meters/1")
+        // Asked again like /info above: one request with one 2 s wait failed on CI under load (PR #60's run).
+        var reply: OSCMessage?
+        for _ in 1...5 where reply == nil {
+            transport.send(OSCMessage("/meters", [.string("/meters/1")]))
+            reply = await recorder.wait(for: "/meters/1")
+        }
         guard case .blob(let blob)? = reply?.arguments.first else {
             Issue.record("no meter blob")
             return
