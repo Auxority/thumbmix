@@ -21,6 +21,16 @@
         }
       }
     },
+    "%@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ to %@"
+          }
+        }
+      }
+    },
     "48V" : {
       "localizations" : {
         "en" : {

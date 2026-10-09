@@ -1,11 +1,20 @@
 /// Relative dragging: the value moves from where it was, never jumps to the finger.
 public enum RelativeDrag {
-    /// Full control width = full range, so the feel follows the desk's own fader taper.
-    public static func value(start: Float, translation: Double, width: Double, scale: ParamScale)
-        -> Float
-    {
-        guard width > 0 else { return start }
-        return scale.snap(start + Float(translation / width))
+    /// Full control width = full range at full speed, so the feel follows the desk's own fader taper. Not snapped:
+    /// the drag adds up its movements, and small slow ones would vanish if each were rounded to a desk step.
+    public static func moved(_ position: Float, by distance: Double, width: Double, speed: Double) -> Float {
+        guard width > 0 else { return position }
+        return Swift.min(Swift.max(position + Float(distance / width * speed), 0), 1)
+    }
+
+    /// Like the iOS video scrubber: full speed on the row, half once the finger strays a row height above or below
+    /// it, a quarter beyond three. Finer than the row's width allows, without a separate control.
+    public static func speed(outside distance: Double, rowHeight: Double) -> Double {
+        switch distance {
+        case (rowHeight * 3)...: 0.25
+        case rowHeight...: 0.5
+        default: 1
+        }
     }
 
     public static func crossed(_ mark: Float, from old: Float, to new: Float) -> Bool {

@@ -32,6 +32,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Features
 
+- [x] **Hold a slider row to type its value** (mock B: the system alert, Set only). Any unit or none ("−6", "1k", "L20", "-inf"), decimal comma or point; a number past either end lands on it (Set is the confirmation), text that isn't a value reopens the alert saying so. VoiceOver gets an "Enter value" action. Dragging away from the row drags finer: ½ beyond one row height, ¼ beyond three.
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
 - [ ] **Send pan on an input's Sends tab** (the pan on odd-numbered sends, `/ch/NN/mix/01/pan`, `…/03/pan`, …): missing today.
