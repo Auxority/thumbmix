@@ -11,6 +11,16 @@ struct LocalizationTests {
         CoreStrings.bundle.localizedString(forKey: key, value: Self.missing, table: nil) != Self.missing
     }
 
+    /// `scripts/strings.sh` adds new Core text as an empty entry, and SwiftPM drops those: the app would show the
+    /// raw key. Read from the source catalog, since the built bundle has already dropped them.
+    @Test func everyCoreCatalogEntryHasAnEnglishValue() throws {
+        let catalog = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().appendingPathComponent("../../Sources/ThumbmixCore/Resources/Localizable.xcstrings")
+        let strings = try JSONDecoder().decode(StringCatalog.self, from: Data(contentsOf: catalog)).strings
+        let empty = strings.filter { $0.value.localizations?["en"]?.stringUnit.value.isEmpty ?? true }.keys.sorted()
+        #expect(empty.isEmpty, "no en value: \(empty)")
+    }
+
     @Test func everyParameterLabelIsInTheCatalog() {
         let strip = StripID(.input, 1)
         var specs = [
@@ -44,4 +54,16 @@ struct LocalizationTests {
         #expect(StripID(.input, 7).defaultName == "Ch 7")
         #expect(ChannelTab.fedBy.title == "Fed by")
     }
+}
+
+/// The parts of an Xcode String Catalog (.xcstrings) the empty-entry check reads.
+private struct StringCatalog: Decodable {
+    struct Entry: Decodable {
+        struct Localization: Decodable {
+            struct Unit: Decodable { let value: String }
+            let stringUnit: Unit
+        }
+        let localizations: [String: Localization]?
+    }
+    let strings: [String: Entry]
 }
