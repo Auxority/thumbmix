@@ -32,13 +32,9 @@ struct DelayTests {
         #expect(ValueText.format(position(12.5), delay.time, locale: .testEnglish) == "12.5 ms · 14.1 ft")
     }
 
-    /// A double-tap is as easy to hit by accident as a drag: these resets ask first, and say what they restore.
-    @Test func delayAndPreampGainResetsAsk() {
+    @Test func delayAndPreampGainResetValues() {
         #expect(delay.time.resetValue == 0.3)
-        #expect(delay.time.resetPrompt == "Reset the delay to 0.3 ms?")
         #expect(Catalog.headampGain(0).resetValue == 0)
-        #expect(Catalog.headampGain(0).resetPrompt == "Reset the preamp gain to 0 dB?")
-        #expect(Catalog.fader(StripID(.input, 1)).resetPrompt == nil, "a fader still resets at once")
     }
 
     @Test func delayIsSyncedAndStartsOffInTheDemo() {

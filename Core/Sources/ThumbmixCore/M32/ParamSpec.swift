@@ -9,23 +9,21 @@ public struct ParamSpec: Sendable, Identifiable, Equatable {
     public let label: String
     public let scale: ParamScale
     public let unit: ParamUnit
-    /// What a double-tap restores, in real units; nil means double-tap does nothing.
+    /// What a double-tap restores at once, in real units; nil means double-tap does nothing. No reset asks
+    /// first: the convenience outweighs an accidental double-tap on a 48 pt row.
     public let resetValue: Double?
-    /// Asked with the system alert before a double-tap resets; nil resets at once.
-    public let resetPrompt: String?
     /// A choice's options in words, for the open list; nil when the desk's own names say enough.
     public let optionNames: [String]?
 
     public init(
         _ address: String, _ label: String, _ scale: ParamScale, _ unit: ParamUnit, reset: Double? = nil,
-        resetPrompt: String? = nil, optionNames: [String]? = nil
+        optionNames: [String]? = nil
     ) {
         self.address = address
         self.label = label
         self.scale = scale
         self.unit = unit
         self.resetValue = reset
-        self.resetPrompt = resetPrompt
         self.optionNames = optionNames
     }
 

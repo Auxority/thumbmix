@@ -692,26 +692,6 @@
         }
       }
     },
-    "Reset the delay to 0.3 ms?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset the delay to 0.3 ms?"
-          }
-        }
-      }
-    },
-    "Reset the preamp gain to 0 dB?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset the preamp gain to 0 dB?"
-          }
-        }
-      }
-    },
     "Sends" : {
       "extractionState" : "stale",
       "localizations" : {

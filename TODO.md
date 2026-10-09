@@ -52,12 +52,12 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
 - [ ] **Replace the Unused / Show unused toggles** on every screen: switched on they're plain white, which looks off. Find a cleaner way to hide strips that aren't patched (mock first).
 - [ ] **Solo** per channel.
-- [x] **Delay** per channel (mock C): below Trim on the Input tab, an on/off chip and the time in ms and distance (343 m/s; feet on US-region phones). It follows the Gain/Delay link. A double-tap resets it to 0.3 ms, and preamp gain to 0 dB, after a system confirmation.
+- [x] **Delay** per channel (mock C): below Trim on the Input tab, an on/off chip and the time in ms and distance (343 m/s; feet on US-region phones). It follows the Gain/Delay link. A double-tap resets it to 0.3 ms, and preamp gain to 0 dB.
 - [ ] **Inserts** per channel.
 - [ ] **Dynamics before or after the EQ:** the toggle that moves the compressor ahead of the EQ.
 - [ ] **More compressor settings:** auto time and the key filter frequency.
 - [x] **Comp and Gate Mode, Detector and Envelope as dropdowns**, like EQ Type. Mode wasn't broken: it was a drag row that flips only past half its width, easy to miss. The open list says each choice in words with the desk's name under it ("Average level" · RMS); the closed row shows the desk's name. Detector and Envelope sit as a pair under Makeup gain (was "Makeup").
-- [x] **Double-tap resets on the Comp and EQ rows**, at once like a double-tap on the EQ graph's point: Makeup gain to 0 dB, Ratio to 3:1, an EQ band's Freq to its Reset bands frequency, Q to 1.7, Gain to 0 dB.
+- [x] **Double-tap resets on the Comp and EQ rows**, at once like a double-tap on the EQ graph's point (no reset asks any more; preamp gain and delay lost their prompts too): Makeup gain to 0 dB, Ratio to 3:1, an EQ band's Freq to its Reset bands frequency, Q to 1.7, Gain to 0 dB.
 - [x] **A cut filter's Gain and Q are disabled** (LCut, HCut, and BU6…LR24 on matrices and mains): dimmed and showing "—", still in place, and the graph's drag and pinch leave them alone.
 - [ ] **Gate key filter.** Lower priority than the compressor's.
 - [x] **Reset bands for buses, matrices and mains** (6 bands): PEQ at 54.5 Hz, 153 Hz, 418 Hz, 1.14 kHz, 3.21 kHz and 8.73 kHz, Q 1.7, 0 dB. Inputs keep 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz.

@@ -33,9 +33,6 @@ struct LocalizationTests {
         for spec in specs {
             #expect(isInCatalog(spec.label), "missing \(spec.label)")
         }
-        for prompt in [Catalog.delay(strip)?.time, Catalog.headampGain(0)].compactMap({ $0?.resetPrompt }) {
-            #expect(isInCatalog(prompt), "missing \(prompt)")
-        }
     }
 
     @Test func formatsAndNamesAreInTheCatalog() {

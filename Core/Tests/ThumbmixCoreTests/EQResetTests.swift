@@ -35,14 +35,12 @@ struct EQResetTests {
         }
     }
 
-    /// One source of truth: a row's double-tap restores what Reset bands would, at once, like a double-tap on
-    /// the band's point in the graph.
+    /// One source of truth: a row's double-tap restores what Reset bands would.
     @Test func bandRowsResetToTheBandsDefault() {
         let band = Catalog.eqBand(StripID(.matrix, 2), 3)
         #expect(band.frequency.resetValue == 418)
         #expect(band.q.resetValue == 1.7)
         #expect(band.gain.resetValue == 0)
-        #expect(band.all.allSatisfy { $0.resetPrompt == nil })
         #expect(Catalog.eqBand(kick, 4).frequency.resetValue == 8730)
     }
 

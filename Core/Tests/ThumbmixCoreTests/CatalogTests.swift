@@ -87,13 +87,11 @@ struct CatalogTests {
         #expect(Catalog.eqBand(StripID(.input, 1), 1).type.optionNames == nil, "EQ types keep the desk's names")
     }
 
-    /// Double-tap resets on the Comp tab go at once, like the EQ's.
-    @Test func makeupGainAndRatioResetAtOnce() {
+    @Test func makeupGainAndRatioResetValues() {
         let dynamics = Catalog.dynamics(StripID(.input, 1))
         #expect(dynamics.makeup.label == "Makeup gain")
         #expect(dynamics.makeup.resetValue == 0)
         #expect(dynamics.ratio.resetValue == Catalog.ratios.firstIndex(of: "3.0").map(Double.init))
-        #expect(dynamics.all.allSatisfy { $0.resetPrompt == nil })
     }
 
     @Test func syncListIsCompleteAndUnique() {
