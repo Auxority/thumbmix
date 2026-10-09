@@ -41,6 +41,11 @@ final class TestDesk: Sendable {
     func change(_ address: String, _ value: Int32) {
         fake.deskChange(address, .int(value))
     }
+
+    /// What the desk holds now, as the app's edits left it.
+    func value(_ address: String) -> OSCArgument? {
+        fake.value(at: address)
+    }
 }
 
 /// Written once by the starting task, read after the wait: never at the same time.

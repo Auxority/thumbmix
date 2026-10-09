@@ -117,4 +117,20 @@ struct ConsoleLinkTests {
         #expect(link.transportGeneration == generation + 1)
         #expect(await eventually { if case .live = link.state { true } else { false } })
     }
+
+    /// The mirror stops a link that found no M32; coming back from the background must not revive it.
+    @Test func wakeLeavesAStoppedLinkStopped() async throws {
+        let (fake, port) = try await startFake(model: "X32")
+        defer { fake.stop() }
+        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
+        link.start()
+        #expect(await eventually { link.state == .failed(.notAnM32(model: "X32")) })
+        link.stop()
+        let generation = link.transportGeneration
+
+        link.wake()
+
+        #expect(link.transportGeneration == generation)
+        #expect(link.state == .failed(.notAnM32(model: "X32")))
+    }
 }

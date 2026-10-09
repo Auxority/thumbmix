@@ -1,3 +1,4 @@
+import ThumbmixCore
 import XCTest
 
 /// The demo desk links Gtr L/R (ch 9-10) with every Link Preference ticked.
@@ -119,5 +120,17 @@ final class PairUITests: DeskUITestCase {
         saveScreenshot("pair-comp-unlinked")
         app.buttons["EQ"].tap()
         XCTAssertFalse(app.buttons["side-R"].exists, "the EQ is still linked")
+    }
+
+    /// With the EQ unlinked, the desk's RTA follows the side shown, not the side the tab opened on.
+    func testTheRTAFollowsTheChosenSide() throws {
+        desk.change("/config/linkcfg/eq", 0)
+        launchAndOpenGuitars()
+        app.buttons["EQ"].tap()
+        let left = try XCTUnwrap(StripID(.input, 9).rtaSource)
+        let right = try XCTUnwrap(StripID(.input, 10).rtaSource)
+        XCTAssertTrue(eventually(within: 3) { self.desk.value(RTA.source) == .int(left) })
+        app.buttons["side-R"].tap()
+        XCTAssertTrue(eventually(within: 3) { self.desk.value(RTA.source) == .int(right) })
     }
 }

@@ -24,6 +24,10 @@ struct EQGraph: View {
         let y: Float
     }
     @State private var pinchStartQ: Float?
+    /// Reset by SwiftUI when a touch ends and also when the system cancels it (a call, Notification Center),
+    /// which `onEnded` never reports: a hold left behind would keep the desk from moving the band.
+    @GestureState private var isTouching = false
+    @GestureState private var isPinching = false
 
     var body: some View {
         // Read the bands here, not inside Canvas: Observation only tracks reads made during body.
@@ -59,6 +63,8 @@ struct EQGraph: View {
             .simultaneousGesture(pinchGesture)
             .simultaneousGesture(resetGesture(in: size))
         }
+        .onChange(of: isTouching) { _, touching in if !touching { endGrab() } }
+        .onChange(of: isPinching) { _, pinching in if !pinching { endPinch() } }
         .background(Theme.track, in: RoundedRectangle(cornerRadius: 12))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .ignore)
@@ -127,6 +133,7 @@ struct EQGraph: View {
 
     private func dragGesture(in size: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 0)
+            .updating($isTouching) { _, touching, _ in touching = true }
             .onChanged { value in
                 if !isDragging {
                     isDragging = true
@@ -135,11 +142,13 @@ struct EQGraph: View {
                 guard let grab, value.translation != .zero else { return }
                 move(grab, by: value.translation, in: size)
             }
-            .onEnded { _ in
-                if let grab { pointAddresses(of: grab.band).forEach(mirror.endEdit) }
-                isDragging = false
-                grab = nil
-            }
+            .onEnded { _ in endGrab() }
+    }
+
+    private func endGrab() {
+        if let grab { pointAddresses(of: grab.band).forEach(mirror.endEdit) }
+        isDragging = false
+        grab = nil
     }
 
     /// nil when no point is near, or the band's values were never read: then the touch changes nothing.
@@ -162,6 +171,7 @@ struct EQGraph: View {
 
     private var pinchGesture: some Gesture {
         MagnifyGesture()
+            .updating($isPinching) { _, pinching, _ in pinching = true }
             .onChanged { value in
                 // The low cut and the band's cut filters have no Q.
                 guard selectedBand != Self.lowCutBand, mirror.eqBandShapesLevel(strip, selectedBand) == true
@@ -176,12 +186,14 @@ struct EQGraph: View {
                 let next = (pinchStartQ ?? 0.5) + Float(log2(value.magnification)) * 0.25
                 mirror.set(q.address, q.scale.argument(fromNormalized: next))
             }
-            .onEnded { _ in
-                if pinchStartQ != nil, selectedBand != Self.lowCutBand {
-                    mirror.endEdit(Catalog.eqBand(strip, selectedBand).q.address)
-                }
-                pinchStartQ = nil
-            }
+            .onEnded { _ in endPinch() }
+    }
+
+    private func endPinch() {
+        if pinchStartQ != nil, selectedBand != Self.lowCutBand {
+            mirror.endEdit(Catalog.eqBand(strip, selectedBand).q.address)
+        }
+        pinchStartQ = nil
     }
 
     /// Double-tap a band point to put that band back to its default, like double-tapping a row.

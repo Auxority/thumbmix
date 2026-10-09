@@ -83,6 +83,7 @@ struct ConnectView: View {
         } label: {
             Label("Try offline (demo console)", systemImage: "slider.horizontal.3")
         }
+        .disabled(model.isStartingOffline)
         if model.offlineFailed {
             Text("The demo console couldn't start. Try again, or restart Thumbmix.")
                 .font(.callout)
