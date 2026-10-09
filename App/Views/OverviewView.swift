@@ -75,6 +75,7 @@ private struct GroupChips: View {
             HStack(spacing: 8) {
                 ForEach(StripGroup.allCases) { group in
                     Button(group.title) { selection = group }
+                        .accessibilityAddTraits(selection == group ? .isSelected : [])
                         .font(.subheadline.weight(.semibold))
                         .padding(.horizontal, 14)
                         .frame(height: chipHeight)

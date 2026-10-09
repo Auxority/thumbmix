@@ -108,8 +108,8 @@ final class OverviewUITests: DeskUITestCase {
         launch()
         let mute = app.buttons["mute-/ch/01/mix/on"]
         mute.tap()
-        XCTAssertEqual(mute.label, "Unmute")
+        XCTAssertEqual(mute.label, "Unmute Kick")
         mute.tap()
-        XCTAssertEqual(mute.label, "Mute")
+        XCTAssertEqual(mute.label, "Mute Kick")
     }
 }

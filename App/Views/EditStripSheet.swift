@@ -117,12 +117,26 @@ private struct StripColorPicker: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("color-\(base)")
-                    .accessibilityLabel(Text(verbatim: "\(base)"))
+                    .accessibilityLabel(Self.name(of: base))
+                    .accessibilityAddTraits(color.base == base ? .isSelected : [])
                 }
                 Spacer(minLength: 0)
             }
             Toggle("Inverted", isOn: Binding(get: { color.inverted }, set: { color = ConsoleColor(base: color.base, inverted: $0) }))
                 .font(.subheadline)
+        }
+    }
+
+    private static func name(of base: ConsoleColor.Base) -> LocalizedStringKey {
+        switch base {
+        case .off: "No colour"
+        case .red: "Red"
+        case .green: "Green"
+        case .yellow: "Yellow"
+        case .blue: "Blue"
+        case .magenta: "Magenta"
+        case .cyan: "Cyan"
+        case .white: "White"
         }
     }
 }

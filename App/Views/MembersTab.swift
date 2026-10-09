@@ -23,8 +23,10 @@ struct MembersTab: View {
                         Text(strip.defaultName).font(.caption).foregroundStyle(Theme.secondaryText)
                     }
                     .padding(.horizontal, 12)
-                    .frame(height: 44)
+                    .frame(minHeight: 44)
                     .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("member-" + strip.id)
                 }
             }
         }

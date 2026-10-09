@@ -21,6 +21,9 @@
         }
       }
     },
+    "%@ fader" : {
+
+    },
     "%@ is a %@. Thumbmix supports the Midas M32 only." : {
       "localizations" : {
         "en" : {
@@ -62,6 +65,9 @@
     "Band" : {
 
     },
+    "Blue" : {
+
+    },
     "Cancel" : {
 
     },
@@ -78,6 +84,9 @@
 
     },
     "Console IP" : {
+
+    },
+    "Cyan" : {
 
     },
     "DEMO" : {
@@ -119,6 +128,9 @@
     "GR %@ dB" : {
 
     },
+    "Green" : {
+
+    },
     "Icon" : {
 
     },
@@ -141,7 +153,10 @@
         }
       }
     },
-    "Mute" : {
+    "Magenta" : {
+
+    },
+    "Mute %@" : {
 
     },
     "Name" : {
@@ -151,6 +166,9 @@
 
     },
     "No channels assigned to this DCA." : {
+
+    },
+    "No colour" : {
 
     },
     "No console answered. Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix." : {
@@ -166,6 +184,9 @@
 
     },
     "On" : {
+
+    },
+    "Red" : {
 
     },
     "Reset" : {
@@ -263,10 +284,16 @@
         }
       }
     },
-    "Unmute" : {
+    "Unmute %@" : {
+
+    },
+    "White" : {
 
     },
     "with %@" : {
+
+    },
+    "Yellow" : {
 
     }
   },

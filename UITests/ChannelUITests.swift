@@ -160,8 +160,8 @@ final class ChannelUITests: DeskUITestCase {
         app.buttons["DCA"].tap()
         open("Drums")
         app.buttons["Members"].tap()
-        XCTAssertTrue(app.staticTexts["Snare"].exists)
-        XCTAssertFalse(app.staticTexts["Bass"].exists)
+        XCTAssertTrue(element("member-/ch/02").exists, "Snare")
+        XCTAssertFalse(element("member-/ch/08").exists, "Bass")
     }
 
     func testSendsListBusesByName() {
