@@ -101,7 +101,6 @@ public enum Catalog {
         )
     }
 
-    /// Makeup gain resets at once; a ratio reset can make the channel louder, so it asks first.
     public static func dynamics(_ strip: StripID) -> DynamicsSpecs {
         let p = strip.prefix + "/dyn/"
         return DynamicsSpecs(
@@ -113,8 +112,7 @@ public enum Catalog {
                 p + "thr", CoreStrings.text("Threshold"), .linear(min: -60, max: 0, step: 0.5), .decibels),
             ratio: ParamSpec(
                 p + "ratio", CoreStrings.text("Ratio"), .choice(ratios), .ratio,
-                reset: ratios.firstIndex(of: "3.0").map(Double.init),
-                resetPrompt: CoreStrings.text("Reset the ratio to 3:1?")),
+                reset: ratios.firstIndex(of: "3.0").map(Double.init)),
             knee: ParamSpec(
                 p + "knee", CoreStrings.text("Knee"), .linear(min: 0, max: 5, step: 1), .plain),
             attack: ParamSpec(p + "attack", CoreStrings.text("Attack"), attack, .milliseconds),
@@ -137,34 +135,22 @@ public enum Catalog {
         ParamSpec(strip.prefix + "/eq/on", CoreStrings.text("EQ"), .toggle, .plain)
     }
 
-    /// A band row's double-tap restores what Reset bands writes. Each asks first: moving a band or raising its
-    /// gain mid-show can make the channel louder or howl.
-    public static func eqBand(_ strip: StripID, _ band: Int, locale: Locale = .current) -> EQBandSpecs {
+    /// A band row's double-tap restores what Reset bands writes, at once like a double-tap on the graph's point.
+    public static func eqBand(_ strip: StripID, _ band: Int) -> EQBandSpecs {
         let p = strip.prefix + "/eq/\(band)/"
         let types = [.matrix, .mainStereo, .mainMono].contains(strip.kind) ? mainEQTypes : eqTypes
         let target = eqDefaults(strip).flatMap { $0.indices.contains(band - 1) ? $0[band - 1] : nil }
-        let frequency = ParamSpec(
-            p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz)
-        let q = ParamSpec(p + "q", CoreStrings.text("Q"), .log(min: 10, max: 0.3, steps: 72), .plain)
         return EQBandSpecs(
             type: ParamSpec(p + "type", CoreStrings.text("Type"), .choice(types), .plain),
-            frequency: resetting(frequency, to: target?.frequency, locale: locale) {
-                CoreStrings.text("Reset the frequency to \($0)?")
-            },
+            frequency: ParamSpec(
+                p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz,
+                reset: target?.frequency),
             gain: ParamSpec(
                 p + "g", CoreStrings.text("Gain"), .linear(min: -15, max: 15, step: 0.25), .decibels,
-                reset: 0, resetPrompt: CoreStrings.text("Reset the EQ gain to 0 dB?")),
-            q: resetting(q, to: target?.q, locale: locale) { CoreStrings.text("Reset the Q to \($0)?") }
+                reset: 0),
+            q: ParamSpec(
+                p + "q", CoreStrings.text("Q"), .log(min: 10, max: 0.3, steps: 72), .plain, reset: target?.q)
         )
-    }
-
-    /// `spec` with a reset to `value` that asks first, naming the value as the row shows it.
-    private static func resetting(
-        _ spec: ParamSpec, to value: Double?, locale: Locale, prompt: (String) -> String
-    ) -> ParamSpec {
-        guard let value else { return spec }
-        let text = ValueText.format(spec.scale.normalized(forValue: value), spec, locale: locale)
-        return ParamSpec(spec.address, spec.label, spec.scale, spec.unit, reset: value, resetPrompt: prompt(text))
     }
 
     /// The engineer's EQ starting points, restored by Reset bands and a row's double-tap: PEQs at Q 1.7, 0 dB.

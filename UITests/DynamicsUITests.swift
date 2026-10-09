@@ -50,9 +50,8 @@ final class DynamicsUITests: DeskUITestCase {
         saveScreenshot("comp-dropdowns")
     }
 
-    /// Makeup gain back to 0 dB can only make the channel quieter, so it goes at once; a ratio reset can
-    /// make it louder, so it asks.
-    func testDoubleTapResetsMakeupGainAtOnceAndRatioAfterAsking() {
+    /// Like the EQ rows: a double-tap resets at once, no question.
+    func testDoubleTapResetsMakeupGainAndRatioAtOnce() {
         launch()
         open("Tom 1")
         app.buttons["Comp"].tap()
@@ -61,14 +60,12 @@ final class DynamicsUITests: DeskUITestCase {
         XCTAssertEqual(makeup.value as? String, "12.0 dB")
         makeup.doubleTap()
         XCTAssertTrue(eventually(within: 2) { makeup.value as? String == "0.0 dB" })
-        XCTAssertEqual(app.alerts.count, 0)
 
         let ratio = app.descendants(matching: .any)["/ch/04/dyn/ratio"]
+        XCTAssertEqual(ratio.value as? String, "2.0:1")
         ratio.doubleTap()
-        let alert = app.alerts["Reset the ratio to 3:1?"]
-        XCTAssertTrue(alert.appears(within: 2))
-        alert.buttons["Reset"].tap()
         XCTAssertTrue(eventually(within: 2) { ratio.value as? String == "3.0:1" })
+        XCTAssertEqual(app.alerts.count, 0)
     }
 
     /// The open list says the choice in words; the closed row shows the desk's name for it.

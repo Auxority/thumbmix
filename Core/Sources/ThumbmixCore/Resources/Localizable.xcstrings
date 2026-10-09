@@ -702,52 +702,12 @@
         }
       }
     },
-    "Reset the EQ gain to 0 dB?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset the EQ gain to 0 dB?"
-          }
-        }
-      }
-    },
-    "Reset the frequency to %@?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset the frequency to %@?"
-          }
-        }
-      }
-    },
     "Reset the preamp gain to 0 dB?" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reset the preamp gain to 0 dB?"
-          }
-        }
-      }
-    },
-    "Reset the Q to %@?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset the Q to %@?"
-          }
-        }
-      }
-    },
-    "Reset the ratio to 3:1?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset the ratio to 3:1?"
           }
         }
       }

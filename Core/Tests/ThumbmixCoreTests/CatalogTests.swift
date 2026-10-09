@@ -87,14 +87,13 @@ struct CatalogTests {
         #expect(Catalog.eqBand(StripID(.input, 1), 1).type.optionNames == nil, "EQ types keep the desk's names")
     }
 
-    /// A reset that can make the channel louder asks first; dropping makeup gain to 0 dB can't.
-    @Test func makeupGainResetsAtOnceAndRatioAsks() {
+    /// Double-tap resets on the Comp tab go at once, like the EQ's.
+    @Test func makeupGainAndRatioResetAtOnce() {
         let dynamics = Catalog.dynamics(StripID(.input, 1))
         #expect(dynamics.makeup.label == "Makeup gain")
         #expect(dynamics.makeup.resetValue == 0)
-        #expect(dynamics.makeup.resetPrompt == nil)
         #expect(dynamics.ratio.resetValue == Catalog.ratios.firstIndex(of: "3.0").map(Double.init))
-        #expect(dynamics.ratio.resetPrompt == "Reset the ratio to 3:1?")
+        #expect(dynamics.all.allSatisfy { $0.resetPrompt == nil })
     }
 
     @Test func syncListIsCompleteAndUnique() {

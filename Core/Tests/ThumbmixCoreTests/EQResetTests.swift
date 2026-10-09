@@ -35,16 +35,14 @@ struct EQResetTests {
         }
     }
 
-    /// One source of truth: a row's double-tap restores what Reset bands would. Every reset that can make
-    /// the channel louder, or move the band, asks first.
+    /// One source of truth: a row's double-tap restores what Reset bands would, at once, like a double-tap on
+    /// the band's point in the graph.
     @Test func bandRowsResetToTheBandsDefault() {
-        let band = Catalog.eqBand(StripID(.matrix, 2), 3, locale: .testEnglish)
+        let band = Catalog.eqBand(StripID(.matrix, 2), 3)
         #expect(band.frequency.resetValue == 418)
-        #expect(band.frequency.resetPrompt == "Reset the frequency to 418 Hz?")
         #expect(band.q.resetValue == 1.7)
-        #expect(band.q.resetPrompt == "Reset the Q to 1.7?")
         #expect(band.gain.resetValue == 0)
-        #expect(band.gain.resetPrompt == "Reset the EQ gain to 0 dB?")
+        #expect(band.all.allSatisfy { $0.resetPrompt == nil })
         #expect(Catalog.eqBand(kick, 4).frequency.resetValue == 8730)
     }
 

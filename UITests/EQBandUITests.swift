@@ -3,8 +3,8 @@ import XCTest
 /// A band's rows: their double-tap resets, and Gain and Q on a cut filter.
 @MainActor
 final class EQBandUITests: DeskUITestCase {
-    /// Moving a band mid-show can howl, so a row's reset asks first, like Reset bands.
-    func testDoubleTappingFrequencyAsksThenRestoresTheDefault() {
+    /// Like a double-tap on the band's point in the graph: at once, no question.
+    func testDoubleTappingFrequencyRestoresTheDefaultAtOnce() {
         launch()
         open("Kick")
         app.buttons["EQ"].tap()
@@ -12,10 +12,8 @@ final class EQBandUITests: DeskUITestCase {
         XCTAssertTrue(frequency.appears(within: 2))
         XCTAssertEqual(frequency.value as? String, "632 Hz")
         frequency.doubleTap()
-        let alert = app.alerts["Reset the frequency to 91.4 Hz?"]
-        XCTAssertTrue(alert.appears(within: 2))
-        alert.buttons["Reset"].tap()
         XCTAssertTrue(eventually(within: 2) { frequency.value as? String == "91.4 Hz" })
+        XCTAssertEqual(app.alerts.count, 0)
     }
 
     func testBusResetsAllSixBands() {

@@ -57,7 +57,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Dynamics before or after the EQ:** the toggle that moves the compressor ahead of the EQ.
 - [ ] **More compressor settings:** auto time and the key filter frequency.
 - [x] **Comp and Gate Mode, Detector and Envelope as dropdowns**, like EQ Type. Mode wasn't broken: it was a drag row that flips only past half its width, easy to miss. The open list says each choice in words with the desk's name under it ("Average level" · RMS); the closed row shows the desk's name. Detector and Envelope sit as a pair under Makeup gain (was "Makeup").
-- [x] **Double-tap resets on the Comp and EQ rows.** Makeup gain goes to 0 dB at once; Ratio (3:1), an EQ band's Freq (its default), Q (1.7) and Gain (0 dB) ask first: a reset that can make the channel louder asks.
+- [x] **Double-tap resets on the Comp and EQ rows**, at once like a double-tap on the EQ graph's point: Makeup gain to 0 dB, Ratio to 3:1, an EQ band's Freq to its Reset bands frequency, Q to 1.7, Gain to 0 dB.
 - [x] **A cut filter's Gain and Q are disabled** (LCut, HCut, and BU6…LR24 on matrices and mains): dimmed and showing "—", still in place, and the graph's drag and pinch leave them alone.
 - [ ] **Gate key filter.** Lower priority than the compressor's.
 - [x] **Reset bands for buses, matrices and mains** (6 bands): PEQ at 54.5 Hz, 153 Hz, 418 Hz, 1.14 kHz, 3.21 kHz and 8.73 kHz, Q 1.7, 0 dB. Inputs keep 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz.
