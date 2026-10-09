@@ -154,15 +154,6 @@ extension ConsoleMirror {
     }
 
     public func resetEQBand(_ strip: StripID, _ band: Int) {
-        guard let defaults = Catalog.eqDefaults(strip), defaults.indices.contains(band - 1) else { return }
-        let target = defaults[band - 1]
-        let specs = Catalog.eqBand(strip, band)
-        let values = [
-            (specs.type, Double(target.typeIndex)), (specs.frequency, target.frequency), (specs.gain, target.gain),
-            (specs.q, target.q),
-        ]
-        for (spec, value) in values {
-            set(spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
-        }
+        for (address, argument) in Catalog.eqDefaultArguments(strip, band) { set(address, argument) }
     }
 }

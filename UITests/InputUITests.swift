@@ -45,4 +45,13 @@ final class InputUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { gain.value as? String == "0.0 dB" })
         XCTAssertEqual(app.alerts.count, 0)
     }
+
+    /// The slim fader row above the tab already meters the channel, so Gain comes right under it.
+    func testGainSitsRightUnderTheFaderRow() {
+        openKicksInput()
+        let gain = element("/headamp/032/gain")
+        XCTAssertTrue(gain.appears(within: 2))
+        let gap = gain.frame.minY - element("/ch/01/mix/fader").frame.maxY
+        XCTAssertLessThanOrEqual(gap, 13, "no meter between the fader row and Gain")
+    }
 }

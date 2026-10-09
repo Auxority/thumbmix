@@ -14,17 +14,17 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
   - Section 6: does `/meters/15` follow `/-prefs/rta/source`, and does "after EQ" include the low cut and the compressor?
   - Section 7: stereo links. Which side moves when a linked fader moves in Mixing Station, what linking copies besides the pans, whether an unticked Link Preference keeps the sides apart, which preference governs sends (assumed Mute/Fader) and the low cut (assumed EQ), and the preferences' factory defaults (the demo assumes all ticked). Also: does switching 48V on one side of a pair with Gain/Delay linked switch the partner's too? The 48V alert assumes it does.
   - Section 8: fader text. Does the desk's own dB text match the app's for every input fader? The app follows the doc's table (p.145), incl. a 0 dB detent and two odd steps (−8.7, −23.2). Set faders near 0, −8.6 and −23.2 with the desk's encoder first; each DIFFERS line goes in `FaderLaw.deskExceptions`. Untested: the fake desk doesn't answer `/node`.
-- [ ] **EQ defaults and cut filters.** (a) Reset bands on a bus or main, then compare the six frequencies with what the desk shows: the app writes the desk steps nearest the engineer's 55.1, 152, 418, 1150, 3170 and 8730 Hz (54.5, 153, 418, 1.14k, 3.21k, 8.73k). Fix `Catalog.eqDefaults` if the desk shows other values. (b) Set a band to LCut, HCut and (on a main) BU12: do Gain and Q really do nothing? The app disables both rows there (`Catalog.eqTypeShapesLevel`); the doc lists gain and Q for every type without saying.
+- [ ] **EQ defaults and cut filters.** (a) Reset bands on a bus or main, then compare the six frequencies with what the desk shows: the app writes the desk steps nearest the engineer's 55.1, 152, 418, 1150, 3170 and 8730 Hz (54.5, 153.5, 418, 1.14k, 3.21k, 8.73k). Fix `Catalog.eqDefaults` if the desk shows other values. (b) Set a band to LCut, HCut and (on a main) BU12: do Gain and Q really do nothing? The app disables both rows there (`Catalog.eqTypeShapesLevel`); the doc lists gain and Q for every type without saying.
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
 - [ ] Walk the acceptance checklist in `README.md`.
 - [ ] Check on a device that VoiceOver's swipe up/down adjusts parameter rows. XCUITest can't drive it.
 
 ## Fixes
 
-- [ ] **RTA stuck on "waiting for the desk"** after 30 s in another app and back; switching views brings it back. Cause unknown.
-- [ ] **Remove the duplicate meter from the Input tab:** the fader row above already shows the level (decided 2026-10-09).
+- [x] **RTA stuck on "waiting for the desk"** after any trip to another app: coming back rebuilds the link, so the EQ tab's borrow found it not live and never retried. It now borrows again once the link is live.
+- [x] **Remove the duplicate meter from the Input tab:** the fader row above already shows the level (decided 2026-10-09).
+- [x] **Offline mode opened every EQ with all bands stacked at 632 Hz:** the demo desk now starts each EQ on its Reset bands values.
 - [ ] **Title and DEMO pill get truncated** on strip screens: the back button ("Thumbmix"), the title and the pill don't fit next to each other. Mock a layout that keeps all three readable on the iPhone SE.
-- [ ] **Gain doesn't change the input level in Offline mode.** The demo meters are a time-based animation (`FakeState.meterBlob`) that ignores the desk state, so turning Gain up or down moves nothing. The input meter should follow the headamp gain (and trim), so gain staging can be tried offline. Gates and compressors could act on the demo signal the same way (on a real desk the console does that). Decide first whether it's worth the complexity and the performance cost.
 
 ## Performance
 
@@ -60,7 +60,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [x] **Double-tap resets on the Comp and EQ rows**, at once like a double-tap on the EQ graph's point (no reset asks any more; preamp gain and delay lost their prompts too): Makeup gain to 0 dB, Ratio to 3:1, an EQ band's Freq to its Reset bands frequency, Q to 1.7, Gain to 0 dB.
 - [x] **A cut filter's Gain and Q are disabled** (LCut, HCut, and BU6…LR24 on matrices and mains): dimmed and showing "—", still in place, and the graph's drag and pinch leave them alone.
 - [ ] **Gate key filter.** Lower priority than the compressor's.
-- [x] **Reset bands for buses, matrices and mains** (6 bands): PEQ at 54.5 Hz, 153 Hz, 418 Hz, 1.14 kHz, 3.21 kHz and 8.73 kHz, Q 1.7, 0 dB. Inputs keep 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz.
+- [x] **Reset bands for buses, matrices and mains** (6 bands): PEQ at 54.5 Hz, 153.5 Hz, 418 Hz, 1.14 kHz, 3.21 kHz and 8.73 kHz, Q 1.7, 0 dB. Inputs keep 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz.
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
 
 ## Maybe later
@@ -74,6 +74,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Known limits
 
+- Offline mode's meters are a time-based animation (`FakeState.meterBlob`): gain, trim, gate and compressor don't move them. Simulating the signal wasn't worth the complexity (decided 2026-10-09).
 - The compressor knee is drawn at 2 dB per step: the doc gives the 0–5 knee setting no unit.
 - Gate curves (EXPn 1:n, GATE, DUCK) follow the engineer's confirmation; the doc only lists the modes.
 - The EQ and low-cut curves are RBJ and Butterworth approximations, not measurements of the desk.
