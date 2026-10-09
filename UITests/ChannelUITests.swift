@@ -109,7 +109,6 @@ final class ChannelUITests: DeskUITestCase {
 
     func testInternalSourceShowsTrimNotGain() {
         launch()
-        app.buttons["Unused"].tap()
         app.swipeUp()
         open("Ch 15")
         app.buttons["Input"].tap()

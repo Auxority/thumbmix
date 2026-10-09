@@ -16,18 +16,6 @@ final class OverviewUITests: DeskUITestCase {
         XCTAssertNotEqual(fader.value as? String, before)
     }
 
-    /// Hiding the unused channels shortens the list; scrolled near its end, the old offset showed
-    /// only black until the user scrolled back up by hand.
-    func testHidingUnusedFromFarDownShowsTheList() {
-        launch()
-        app.buttons["Unused"].tap()
-        for _ in 0..<4 { app.swipeUp() }
-        XCTAssertFalse(app.buttons["Kick"].isHittable)
-        app.buttons["Unused"].tap()
-        XCTAssertTrue(app.buttons["Kick"].appears(within: 2))
-        XCTAssertTrue(app.buttons["Kick"].isHittable)
-    }
-
     /// Switching from far down the inputs to a short group kept the old offset, past that group's end:
     /// the list showed only black.
     func testSwitchingToAShortGroupFromFarDownShowsTheList() {
@@ -37,19 +25,6 @@ final class OverviewUITests: DeskUITestCase {
         app.buttons["DCA"].tap()
         XCTAssertTrue(app.buttons["Drums"].appears(within: 2))
         XCTAssertTrue(app.buttons["Drums"].isHittable)
-    }
-
-    /// Showing the unused buses moved the used ones up by a few points on iOS 27: the list was
-    /// scrolled to an anchor at its very top instead of starting where a list naturally starts.
-    func testShowingUnusedKeepsTheRowsInPlace() {
-        launch()
-        app.buttons["Buses"].tap()
-        let mon1 = app.buttons["Mon 1"]
-        XCTAssertTrue(mon1.appears(within: 2))
-        let before = mon1.frame.minY
-        app.buttons["Unused"].tap()
-        XCTAssertTrue(app.buttons["Bus 5"].appears(within: 2))
-        XCTAssertEqual(mon1.frame.minY, before, accuracy: 0.5)
     }
 
     func testVerticalSwipeScrollsInsteadOfMovingFaders() {
@@ -64,10 +39,11 @@ final class OverviewUITests: DeskUITestCase {
         XCTAssertEqual(fader.value as? String, before)
     }
 
-    func testUnusedChannelsHiddenUntilToggled() {
+    /// The Unused toggle is gone until its redesign (TODO): every strip shows, so none is out of reach.
+    func testEveryChannelShowsWithoutAToggle() {
         launch()
-        XCTAssertFalse(app.buttons["Ch 20"].exists)
-        app.buttons["Unused"].tap()
+        XCTAssertTrue(app.buttons["Kick"].appears(within: 5))
+        XCTAssertFalse(app.buttons["Unused"].exists)
         app.swipeUp()
         app.swipeUp()
         XCTAssertTrue(app.buttons["Ch 20"].appears(within: 2))

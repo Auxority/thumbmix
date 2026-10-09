@@ -27,6 +27,8 @@ private struct DemoTitle: ViewModifier {
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
                             .background(Theme.demoPurple, in: Capsule())
+                            // iOS 27's bar measured the pill too narrow ("DE…") even with room to spare.
+                            .fixedSize()
                     }
                 }
             }

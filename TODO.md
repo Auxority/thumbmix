@@ -24,7 +24,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [x] **RTA stuck on "waiting for the desk"** after any trip to another app: coming back rebuilds the link, so the EQ tab's borrow found it not live and never retried. It now borrows again once the link is live.
 - [x] **Remove the duplicate meter from the Input tab:** the fader row above already shows the level (decided 2026-10-09).
 - [x] **Offline mode opened every EQ with all bands stacked at 632 Hz:** the demo desk now starts each EQ on its Reset bands values.
-- [ ] **Title and DEMO pill get truncated** on strip screens: the back button ("Thumbmix"), the title and the pill don't fit next to each other. Mock a layout that keeps all three readable on the iPhone SE.
+- [x] **Title and DEMO pill got truncated** on iOS 27 ("Thu…", "DE…"): the bar measured the pill too narrow even with room to spare, and on the overview the Unused button left too little. The pill keeps its size, and the overview's Unused button is gone.
 
 ## Performance
 
@@ -50,7 +50,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Matrix send pan and tap** (`/bus/NN/mix/01/pan`, `…/type`, on the odd sends): needed to feed a stereo matrix pair properly. Neither Fed by tab shows them yet.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
-- [ ] **Replace the Unused / Show unused toggles** on every screen: switched on they're plain white, which looks off. Find a cleaner way to hide strips that aren't patched (mock first).
+- [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. The Sends tab's "Show unused" toggle is still there: switched on it's plain white, which looks off.
 - [ ] **Solo** per channel.
 - [x] **Delay** per channel (mock C): below Trim on the Input tab, an on/off chip and the time in ms and distance (343 m/s; feet on US-region phones). It follows the Gain/Delay link. A double-tap resets it to 0.3 ms, and preamp gain to 0 dB.
 - [ ] **Inserts** per channel.

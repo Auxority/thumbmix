@@ -119,9 +119,6 @@
     "GR %@ dB" : {
 
     },
-    "Hidden" : {
-
-    },
     "Icon" : {
 
     },
@@ -211,9 +208,6 @@
     "Show unused" : {
 
     },
-    "Shown" : {
-
-    },
     "Stereo link" : {
 
     },
@@ -270,9 +264,6 @@
       }
     },
     "Unmute" : {
-
-    },
-    "Unused" : {
 
     },
     "with %@" : {

@@ -15,6 +15,7 @@ final class OfflineUITests: XCTestCase {
 
         startOffline(app)
         XCTAssertTrue(app.staticTexts["DEMO"].exists, "the overview says it's the demo")
+        saveScreenshot("offline-overview")
         app.buttons["Kick"].tap()
         XCTAssertTrue(app.staticTexts["DEMO"].appears(within: 3), "so does a strip screen")
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
