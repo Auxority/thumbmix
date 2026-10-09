@@ -38,6 +38,7 @@ struct MuteButton: View {
 
     var body: some View {
         let muted = mirror.isMuted(strip)
+        let name = mirror.isLinked(strip) ? mirror.pairName(strip) : mirror.name(strip)
         Button {
             mirror.set(strip.on, .int(muted ? 1 : 0))
         } label: {
@@ -51,6 +52,7 @@ struct MuteButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("mute-" + strip.on)
-        .accessibilityLabel(muted ? "Unmute" : "Mute")
+        // A list of plain "Mute"s doesn't say which strip each one mutes.
+        .accessibilityLabel(muted ? "Unmute \(name)" : "Mute \(name)")
     }
 }

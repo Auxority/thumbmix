@@ -81,7 +81,9 @@ struct StripRow: View {
     @ViewBuilder private var faderAndMute: some View {
         ParameterRow(
             spec: Catalog.fader(strip), mirror: mirror, title: "", accent: color, height: 52,
-            meter: mirror.meter(rightSide ?? strip), upperMeter: rightSide.map { _ in mirror.meter(strip) })
+            meter: mirror.meter(rightSide ?? strip), upperMeter: rightSide.map { _ in mirror.meter(strip) }
+        )
+        .accessibilityLabel("\(name) fader")
         MuteButton(strip: strip, mirror: mirror, height: 52)
     }
 
