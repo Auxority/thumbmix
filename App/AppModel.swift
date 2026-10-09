@@ -10,6 +10,7 @@ final class AppModel {
     /// The demo console Offline mode runs inside the app; nil when connected to a real desk.
     private var demoConsole: FakeM32?
     private(set) var offlineFailed = false
+    private(set) var isStartingOffline = false
     private static let lastHostKey = "lastConsoleHost"
 
     var isOffline: Bool { demoConsole != nil }
@@ -41,7 +42,11 @@ final class AppModel {
     }
 
     /// Every visit gets a fresh demo desk. It never becomes the last console, so a relaunch can't land on it.
+    /// A second tap while the first demo desk starts would replace it without stopping it.
     func startOffline() async {
+        guard !isStartingOffline else { return }
+        isStartingOffline = true
+        defer { isStartingOffline = false }
         disconnect()
         do {
             let demo = try FakeM32()

@@ -45,6 +45,8 @@ struct EQTab: View {
         .onChange(of: mirror.isLive) { _, isLive in
             if isLive, scenePhase == .active { mirror.followRTA(strip) }
         }
+        // Picking L or R of an unlinked pair swaps the strip but keeps this view, so onAppear doesn't run again.
+        .onChange(of: strip) { mirror.followRTA(strip) }
     }
 
     /// A cut filter's Gain and Q do nothing, so they're disabled, not removed: nothing below them moves.

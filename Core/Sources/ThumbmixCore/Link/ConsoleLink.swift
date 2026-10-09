@@ -75,6 +75,7 @@ public final class ConsoleLink {
     private var info: ConsoleInfo?
     private var supervisor: LinkSupervisor
     private var tasks: [Task<Void, Never>] = []
+    private var isStopped = false
 
     public init(host: String, port: UInt16 = 10023, timing: LinkTiming = .console) {
         self.host = host
@@ -91,8 +92,9 @@ public final class ConsoleLink {
 
     /// After the app was in the background: desk changes may have been missed and the socket may be
     /// dead, so show the link as lost and rebuild it; the next reply makes it live and triggers a resync.
+    /// A stopped link stays stopped: the mirror stops one that found no M32, and nothing would stop it again.
     public func wake() {
-        guard info != nil else { return }
+        guard info != nil, !isStopped else { return }
         if case .live = state { state = .lost }
         restartTransport()
     }
@@ -102,6 +104,7 @@ public final class ConsoleLink {
     }
 
     public func stop() {
+        isStopped = true
         for task in tasks { task.cancel() }
         tasks = []
         receiveTask?.cancel()
