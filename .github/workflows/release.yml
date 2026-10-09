@@ -1,7 +1,8 @@
 # A push to main (a merged PR) with a feat or fix commit becomes a GitHub Release with an unsigned IPA for
 # SideStore, versioned from the commit titles (scripts/next-version.sh), once CI's `check` passed on that
 # commit. A manual run releases a version you type, such as 1.0.0 or 1.0.0-rc.1. Everything below 1.0.0, and
-# every -rc, is marked as a pre-release.
+# every -rc, is marked as a pre-release. Every run builds main's newest commit that passed CI; a manual run
+# refuses to start until that is main's latest commit.
 name: Release
 
 on:
@@ -19,16 +20,18 @@ on:
 
 permissions:
   contents: write
+  actions: read # to find main's newest commit that passed CI
 
-# Releases must not race each other: build numbers and tags are created in run order.
+# Releases must not race each other: build numbers and tags are created in run order. Waiting runs can be
+# cancelled, which is why each run builds the newest green commit (scripts/release-commit.sh).
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
   release:
-    # Lint and tests are not repeated here: this runs only after CI's `check` passed on main's push. A manual
-    # run from another branch would skip that gate, so refuse it.
+    # Lint and tests are not repeated here: only a commit whose CI passed on main's push is built. A manual run
+    # from another branch would run that branch's copy of this workflow, so refuse it.
     if: >-
       github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
@@ -42,9 +45,15 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # The commit CI checked, not whatever main is by now.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0 # the tags and commits since the last release decide the version
+
+      - name: Check out the newest green commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(scripts/release-commit.sh)
+          git checkout --quiet --detach "$sha"
+          echo "Building $sha"
 
       - name: Decide the version
         id: version
@@ -76,13 +85,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
-          # The commit that was checked out and built; GITHUB_SHA is main's newest under workflow_run.
-          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-        run: |
-          prerelease=()
-          case "$VERSION" in 0.* | *-*) prerelease=(--prerelease) ;; esac
-          gh release create "v${VERSION}" build/ipa/Thumbmix.ipa \
-            --target "$RELEASE_SHA" \
-            --title "Thumbmix ${VERSION} (build ${BUILD_NUMBER})" \
-            --generate-notes \
-            ${prerelease[@]+"${prerelease[@]}"}
+        run: scripts/publish-release.sh
