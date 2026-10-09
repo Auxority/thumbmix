@@ -12,7 +12,7 @@ struct MeterBar: View {
                 Capsule().fill(Theme.raised)
                 Capsule()
                     .fill(Self.color(for: level))
-                    .frame(width: geometry.size.width * MeterScale.fraction(linear: level))
+                    .meterFill(MeterScale.fraction(linear: level), from: .leading)
                 if let threshold {
                     Rectangle()
                         .fill(.white)
@@ -33,6 +33,14 @@ struct MeterBar: View {
     }
 }
 
+extension View {
+    /// Shows `fraction` of a full-width fill by scaling it: a changing frame re-ran layout up the row for every
+    /// meter, 20 times a second (Instruments, iPhone 11 Pro). Never 0: a zero scale can't be inverted.
+    func meterFill(_ fraction: Double, from anchor: UnitPoint) -> some View {
+        scaleEffect(x: max(fraction, 0.001), y: 1, anchor: anchor)
+    }
+}
+
 /// Gain reduction, filling from the right, full scale 30 dB.
 struct ReductionBar: View {
     let gain: Float
@@ -40,11 +48,9 @@ struct ReductionBar: View {
     var body: some View {
         let reduction = MeterScale.reductionDecibels(gain: gain)
         HStack(spacing: 8) {
-            GeometryReader { geometry in
-                ZStack(alignment: .trailing) {
-                    Capsule().fill(Theme.raised)
-                    Capsule().fill(.orange).frame(width: geometry.size.width * min(reduction / 30, 1))
-                }
+            ZStack {
+                Capsule().fill(Theme.raised)
+                Capsule().fill(.orange).meterFill(min(reduction / 30, 1), from: .trailing)
             }
             .frame(height: 10)
             Text("GR \(ValueText.number(reduction, digits: 1)) dB")

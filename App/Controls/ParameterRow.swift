@@ -120,7 +120,8 @@ private struct MeterLine: View {
     var body: some View {
         Capsule()
             .fill(MeterBar.color(for: cell.level))
-            .frame(width: width * MeterScale.fraction(linear: cell.level), height: 3)
+            .frame(width: width, height: 3)
+            .meterFill(MeterScale.fraction(linear: cell.level), from: .leading)
             .padding(.bottom, 2)
     }
 }
