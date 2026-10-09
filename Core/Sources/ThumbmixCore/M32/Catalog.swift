@@ -4,6 +4,8 @@ import Foundation
 public enum Catalog {
     public static let gateModes = ["EXP2", "EXP3", "EXP4", "GATE", "DUCK"]
     public static let dynamicsModes = ["COMP", "EXP"]
+    public static let dynamicsDetectors = ["PEAK", "RMS"]
+    public static let dynamicsEnvelopes = ["LIN", "LOG"]
     public static let ratios = [
         "1.1", "1.3", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "7.0", "10", "20", "100",
     ]
@@ -94,6 +96,7 @@ public enum Catalog {
         )
     }
 
+    /// Makeup gain resets at once; a ratio reset can make the channel louder, so it asks first.
     public static func dynamics(_ strip: StripID) -> DynamicsSpecs {
         let p = strip.prefix + "/dyn/"
         return DynamicsSpecs(
@@ -101,15 +104,20 @@ public enum Catalog {
             mode: ParamSpec(p + "mode", CoreStrings.text("Mode"), .choice(dynamicsModes), .plain),
             threshold: ParamSpec(
                 p + "thr", CoreStrings.text("Threshold"), .linear(min: -60, max: 0, step: 0.5), .decibels),
-            ratio: ParamSpec(p + "ratio", CoreStrings.text("Ratio"), .choice(ratios), .ratio),
+            ratio: ParamSpec(
+                p + "ratio", CoreStrings.text("Ratio"), .choice(ratios), .ratio,
+                reset: ratios.firstIndex(of: "3.0").map(Double.init),
+                resetPrompt: CoreStrings.text("Reset the ratio to 3:1?")),
             knee: ParamSpec(
                 p + "knee", CoreStrings.text("Knee"), .linear(min: 0, max: 5, step: 1), .plain),
             attack: ParamSpec(p + "attack", CoreStrings.text("Attack"), attack, .milliseconds),
             hold: ParamSpec(p + "hold", CoreStrings.text("Hold"), hold, .milliseconds),
             release: ParamSpec(p + "release", CoreStrings.text("Release"), release, .milliseconds),
             makeup: ParamSpec(
-                p + "mgain", CoreStrings.text("Makeup"), .linear(min: 0, max: 24, step: 0.5), .decibelAmount
-            )
+                p + "mgain", CoreStrings.text("Makeup gain"), .linear(min: 0, max: 24, step: 0.5),
+                .decibelAmount, reset: 0),
+            detector: ParamSpec(p + "det", CoreStrings.text("Detector"), .choice(dynamicsDetectors), .plain),
+            envelope: ParamSpec(p + "env", CoreStrings.text("Envelope"), .choice(dynamicsEnvelopes), .plain)
         )
     }
 
@@ -117,26 +125,53 @@ public enum Catalog {
         ParamSpec(strip.prefix + "/eq/on", CoreStrings.text("EQ"), .toggle, .plain)
     }
 
-    public static func eqBand(_ strip: StripID, _ band: Int) -> EQBandSpecs {
+    /// A band row's double-tap restores what Reset bands writes. Each asks first: moving a band or raising its
+    /// gain mid-show can make the channel louder or howl.
+    public static func eqBand(_ strip: StripID, _ band: Int, locale: Locale = .current) -> EQBandSpecs {
         let p = strip.prefix + "/eq/\(band)/"
         let types = [.matrix, .mainStereo, .mainMono].contains(strip.kind) ? mainEQTypes : eqTypes
+        let target = eqDefaults(strip).flatMap { $0.indices.contains(band - 1) ? $0[band - 1] : nil }
+        let frequency = ParamSpec(
+            p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz)
+        let q = ParamSpec(p + "q", CoreStrings.text("Q"), .log(min: 10, max: 0.3, steps: 72), .plain)
         return EQBandSpecs(
             type: ParamSpec(p + "type", CoreStrings.text("Type"), .choice(types), .plain),
-            frequency: ParamSpec(
-                p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz),
+            frequency: resetting(frequency, to: target?.frequency, locale: locale) {
+                CoreStrings.text("Reset the frequency to \($0)?")
+            },
             gain: ParamSpec(
                 p + "g", CoreStrings.text("Gain"), .linear(min: -15, max: 15, step: 0.25), .decibels,
-                reset: 0),
-            q: ParamSpec(p + "q", CoreStrings.text("Q"), .log(min: 10, max: 0.3, steps: 72), .plain)
+                reset: 0, resetPrompt: CoreStrings.text("Reset the EQ gain to 0 dB?")),
+            q: resetting(q, to: target?.q, locale: locale) { CoreStrings.text("Reset the Q to \($0)?") }
         )
     }
 
-    /// The engineer's channel EQ starting point, restored by reset: four PEQs at 91.4 Hz, 418 Hz, 1.91 kHz
-    /// and 8.73 kHz, Q 1.7, 0 dB. Buses and mains have six bands and no agreed defaults yet.
-    public static func eqDefaults(_ strip: StripID) -> [EQBandState]? {
-        guard strip.kind == .input else { return nil }
-        return [91.4, 418, 1910, 8730].map { EQBandState(typeIndex: 2, frequency: $0, gain: 0, q: 1.7) }
+    /// `spec` with a reset to `value` that asks first, naming the value as the row shows it.
+    private static func resetting(
+        _ spec: ParamSpec, to value: Double?, locale: Locale, prompt: (String) -> String
+    ) -> ParamSpec {
+        guard let value else { return spec }
+        let text = ValueText.format(spec.scale.normalized(forValue: value), spec, locale: locale)
+        return ParamSpec(spec.address, spec.label, spec.scale, spec.unit, reset: value, resetPrompt: prompt(text))
     }
+
+    /// The engineer's EQ starting points, restored by Reset bands and a row's double-tap: PEQs at Q 1.7, 0 dB.
+    /// Six-band strips use the desk's steps nearest the engineer's 55.1, 152, 418, 1150, 3170 and 8730 Hz;
+    /// compare them with the real desk (TODO). PEQ is type 2 in both type lists.
+    public static func eqDefaults(_ strip: StripID) -> [EQBandState]? {
+        let frequencies: [Double] =
+            switch strip.eqBandCount {
+            case 4: [91.4, 418, 1910, 8730]
+            case 6: [54.5, 153.5, 418, 1140, 3210, 8730]
+            default: []
+            }
+        guard !frequencies.isEmpty else { return nil }
+        return frequencies.map { EQBandState(typeIndex: 2, frequency: $0, gain: 0, q: 1.7) }
+    }
+
+    /// Cut filters (LCut, HCut, the mains' BU6…LR24) have no level to shape, so Gain and Q do nothing there.
+    /// The doc lists gain and Q for every type without saying so: assumed, to check on the desk (TODO).
+    public static func eqTypeShapesLevel(_ name: String) -> Bool { ["LShv", "PEQ", "VEQ", "HShv"].contains(name) }
 
     /// `target` is a bus for inputs, aux ins and FX returns, a matrix for buses and mains (`StripKind.sendTarget`).
     public static func sendLevel(from strip: StripID, to target: StripID) -> ParamSpec {

@@ -79,7 +79,7 @@ public enum DemoState {
         // Delay before the generic "/on": the demo's delays start off, at 0.3 ms.
         ("/delay/on", .int(0)), ("/delay/time", .float(0)),
         ("/phantom", .int(0)), ("/hpon", .int(0)), ("/hpslope", .int(2)), ("/on", .int(1)), ("/type", .int(2)),
-        ("/dyn/mode", .int(0)), ("/mode", .int(3)), ("/ratio", .int(3)),
+        ("/dyn/mode", .int(0)), ("/dyn/det", .int(0)), ("/dyn/env", .int(1)), ("/mode", .int(3)), ("/ratio", .int(3)),
         ("/fader", .float(0)), ("/level", .float(0)), ("/rta/source", .int(0)), ("/rta/pos", .int(0)),
     ]
 

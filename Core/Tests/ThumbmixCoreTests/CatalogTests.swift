@@ -61,12 +61,35 @@ struct CatalogTests {
         #expect(DemoState.values()["/ch/01/dyn/mode"] == .int(0))
     }
 
+    /// Separate 0/1 enums on every strip with dynamics (doc p.25, 33, 36, 38, 40).
+    @Test func compressorHasDetectorAndEnvelope() {
+        let dynamics = Catalog.dynamics(StripID(.mainMono))
+        #expect(dynamics.detector.address == "/main/m/dyn/det")
+        #expect(dynamics.detector.scale == .choice(["PEAK", "RMS"]))
+        #expect(dynamics.envelope.address == "/main/m/dyn/env")
+        #expect(dynamics.envelope.scale == .choice(["LIN", "LOG"]))
+        #expect(Catalog.syncAddresses().contains("/ch/01/dyn/det"))
+        #expect(Catalog.syncAddresses().contains("/mtx/06/dyn/env"))
+        #expect(DemoState.values()["/ch/01/dyn/det"] == .int(0))
+        #expect(DemoState.values()["/bus/01/dyn/env"] == .int(1))
+    }
+
+    /// A reset that can make the channel louder asks first; dropping makeup gain to 0 dB can't.
+    @Test func makeupGainResetsAtOnceAndRatioAsks() {
+        let dynamics = Catalog.dynamics(StripID(.input, 1))
+        #expect(dynamics.makeup.label == "Makeup gain")
+        #expect(dynamics.makeup.resetValue == 0)
+        #expect(dynamics.makeup.resetPrompt == nil)
+        #expect(dynamics.ratio.resetValue == Catalog.ratios.firstIndex(of: "3.0").map(Double.init))
+        #expect(dynamics.ratio.resetPrompt == "Reset the ratio to 3:1?")
+    }
+
     @Test func syncListIsCompleteAndUnique() {
         let addresses = Catalog.syncAddresses()
-        // 32 inputs x 79 + 8 aux x 39 + 8 FX x 39 + 16 buses x 53 + 6 matrices x 39 + LR 52 + M 51 + 8 DCAs x 5
+        // 32 inputs x 81 + 8 aux x 39 + 8 FX x 39 + 16 buses x 55 + 6 matrices x 41 + LR 54 + M 53 + 8 DCAs x 5
         // + 128 headamps x 2 + /-prefs/rta/source and /pos + 16 + 4 + 4 + 8 + 3 link pairs + 4 Link Preferences
         // (a bus or main has 12 matrix-send addresses)
-        #expect(addresses.count == 4674)
+        #expect(addresses.count == 4786)
         #expect(Set(addresses).count == addresses.count)
     }
 
