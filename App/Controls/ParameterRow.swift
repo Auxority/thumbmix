@@ -119,10 +119,18 @@ private struct MeterLine: View {
 
     var body: some View {
         Capsule()
-            .fill(MeterBar.color(for: cell.level))
+            .fill(Self.color(for: cell.level))
             .frame(width: width, height: 3)
             .meterFill(MeterScale.fraction(linear: cell.level), from: .leading)
             .padding(.bottom, 2)
+    }
+
+    private static func color(for level: Float) -> Color {
+        switch MeterScale.decibels(level) {
+        case ..<(-12): .green
+        case ..<(-3): .yellow
+        default: .red
+        }
     }
 }
 

@@ -1,38 +1,6 @@
 import SwiftUI
 import ThumbmixCore
 
-struct MeterBar: View {
-    let level: Float
-    var threshold: Double?
-    var height: CGFloat = 10
-
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Capsule().fill(Theme.raised)
-                Capsule()
-                    .fill(Self.color(for: level))
-                    .meterFill(MeterScale.fraction(linear: level), from: .leading)
-                if let threshold {
-                    Rectangle()
-                        .fill(.white)
-                        .frame(width: 2)
-                        .offset(x: geometry.size.width * MeterScale.fraction(decibels: threshold) - 1)
-                }
-            }
-        }
-        .frame(height: height)
-    }
-
-    static func color(for level: Float) -> Color {
-        switch MeterScale.decibels(level) {
-        case ..<(-12): .green
-        case ..<(-3): .yellow
-        default: .red
-        }
-    }
-}
-
 extension View {
     /// Shows `fraction` of a full-width fill by scaling it: a changing frame re-ran layout up the row for every
     /// meter, 20 times a second (Instruments, iPhone 11 Pro). Never 0: a zero scale can't be inverted.

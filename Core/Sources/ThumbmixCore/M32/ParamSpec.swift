@@ -1,7 +1,7 @@
 public enum ParamUnit: Sendable {
     /// `decibels` is a signed level or gain; `decibelAmount` is a size (gate range, makeup) and reads without a sign.
     /// `delayTime` is milliseconds plus the distance sound travels in that time.
-    case decibels, decibelAmount, hertz, milliseconds, delayTime, percent, ratio, pan, plain
+    case decibels, decibelAmount, hertz, milliseconds, delayTime, ratio, pan, plain
 }
 
 public struct ParamSpec: Sendable, Identifiable, Equatable {

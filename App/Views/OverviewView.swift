@@ -42,16 +42,17 @@ struct OverviewView: View {
             .onAppear(perform: refreshVisibleItems)
             .onChange(of: group) { refreshVisibleItems() }
             .onChange(of: mirror.status) { refreshVisibleItems() }
-            .onChange(of: linkState) { refreshOnceNoFingerIsDown() }
+            .task(id: linkState) { await refreshOnceNoFingerIsDown() }
         }
     }
 
     /// A link changed on the desk mid-drag would rebuild the row under the finger; the list regroups once it lifts.
-    private func refreshOnceNoFingerIsDown() {
-        Task {
-            while mirror.isFingerDown { try? await Task.sleep(for: .milliseconds(100)) }
-            refreshVisibleItems()
+    /// The next link change or leaving the screen cancels the wait.
+    private func refreshOnceNoFingerIsDown() async {
+        while mirror.isFingerDown {
+            do { try await Task.sleep(for: .milliseconds(100)) } catch { return }
         }
+        refreshVisibleItems()
     }
 
     /// Linking or unlinking a pair, here or on the desk, merges or splits rows.

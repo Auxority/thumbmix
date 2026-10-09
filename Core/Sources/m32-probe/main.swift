@@ -69,18 +69,7 @@ for address in ["/info", "/xinfo", "/status"] {
 
 print("\n== 2. Push test: keep the Mixing Station clients connected.")
 print("Move any fader on the desk or in Mixing Station during the next 20 seconds...")
-recorder.clear()
-transport.send(OSCMessage("/xremote"))
-let pushStart = ContinuousClock.now
-var renewed = false
-while ContinuousClock.now - pushStart < .seconds(20) {
-    if !renewed, ContinuousClock.now - pushStart > .seconds(9) {
-        transport.send(OSCMessage("/xremote"))
-        renewed = true
-    }
-    try? await Task.sleep(for: .milliseconds(200))
-}
-let pushes = recorder.messages
+let pushes = await listen(seconds: 20)
 print("pushed messages received: \(pushes.count)")
 for push in pushes.prefix(10) { print("  " + describe(push)) }
 print(

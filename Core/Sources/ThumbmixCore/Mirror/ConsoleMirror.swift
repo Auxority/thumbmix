@@ -112,8 +112,11 @@ public final class ConsoleMirror {
     /// The desk copies a shared section to the linked partner, but may not push that copy back: the partner is
     /// re-read and checked. A desk that turns out not to copy gets both sides written by the app.
     private func followLinkedEdit(_ partner: String, _ argument: OSCArgument) {
-        // Writing an unread partner would show a value the desk never sent.
-        guard linkCopies.deskCopies else { return cell(partner).argument == nil ? () : write(partner, argument) }
+        guard linkCopies.deskCopies else {
+            // Writing an unread partner would show a value the desk never sent.
+            if cell(partner).argument != nil { write(partner, argument) }
+            return
+        }
         linkCopies.expect(partner, argument)
         holds.rereadSoon(partner, now: .now)
     }

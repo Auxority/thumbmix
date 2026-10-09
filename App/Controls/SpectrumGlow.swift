@@ -32,7 +32,7 @@ struct SpectrumGlow: View {
     private static func outline(_ decibels: [Float], in size: CGSize) -> Path {
         var path = Path()
         for (band, level) in decibels.enumerated() {
-            let x = log(RTA.bandFrequency(band) / 20) / log(1000) * size.width
+            let x = EQGraph.graphX(hertz: RTA.bandFrequency(band)) * size.width
             let fraction = (min(max(Double(level), floor), 0) - floor) / -floor
             let point = CGPoint(x: x, y: (1 - fraction) * size.height)
             if band == 0 { path.move(to: point) } else { path.addLine(to: point) }
