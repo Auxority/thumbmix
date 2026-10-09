@@ -166,6 +166,20 @@ public enum Catalog {
         return frequencies.map { EQBandState(typeIndex: 2, frequency: $0, gain: 0, q: 1.7) }
     }
 
+    /// `eqDefaults` for one band as the desk's arguments, each snapped to the nearest step its scale has.
+    public static func eqDefaultArguments(_ strip: StripID, _ band: Int) -> [(address: String, argument: OSCArgument)] {
+        guard let defaults = eqDefaults(strip), defaults.indices.contains(band - 1) else { return [] }
+        let target = defaults[band - 1]
+        let specs = eqBand(strip, band)
+        let values = [
+            (specs.type, Double(target.typeIndex)), (specs.frequency, target.frequency), (specs.gain, target.gain),
+            (specs.q, target.q),
+        ]
+        return values.map { spec, value in
+            (spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
+        }
+    }
+
     /// Cut filters (LCut, HCut, the mains' BU6…LR24) have no level to shape, so Gain and Q do nothing there.
     /// The doc lists gain and Q for every type without saying so: assumed, to check on the desk (TODO).
     public static func eqTypeShapesLevel(_ name: String) -> Bool { ["LShv", "PEQ", "VEQ", "HShv"].contains(name) }

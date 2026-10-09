@@ -2,6 +2,9 @@ import XCTest
 
 @MainActor
 final class EQUITests: DeskUITestCase {
+    /// Where band 1 of an input sits on the graph at its default: 91.4 Hz on the log axis, 0 dB.
+    private static let kickBand1 = CGVector(dx: log(91.4 / 20) / log(1000), dy: 0.5)
+
     func testDraggingOnTheGraphMovesTheGrabbedBand() {
         launch()
         open("Kick")
@@ -9,16 +12,15 @@ final class EQUITests: DeskUITestCase {
         let frequency = app.descendants(matching: .any)["/ch/01/eq/1/f"]
         let gain = app.descendants(matching: .any)["/ch/01/eq/1/g"]
         XCTAssertTrue(frequency.appears(within: 2))
-        XCTAssertEqual(frequency.value as? String, "632 Hz")
+        XCTAssertEqual(frequency.value as? String, "91.4 Hz")
         let graph = app.descendants(matching: .any)["eq-graph"]
 
-        // All fake bands sit at the centre point; the nearest-band tie goes to band 1.
-        graph.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        graph.coordinate(withNormalizedOffset: Self.kickBand1)
             .press(
                 forDuration: 0.1,
-                thenDragTo: graph.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.25)))
+                thenDragTo: graph.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.25)))
 
-        XCTAssertNotEqual(frequency.value as? String, "632 Hz")
+        XCTAssertNotEqual(frequency.value as? String, "91.4 Hz")
         XCTAssertNotEqual(gain.value as? String, "0.0 dB")
         saveScreenshot("task-15-eq")
     }
@@ -33,10 +35,9 @@ final class EQUITests: DeskUITestCase {
         let gain = app.descendants(matching: .any)["/ch/05/eq/1/g"]
         XCTAssertTrue(frequency.appears(within: 2))
         let graph = app.descendants(matching: .any)["eq-graph"]
-        let nearTheCentrePoint = graph.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            .withOffset(CGVector(dx: 20, dy: -25))
-        nearTheCentrePoint.press(forDuration: 0.3)
-        XCTAssertEqual(frequency.value as? String, "632 Hz")
+        let nearBand1 = graph.coordinate(withNormalizedOffset: Self.kickBand1).withOffset(CGVector(dx: 20, dy: -25))
+        nearBand1.press(forDuration: 0.3)
+        XCTAssertEqual(frequency.value as? String, "91.4 Hz")
         XCTAssertEqual(gain.value as? String, "0.0 dB")
     }
 
@@ -73,7 +74,10 @@ final class EQUITests: DeskUITestCase {
         let frequency = app.descendants(matching: .any)["/ch/02/eq/1/f"]
         // 5 s: in one full-suite run the EQ rows took over 2 s to appear on a busy simulator.
         XCTAssertTrue(frequency.appears(within: 5))
-        XCTAssertEqual(frequency.value as? String, "632 Hz")
+        frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.5))
+            .press(forDuration: 0.05, thenDragTo: frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5)))
+        let moved = frequency.value as? String
+        XCTAssertNotEqual(moved, "91.4 Hz")
         // Drag from the Type row: on a 375 pt phone the rows below it can start past the screen's bottom edge.
         let type = app.buttons["/ch/02/eq/1/type"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         type.press(forDuration: 0.05, thenDragTo: type.withOffset(CGVector(dx: 0, dy: -300)))
@@ -82,7 +86,7 @@ final class EQUITests: DeskUITestCase {
         let alert = app.alerts["Reset all 4 bands of Snare?"]
         XCTAssertTrue(alert.appears(within: 2))
         alert.buttons["Cancel"].tap()
-        XCTAssertEqual(frequency.value as? String, "632 Hz")
+        XCTAssertEqual(frequency.value as? String, moved)
         app.buttons["Reset bands"].tap()
         alert.buttons["Reset"].tap()
         XCTAssertEqual(frequency.value as? String, "91.4 Hz")
@@ -92,13 +96,15 @@ final class EQUITests: DeskUITestCase {
         launch()
         open("Hi-hat")
         app.buttons["EQ"].tap()
-        let frequency = app.descendants(matching: .any)["/ch/03/eq/1/f"]
-        XCTAssertTrue(frequency.appears(within: 2))
-        XCTAssertEqual(frequency.value as? String, "632 Hz")
-        // All fake bands sit at the centre point; the nearest-band tie goes to band 1.
-        app.descendants(matching: .any)["eq-graph"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            .doubleTap()
-        XCTAssertEqual(frequency.value as? String, "91.4 Hz")
+        let gain = app.descendants(matching: .any)["/ch/03/eq/1/g"]
+        XCTAssertTrue(gain.appears(within: 2))
+        let graph = app.descendants(matching: .any)["eq-graph"]
+        let raised = CGVector(dx: Self.kickBand1.dx, dy: 0.25)
+        graph.coordinate(withNormalizedOffset: Self.kickBand1)
+            .press(forDuration: 0.1, thenDragTo: graph.coordinate(withNormalizedOffset: raised))
+        XCTAssertNotEqual(gain.value as? String, "0.0 dB")
+        graph.coordinate(withNormalizedOffset: raised).doubleTap()
+        XCTAssertTrue(eventually(within: 2) { gain.value as? String == "0.0 dB" })
     }
 
     func testLowCutIsTheFirstChoiceInTheBandPicker() {
@@ -128,6 +134,19 @@ final class EQUITests: DeskUITestCase {
         let status = app.staticTexts["rta-status"]
         XCTAssertTrue(eventually(within: 5) { status.exists && status.label == "RTA follows Kick (after EQ)" })
         saveScreenshot("eq-spectrum")
+    }
+
+    /// Coming back from another app rebuilds the link; the RTA must be borrowed again once it is live.
+    func testTheSpectrumComesBackAfterTheBackground() {
+        launch()
+        open("Kick")
+        app.buttons["EQ"].tap()
+        let status = app.staticTexts["rta-status"]
+        XCTAssertTrue(eventually(within: 5) { status.exists && status.label == "RTA follows Kick (after EQ)" })
+        XCUIDevice.shared.press(.home)
+        XCTAssertTrue(eventually(within: 5) { [.runningBackground, .runningBackgroundSuspended].contains(self.app.state) })
+        app.activate()
+        XCTAssertTrue(eventually(within: 10) { status.exists && status.label == "RTA follows Kick (after EQ)" })
     }
 
     /// The RTA status line appeared only once spectrum data came in, pushing everything under it down a line:

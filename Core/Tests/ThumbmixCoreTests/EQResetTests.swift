@@ -35,6 +35,23 @@ struct EQResetTests {
         }
     }
 
+    /// Offline mode opens on the bands Reset bands would give, not every band stacked at mid-travel.
+    @Test func theDemoDeskStartsEveryEQAtItsDefaults() {
+        let state = DemoState.values()
+        func value(_ spec: ParamSpec) -> Double? {
+            state[spec.address].flatMap(spec.scale.normalized(from:)).map(spec.scale.value(fromNormalized:))
+        }
+        for strip in [kick, StripID(.input, 32)] + sixBandStrips {
+            for (index, target) in (Catalog.eqDefaults(strip) ?? []).enumerated() {
+                let specs = Catalog.eqBand(strip, index + 1)
+                #expect(state[specs.type.address] == .int(Int32(target.typeIndex)), "\(specs.type.address)")
+                #expect(value(specs.frequency).map { abs($0 / target.frequency - 1) < 0.003 } == true, "\(strip)")
+                #expect(value(specs.gain) == target.gain, "\(specs.gain.address)")
+                #expect(value(specs.q).map { abs($0 - target.q) < 0.05 } == true, "\(specs.q.address)")
+            }
+        }
+    }
+
     /// One source of truth: a row's double-tap restores what Reset bands would.
     @Test func bandRowsResetToTheBandsDefault() {
         let band = Catalog.eqBand(StripID(.matrix, 2), 3)

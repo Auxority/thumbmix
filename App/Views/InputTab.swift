@@ -8,7 +8,6 @@ struct InputTab: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 8) {
-                InputMeter(cell: mirror.meter(strip))
                 if let headamp = mirror.headamp(forInput: strip.number) {
                     HStack(spacing: 8) {
                         ParameterRow(spec: Catalog.headampGain(headamp), mirror: mirror)
@@ -112,16 +111,6 @@ private struct PhantomButton: View {
     private func lines(_ candidates: String?...) -> String? {
         let present = candidates.compactMap { $0 }
         return present.isEmpty ? nil : present.joined(separator: "\n")
-    }
-}
-
-private struct InputMeter: View {
-    let cell: MeterCell
-
-    var body: some View {
-        MeterBar(level: cell.level, height: 12)
-            .padding(12)
-            .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
     }
 }
 

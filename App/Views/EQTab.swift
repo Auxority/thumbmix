@@ -41,6 +41,10 @@ struct EQTab: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { mirror.followRTA(strip) } else { mirror.releaseRTA() }
         }
+        // Coming back from the background rebuilds the link, so the borrow above finds it not live yet: retry once it is.
+        .onChange(of: mirror.isLive) { _, isLive in
+            if isLive, scenePhase == .active { mirror.followRTA(strip) }
+        }
     }
 
     /// A cut filter's Gain and Q do nothing, so they're disabled, not removed: nothing below them moves.

@@ -2,15 +2,9 @@ import SwiftUI
 import ThumbmixCore
 
 struct OverviewView: View {
-    private struct ListIdentity: Hashable {
-        let group: StripGroup
-        let showUnused: Bool
-    }
-
     let mirror: ConsoleMirror
     let onDisconnect: () -> Void
     @State private var group: StripGroup = .inputs
-    @State private var showUnused = false
     @State private var openStrip: StripID?
     @State private var visibleItems: [OverviewItem] = []
 
@@ -30,7 +24,7 @@ struct OverviewView: View {
                 // Each list gets its own scroll view, so it starts where a list naturally starts. Keeping
                 // one left the old offset past a shorter list (only black), and scrolling it to a top
                 // anchor shifted the rows on iOS 27. A reconnect keeps the position: no list moves under a finger.
-                .id(ListIdentity(group: group, showUnused: showUnused))
+                .id(group)
                 .disabled(!mirror.isLive)
                 .opacity(mirror.isLive ? 1 : 0.4)
             }
@@ -41,19 +35,12 @@ struct OverviewView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("Disconnect", action: onDisconnect) }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Unused") { showUnused.toggle() }
-                        .fontWeight(showUnused ? .bold : .regular)
-                        .foregroundStyle(showUnused ? .white : Theme.secondaryText)
-                        .accessibilityValue(showUnused ? "Shown" : "Hidden")
-                }
             }
             .navigationDestination(item: $openStrip) { strip in
                 ChannelView(strip: strip, mirror: mirror)
             }
             .onAppear(perform: refreshVisibleItems)
             .onChange(of: group) { refreshVisibleItems() }
-            .onChange(of: showUnused) { refreshVisibleItems() }
             .onChange(of: mirror.status) { refreshVisibleItems() }
             .onChange(of: linkState) { refreshOnceNoFingerIsDown() }
         }
@@ -72,10 +59,10 @@ struct OverviewView: View {
         Catalog.linkAddresses.map { mirror.cell($0).argument }
     }
 
-    /// Filtered only when the view, group, toggle, connection or links change, never per fader move:
-    /// a row must not vanish under the finger when an unnamed fader reaches -inf.
+    /// Rebuilt only when the view, group, connection or links change, never per fader move.
+    /// Every strip shows until the Unused toggle's redesign (TODO): hiding them left some out of reach.
     private func refreshVisibleItems() {
-        visibleItems = mirror.overviewItems(group.strips, showUnused: showUnused)
+        visibleItems = mirror.overviewItems(group.strips, showUnused: true)
     }
 }
 

@@ -10,19 +10,27 @@ final class EQBandUITests: DeskUITestCase {
         app.buttons["EQ"].tap()
         let frequency = app.descendants(matching: .any)["/ch/01/eq/1/f"]
         XCTAssertTrue(frequency.appears(within: 2))
-        XCTAssertEqual(frequency.value as? String, "632 Hz")
+        frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.5))
+            .press(forDuration: 0.05, thenDragTo: frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5)))
+        XCTAssertNotEqual(frequency.value as? String, "91.4 Hz")
         frequency.doubleTap()
         XCTAssertTrue(eventually(within: 2) { frequency.value as? String == "91.4 Hz" })
         XCTAssertEqual(app.alerts.count, 0)
     }
 
+    /// Offline mode opens a bus on its Reset bands frequencies, then Reset bands brings a moved band back.
     func testBusResetsAllSixBands() {
         launch()
         app.buttons["Buses"].tap()
         open("Mon 1")
         app.buttons["EQ"].tap()
         let type = app.buttons["/bus/01/eq/1/type"]
-        XCTAssertTrue(type.appears(within: 2))
+        let frequency = app.descendants(matching: .any)["/bus/01/eq/1/f"]
+        XCTAssertTrue(frequency.appears(within: 2))
+        XCTAssertEqual(frequency.value as? String, "54.5 Hz")
+        frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.5))
+            .press(forDuration: 0.05, thenDragTo: frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5)))
+        XCTAssertNotEqual(frequency.value as? String, "54.5 Hz")
         // Drag from the Type row: on a 375 pt phone the rows below it start past the screen's bottom edge.
         let start = type.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -300)))
@@ -30,7 +38,6 @@ final class EQBandUITests: DeskUITestCase {
         let alert = app.alerts["Reset all 6 bands of Mon 1?"]
         XCTAssertTrue(alert.appears(within: 2))
         alert.buttons["Reset"].tap()
-        let frequency = app.descendants(matching: .any)["/bus/01/eq/1/f"]
         XCTAssertTrue(eventually(within: 2) { frequency.value as? String == "54.5 Hz" })
     }
 

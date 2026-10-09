@@ -13,7 +13,16 @@ public enum DemoState {
         addMonitors(to: &state)
         addReturnsDCAsAndMain(to: &state)
         addFill(to: &state)
+        addEQDefaults(to: &state)
         return state
+    }
+
+    /// Every EQ starts where Reset bands puts it, not with all bands stacked at mid-travel.
+    private static func addEQDefaults(to state: inout [String: OSCArgument]) {
+        let arguments = StripKind.allCases.flatMap(StripID.all).flatMap { strip in
+            (0..<strip.eqBandCount).flatMap { Catalog.eqDefaultArguments(strip, $0 + 1) }
+        }
+        for (address, argument) in arguments { state[address] = argument }
     }
 
     private static let unity = OSCArgument.float(ParamScale.fader.normalized(forValue: 0))
