@@ -1,7 +1,8 @@
 # A push to main (a merged PR) with a feat or fix commit becomes a GitHub Release with an unsigned IPA for
 # SideStore, versioned from the commit titles (scripts/next-version.sh), once CI's `check` passed on that
 # commit. A manual run releases a version you type, such as 1.0.0 or 1.0.0-rc.1. Everything below 1.0.0, and
-# every -rc, is marked as a pre-release. Every run, manual too, builds main's newest commit that passed CI.
+# every -rc, is marked as a pre-release. Every run builds main's newest commit that passed CI; a manual run
+# refuses to start until that is main's latest commit.
 name: Release
 
 on:
@@ -53,6 +54,11 @@ jobs:
           sha=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --event push \
             --status success --limit 1 --json headSha --jq '.[0].headSha // empty')
           [ -n "$sha" ] || { echo "No commit on main has passed CI" >&2; exit 1; }
+          # A manual run means main as it is now: building an older commit could tag 1.0.0 without the last merge.
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] && [ "$sha" != "$GITHUB_SHA" ]; then
+            echo "CI hasn't passed on main's latest commit $GITHUB_SHA yet; run this again once it has" >&2
+            exit 1
+          fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           echo "Building $sha"
 
