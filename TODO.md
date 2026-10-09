@@ -35,7 +35,6 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
 - [ ] **Send pan on an input's Sends tab** (the pan on odd-numbered sends, `/ch/NN/mix/01/pan`, `…/03/pan`, …): missing today.
-- [ ] **Short taps on slider rows:** decide whether a short tap nudges a fader, gain, delay or other row by one small step, also in the overview.
 - [ ] **FX returns get EQ (and the other tabs) like an input:** the desk gives them a 4-band EQ. Check first whether that's good practice for returns.
 - [ ] **Group chips within thumb reach.** Move the overview's Inputs/Aux/FX/Buses/DCA/Main chips (`GroupChips`, now at the top) down, so they can be reached easily one-handed with the thumb. Mock it first; the Matrix chip joins that row.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
