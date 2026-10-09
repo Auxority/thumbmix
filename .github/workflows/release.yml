@@ -1,7 +1,7 @@
 # A push to main (a merged PR) with a feat or fix commit becomes a GitHub Release with an unsigned IPA for
 # SideStore, versioned from the commit titles (scripts/next-version.sh), once CI's `check` passed on that
 # commit. A manual run releases a version you type, such as 1.0.0 or 1.0.0-rc.1. Everything below 1.0.0, and
-# every -rc, is marked as a pre-release.
+# every -rc, is marked as a pre-release. Every run, manual too, builds main's newest commit that passed CI.
 name: Release
 
 on:
@@ -19,16 +19,19 @@ on:
 
 permissions:
   contents: write
+  actions: read # to find main's newest commit that passed CI
 
-# Releases must not race each other: build numbers and tags are created in run order.
+# Releases must not race each other: build numbers and tags are created in run order. GitHub keeps only one
+# waiting run and cancels the older, so several quick merges skip runs: hence each run builds the newest green
+# commit rather than its own, or a merge could stay unreleased until the next one (#58 on 2026-10-09).
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
   release:
-    # Lint and tests are not repeated here: this runs only after CI's `check` passed on main's push. A manual
-    # run from another branch would skip that gate, so refuse it.
+    # Lint and tests are not repeated here: only a commit whose CI passed on main's push is built. A manual run
+    # from another branch would run that branch's copy of this workflow, so refuse it.
     if: >-
       github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
@@ -40,10 +43,22 @@ jobs:
       BUILD_NUMBER: ${{ github.run_number }}
       DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
     steps:
+      # Runs are created in push order, so the newest successful one is main's newest green commit. Not main's
+      # head: its CI may still run or have failed, and its own completion starts the next release run.
+      - name: Find the newest green commit
+        id: green
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --event push \
+            --status success --limit 1 --json headSha --jq '.[0].headSha // empty')
+          [ -n "$sha" ] || { echo "No commit on main has passed CI" >&2; exit 1; }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Building $sha"
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # The commit CI checked, not whatever main is by now.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ steps.green.outputs.sha }}
           fetch-depth: 0 # the tags and commits since the last release decide the version
 
       - name: Decide the version
@@ -76,8 +91,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
-          # The commit that was checked out and built; GITHUB_SHA is main's newest under workflow_run.
-          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          # The commit that was checked out and built, not GITHUB_SHA (main's head).
+          RELEASE_SHA: ${{ steps.green.outputs.sha }}
         run: |
           prerelease=()
           case "$VERSION" in 0.* | *-*) prerelease=(--prerelease) ;; esac
