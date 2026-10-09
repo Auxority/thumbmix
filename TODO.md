@@ -20,9 +20,12 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Fixes
 
-
+- [ ] **Compressor Mode can't be changed any more** (seen 2026-10-09). Cause unknown; check the Mode menu on an input's and a bus's Comp tab, and the newest PRs that touched the Comp tab.
+- [ ] **RTA stuck on "waiting for the desk"** after 30 s in another app and back; switching views brings it back. Cause unknown.
+- [ ] **EQ Gain with LCut selected:** a cut filter has no gain. Disable the Gain row (keeps the layout still) rather than remove it (shifts the rows below); probably the same for HCut.
+- [ ] **Remove the duplicate meter from the Input tab:** the fader row above already shows the level (decided 2026-10-09).
 - [ ] **Title and DEMO pill get truncated** on strip screens: the back button ("Thumbmix"), the title and the pill don't fit next to each other. Mock a layout that keeps all three readable on the iPhone SE.
-- [ ] **Gain doesn't change the input level in Offline mode.** The demo meters are a time-based animation (`FakeState.meterBlob`) that ignores the desk state, so turning Gain up or down moves nothing. The input meter should follow the headamp gain (and trim), so gain staging can be tried offline.
+- [ ] **Gain doesn't change the input level in Offline mode.** The demo meters are a time-based animation (`FakeState.meterBlob`) that ignores the desk state, so turning Gain up or down moves nothing. The input meter should follow the headamp gain (and trim), so gain staging can be tried offline. Gates and compressors could act on the demo signal the same way (on a real desk the console does that). Decide first whether it's worth the complexity and the performance cost.
 
 ## Performance
 
@@ -30,9 +33,16 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Features
 
+- [ ] **Double-tap defaults on the Comp tab:** Makeup gain to 0 dB, Ratio to 3:1.
+- [ ] **Double-tap defaults on an EQ band:** Freq to the band's Reset bands frequency, Q to 1.7.
+- [ ] **Rename "Makeup" to "Makeup gain"** on the Comp tab.
+- [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
+- [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
+- [ ] **Send pan on an input's Sends tab** (the pan on odd-numbered sends, `/ch/NN/mix/01/pan`, `…/03/pan`, …): missing today.
+- [ ] **Short taps on slider rows:** decide whether a short tap nudges a fader, gain, delay or other row by one small step, also in the overview.
+- [ ] **FX returns get EQ (and the other tabs) like an input:** the desk gives them a 4-band EQ. Check first whether that's good practice for returns.
 - [ ] **Group chips within thumb reach.** Move the overview's Inputs/Aux/FX/Buses/DCA/Main chips (`GroupChips`, now at the top) down, so they can be reached easily one-handed with the thumb. Mock it first; the Matrix chip joins that row.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
-- [ ] **Double level meter on the Input tab.** To settle first: a twin L/R meter for a linked pair (like its overview row), or one meter fewer (the fader row above already shows a level)?
 - [ ] **Input meter marks at −18 dBFS and 0 dBFS?** A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
 - [x] **The 48V alert names a linked partner.** When the pair's Gain/Delay is linked on the desk, the alert adds "Also powers Gtr R (linked).", like the shared-input line.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
@@ -44,7 +54,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Matrix send pan and tap** (`/bus/NN/mix/01/pan`, `…/type`, on the odd sends): needed to feed a stereo matrix pair properly. Neither Fed by tab shows them yet.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
-- [ ] revisit **Unused** approach
+- [ ] **Replace the Unused / Show unused toggles** on every screen: switched on they're plain white, which looks off. Find a cleaner way to hide strips that aren't patched (mock first).
 - [ ] **Solo** per channel.
 - [x] **Delay** per channel (mock C): below Trim on the Input tab, an on/off chip and the time in ms and distance (343 m/s; feet on US-region phones). It follows the Gain/Delay link. A double-tap resets it to 0.3 ms, and preamp gain to 0 dB, after a system confirmation.
 - [ ] **Inserts** per channel.
