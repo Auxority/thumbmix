@@ -27,7 +27,7 @@ struct InputTab: View {
         }
     }
 
-    /// Mock C: like the low cut on the EQ tab, an on/off chip beside the time, which also reads as a distance.
+    /// Like the low cut on the EQ tab, an on/off chip beside the time, which also reads as a distance.
     private func delayRow(_ delay: DelaySpecs) -> some View {
         HStack(spacing: 8) {
             ToggleChip(spec: delay.on, mirror: mirror, onColor: .green)

@@ -94,13 +94,44 @@ struct CatalogTests {
         #expect(dynamics.ratio.resetValue == Catalog.ratios.firstIndex(of: "3.0").map(Double.init))
     }
 
-    @Test func syncListIsCompleteAndUnique() {
+    @Test func syncListIsUnique() {
         let addresses = Catalog.syncAddresses()
-        // 32 inputs x 81 + 8 aux x 39 + 8 FX x 39 + 16 buses x 55 + 6 matrices x 41 + LR 54 + M 53 + 8 DCAs x 5
-        // + 128 headamps x 2 + /-prefs/rta/source and /pos + 16 + 4 + 4 + 8 + 3 link pairs + 4 Link Preferences
-        // (a bus or main has 12 matrix-send addresses)
-        #expect(addresses.count == 4786)
         #expect(Set(addresses).count == addresses.count)
+    }
+
+    /// Whatever a tab shows is read on connect. Checked from the tabs' side, not as a pinned total, so two PRs
+    /// that each add a parameter don't conflict over one number.
+    @Test func everyTabsParametersAreSynced() {
+        let synced = Set(Catalog.syncAddresses())
+        for strip in StripKind.allCases.flatMap(StripID.all) {
+            for tab in ChannelTab.tabs(for: strip.kind) {
+                for address in Self.shownAddresses(tab, strip) {
+                    #expect(synced.contains(address), "\(tab) of \(strip): \(address)")
+                }
+            }
+        }
+    }
+
+    private static func shownAddresses(_ tab: ChannelTab, _ strip: StripID) -> [String] {
+        switch tab {
+        case .mix:
+            [Catalog.fader(strip).address, Catalog.on(strip).address] + [Catalog.pan(strip)?.address].compactMap { $0 }
+        case .input:
+            [Catalog.trim(strip).address, Catalog.headampIndex(forInput: strip.number)]
+                + (Catalog.delay(strip)?.all.map(\.address) ?? [])
+        case .gate: Catalog.gate(strip).all.map(\.address)
+        case .eq:
+            [Catalog.eqOn(strip).address] + (Catalog.lowCut(strip)?.all.map(\.address) ?? [])
+                + (1...strip.eqBandCount).flatMap { Catalog.eqBand(strip, $0).all.map(\.address) }
+        case .comp: Catalog.dynamics(strip).all.map(\.address)
+        case .sends:
+            (strip.kind.sendTarget.map(StripID.all) ?? []).flatMap {
+                [Catalog.sendLevel(from: strip, to: $0).address, Catalog.sendOn(from: strip, to: $0).address]
+            }
+        case .fedBy:
+            strip.kind.feeders.flatMap(StripID.all).map { Catalog.sendLevel(from: $0, to: strip).address }
+        case .members: StripKind.allCases.flatMap(StripID.all).compactMap(\.dcaMask)
+        }
     }
 
     @Test func unityExistsForDecibelControlsWithZeroReset() {

@@ -111,7 +111,7 @@ struct StackedStripe: View {
     #Preview {
         let mirror = ConsoleMirror.preview()
         return VStack(spacing: 6) {
-            ForEach(mirror.overviewItems(StripID.all(.input), showUnused: false)) { StripRow(item: $0, mirror: mirror) {} }
+            ForEach(mirror.overviewItems(StripID.all(.input), showUnused: true)) { StripRow(item: $0, mirror: mirror) {} }
         }
         .padding(12)
         .background(Theme.background)

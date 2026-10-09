@@ -27,7 +27,6 @@ public enum ValueText {
         case .hertz: return hertz(value, locale)
         case .milliseconds: return milliseconds(value, locale)
         case .delayTime: return milliseconds(value, locale) + " · " + distance(milliseconds: value, locale)
-        case .percent: return number(value, digits: 0, locale) + "%"
         case .pan: return pan(value)
         case .ratio, .plain: return number(value, digits: 1, locale)
         }

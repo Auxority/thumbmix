@@ -81,7 +81,7 @@ struct EQGraph: View {
     /// The "L" point sits at the cutoff on the -3 dB line, where the filter starts to bite.
     private func lowCutPosition(in size: CGSize) -> CGPoint {
         let x = CGFloat(Self.graphX(hertz: lowCutHertz ?? 100)) * size.width
-        return CGPoint(x: x, y: (1 - (-3 + 15) / 30) * size.height)
+        return CGPoint(x: x, y: Self.graphY(decibels: -3) * size.height)
     }
 
     private var lowCutHertz: Double? {
@@ -92,7 +92,10 @@ struct EQGraph: View {
     }
 
     /// The graph's x axis is log 20 Hz-20 kHz, the same law as the band frequency parameter.
-    private static func graphX(hertz: Double) -> Double { log(hertz / 20) / log(1000) }
+    static func graphX(hertz: Double) -> Double { log(hertz / 20) / log(1000) }
+
+    /// The y axis, from the top: +15 dB at 0, -15 dB at 1.
+    private static func graphY(decibels: Double) -> Double { 1 - (min(max(decibels, -15), 15) + 15) / 30 }
 
     private func curve(_ bands: [EQBandState], _ lowCut: LowCutState?, in size: CGSize, upTo maxHertz: Double = 20_000)
         -> Path
@@ -104,7 +107,7 @@ struct EQGraph: View {
             let hertz = 20 * pow(1000, x)
             let decibels = EQResponse.decibels(at: hertz, bands: bands) + (lowCut?.decibels(at: hertz) ?? 0)
             let point = CGPoint(
-                x: x * size.width, y: (1 - (min(max(decibels, -15), 15) + 15) / 30) * size.height)
+                x: x * size.width, y: Self.graphY(decibels: decibels) * size.height)
             if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
         }
         return path
@@ -113,12 +116,12 @@ struct EQGraph: View {
     private func drawGrid(in context: GraphicsContext, size: CGSize) {
         var grid = Path()
         for decibels in [-12.0, -6, 0, 6, 12] {
-            let y = (1 - (decibels + 15) / 30) * size.height
+            let y = Self.graphY(decibels: decibels) * size.height
             grid.move(to: CGPoint(x: 0, y: y))
             grid.addLine(to: CGPoint(x: size.width, y: y))
         }
         for hertz in [100.0, 1000, 10_000] {
-            let x = log(hertz / 20) / log(1000) * size.width
+            let x = Self.graphX(hertz: hertz) * size.width
             grid.move(to: CGPoint(x: x, y: 0))
             grid.addLine(to: CGPoint(x: x, y: size.height))
         }

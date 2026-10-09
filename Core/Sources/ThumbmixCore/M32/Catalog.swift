@@ -193,7 +193,7 @@ public enum Catalog {
         ParamSpec(sendPrefix(strip, target) + "/on", CoreStrings.text("On"), .toggle, .plain)
     }
 
-    /// Every address the mirror reads on connect, names first so the overview fills in early.
+    /// Every address the mirror reads on connect; the mirror goes live once all have answered.
     public static func syncAddresses() -> [String] {
         StripKind.allCases.flatMap(StripID.all).flatMap(addresses(of:)) + headampAddresses() + rtaAddresses
             + linkAddresses
