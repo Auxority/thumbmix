@@ -22,9 +22,8 @@ permissions:
   contents: write
   actions: read # to find main's newest commit that passed CI
 
-# Releases must not race each other: build numbers and tags are created in run order. GitHub keeps only one
-# waiting run and cancels the older, so several quick merges skip runs: hence each run builds the newest green
-# commit rather than its own, or a merge could stay unreleased until the next one (#58 on 2026-10-09).
+# Releases must not race each other: build numbers and tags are created in run order. Waiting runs can be
+# cancelled, which is why each run builds the newest green commit (scripts/release-commit.sh).
 concurrency:
   group: release
   cancel-in-progress: false
@@ -44,28 +43,17 @@ jobs:
       BUILD_NUMBER: ${{ github.run_number }}
       DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
     steps:
-      # Runs are created in push order, so the newest successful one is main's newest green commit. Not main's
-      # head: its CI may still run or have failed, and its own completion starts the next release run.
-      - name: Find the newest green commit
-        id: green
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the tags and commits since the last release decide the version
+
+      - name: Check out the newest green commit
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          sha=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --event push \
-            --status success --limit 1 --json headSha --jq '.[0].headSha // empty')
-          [ -n "$sha" ] || { echo "No commit on main has passed CI" >&2; exit 1; }
-          # A manual run means main as it is now: building an older commit could tag 1.0.0 without the last merge.
-          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] && [ "$sha" != "$GITHUB_SHA" ]; then
-            echo "CI hasn't passed on main's latest commit $GITHUB_SHA yet; run this again once it has" >&2
-            exit 1
-          fi
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          sha=$(scripts/release-commit.sh)
+          git checkout --quiet --detach "$sha"
           echo "Building $sha"
-
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ steps.green.outputs.sha }}
-          fetch-depth: 0 # the tags and commits since the last release decide the version
 
       - name: Decide the version
         id: version
@@ -97,13 +85,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
-          # The commit that was checked out and built, not GITHUB_SHA (main's head).
-          RELEASE_SHA: ${{ steps.green.outputs.sha }}
-        run: |
-          prerelease=()
-          case "$VERSION" in 0.* | *-*) prerelease=(--prerelease) ;; esac
-          gh release create "v${VERSION}" build/ipa/Thumbmix.ipa \
-            --target "$RELEASE_SHA" \
-            --title "Thumbmix ${VERSION} (build ${BUILD_NUMBER})" \
-            --generate-notes \
-            ${prerelease[@]+"${prerelease[@]}"}
+        run: scripts/publish-release.sh
