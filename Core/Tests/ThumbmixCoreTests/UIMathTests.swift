@@ -7,9 +7,25 @@ struct UIMathTests {
     private let fader = Catalog.fader(StripID(.input, 1))
 
     @Test func dragAcrossFullWidthIsFullRange() {
-        #expect(RelativeDrag.value(start: 0, translation: 200, width: 200, scale: .fader) == 1)
-        #expect(RelativeDrag.value(start: 0.5, translation: -50, width: 200, scale: .toggle) == 0)
-        #expect(RelativeDrag.value(start: 0.3, translation: 10, width: 0, scale: .fader) == 0.3)
+        #expect(RelativeDrag.moved(0, by: 200, width: 200, speed: 1) == 1)
+        #expect(RelativeDrag.moved(0.5, by: -150, width: 200, speed: 1) == 0, "stays inside 0...1")
+        #expect(RelativeDrag.moved(0.3, by: 10, width: 0, speed: 1) == 0.3)
+    }
+
+    /// Like the iOS video scrubber: the further the finger strays from the row, the finer the drag.
+    @Test func dragSlowsAwayFromTheRow() {
+        #expect(RelativeDrag.speed(outside: 0, rowHeight: 48) == 1)
+        #expect(RelativeDrag.speed(outside: 47, rowHeight: 48) == 1)
+        #expect(RelativeDrag.speed(outside: 48, rowHeight: 48) == 0.5)
+        #expect(RelativeDrag.speed(outside: 144, rowHeight: 48) == 0.25)
+        #expect(RelativeDrag.moved(0, by: 100, width: 200, speed: 0.25) == 0.125)
+    }
+
+    /// The drag adds up each movement at its own speed: slowing down mid-drag never jumps the value back.
+    @Test func changingSpeedMidDragKeepsThePosition() {
+        let fast = RelativeDrag.moved(0.2, by: 40, width: 200, speed: 1)
+        let slowed = RelativeDrag.moved(fast, by: 40, width: 200, speed: 0.5)
+        #expect(abs(slowed - 0.5) < 0.0001)
     }
 
     @Test func crossingUnityBothWays() {
