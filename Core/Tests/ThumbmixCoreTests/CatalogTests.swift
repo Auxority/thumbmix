@@ -74,6 +74,19 @@ struct CatalogTests {
         #expect(DemoState.values()["/bus/01/dyn/env"] == .int(1))
     }
 
+    /// The open list says each choice in words, the desk's name under it; the closed row keeps the desk's name.
+    @Test func dynamicsChoicesHaveWordsForTheList() {
+        let dynamics = Catalog.dynamics(StripID(.input, 1))
+        #expect(dynamics.mode.optionNames == ["Compressor", "Expander"])
+        #expect(dynamics.detector.optionNames == ["Peak level", "Average level"])
+        #expect(dynamics.envelope.optionNames == ["Linear", "Logarithmic"])
+        #expect(
+            Catalog.gate(StripID(.input, 1)).mode.optionNames == [
+                "Expander 1:2", "Expander 1:3", "Expander 1:4", "Gate", "Ducker",
+            ])
+        #expect(Catalog.eqBand(StripID(.input, 1), 1).type.optionNames == nil, "EQ types keep the desk's names")
+    }
+
     /// A reset that can make the channel louder asks first; dropping makeup gain to 0 dB can't.
     @Test func makeupGainResetsAtOnceAndRatioAsks() {
         let dynamics = Catalog.dynamics(StripID(.input, 1))

@@ -21,9 +21,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Fixes
 
-- [ ] **Compressor Mode can't be changed any more** (seen 2026-10-09). Cause unknown; check the Mode menu on an input's and a bus's Comp tab, and the newest PRs that touched the Comp tab.
 - [ ] **RTA stuck on "waiting for the desk"** after 30 s in another app and back; switching views brings it back. Cause unknown.
-- [ ] **EQ Gain with LCut selected:** a cut filter has no gain. Disable the Gain row (keeps the layout still) rather than remove it (shifts the rows below); probably the same for HCut.
 - [ ] **Remove the duplicate meter from the Input tab:** the fader row above already shows the level (decided 2026-10-09).
 - [ ] **Title and DEMO pill get truncated** on strip screens: the back button ("Thumbmix"), the title and the pill don't fit next to each other. Mock a layout that keeps all three readable on the iPhone SE.
 - [ ] **Gain doesn't change the input level in Offline mode.** The demo meters are a time-based animation (`FakeState.meterBlob`) that ignores the desk state, so turning Gain up or down moves nothing. The input meter should follow the headamp gain (and trim), so gain staging can be tried offline. Gates and compressors could act on the demo signal the same way (on a real desk the console does that). Decide first whether it's worth the complexity and the performance cost.
@@ -34,9 +32,6 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Features
 
-- [ ] **Double-tap defaults on the Comp tab:** Makeup gain to 0 dB, Ratio to 3:1.
-- [ ] **Double-tap defaults on an EQ band:** Freq to the band's Reset bands frequency, Q to 1.7.
-- [ ] **Rename "Makeup" to "Makeup gain"** on the Comp tab.
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
 - [ ] **Send pan on an input's Sends tab** (the pan on odd-numbered sends, `/ch/NN/mix/01/pan`, `…/03/pan`, …): missing today.
@@ -61,9 +56,9 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Inserts** per channel.
 - [ ] **Dynamics before or after the EQ:** the toggle that moves the compressor ahead of the EQ.
 - [ ] **More compressor settings:** auto time and the key filter frequency.
-- [x] **Comp and Gate Mode, Detector and Envelope as dropdowns**, like EQ Type: no more dragging past half a row to flip a choice. "Makeup" reads "Makeup gain".
+- [x] **Comp and Gate Mode, Detector and Envelope as dropdowns**, like EQ Type. Mode wasn't broken: it was a drag row that flips only past half its width, easy to miss. The open list says each choice in words with the desk's name under it ("Average level" · RMS); the closed row shows the desk's name. Detector and Envelope sit as a pair under Makeup gain (was "Makeup").
 - [x] **Double-tap resets on the Comp and EQ rows.** Makeup gain goes to 0 dB at once; Ratio (3:1), an EQ band's Freq (its default), Q (1.7) and Gain (0 dB) ask first: a reset that can make the channel louder asks.
-- [x] **A cut filter's Gain and Q are disabled** (LCut, HCut, and BU6…LR24 on matrices and mains): dimmed, still in place, and the graph's drag and pinch leave them alone.
+- [x] **A cut filter's Gain and Q are disabled** (LCut, HCut, and BU6…LR24 on matrices and mains): dimmed and showing "—", still in place, and the graph's drag and pinch leave them alone.
 - [ ] **Gate key filter.** Lower priority than the compressor's.
 - [x] **Reset bands for buses, matrices and mains** (6 bands): PEQ at 54.5 Hz, 153 Hz, 418 Hz, 1.14 kHz, 3.21 kHz and 8.73 kHz, Q 1.7, 0 dB. Inputs keep 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz.
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.

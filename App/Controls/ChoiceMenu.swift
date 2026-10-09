@@ -17,7 +17,7 @@ struct ChoiceMenu: View {
                 Button {
                     select(option)
                 } label: {
-                    if option == current { Label(options[option], systemImage: "checkmark") } else { Text(options[option]) }
+                    item(option, isCurrent: option == current)
                 }
             }
         } label: {
@@ -35,6 +35,15 @@ struct ChoiceMenu: View {
         .disabled(current == nil)
         .accessibilityIdentifier(spec.address)
         .accessibilityValue(text)
+    }
+
+    /// The option in words with the desk's name under it, so the list explains and the closed row matches the desk.
+    @ViewBuilder private func item(_ option: Int, isCurrent: Bool) -> some View {
+        let name = spec.optionNames?[option] ?? options[option]
+        // A menu item reads a second Text as its subtitle; inside a Label's title it's dropped.
+        Text(verbatim: name)
+        if spec.optionNames != nil { Text(verbatim: options[option]) }
+        if isCurrent { Image(systemName: "checkmark") }
     }
 
     private var options: [String] {

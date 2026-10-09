@@ -72,6 +72,16 @@
         }
       }
     },
+    "Average level" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Average level"
+          }
+        }
+      }
+    },
     "Bass & guitar" : {
       "localizations" : {
         "en" : {
@@ -163,6 +173,16 @@
         }
       }
     },
+    "Compressor" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compressor"
+          }
+        }
+      }
+    },
     "DCA" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -214,6 +234,16 @@
         }
       }
     },
+    "Ducker" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ducker"
+          }
+        }
+      }
+    },
     "dynamics" : {
       "localizations" : {
         "en" : {
@@ -240,6 +270,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "EQ"
+          }
+        }
+      }
+    },
+    "Expander" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expander"
+          }
+        }
+      }
+    },
+    "Expander 1:2" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expander 1:2"
+          }
+        }
+      }
+    },
+    "Expander 1:3" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expander 1:3"
+          }
+        }
+      }
+    },
+    "Expander 1:4" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expander 1:4"
           }
         }
       }
@@ -398,6 +468,26 @@
         }
       }
     },
+    "Linear" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linear"
+          }
+        }
+      }
+    },
+    "Logarithmic" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logarithmic"
+          }
+        }
+      }
+    },
     "Low cut" : {
       "localizations" : {
         "en" : {
@@ -548,6 +638,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pan"
+          }
+        }
+      }
+    },
+    "Peak level" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peak level"
           }
         }
       }

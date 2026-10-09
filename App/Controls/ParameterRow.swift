@@ -23,7 +23,8 @@ struct ParameterRow: View {
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
-        let position = mirror.normalized(spec)
+        // A disabled row shows no value: a number would suggest it still does something.
+        let position = isEnabled ? mirror.normalized(spec) : nil
         let text = ValueText.format(position, spec)
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 10).fill(Theme.track)

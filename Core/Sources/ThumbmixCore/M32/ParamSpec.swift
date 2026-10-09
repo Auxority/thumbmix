@@ -13,10 +13,12 @@ public struct ParamSpec: Sendable, Identifiable, Equatable {
     public let resetValue: Double?
     /// Asked with the system alert before a double-tap resets; nil resets at once.
     public let resetPrompt: String?
+    /// A choice's options in words, for the open list; nil when the desk's own names say enough.
+    public let optionNames: [String]?
 
     public init(
         _ address: String, _ label: String, _ scale: ParamScale, _ unit: ParamUnit, reset: Double? = nil,
-        resetPrompt: String? = nil
+        resetPrompt: String? = nil, optionNames: [String]? = nil
     ) {
         self.address = address
         self.label = label
@@ -24,6 +26,7 @@ public struct ParamSpec: Sendable, Identifiable, Equatable {
         self.unit = unit
         self.resetValue = reset
         self.resetPrompt = resetPrompt
+        self.optionNames = optionNames
     }
 
     public var id: String { address }

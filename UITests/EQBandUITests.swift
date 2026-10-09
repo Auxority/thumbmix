@@ -49,6 +49,8 @@ final class EQBandUITests: DeskUITestCase {
         type.tap()
         app.buttons["LCut"].tap()
         XCTAssertTrue(eventually(within: 2) { !gain.isEnabled && !q.isEnabled })
+        XCTAssertEqual(gain.value as? String, "—", "a number would suggest the row still does something")
+        XCTAssertEqual(q.value as? String, "—")
         let before = gain.frame
         gain.doubleTap()
         XCTAssertEqual(app.alerts.count, 0, "a disabled row doesn't offer a reset")

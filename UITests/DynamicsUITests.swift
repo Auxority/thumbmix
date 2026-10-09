@@ -31,22 +31,22 @@ final class DynamicsUITests: DeskUITestCase {
         launch()
         open("Kick")
         app.buttons["Comp"].tap()
-        pick("EXP", in: "/ch/01/dyn/mode", from: "COMP")
+        pick("Expander", in: "/ch/01/dyn/mode", from: "COMP", to: "EXP")
     }
 
     func testGateModeIsADropdown() {
         launch()
         open("Kick")
         app.buttons["Gate"].tap()
-        pick("DUCK", in: "/ch/01/gate/mode", from: "GATE")
+        pick("Ducker", in: "/ch/01/gate/mode", from: "GATE", to: "DUCK")
     }
 
     func testDetectorAndEnvelopeAreDropdowns() {
         launch()
         open("Snare")
         app.buttons["Comp"].tap()
-        pick("RMS", in: "/ch/02/dyn/det", from: "PEAK")
-        pick("LIN", in: "/ch/02/dyn/env", from: "LOG")
+        pick("Average level", in: "/ch/02/dyn/det", from: "PEAK", to: "RMS")
+        pick("Linear", in: "/ch/02/dyn/env", from: "LOG", to: "LIN")
         saveScreenshot("comp-dropdowns")
     }
 
@@ -71,13 +71,16 @@ final class DynamicsUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { ratio.value as? String == "3.0:1" })
     }
 
-    private func pick(_ option: String, in address: String, from current: String) {
+    /// The open list says the choice in words; the closed row shows the desk's name for it.
+    private func pick(_ item: String, in address: String, from current: String, to deskName: String) {
         let menu = app.buttons[address]
         XCTAssertTrue(menu.appears(within: 2), address)
         XCTAssertEqual(menu.value as? String, current)
         menu.tap()
-        app.buttons[option].tap()
-        XCTAssertTrue(eventually(within: 2) { menu.value as? String == option }, address)
+        let option = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", item)).firstMatch
+        XCTAssertTrue(option.appears(within: 2), item)
+        option.tap()
+        XCTAssertTrue(eventually(within: 2) { menu.value as? String == deskName }, address)
     }
 
     func testGateAndCompDrawTheirCurves() {

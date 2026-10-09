@@ -85,7 +85,12 @@ public enum Catalog {
         let p = strip.prefix + "/gate/"
         return GateSpecs(
             on: ParamSpec(p + "on", CoreStrings.text("Gate"), .toggle, .plain),
-            mode: ParamSpec(p + "mode", CoreStrings.text("Mode"), .choice(gateModes), .plain),
+            mode: ParamSpec(
+                p + "mode", CoreStrings.text("Mode"), .choice(gateModes), .plain,
+                optionNames: [
+                    CoreStrings.text("Expander 1:2"), CoreStrings.text("Expander 1:3"),
+                    CoreStrings.text("Expander 1:4"), CoreStrings.text("Gate"), CoreStrings.text("Ducker"),
+                ]),
             threshold: ParamSpec(
                 p + "thr", CoreStrings.text("Threshold"), .linear(min: -80, max: 0, step: 0.5), .decibels),
             range: ParamSpec(
@@ -101,7 +106,9 @@ public enum Catalog {
         let p = strip.prefix + "/dyn/"
         return DynamicsSpecs(
             on: ParamSpec(p + "on", CoreStrings.text("Comp"), .toggle, .plain),
-            mode: ParamSpec(p + "mode", CoreStrings.text("Mode"), .choice(dynamicsModes), .plain),
+            mode: ParamSpec(
+                p + "mode", CoreStrings.text("Mode"), .choice(dynamicsModes), .plain,
+                optionNames: [CoreStrings.text("Compressor"), CoreStrings.text("Expander")]),
             threshold: ParamSpec(
                 p + "thr", CoreStrings.text("Threshold"), .linear(min: -60, max: 0, step: 0.5), .decibels),
             ratio: ParamSpec(
@@ -116,8 +123,13 @@ public enum Catalog {
             makeup: ParamSpec(
                 p + "mgain", CoreStrings.text("Makeup gain"), .linear(min: 0, max: 24, step: 0.5),
                 .decibelAmount, reset: 0),
-            detector: ParamSpec(p + "det", CoreStrings.text("Detector"), .choice(dynamicsDetectors), .plain),
-            envelope: ParamSpec(p + "env", CoreStrings.text("Envelope"), .choice(dynamicsEnvelopes), .plain)
+            // RMS follows the signal's average level, PEAK its peaks: "average level" says that without the maths.
+            detector: ParamSpec(
+                p + "det", CoreStrings.text("Detector"), .choice(dynamicsDetectors), .plain,
+                optionNames: [CoreStrings.text("Peak level"), CoreStrings.text("Average level")]),
+            envelope: ParamSpec(
+                p + "env", CoreStrings.text("Envelope"), .choice(dynamicsEnvelopes), .plain,
+                optionNames: [CoreStrings.text("Linear"), CoreStrings.text("Logarithmic")])
         )
     }
 
