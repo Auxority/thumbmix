@@ -18,12 +18,66 @@ final class DynamicsUITests: DeskUITestCase {
         saveScreenshot("task-14-gate")
     }
 
-    func testCompTabShowsRatioAndMakeup() {
+    func testCompTabShowsRatioAndMakeupGain() {
         launch()
         open("Kick")
         app.buttons["Comp"].tap()
         XCTAssertEqual(app.descendants(matching: .any)["/ch/01/dyn/ratio"].value as? String, "2.0:1")
-        XCTAssertTrue(app.descendants(matching: .any)["/ch/01/dyn/mgain"].exists)
+        XCTAssertEqual(app.descendants(matching: .any)["/ch/01/dyn/mgain"].label, "Makeup gain")
+    }
+
+    /// Dragging past half the row to flip a two-way choice was easy to miss; a list shows both.
+    func testCompModeIsADropdown() {
+        launch()
+        open("Kick")
+        app.buttons["Comp"].tap()
+        pick("EXP", in: "/ch/01/dyn/mode", from: "COMP")
+    }
+
+    func testGateModeIsADropdown() {
+        launch()
+        open("Kick")
+        app.buttons["Gate"].tap()
+        pick("DUCK", in: "/ch/01/gate/mode", from: "GATE")
+    }
+
+    func testDetectorAndEnvelopeAreDropdowns() {
+        launch()
+        open("Snare")
+        app.buttons["Comp"].tap()
+        pick("RMS", in: "/ch/02/dyn/det", from: "PEAK")
+        pick("LIN", in: "/ch/02/dyn/env", from: "LOG")
+        saveScreenshot("comp-dropdowns")
+    }
+
+    /// Makeup gain back to 0 dB can only make the channel quieter, so it goes at once; a ratio reset can
+    /// make it louder, so it asks.
+    func testDoubleTapResetsMakeupGainAtOnceAndRatioAfterAsking() {
+        launch()
+        open("Tom 1")
+        app.buttons["Comp"].tap()
+        let makeup = app.descendants(matching: .any)["/ch/04/dyn/mgain"]
+        XCTAssertTrue(makeup.appears(within: 2))
+        XCTAssertEqual(makeup.value as? String, "12.0 dB")
+        makeup.doubleTap()
+        XCTAssertTrue(eventually(within: 2) { makeup.value as? String == "0.0 dB" })
+        XCTAssertEqual(app.alerts.count, 0)
+
+        let ratio = app.descendants(matching: .any)["/ch/04/dyn/ratio"]
+        ratio.doubleTap()
+        let alert = app.alerts["Reset the ratio to 3:1?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        alert.buttons["Reset"].tap()
+        XCTAssertTrue(eventually(within: 2) { ratio.value as? String == "3.0:1" })
+    }
+
+    private func pick(_ option: String, in address: String, from current: String) {
+        let menu = app.buttons[address]
+        XCTAssertTrue(menu.appears(within: 2), address)
+        XCTAssertEqual(menu.value as? String, current)
+        menu.tap()
+        app.buttons[option].tap()
+        XCTAssertTrue(eventually(within: 2) { menu.value as? String == option }, address)
     }
 
     func testGateAndCompDrawTheirCurves() {

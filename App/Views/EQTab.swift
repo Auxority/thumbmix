@@ -43,9 +43,12 @@ struct EQTab: View {
         }
     }
 
+    /// A cut filter's Gain and Q do nothing, so they're disabled, not removed: nothing below them moves.
     @ViewBuilder private func bandRows(_ specs: EQBandSpecs) -> some View {
+        let shapesLevel = mirror.eqBandShapesLevel(strip, band) != false
         ChoiceMenu(spec: specs.type, mirror: mirror)
-        ForEach([specs.frequency, specs.gain, specs.q]) { ParameterRow(spec: $0, mirror: mirror) }
+        ParameterRow(spec: specs.frequency, mirror: mirror)
+        ForEach([specs.gain, specs.q]) { ParameterRow(spec: $0, mirror: mirror).disabled(!shapesLevel) }
     }
 
     /// On the desk the low cut belongs to the preamp, so "Reset bands" leaves it alone.

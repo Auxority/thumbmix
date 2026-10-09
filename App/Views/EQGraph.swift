@@ -163,8 +163,9 @@ struct EQGraph: View {
     private var pinchGesture: some Gesture {
         MagnifyGesture()
             .onChanged { value in
-                // The low cut has no Q.
-                guard selectedBand != Self.lowCutBand else { return }
+                // The low cut and the band's cut filters have no Q.
+                guard selectedBand != Self.lowCutBand, mirror.eqBandShapesLevel(strip, selectedBand) == true
+                else { return }
                 let q = Catalog.eqBand(strip, selectedBand).q
                 if pinchStartQ == nil {
                     guard let current = mirror.normalized(q) else { return }
@@ -214,8 +215,7 @@ struct EQGraph: View {
         let specs = Catalog.eqBand(strip, grab.band)
         mirror.set(specs.frequency.address, specs.frequency.scale.argument(fromNormalized: x))
         // Cut filters and the main-bus crossover types have no gain, so vertical movement is ignored.
-        let type = Int(specs.type.scale.value(fromNormalized: mirror.normalized(specs.type) ?? 0))
-        guard [1, 2, 3, 4].contains(type) else { return }
+        guard mirror.eqBandShapesLevel(strip, grab.band) == true else { return }
         let y = grab.y - Float(translation.height / size.height)
         mirror.set(specs.gain.address, specs.gain.scale.argument(fromNormalized: y))
     }

@@ -73,6 +73,22 @@ struct EQResetTests {
         }
     }
 
+    /// Main LR's type 7 is BU12, a type inputs don't have: the band's own type list decides.
+    @Test func mirrorTellsWhetherABandShapesLevel() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
+        #expect(mirror.eqBandShapesLevel(kick, 1) == true, "the demo's bands are PEQs")
+
+        fake.deskChange("/ch/01/eq/1/type", .int(0))
+        fake.deskChange("/main/st/eq/2/type", .int(7))
+
+        #expect(await eventually { mirror.eqBandShapesLevel(kick, 1) == false })
+        #expect(await eventually { mirror.eqBandShapesLevel(StripID(.mainStereo), 2) == false })
+        #expect(mirror.eqBandShapesLevel(StripID(.mainStereo), 3) == true)
+    }
+
     @Test func resetBandsPutsEveryBandBackToItsDefault() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }

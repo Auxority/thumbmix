@@ -17,6 +17,8 @@ struct ParameterRow: View {
     @State private var dragStart: Float?
     @State private var unityTicks = 0
     @State private var isConfirmingReset = false
+    /// `.disabled` doesn't reach the UIKit pan area, so the row checks it itself.
+    @Environment(\.isEnabled) private var isEnabled
     /// Grows the row with the user's text size, so large type isn't clipped.
     @ScaledMetric private var sizeScale: CGFloat = 1
 
@@ -55,6 +57,7 @@ struct ParameterRow: View {
         }
         .frame(height: height * sizeScale)
         .clipShape(RoundedRectangle(cornerRadius: 10))
+        .opacity(isEnabled ? 1 : 0.38)
         .sensoryFeedback(.selection, trigger: unityTicks)
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier(spec.address)
@@ -71,7 +74,7 @@ struct ParameterRow: View {
 
     /// VoiceOver swipe up/down: dragging isn't available to a VoiceOver user, so the row steps instead.
     private func adjust(_ direction: AccessibilityAdjustmentDirection) {
-        guard let current = mirror.normalized(spec) else { return }
+        guard isEnabled, let current = mirror.normalized(spec) else { return }
         let step =
             switch direction {
             case .increment: 1
@@ -87,7 +90,7 @@ struct ParameterRow: View {
 
     /// No value read yet means no drag: starting from a guess would jump the desk.
     private func beginDrag() {
-        guard let current = mirror.normalized(spec) else { return }
+        guard isEnabled, let current = mirror.normalized(spec) else { return }
         dragStart = current
         mirror.beginEdit(spec.address)
     }
@@ -112,7 +115,7 @@ struct ParameterRow: View {
 
     /// A spec with a reset prompt asks first: a double-tap is as easy to hit by accident as a drag.
     private func reset() {
-        guard spec.resetValue != nil else { return }
+        guard isEnabled, spec.resetValue != nil else { return }
         if spec.resetPrompt == nil { applyReset() } else { isConfirmingReset = true }
     }
 
