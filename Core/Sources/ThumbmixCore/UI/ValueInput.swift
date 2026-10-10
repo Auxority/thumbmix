@@ -1,19 +1,23 @@
 import Foundation
 
-/// A value typed into a row's alert. A number outside the range lands on its nearest end ("100" on a fader is
-/// +10 dB): the alert's Set is the confirmation. The desk snaps to its own grid, so the result is snapped too.
+/// A value typed into a row's alert. A number past either end is refused, never moved onto that end: a slip such as
+/// "100" on a fader must not set +10 dB. The desk snaps to its own grid, so an accepted value is snapped too.
 public enum ValueInput {
-    /// The 0...1 position for `text`, or nil when it isn't a value of this parameter.
-    public static func normalized(from text: String, for spec: ParamSpec) -> Float? {
+    public enum Reading: Equatable, Sendable {
+        /// The snapped 0...1 position.
+        case value(Float)
+        case notAValue
+        case outOfRange
+    }
+
+    public static func read(_ text: String, for spec: ParamSpec) -> Reading {
         let typed = text.trimmingCharacters(in: .whitespaces).lowercased()
             .replacingOccurrences(of: "−", with: "-").replacingOccurrences(of: ",", with: ".")
         switch spec.scale {
-        case .toggle: return nil
-        case .fader, .sendLevel: return level(typed, spec.scale)
+        case .toggle: return .notAValue
         case .choice(let options): return choice(typed, options: options, scale: spec.scale)
-        case .linear, .log:
-            let value = spec.unit == .pan ? pan(typed) : number(typed)
-            return value.map(spec.scale.normalized(forValue:))
+        case .fader, .sendLevel: return checked(level(typed), spec.scale)
+        case .linear, .log: return checked(spec.unit == .pan ? pan(typed) : number(typed), spec.scale)
         }
     }
 
@@ -23,6 +27,20 @@ public enum ValueInput {
         let low = ValueText.format(ends[0], spec, locale: locale)
         let high = ValueText.format(ends[1], spec, locale: locale)
         return CoreStrings.text("\(low) to \(high)")
+    }
+
+    private static func checked(_ value: Double?, _ scale: ParamScale) -> Reading {
+        guard let value else { return .notAValue }
+        let ends = [scale.value(fromNormalized: 0), scale.value(fromNormalized: 1)]
+        guard within(value, ends.min()!...ends.max()!) else { return .outOfRange }
+        return .value(scale.normalized(forValue: value))
+    }
+
+    /// The scale's maths can put an end a hair off its round number (20 kHz as 19999.999…), so typing the end as the
+    /// row shows it gets a tiny slack. An infinite end (the fader's −∞) needs none.
+    private static func within(_ value: Double, _ ends: ClosedRange<Double>) -> Bool {
+        func slack(_ end: Double) -> Double { end.isFinite ? 1e-9 * Swift.max(1, abs(end)) : 0 }
+        return value >= ends.lowerBound - slack(ends.lowerBound) && value <= ends.upperBound + slack(ends.upperBound)
     }
 
     /// Unit suffixes an engineer may add, with what they multiply by; "k" is kilohertz.
@@ -41,10 +59,10 @@ public enum ValueInput {
     }
 
     /// Faders and sends: dB, or −∞ by name.
-    private static func level(_ typed: String, _ scale: ParamScale) -> Float? {
+    private static func level(_ typed: String) -> Double? {
         let bare = typed.hasSuffix("db") ? typed.dropLast(2).trimmingCharacters(in: .whitespaces) : typed
-        if ["-inf", "-∞", "off"].contains(bare) { return 0 }
-        return number(typed).map(scale.normalized(forValue:))
+        if ["-inf", "-∞", "off"].contains(bare) { return -.infinity }
+        return number(typed)
     }
 
     /// Pan as the row shows it: "L20", "R30", "C", or a plain number from −100 (left) to 100.
@@ -55,15 +73,17 @@ public enum ValueInput {
         return finite(typed)
     }
 
-    /// A list of the desk's numbers (the ratio) takes the nearest one; a list of names takes a name.
-    private static func choice(_ typed: String, options: [String], scale: ParamScale) -> Float? {
+    /// A list of the desk's numbers (the ratio) takes the nearest one within its first and last; a list of names
+    /// takes a name.
+    private static func choice(_ typed: String, options: [String], scale: ParamScale) -> Reading {
         let values = options.compactMap(finite)
-        let index: Int?
-        if values.count == options.count, let typedValue = number(typed) {
-            index = values.indices.min { abs(values[$0] - typedValue) < abs(values[$1] - typedValue) }
-        } else {
-            index = options.firstIndex { $0.lowercased() == typed }
+        guard values.count == options.count else {
+            let index = options.firstIndex { $0.lowercased() == typed }
+            return index.map { .value(scale.normalized(forValue: Double($0))) } ?? .notAValue
         }
-        return index.map { scale.normalized(forValue: Double($0)) }
+        guard let typedValue = number(typed) else { return .notAValue }
+        guard within(typedValue, values.min()!...values.max()!) else { return .outOfRange }
+        let index = values.indices.min { abs(values[$0] - typedValue) < abs(values[$1] - typedValue) }!
+        return .value(scale.normalized(forValue: Double(index)))
     }
 }

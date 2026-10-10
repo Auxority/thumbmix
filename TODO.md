@@ -14,6 +14,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
   - Section 6: does `/meters/15` follow `/-prefs/rta/source`, and does "after EQ" include the low cut and the compressor?
   - Section 7: stereo links. Which side moves when a linked fader moves in Mixing Station, what linking copies besides the pans, whether an unticked Link Preference keeps the sides apart, which preference governs sends (assumed Mute/Fader) and the low cut (assumed EQ), and the preferences' factory defaults (the demo assumes all ticked). Also: does switching 48V on one side of a pair with Gain/Delay linked switch the partner's too? The 48V alert assumes it does.
   - Section 8: fader text. Does the desk's own dB text match the app's for every input fader? The app follows the doc's table (p.145), incl. a 0 dB detent and two odd steps (−8.7, −23.2). Set faders near 0, −8.6 and −23.2 with the desk's encoder first; each DIFFERS line goes in `FaderLaw.deskExceptions`. Untested: the fake desk doesn't answer `/node`.
+- [ ] **After the probe: a formula instead of a list where the desk's steps look inconsistent** (e.g. the fader text's odd steps in `FaderLaw.deskExceptions`). Once the probe's answers are in, check whether a formula reproduces them, and drop the list if it does.
 - [ ] **EQ defaults and cut filters.** (a) Reset bands on a bus or main, then compare the six frequencies with what the desk shows: the app writes the desk steps nearest the engineer's 55.1, 152, 418, 1150, 3170 and 8730 Hz (54.5, 153.5, 418, 1.14k, 3.21k, 8.73k). Fix `Catalog.eqDefaults` if the desk shows other values. (b) Set a band to LCut, HCut and (on a main) BU12: do Gain and Q really do nothing? The app disables both rows there (`Catalog.eqTypeShapesLevel`); the doc lists gain and Q for every type without saying.
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
 - [ ] Walk the acceptance checklist in `README.md`.
@@ -21,7 +22,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Fixes
 
-- [ ] **Refuse a typed value outside the range instead of clamping it** (decided 2026-10-10, replaces the clamp from 2026-10-09). "1000000" on a row whose top is 10 must not set 10: Set reopens the alert saying it's out of range, with the range, like text that isn't a value. Decimal comma and point both keep working (`ValueInput` already reads both).
+- [x] **Refuse a typed value outside the range instead of clamping it** (decided 2026-10-10, replaces the clamp from 2026-10-09). "1000000" on a fader must not set +10 dB: Set reopens the alert with "“1000000” is out of range." and the range, the text kept. The fader's low end is −∞, so "-200" is −∞, not past it.
 - [ ] **Finer drags (½, ¼) don't help a small nudge.** You first have to drag away from the row to get the finer speed, and by then the fader has already moved. Rethink how to pick the finer speed before the value changes (mock first), or drop it.
 - [ ] **Remove the "Show unused" toggle from the Fed by tab** (`FedByTab` in `SendsTabs.swift`).
 - [ ] **Not every button is OLED black, e.g. Disconnect.** Nothing in the app styles it: it's iOS's default toolbar button. Decide whether toolbar buttons (and other controls with a grey fill) go black, and check every screen.
@@ -40,7 +41,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 - [ ] **Group chips within thumb reach** (asked again 2026-10-10). Move the overview's Inputs/Aux/FX/Buses/DCA/Main chips (`GroupChips`, now at the top) down, so they can be reached easily one-handed with the thumb. Mock it first; the Matrix chip joins that row.
 - [ ] **A SideStore source that updates itself:** a source file listing Thumbmix's versions, updated by each release, so SideStore picks up new versions on its own.
-- [x] **Hold a slider row to type its value** (mock B: the system alert, Set only). Any unit or none ("−6", "1k", "L20", "-inf"), decimal comma or point; text that isn't a value reopens the alert saying so. (A number past either end landed on it; that clamp is being replaced, see Fixes.) VoiceOver gets an "Enter value" action. Dragging away from the row drags finer: ½ beyond one row height, ¼ beyond three.
+- [x] **Hold a slider row to type its value** (mock B: the system alert, Set only). Any unit or none ("−6", "1k", "L20", "-inf"), decimal comma or point; text that isn't a value reopens the alert saying so. A number past either end is refused the same way (it was clamped until 2026-10-10). VoiceOver gets an "Enter value" action. Dragging away from the row drags finer: ½ beyond one row height, ¼ beyond three.
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
 - [ ] **Send pan on an input's Sends tab** (the pan on odd-numbered sends, `/ch/NN/mix/01/pan`, `…/03/pan`, …): missing today.
