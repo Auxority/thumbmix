@@ -21,6 +21,11 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Fixes
 
+- [ ] **Refuse a typed value outside the range instead of clamping it** (decided 2026-10-10, replaces the clamp from 2026-10-09). "1000000" on a row whose top is 10 must not set 10: Set reopens the alert saying it's out of range, with the range, like text that isn't a value. Decimal comma and point both keep working (`ValueInput` already reads both).
+- [ ] **Finer drags (½, ¼) don't help a small nudge.** You first have to drag away from the row to get the finer speed, and by then the fader has already moved. Rethink how to pick the finer speed before the value changes (mock first), or drop it.
+- [ ] **Remove the "Show unused" toggle from the Fed by tab** (`FedByTab` in `SendsTabs.swift`).
+- [ ] **Not every button is OLED black, e.g. Disconnect.** Nothing in the app styles it: it's iOS's default toolbar button. Decide whether toolbar buttons (and other controls with a grey fill) go black, and check every screen.
+
 - [x] **RTA stuck on "waiting for the desk"** after any trip to another app: coming back rebuilds the link, so the EQ tab's borrow found it not live and never retried. It now borrows again once the link is live.
 - [x] **Remove the duplicate meter from the Input tab:** the fader row above already shows the level (decided 2026-10-09).
 - [x] **Offline mode opened every EQ with all bands stacked at 632 Hz:** the demo desk now starts each EQ on its Reset bands values.
@@ -28,16 +33,18 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Performance
 
+- [ ] **Meters only for the strips in view?** Draw (or update) meters only for the rows on screen, not every strip. Measure first; if it saves only 1–2 % CPU, it isn't worth it and this item goes.
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 17.0: iPhone XS/XR, SE 2nd gen). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
 
 ## Features
 
-- [x] **Hold a slider row to type its value** (mock B: the system alert, Set only). Any unit or none ("−6", "1k", "L20", "-inf"), decimal comma or point; a number past either end lands on it (Set is the confirmation), text that isn't a value reopens the alert saying so. VoiceOver gets an "Enter value" action. Dragging away from the row drags finer: ½ beyond one row height, ¼ beyond three.
+- [ ] **Group chips within thumb reach** (asked again 2026-10-10). Move the overview's Inputs/Aux/FX/Buses/DCA/Main chips (`GroupChips`, now at the top) down, so they can be reached easily one-handed with the thumb. Mock it first; the Matrix chip joins that row.
+- [ ] **A SideStore source that updates itself:** a source file listing Thumbmix's versions, updated by each release, so SideStore picks up new versions on its own.
+- [x] **Hold a slider row to type its value** (mock B: the system alert, Set only). Any unit or none ("−6", "1k", "L20", "-inf"), decimal comma or point; text that isn't a value reopens the alert saying so. (A number past either end landed on it; that clamp is being replaced, see Fixes.) VoiceOver gets an "Enter value" action. Dragging away from the row drags finer: ½ beyond one row height, ¼ beyond three.
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
 - [ ] **Send pan on an input's Sends tab** (the pan on odd-numbered sends, `/ch/NN/mix/01/pan`, `…/03/pan`, …): missing today.
 - [ ] **FX returns get EQ (and the other tabs) like an input:** the desk gives them a 4-band EQ. Check first whether that's good practice for returns.
-- [ ] **Group chips within thumb reach.** Move the overview's Inputs/Aux/FX/Buses/DCA/Main chips (`GroupChips`, now at the top) down, so they can be reached easily one-handed with the thumb. Mock it first; the Matrix chip joins that row.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Input meter marks at −18 dBFS and 0 dBFS?** A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
 - [x] **The 48V alert names a linked partner.** When the pair's Gain/Delay is linked on the desk, the alert adds "Also powers Gtr R (linked).", like the shared-input line.
@@ -50,7 +57,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Matrix send pan and tap** (`/bus/NN/mix/01/pan`, `…/type`, on the odd sends): needed to feed a stereo matrix pair properly. Neither Fed by tab shows them yet.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
-- [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. The Sends tab's "Show unused" toggle is still there: switched on it's plain white, which looks off.
+- [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. The Fed by tab's "Show unused" toggle is being removed (see Fixes).
 - [ ] **Solo** per channel.
 - [x] **Delay** per channel (mock C): below Trim on the Input tab, an on/off chip and the time in ms and distance (343 m/s; feet on US-region phones). It follows the Gain/Delay link. A double-tap resets it to 0.3 ms, and preamp gain to 0 dB.
 - [ ] **Inserts** per channel.
@@ -65,6 +72,9 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Maybe later
 
+- [ ] **Long term: presets that match the channel name**, so a channel called "Kick" offers kick presets first.
+- [ ] **Long term: a lightweight API and an MCP server** for the desk.
+- [ ] **Long term: effect controls** (reverb and the other FX).
 - [ ] Fold rarely used settings into one line that opens on tap, like "Delay · Off · 12.5 ms ›" (delay mock B). Worth it once the Input tab holds more than gain, trim and delay.
 - [ ] A linked pair's pan as one track with an L and an R handle (mock "B"): a picture of the stereo image. Today it's two rows, "Pan · Gtr L" and "Pan · Gtr R"; revisit if those feel clunky.
 - [ ] A 7th strip tab: switch the bottom tabs (`StripTabBar`) to scrolling chips (mock "T5"). Six chips are ≈ 55 pt wide on the iPhone SE; seven would be too narrow for "Sends".
