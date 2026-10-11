@@ -23,7 +23,9 @@ OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unoffic
 
 `scripts/lint.sh` clean, `swift test --package-path Core` green, and `scripts/ui-test.sh` green: it runs the UI suite on the **iPhone SE (3rd generation)** simulator (375 pt wide, like the target iPhone 11 Pro), three test classes at a time on clones of it; each test talks to its own fake desk (`UITests/TestDesk.swift`). Every change ships a test that failed first.
 
-The full UI suite takes minutes, so run it once, on the final code, before pushing. While iterating, run only the classes the change touches: `scripts/ui-test.sh -only-testing:ThumbmixUITests/PairUITests`. A change that UI can't see (Core logic with its own tests, docs, CI) doesn't need it.
+**Keep the loop tight.** Iterate on `swift test --package-path Core` (seconds): put the logic in Core, where a unit test reaches it, and keep the App layer thin enough that a UI test only checks the wiring. Any UI run costs minutes, even one class, so the UI suite runs once, on the final code, before pushing. A change that UI can't see (Core logic with its own tests, docs, CI) doesn't need it.
+
+**A hung UI run.** A healthy run starts its first test within ~2 min of launch. When none has started by then, stop it: waiting ends only at xcodebuild's ~6 min timeout with "The test runner hung before establishing connection" and 0 tests run. On 2026-10-10/11 every run hung like that, on the 17.4 and iOS 27 SE, with and without clones, and after restarting CoreSimulator; the cause is unknown. Tell the user instead of retrying; they decide whether the PR goes up with the UI test unrun (then the PR says so).
 
 When `scripts/ui-test.sh` stops before any test with "Failed to clone device … stuck in creation state", run the suite on the SE itself, one test at a time (≈ 4 min): `xcodebuild test -project Thumbmix.xcodeproj -scheme Thumbmix -destination id=<SE id> -parallel-testing-enabled NO`. The SE id is the first `iPhone SE (3rd generation)` in `xcrun simctl list devices available`, as the script picks it. For screenshots, `mkdir -p build/screens` first: `saveScreenshot` doesn't create it.
 
