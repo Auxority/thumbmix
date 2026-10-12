@@ -24,7 +24,10 @@ public final class ConsoleMirror {
     @ObservationIgnored public let spectrum = SpectrumCell()
     /// Set while the app borrows the desk's RTA; see ConsoleMirror+RTA.
     @ObservationIgnored var rtaLoan: RTALoan?
-    @ObservationIgnored private let addresses: [String]
+    /// Read on connect; everything else is read per tab (`ConsoleMirror+Reads`) and forgotten on a resync.
+    @ObservationIgnored private let overview: [String]
+    @ObservationIgnored private let overviewSet: Set<String>
+    @ObservationIgnored var reads = ReadQueue()
     @ObservationIgnored private var meterCells: [StripID: MeterCell] = [:]
     @ObservationIgnored private var sync: InitialSync?
     @ObservationIgnored private var pendingSends: [String: OSCArgument] = [:]
@@ -42,11 +45,12 @@ public final class ConsoleMirror {
     /// `auditAddresses` are re-read one per tick while live, so a push that never arrived (lost renewal,
     /// console client limit) is corrected within seconds instead of showing a stale value as live.
     public init(
-        link: ConsoleLink, addresses: [String] = Catalog.syncAddresses(),
-        auditAddresses: [String] = Catalog.auditAddresses()
+        link: ConsoleLink, addresses: [String] = Catalog.allAddresses(),
+        overview: [String] = Catalog.overviewAddresses(), auditAddresses: [String] = Catalog.auditAddresses()
     ) {
         self.link = link
-        self.addresses = addresses
+        self.overview = overview
+        overviewSet = Set(overview)
         self.auditAddresses = auditAddresses
         for address in addresses { cells[address] = ParamCell() }
         for kind in StripKind.allCases {
@@ -83,7 +87,7 @@ public final class ConsoleMirror {
 
     public func cell(_ address: String) -> ParamCell {
         if let cell = cells[address] { return cell }
-        log.error("no cell for \(address, privacy: .public); add it to Catalog.syncAddresses")
+        log.error("no cell for \(address, privacy: .public); add it to Catalog.allAddresses")
         let cell = ParamCell()
         cells[address] = cell
         return cell
@@ -154,12 +158,18 @@ public final class ConsoleMirror {
         else { return }
         // A reply of another type (",i" where the parameter is ",f") is garbage, not a new value.
         if let known = cell.argument, !known.hasSameType(as: argument) { return }
+        // Stored before the reply is counted: the last answer turns the status live, and screens rebuild on that.
+        if !holds.isHeld(message.address, now: .now) { store(argument, in: cell, at: message.address) }
+        noteReply(message.address)
+    }
+
+    /// A reply the connect sync or a tab read asked for frees a slot for the next request.
+    private func noteReply(_ address: String) {
         if sync != nil {
-            sync?.received(message.address)
+            sync?.received(address)
             pumpSync()
         }
-        if holds.isHeld(message.address, now: .now) { return }
-        store(argument, in: cell, at: message.address)
+        if reads.received(address) { pumpReads() }
     }
 
     private func store(_ argument: OSCArgument, in cell: ParamCell, at address: String) {
@@ -199,6 +209,7 @@ public final class ConsoleMirror {
         pendingSends.removeAll()
         if sync != nil { pumpSync() }
         guard isLive else { return }
+        pumpReads()
         sendDueRereads()
         sendNextAudit()
     }
@@ -224,6 +235,7 @@ public final class ConsoleMirror {
             startSync()
         case .lost:
             sync = nil
+            reads = ReadQueue()
             linkCopies.forget()
             status = .lost
         case .failed(let failure):
@@ -234,8 +246,10 @@ public final class ConsoleMirror {
     }
 
     private func startSync() {
-        log.info("sync started: \(self.addresses.count) addresses")
-        sync = InitialSync(addresses: addresses)
+        log.info("sync started: \(self.overview.count) addresses")
+        forgetTabValues()
+        reads = ReadQueue()
+        sync = InitialSync(addresses: overview)
         // An edit made just before an outage may never have reached the console; the resync is the truth.
         holds.clearTimedHolds()
         linkCopies.forget()
@@ -258,5 +272,20 @@ public final class ConsoleMirror {
         log.info("sync done")
         self.sync = nil
         status = .live
+        startBackgroundFill()
+        pumpReads()
+    }
+
+    /// A value read before an outage may have changed on the desk meanwhile; the open tab reads it again once live.
+    private func forgetTabValues() {
+        for (address, cell) in cells where !overviewSet.contains(address) && cell.argument != nil { cell.argument = nil }
+    }
+
+    func pumpReads() {
+        let missing = reads.missing.count
+        for address in reads.due(now: .now) { link.send(OSCMessage(address)) }
+        if reads.missing.count > missing {
+            log.warning("\(self.reads.missing.count - missing) tab values never answered; their rows stay disabled")
+        }
     }
 }

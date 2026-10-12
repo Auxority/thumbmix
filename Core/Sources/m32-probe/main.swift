@@ -287,5 +287,6 @@ print("RESULT: \(change(followChange)). About 0 = the send's own pan is ignored 
 print("Put buses 15-16 and channel 1 back as the show needs them.")
 
 await probeEQDefaults()
+await probeReadTiming()
 
 transport.cancel()

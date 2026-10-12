@@ -26,6 +26,10 @@ public enum ChannelTab: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
+    /// The order strips in use are read in the background (the user, 2026-10-12): what an FOH engineer opens most
+    /// comes first. Mix and Members show only what connect already read.
+    public static let fillOrder: [ChannelTab] = [.input, .eq, .comp, .sends, .gate, .fedBy]
+
     /// Every strip opens on Mix: its full fader, nudges, mute and pan. The other tabs keep a slim fader and mute.
     /// A bus's Sends (to the matrices) sit before Fed by, which mix buses use more and so keeps the far right.
     public static func tabs(for kind: StripKind) -> [ChannelTab] {

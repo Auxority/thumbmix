@@ -47,7 +47,7 @@ struct MatrixTests {
     }
 
     @Test func matrixStateAndItsSendsAreSynced() {
-        let addresses = Set(Catalog.syncAddresses())
+        let addresses = Set(Catalog.allAddresses())
         for address in ["/mtx/06/mix/fader", "/mtx/01/dyn/thr", "/mtx/02/eq/6/type", "/main/st/mix/06/level"] {
             #expect(addresses.contains(address), "missing \(address)")
         }
