@@ -38,8 +38,9 @@ Settled choices about how Thumbmix behaves, with the reason, so nobody proposes 
 - **The Input tab has no meter of its own**: the fader row above already shows the level (2026-10-09).
 - **Comp and Gate Mode, Detector and Envelope are dropdowns**, like EQ Type: the open list says each choice in words with the desk's name under it ("Average level" · RMS); the closed row shows the desk's name.
 - **A cut filter's Gain and Q stay in place, dimmed and showing "—"** (LCut, HCut, BU6…LR24), and the graph's drag and pinch leave them alone.
-- **Reset bands**: buses, matrices and mains (6 bands) to PEQ at 54.5 Hz, 153.5 Hz, 418 Hz, 1.14 kHz, 3.21 kHz and 8.73 kHz, Q 1.7, 0 dB; inputs keep 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz.
-- **Tabs**: buses get Mix · EQ · Comp · Sends · Fed by (Fed by keeps the far right, where a monitor engineer's thumb goes), the mains Mix · EQ · Comp · Sends, matrices Mix · EQ · Comp · Fed by.
+- **Reset bands**: buses, matrices and mains (6 bands) to PEQ at 54.5 Hz, 153.5 Hz, 418 Hz, 1.14 kHz, 3.21 kHz and 8.73 kHz, Q 1.7, 0 dB; inputs and aux ins keep 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz (aux assumed like an input's; m32-probe section 11).
+- **Tabs**: buses get Mix · EQ · Comp · Sends · Fed by (Fed by keeps the far right, where a monitor engineer's thumb goes), the mains Mix · EQ · Comp · Sends, matrices Mix · EQ · Comp · Fed by, aux ins Mix · Input · EQ · Sends (the desk gives them no gate, comp, delay or low cut).
+- **An aux in fed by a preamp shows its Gain and 48V** (2026-10-12): the desk can route aux 1-6 from inputs, and then `/-ha/32…39` names the preamp. Shown only when the desk names one; with the line jacks the Input tab shows Trim alone. The same preamp's channel and aux name each other in the "shares an input" line and the 48V alert, so 48V never reaches a strip the alert didn't name. Unverified on the desk (m32-probe section 3b), kept because users may route aux that way.
 
 ## How we decide
 

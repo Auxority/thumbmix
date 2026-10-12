@@ -121,6 +121,7 @@ struct UIMathTests {
         #expect(ChannelTab.tabs(for: .mainMono) == [.mix, .eq, .comp, .sends])
         #expect(ChannelTab.tabs(for: .matrix) == [.mix, .eq, .comp, .fedBy], "a matrix sends nowhere")
         #expect(ChannelTab.tabs(for: .dca) == [.mix, .members])
+        #expect(ChannelTab.tabs(for: .auxIn) == [.mix, .input, .eq, .sends], "no gate, comp or delay (doc p.28)")
         #expect(ChannelTab.tabs(for: .fxReturn) == [.mix])
     }
 }

@@ -41,17 +41,18 @@ extension ConsoleMirror {
         rawName(strip).isEmpty && (normalized(Catalog.fader(strip)) ?? 0) == 0
     }
 
-    /// The headamp (0-127) feeding input `n`, or nil when it reads from an internal source.
-    public func headamp(forInput n: Int) -> Int? {
-        guard case .int(let index)? = cell(Catalog.headampIndex(forInput: n)).argument,
+    /// The headamp (0-127) feeding an input or aux in, or nil when it reads from an internal source or a line jack.
+    public func headamp(of strip: StripID) -> Int? {
+        guard let address = Catalog.headampIndex(strip), case .int(let index)? = cell(address).argument,
             (0...127).contains(index)
         else { return nil }
         return Int(index)
     }
 
-    public func inputsSharingHeadamp(withInput n: Int) -> [Int] {
-        guard let mine = headamp(forInput: n) else { return [] }
-        return (1...32).filter { $0 != n && headamp(forInput: $0) == mine }
+    /// The other inputs and aux ins on the same preamp: they share its gain and 48V.
+    public func stripsSharingHeadamp(with strip: StripID) -> [StripID] {
+        guard let mine = headamp(of: strip) else { return [] }
+        return Catalog.preampStrips.filter { $0 != strip && headamp(of: $0) == mine }
     }
 
     /// Bit 0 = DCA 1. The doc doesn't state the bit order; m32-probe section 4 checks it.

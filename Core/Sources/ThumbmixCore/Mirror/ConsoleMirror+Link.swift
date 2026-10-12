@@ -87,15 +87,14 @@ extension ConsoleMirror {
         return partner.prefix + suffix
     }
 
-    /// "/headamp/040/gain" → the same parameter on the headamp feeding the linked partner input. A headamp feeding
-    /// several inputs can't say which pair the edit is for, so it gets no partner.
+    /// "/headamp/040/gain" → the same parameter on the headamp feeding the linked partner (input or aux in). A
+    /// headamp feeding several strips can't say which pair the edit is for, so it gets no partner.
     private func partnerHeadampAddress(of address: String) -> String? {
         let parts = address.split(separator: "/", maxSplits: 2)
         guard isShared(.gainDelay), parts.count == 3, let index = Int(parts[1]) else { return nil }
-        let inputs = (1...32).filter { headamp(forInput: $0) == index }
-        guard inputs.count == 1, let input = inputs.first,
-            isLinked(StripID(.input, input)), let partner = StripID(.input, input).partner,
-            let partnerIndex = headamp(forInput: partner.number), partnerIndex != index
+        let strips = Catalog.preampStrips.filter { headamp(of: $0) == index }
+        guard strips.count == 1, let strip = strips.first, isLinked(strip), let partner = strip.partner,
+            let partnerIndex = headamp(of: partner), partnerIndex != index
         else { return nil }
         return "/headamp/" + String(format: "%03d", partnerIndex) + "/" + parts[2]
     }
