@@ -12,7 +12,7 @@ struct ConsoleMirrorTests {
         return mirror
     }
 
-    @Test func syncFillsEveryCell() async throws {
+    @Test func syncFillsTheOverview() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         let mirror = await liveMirror(fake, port)
@@ -20,7 +20,7 @@ struct ConsoleMirrorTests {
 
         #expect(mirror.isLive)
         #expect(mirror.cell("/ch/01/config/name").argument == .string("Kick"))
-        #expect(Catalog.syncAddresses().allSatisfy { mirror.cell($0).argument != nil })
+        #expect(Catalog.overviewAddresses().allSatisfy { mirror.cell($0).argument != nil })
     }
 
     /// UI tests wait for this before trusting the screen: until then it can still show the previous test's desk.
@@ -43,7 +43,7 @@ struct ConsoleMirrorTests {
         defer { mirror.stop() }
 
         #expect(mirror.isLive)
-        #expect(Catalog.syncAddresses().allSatisfy { mirror.cell($0).argument != nil })
+        #expect(Catalog.overviewAddresses().allSatisfy { mirror.cell($0).argument != nil })
     }
 
     @Test func deskChangesArriveAfterSync() async throws {

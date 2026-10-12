@@ -49,6 +49,7 @@ struct LinkSyncTests {
         fake.copiesLinkedEdits = false
         let mirror = await liveMirror(port: port)
         defer { mirror.stop() }
+        await openTab(.eq, of: StripID(.input, 9), in: mirror)
         let gainL = Catalog.eqBand(StripID(.input, 9), 2).gain.address
         let gainR = Catalog.eqBand(StripID(.input, 10), 2).gain.address
         let before = fake.value(at: gainR)
@@ -69,6 +70,7 @@ struct LinkSyncTests {
         defer { fake.stop() }
         let mirror = await liveMirror(port: port)
         defer { mirror.stop() }
+        await openTab(.input, of: StripID(.input, 9), in: mirror)
         let left = try #require(mirror.headamp(of: StripID(.input, 9)))
         let right = try #require(mirror.headamp(of: StripID(.input, 10)))
         let gainR = Catalog.headampGain(right).address

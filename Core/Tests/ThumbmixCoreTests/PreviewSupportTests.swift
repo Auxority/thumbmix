@@ -8,7 +8,7 @@ struct PreviewSupportTests {
         let mirror = ConsoleMirror.preview()
         #expect(mirror.isLive)
         #expect(mirror.name(StripID(.input, 1)) == "Kick")
-        #expect(Catalog.syncAddresses().allSatisfy { mirror.cell($0).argument != nil })
+        #expect(Catalog.allAddresses().allSatisfy { mirror.cell($0).argument != nil })
     }
 
     @Test func previewMirrorStaysOffTheNetwork() {
@@ -18,6 +18,6 @@ struct PreviewSupportTests {
 
     @Test func demoStateCoversEverySyncedAddress() {
         let state = DemoState.values()
-        #expect(Catalog.syncAddresses().allSatisfy { state[$0] != nil })
+        #expect(Catalog.allAddresses().allSatisfy { state[$0] != nil })
     }
 }

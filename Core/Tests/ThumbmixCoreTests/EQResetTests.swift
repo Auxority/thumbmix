@@ -93,6 +93,8 @@ struct EQResetTests {
         defer { fake.stop() }
         let mirror = await liveMirror(port: port)
         defer { mirror.stop() }
+        await openTab(.eq, of: kick, in: mirror)
+        await openTab(.eq, of: StripID(.mainStereo), in: mirror)
         #expect(mirror.eqBandShapesLevel(kick, 1) == true, "the demo's bands are PEQs")
 
         fake.deskChange("/ch/01/eq/1/type", .int(0))

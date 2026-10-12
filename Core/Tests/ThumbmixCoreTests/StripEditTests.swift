@@ -8,7 +8,7 @@ struct StripEditTests {
     @Test func everyShownStripHasAnIconAddressThatIsSynced() {
         #expect(StripID(.dca, 1).icon == "/dca/1/config/icon")
         #expect(StripID(.mainStereo).icon == "/main/st/config/icon")
-        let synced = Catalog.syncAddresses()
+        let synced = Catalog.allAddresses()
         #expect(StripKind.allCases.flatMap(StripID.all).allSatisfy { synced.contains($0.icon) })
         #expect(DemoState.values()["/ch/01/config/icon"] == .int(1))
     }

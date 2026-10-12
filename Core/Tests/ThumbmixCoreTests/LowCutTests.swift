@@ -17,7 +17,7 @@ struct LowCutTests {
     }
 
     @Test func lowCutIsSyncedWithIntDefaultsInTheDemo() {
-        #expect(Catalog.syncAddresses().contains("/ch/32/preamp/hpslope"))
+        #expect(Catalog.allAddresses().contains("/ch/32/preamp/hpslope"))
         let demo = DemoState.values()
         #expect(demo["/ch/01/preamp/hpon"] == .int(0))
         #expect(demo["/ch/01/preamp/hpslope"] == .int(2))

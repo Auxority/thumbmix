@@ -51,8 +51,8 @@ struct CatalogTests {
         #expect(Catalog.sendPan(from: StripID(.bus, 1), to: StripID(.matrix, 3))?.address == "/bus/01/mix/03/pan")
         #expect(Catalog.sendPanFollow(from: vox, to: StripID(.bus, 5))?.address == "/ch/13/mix/05/panFollow")
         #expect(Catalog.sendPanFollow(from: vox, to: StripID(.bus, 6)) == nil)
-        #expect(!Catalog.syncAddresses().contains("/fxrtn/01/mix/01/pan"), "no Sends tab shows it: not worth the sync")
-        #expect(Catalog.syncAddresses().contains("/auxin/01/mix/01/pan"), "an aux in's Sends tab shows it")
+        #expect(!Catalog.allAddresses().contains("/fxrtn/01/mix/01/pan"), "no Sends tab shows it: not worth the sync")
+        #expect(Catalog.allAddresses().contains("/auxin/01/mix/01/pan"), "an aux in's Sends tab shows it")
         #expect(DemoState.values()["/ch/13/mix/05/panFollow"] == .int(0), "a toggle, not mid-travel")
         #expect(DemoState.values()["/ch/13/mix/05/pan"] == .float(0.5), "centre")
     }
@@ -94,7 +94,7 @@ struct CatalogTests {
         let mode = Catalog.dynamics(StripID(.bus, 3)).mode
         #expect(mode.address == "/bus/03/dyn/mode")
         #expect(mode.scale == .choice(["COMP", "EXP"]))
-        #expect(Catalog.syncAddresses().contains("/ch/01/dyn/mode"))
+        #expect(Catalog.allAddresses().contains("/ch/01/dyn/mode"))
         #expect(DemoState.values()["/ch/01/dyn/mode"] == .int(0))
     }
 
@@ -105,8 +105,8 @@ struct CatalogTests {
         #expect(dynamics.detector.scale == .choice(["PEAK", "RMS"]))
         #expect(dynamics.envelope.address == "/main/m/dyn/env")
         #expect(dynamics.envelope.scale == .choice(["LIN", "LOG"]))
-        #expect(Catalog.syncAddresses().contains("/ch/01/dyn/det"))
-        #expect(Catalog.syncAddresses().contains("/mtx/06/dyn/env"))
+        #expect(Catalog.allAddresses().contains("/ch/01/dyn/det"))
+        #expect(Catalog.allAddresses().contains("/mtx/06/dyn/env"))
         #expect(DemoState.values()["/ch/01/dyn/det"] == .int(0))
         #expect(DemoState.values()["/bus/01/dyn/env"] == .int(1))
     }
@@ -132,18 +132,19 @@ struct CatalogTests {
     }
 
     @Test func syncListIsUnique() {
-        let addresses = Catalog.syncAddresses()
+        let addresses = Catalog.allAddresses()
         #expect(Set(addresses).count == addresses.count)
     }
 
-    /// Whatever a tab shows is read on connect. Checked from the tabs' side, not as a pinned total, so two PRs
-    /// that each add a parameter don't conflict over one number.
-    @Test func everyTabsParametersAreSynced() {
-        let synced = Set(Catalog.syncAddresses())
+    /// Whatever a tab shows is read: on connect (the overview) or when the tab opens. A value missing here would never
+    /// be read, and its row would stay disabled. Checked per tab, not as a pinned total, so PRs don't conflict over it.
+    @Test func everyTabsParametersAreRead() {
+        let overview = Set(Catalog.overviewAddresses())
         for strip in StripKind.allCases.flatMap(StripID.all) {
             for tab in ChannelTab.tabs(for: strip.kind) {
+                let read = overview.union(Catalog.tabAddresses(tab, strip, headamp: 32))
                 for address in Self.shownAddresses(tab, strip) {
-                    #expect(synced.contains(address), "\(tab) of \(strip): \(address)")
+                    #expect(read.contains(address), "\(tab) of \(strip): \(address)")
                 }
             }
         }

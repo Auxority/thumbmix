@@ -34,6 +34,15 @@ func liveMirror(port: UInt16) async -> ConsoleMirror {
     return mirror
 }
 
+/// Opens `tab` of `strip` as the app's screen does: reads its values (and a linked partner's) and waits for them.
+@MainActor
+func openTab(_ tab: ChannelTab, of strip: StripID, in mirror: ConsoleMirror) async {
+    mirror.read(tab, of: strip)
+    let strips = [strip] + (mirror.isLinked(strip) ? [strip.partner].compactMap { $0 } : [])
+    let addresses = strips.flatMap { Catalog.tabAddresses(tab, $0, headamp: mirror.headamp(of: $0)) }
+    #expect(await eventually { addresses.allSatisfy { mirror.cell($0).argument != nil } }, "\(tab) of \(strip) never read")
+}
+
 extension Locale {
     /// Fixed formatting for assertions, whatever language the test machine runs in.
     static let testEnglish = Locale(identifier: "en_US_POSIX")

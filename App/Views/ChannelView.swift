@@ -42,7 +42,15 @@ struct ChannelView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if tabs.count > 1 { StripTabBar(tabs: tabs, selection: $tab) }
         }
-        .onChange(of: tab) { showsRight = false }
+        // A tab's values are read when it opens (and after a resync forgot them), ahead of the background fill.
+        .onAppear { mirror.read(tab, of: main) }
+        .onChange(of: tab) {
+            showsRight = false
+            mirror.read(tab, of: main)
+        }
+        .onChange(of: mirror.isLive) { _, isLive in
+            if isLive { mirror.read(tab, of: main) }
+        }
         .navigationTitle(title)
         .demoTitle(title)
         .navigationBarTitleDisplayMode(.inline)

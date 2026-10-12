@@ -8,7 +8,7 @@ public enum DemoState {
     ]
 
     public static func values() -> [String: OSCArgument] {
-        var state = Dictionary(uniqueKeysWithValues: Catalog.syncAddresses().map { ($0, defaultValue(for: $0)) })
+        var state = Dictionary(uniqueKeysWithValues: Catalog.allAddresses().map { ($0, defaultValue(for: $0)) })
         addBand(to: &state)
         addMonitors(to: &state)
         addReturnsDCAsAndMain(to: &state)

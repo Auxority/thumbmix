@@ -206,63 +206,6 @@ public enum Catalog {
         return ParamSpec(strip.prefix + "/dyn/pos", CoreStrings.text("Comp position"), .choice(["PRE", "POST"]), .plain)
     }
 
-    /// Every address the mirror reads on connect; the mirror goes live once all have answered.
-    public static func syncAddresses() -> [String] {
-        StripKind.allCases.flatMap(StripID.all).flatMap(addresses(of:)) + headampAddresses() + rtaAddresses
-            + linkAddresses
-    }
-
-    /// Every pair's link switch and the four Link Preferences: they decide how the overview and tabs look.
-    public static let linkAddresses =
-        StripKind.allCases.flatMap(StripID.all).filter { $0 == $0.oddSide }.compactMap(\.linkAddress)
-        + LinkSection.allCases.map(\.preferenceAddress)
-
-    /// Read on connect so the desk's own RTA setting is known before the app borrows it.
-    private static let rtaAddresses = [RTA.source, RTA.position]
-
-    static func addresses(of strip: StripID) -> [String] {
-        [strip.name, strip.color, strip.icon, strip.fader, strip.on] + [strip.pan, strip.dcaMask].compactMap { $0 }
-            + inputAddresses(strip) + gateAddresses(strip) + dynamicsAddresses(strip) + eqAddresses(strip)
-            + sendAddresses(strip)
-    }
-
-    private static func inputAddresses(_ strip: StripID) -> [String] {
-        guard ChannelTab.tabs(for: strip.kind).contains(.input) else { return [] }
-        return [trim(strip).address] + [headampIndex(strip), invert(strip)?.address].compactMap { $0 }
-            + (delay(strip)?.all.map(\.address) ?? [])
-    }
-
-    private static func gateAddresses(_ strip: StripID) -> [String] {
-        strip.hasGate ? gate(strip).all.map(\.address) : []
-    }
-
-    private static func dynamicsAddresses(_ strip: StripID) -> [String] {
-        strip.hasDynamics ? dynamics(strip).all.map(\.address) + [dynamicsPosition(strip)?.address].compactMap { $0 } : []
-    }
-
-    private static func eqAddresses(_ strip: StripID) -> [String] {
-        guard strip.eqBandCount > 0 else { return [] }
-        return [eqOn(strip).address] + (lowCut(strip)?.all.map(\.address) ?? [])
-            + (1...strip.eqBandCount).flatMap { eqBand(strip, $0).all.map(\.address) }
-    }
-
-    private static func sendAddresses(_ strip: StripID) -> [String] {
-        guard let target = strip.kind.sendTarget else { return [] }
-        // A send's settings are read only where a Sends tab shows them: they'd add ~15 % to every connect.
-        let showsSettings = ChannelTab.tabs(for: strip.kind).contains(.sends)
-        return StripID.all(target).flatMap {
-            [sendLevel(from: strip, to: $0).address, sendOn(from: strip, to: $0).address]
-                + (showsSettings ? sendSettingsAddresses(from: strip, to: $0) : [])
-        }
-    }
-
-    private static func sendSettingsAddresses(from strip: StripID, to target: StripID) -> [String] {
-        [
-            sendPan(from: strip, to: target)?.address, sendPanFollow(from: strip, to: target)?.address,
-            sendTap(from: strip, to: target)?.address,
-        ].compactMap { $0 }
-    }
-
     /// The values a stale display would hurt most: what each strip is called and where its fader and mute sit.
     /// The RTA setting is audited too: the doc doesn't say a change on the desk is pushed, and releasing
     /// the RTA must not overwrite a choice the engineer made on the desk meanwhile.

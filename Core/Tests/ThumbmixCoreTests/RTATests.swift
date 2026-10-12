@@ -63,6 +63,7 @@ struct RTATests {
         let mirror = await liveMirror(port: port)
         defer { mirror.stop() }
         let kick = StripID(.input, 1)
+        await openTab(.eq, of: kick, in: mirror)
         let gain = Catalog.eqBand(kick, 1).gain
         let bandFrequency = try #require(mirror.eqBands(kick).first?.frequency)
         let index = (0..<RTA.bandCount).min { abs(RTA.bandFrequency($0) - bandFrequency) < abs(RTA.bandFrequency($1) - bandFrequency) }!
