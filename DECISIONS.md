@@ -20,6 +20,8 @@ Settled choices about how Thumbmix behaves, with the reason, so nobody proposes 
 ## Layout
 
 - **Group chips sit at the bottom, in one dark glass bar that scrolls sideways** (2026-10-12, mock A2 from real iOS 27 screenshots): in thumb reach, and a new group is just one more chip.
+- **A send's settings open in a sheet** (2026-10-12, mock H, picked over a pushed send screen and four inline layouts): a › on the send row opens a half-height sheet of black-tinted glass, picked from real iOS 27 screenshots. The sheet keeps you on the Sends tab, in thumb reach, closes with a swipe down, and the strip's fader and mute above it stay usable. Sheets are for details of where you are (like Edit strip), pushed screens for going somewhere. Full height waits until the settings outgrow half.
+- **A linked bus or matrix pair is one send**, like on the desk. Only its › exists today: a send pan does nothing on a mono bus. A linked source gets a send pan per side, like its LR pan, and one Follow LR pan switch for both.
 - **Every strip shows, used or not**: the overview's and Fed by's "Show unused" toggles are gone until hiding is redesigned (TODO).
 - **Toolbar buttons and Connect are glass tinted black** (`DarkCapsuleStyle`, 2026-10-12, picked from real iOS 27 screenshots over a flat black capsule), so they sit with iOS's own back button and swipe-back stays. The app's own greys (fader tracks, chips, M) stay: they show where a control is.
 - **48V is a button beside the Gain row**, the same height, red when on, like MUTE beside a fader.
