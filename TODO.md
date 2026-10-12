@@ -34,11 +34,13 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 ## Performance
 
+- [ ] **Load strips in parallel, show them as they arrive?** Ask the desk for all strips at once and show each row disabled (a placeholder) until its values are in, then make it active. Measure connect and reconnect time first; build it only if it gets them significantly faster.
 - [ ] **Meters only for the strips in view?** Draw (or update) meters only for the rows on screen, not every strip. Measure first; if it saves only 1–2 % CPU, it isn't worth it and this item goes.
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 17.0: iPhone XS/XR, SE 2nd gen). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
 
 ## Features
 
+- [ ] **Aux in gets the Input, EQ and Sends tabs like an input.** Today an aux strip has only Mix (`ChannelTab`), but the desk gives aux in Trim and invert, a 4-band EQ and 16 bus sends (`notes/m32-protocol.md` §5.2; no gate, dynamics, delay or low cut).
 - [ ] **Group chips within thumb reach** (asked again 2026-10-10). Move the overview's Inputs/Aux/FX/Buses/DCA/Main chips (`GroupChips`, now at the top) down, so they can be reached easily one-handed with the thumb. Mock it first; the Matrix chip joins that row.
 - [ ] **A SideStore source that updates itself:** a source file listing Thumbmix's versions, updated by each release, so SideStore picks up new versions on its own.
 - [x] **Hold a slider row to type its value** (mock B: the system alert, Set only). Any unit or none ("−6", "1k", "L20", "-inf"), decimal comma or point; text that isn't a value reopens the alert saying so. A number past either end is refused the same way (it was clamped until 2026-10-10). VoiceOver gets an "Enter value" action. Dragging away from the row drags finer: ½ beyond one row height, ¼ beyond three.
