@@ -11,8 +11,9 @@ struct LocalizationTests {
         CoreStrings.bundle.localizedString(forKey: key, value: Self.missing, table: nil) != Self.missing
     }
 
-    /// `scripts/strings.sh` adds new Core text as an empty entry, and SwiftPM drops those: the app would show the
-    /// raw key. Read from the source catalog, since the built bundle has already dropped them.
+    /// SwiftPM drops an empty entry, so the app would show the raw key. `scripts/strings.sh` fills new Core text's
+    /// English value; this catches a catalog merged or edited by hand. Read from the source catalog, since the built
+    /// bundle has already dropped empty entries.
     @Test func everyCoreCatalogEntryHasAnEnglishValue() throws {
         let catalog = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent().appendingPathComponent("../../Sources/ThumbmixCore/Resources/Localizable.xcstrings")
