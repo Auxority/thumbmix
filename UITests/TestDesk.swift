@@ -37,6 +37,10 @@ final class TestDesk: Sendable {
     /// Launch arguments that connect the app straight to this desk.
     var connect: [String] { ["-lastConsoleHost", "127.0.0.1", "-consolePort", String(port)] }
 
+    /// The app swaps its screens to a new desk before it sends anything, so once the desk heard from it, the
+    /// screen is this desk's, not the previous test's.
+    var heardFromApp: Bool { fake.hasClients }
+
     /// Plays the engineer changing a setting on the desk itself.
     func change(_ address: String, _ value: Int32) {
         fake.deskChange(address, .int(value))

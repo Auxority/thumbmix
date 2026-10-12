@@ -35,6 +35,8 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSLocalNetworkUsageDescription: Thumbmix talks to your M32 over the local network.
         UILaunchScreen: {}
+        # Only Debug builds handle it (AppModel.openTestURL): UI tests switch the running app to a new fake desk.
+        CFBundleURLTypes: [{CFBundleURLName: dev.thumbmix.app.uitest, CFBundleURLSchemes: [thumbmix-test]}]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIUserInterfaceStyle: Dark
     settings:

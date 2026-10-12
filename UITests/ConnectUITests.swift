@@ -15,7 +15,9 @@ final class ConnectUITests: XCTestCase {
         let field = app.textFields["console-ip"]
         XCTAssertTrue(field.appears(within: 5))
         field.tap()
-        field.typeText("192,168,1,50")
+        // One key at a time: the field turns each comma into a dot as it arrives, and XCUITest's fast typing
+        // dropped a key while that ran.
+        for key in "192,168,1,50" { field.typeText(String(key)) }
         XCTAssertEqual(field.value as? String, "192.168.1.50")
         XCTAssertTrue(app.buttons["Connect"].isEnabled)
     }

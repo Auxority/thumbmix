@@ -92,6 +92,9 @@ public final class FakeM32: @unchecked Sendable {
 
     public var receivedSets: [OSCMessage] { queue.sync { sets } }
 
+    /// True once an app has sent anything: from then on, its screen shows this desk.
+    public var hasClients: Bool { queue.sync { !clients.isEmpty } }
+
     /// Someone moved a control on the desk.
     public func deskChange(_ address: String, _ value: OSCArgument) {
         queue.sync {

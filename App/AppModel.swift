@@ -32,9 +32,13 @@ final class AppModel {
     }
 
     func connect(to host: String) {
+        connect(to: host, port: Self.consolePort)
+    }
+
+    private func connect(to host: String, port: UInt16) {
         guard Discovery.isUsableIPv4(host) else { return }
         disconnect()
-        let mirror = ConsoleMirror(link: ConsoleLink(host: host, port: Self.consolePort))
+        let mirror = ConsoleMirror(link: ConsoleLink(host: host, port: port))
         mirror.start()
         self.mirror = mirror
         self.host = host
@@ -65,6 +69,19 @@ final class AppModel {
         guard mirror == nil, let lastHost else { return }
         connect(to: lastHost)
     }
+
+    #if DEBUG
+        /// UI tests launch the app once per test class (a launch is most of a test's time) and send each next
+        /// test's fresh fake desk as `thumbmix-test://connect?port=N`. Always this Mac's loopback, never another host.
+        func openTestURL(_ url: URL) {
+            guard url.scheme == "thumbmix-test", url.host() == "connect",
+                let value = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?
+                    .first(where: { $0.name == "port" })?.value,
+                let port = UInt16(value), port > 0
+            else { return }
+            connect(to: "127.0.0.1", port: port)
+        }
+    #endif
 
     /// Coming back from the background: anything could have changed on the desk meanwhile.
     func wake() {
