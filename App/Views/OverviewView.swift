@@ -11,7 +11,6 @@ struct OverviewView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 10) {
-                GroupChips(selection: $group)
                 ScrollView {
                     LazyVStack(spacing: 6) {
                         ForEach(visibleItems) { item in
@@ -27,6 +26,8 @@ struct OverviewView: View {
                 .id(group)
                 .disabled(!mirror.isLive)
                 .opacity(mirror.isLive ? 1 : 0.4)
+                // In thumb reach; the list scrolls on under the glass, and its last row scrolls clear of it.
+                .safeAreaInset(edge: .bottom, spacing: 0) { GroupChips(selection: $group) }
             }
             .background(Theme.background)
             .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
@@ -70,13 +71,14 @@ struct OverviewView: View {
     }
 }
 
+/// One dark glass bar of chips (mock A2): it scrolls sideways, so a new group is just one more chip.
 private struct GroupChips: View {
     @Binding var selection: StripGroup
     @ScaledMetric private var chipHeight: CGFloat = 36
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
+            HStack(spacing: 4) {
                 ForEach(StripGroup.allCases) { group in
                     Button(group.title) { selection = group }
                         .accessibilityAddTraits(selection == group ? .isSelected : [])
@@ -84,12 +86,15 @@ private struct GroupChips: View {
                         .padding(.horizontal, 14)
                         .frame(height: chipHeight)
                         .foregroundStyle(selection == group ? .black : .white)
-                        .background(selection == group ? Color.white : Theme.track, in: Capsule())
+                        .background(selection == group ? Color.white : Color.clear, in: Capsule())
                         .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 12)
+            .padding(6)
         }
+        .glassEffect(.regular.tint(.black), in: Capsule())
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
     }
 }
 

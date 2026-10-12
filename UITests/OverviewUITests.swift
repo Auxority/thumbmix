@@ -81,6 +81,8 @@ final class OverviewUITests: DeskUITestCase {
         XCTAssertEqual(app.buttons["Kick"].value as? String, "1")
         XCTAssertEqual(app.buttons["Vox 2"].value as? String, "14")
         saveScreenshot("channel-numbers")
+        // The Main chip sits past the edge of a 375 pt screen: the engineer swipes the chip row first.
+        app.buttons["Buses"].swipeLeft()
         app.buttons["Main"].tap()
         XCTAssertTrue(app.buttons["LR"].appears(within: 2))
         XCTAssertEqual(app.buttons["LR"].value as? String, "", "a main bus has no number")
@@ -105,6 +107,18 @@ final class OverviewUITests: DeskUITestCase {
         launch()
         app.buttons["Buses"].tap()
         XCTAssertTrue(app.buttons["Mon 1"].appears(within: 2))
+    }
+
+    /// The group chips sit along the bottom edge, where a thumb reaches them one-handed, and the list's last
+    /// strip still scrolls clear of their bar.
+    func testGroupChipsSitWithinThumbReach() {
+        launch()
+        let inputs = app.buttons["Inputs"]
+        XCTAssertGreaterThan(inputs.frame.minY, app.frame.height * 0.75, "the chips sit in the bottom quarter")
+        for _ in 0..<6 { app.swipeUp(velocity: .fast) }
+        let lastMute = app.buttons["mute-/ch/32/mix/on"]
+        XCTAssertTrue(eventually(within: 3) { lastMute.exists && lastMute.frame.maxY <= inputs.frame.minY })
+        XCTAssertTrue(lastMute.isHittable)
     }
 
     func testMuteToggles() {
