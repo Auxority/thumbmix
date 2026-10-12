@@ -21,7 +21,7 @@ OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unoffic
 
 ## Done means
 
-`scripts/lint.sh` clean, `swift test --package-path Core` green, and `scripts/ui-test.sh` green: it runs the UI suite on the **iPhone SE (3rd generation)** simulator (375 pt wide, like the target iPhone 11 Pro), three test classes at a time on clones of it; each test talks to its own fake desk (`UITests/TestDesk.swift`). Every change ships a test that failed first.
+`scripts/lint.sh` clean, `swift test --package-path Core` green, and `scripts/ui-test.sh` green: it runs the UI suite on the **iPhone SE (3rd generation)** simulator (375 pt wide, like the target iPhone 11 Pro), three test classes at a time on clones of it; each test talks to its own fake desk (`UITests/TestDesk.swift`). A full run then repeats `BlackButtonsUITests` on an iOS 26+ SE, since only that draws the grey toolbar glass they guard against. Every change ships a test that failed first.
 
 **Keep the loop tight.** Iterate on `swift test --package-path Core` (seconds): put the logic in Core, where a unit test reaches it, and keep the App layer thin enough that a UI test only checks the wiring. Any UI run costs minutes, even one class, so the UI suite runs once, on the final code, before pushing. A change that UI can't see (Core logic with its own tests, docs, CI) doesn't need it.
 

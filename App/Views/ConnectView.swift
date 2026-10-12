@@ -35,10 +35,7 @@ struct ConnectView: View {
                         .padding(12)
                         .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
                     Button("Connect") { model.connect(to: trimmedAddress) }
-                        .buttonStyle(.borderedProminent)
-                        // The white app tint makes the enabled fill white and the disabled fill dark grey,
-                        // so the label colour has to follow the state or it vanishes into the fill.
-                        .foregroundStyle(canConnect ? Color.black : Theme.secondaryText)
+                        .buttonStyle(.prominentDarkCapsule)
                         .disabled(!canConnect)
                 }
             }
