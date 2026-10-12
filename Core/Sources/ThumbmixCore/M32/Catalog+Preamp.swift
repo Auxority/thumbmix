@@ -12,6 +12,13 @@ extension Catalog {
         ParamSpec(headamp(index) + "/phantom", CoreStrings.text("48V"), .toggle, .plain)
     }
 
+    /// The strip's polarity (doc p.25, p.28). The doc lists one for matrices too (p.32), but Mixing Station has none:
+    /// unconfirmed until m32-probe section 7 reads it.
+    public static func invert(_ strip: StripID) -> ParamSpec? {
+        guard [.input, .auxIn].contains(strip.kind) else { return nil }
+        return ParamSpec(strip.prefix + "/preamp/invert", CoreStrings.text("Polarity"), .toggle, .plain)
+    }
+
     /// The console answers which headamp (0-127) feeds input `n`, or -1 for internal sources (doc p.43).
     public static func headampIndex(forInput n: Int) -> String {
         "/-ha/" + String(format: "%02d", n - 1) + "/index"

@@ -25,6 +25,20 @@ final class PairUITests: DeskUITestCase {
         alert.buttons["Cancel"].tap()
     }
 
+    /// Polarity follows the Gain/Delay link too (assumed; m32-probe 7e), so flipping one side names the other.
+    func testPolarityOnALinkedPairNamesThePartner() {
+        launchAndOpenGuitars()
+        app.buttons["Input"].tap()
+        let flip = app.buttons["toggle-/ch/09/preamp/invert"]
+        XCTAssertTrue(flip.appears(within: 2))
+        flip.tap()
+        let alert = app.alerts["Flip the polarity of Gtr L?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        let partnerLine = NSPredicate(format: "label CONTAINS %@", "Also flips Gtr R (linked).")
+        XCTAssertTrue(alert.staticTexts.containing(partnerLine).firstMatch.exists)
+        alert.buttons["Cancel"].tap()
+    }
+
     /// An unticked Gain/Delay Link keeps each side's preamp apart: no partner in the alert.
     func testPhantomPowerWithoutGainLinkNamesNoPartner() {
         desk.change("/config/linkcfg/hadly", 0)

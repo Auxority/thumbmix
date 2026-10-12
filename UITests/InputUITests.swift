@@ -46,6 +46,31 @@ final class InputUITests: DeskUITestCase {
         XCTAssertEqual(app.alerts.count, 0)
     }
 
+    /// Ø beside Trim, like 48V beside Gain (mock A, 2026-10-12). It asks first, and the alert explains polarity.
+    func testPolarityAsksAndExplainsBeforeFlipping() {
+        openKicksInput()
+        let flip = app.buttons["toggle-/ch/01/preamp/invert"]
+        XCTAssertTrue(flip.appears(within: 2))
+        XCTAssertEqual(flip.value as? String, "Normal")
+        XCTAssertEqual(flip.frame.midY, element("/ch/01/preamp/trim").frame.midY, accuracy: 2, "beside Trim")
+
+        flip.tap()
+        let alert = app.alerts["Flip the polarity of Kick?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        let explanation = "Turns the signal upside down. Try it when two mics on one source sound thin together."
+        XCTAssertTrue(alert.staticTexts[explanation].exists)
+        saveScreenshot("polarity-alert")
+        alert.buttons["Flip"].tap()
+        XCTAssertTrue(eventually(within: 2) { flip.value as? String == "Flipped" })
+        saveScreenshot("polarity-flipped")
+
+        flip.tap()
+        let back = app.alerts["Set Kick's polarity back to normal?"]
+        XCTAssertTrue(back.appears(within: 2))
+        back.buttons["Normal"].tap()
+        XCTAssertTrue(eventually(within: 2) { flip.value as? String == "Normal" })
+    }
+
     /// The slim fader row above the tab already meters the channel, so Gain comes right under it.
     func testGainSitsRightUnderTheFaderRow() {
         openKicksInput()

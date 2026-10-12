@@ -151,6 +151,9 @@
     "Fader and mute aren't linked on the desk." : {
 
     },
+    "Flipped" : {
+
+    },
     "Follow LR pan" : {
 
     },
@@ -230,6 +233,9 @@
     "No reply from %@. Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix." : {
 
     },
+    "Normal" : {
+
+    },
     "Not in this mix" : {
 
     },
@@ -240,6 +246,9 @@
 
     },
     "Open %@" : {
+
+    },
+    "Polarity" : {
 
     },
     "Red" : {
