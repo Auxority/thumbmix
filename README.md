@@ -16,9 +16,12 @@ It supports the Midas M32 family only (FW 4.x), on iPhone only, in portrait only
 
 ## Install with SideStore (free Apple ID)
 
-1. Download `Thumbmix.ipa` from the newest of the [releases](../../releases). Until 1.0.0 they are all pre-releases, which GitHub's "latest" link skips. Every merge to `main` with a `feat:` or `fix:` commit publishes one, tagged with its [semantic version](https://semver.org): a feature bumps the minor number, a fix the patch number. To build it yourself instead, run `scripts/build-ipa.sh` on a Mac with Xcode and XcodeGen (`brew install xcodegen`).
-2. AirDrop the IPA to the iPhone, then open it with SideStore (My Apps → +).
-3. On first launch, iOS asks for Local Network access. Allow it, or Thumbmix can't reach the desk.
+1. In SideStore, open Sources, tap +, and add `https://raw.githubusercontent.com/Auxority/thumbmix/sidestore/source.json`. Install Thumbmix from it; SideStore then offers each new version by itself.
+
+   Or by hand: download `Thumbmix.ipa` from the newest of the [releases](../../releases). Until 1.0.0 they are all pre-releases, which GitHub's "latest" link skips. Every merge to `main` with a `feat:` or `fix:` commit publishes one, tagged with its [semantic version](https://semver.org): a feature bumps the minor number, a fix the patch number. To build it yourself instead, run `scripts/build-ipa.sh` on a Mac with Xcode and XcodeGen (`brew install xcodegen`).
+
+   AirDrop the IPA to the iPhone, then open it with SideStore (My Apps → +).
+2. On first launch, iOS asks for Local Network access. Allow it, or Thumbmix can't reach the desk.
 
 SideStore re-signs apps every 7 days. A free Apple ID allows 3 active sideloaded apps, and SideStore itself counts as one.
 

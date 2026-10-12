@@ -86,3 +86,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
         run: scripts/publish-release.sh
+
+      # SideStore reads its source from a raw link on the `sidestore` branch and offers the new version on its own.
+      - name: Publish the SideStore source
+        if: steps.version.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/publish-sidestore-source.sh
