@@ -20,21 +20,15 @@ struct SendsTab: View {
 }
 
 /// What feeds this bus or matrix: the sends of every kind that feeds it (`StripKind.feeders`).
+/// Unused sources show too, like the overview, until hiding them is redesigned (TODO).
 struct FedByTab: View {
     let target: StripID
     let mirror: ConsoleMirror
-    @State private var showUnused = false
 
     var body: some View {
-        let sources = target.kind.feeders
-            .flatMap(StripID.all)
-            .filter { showUnused || !mirror.isUnused($0) }
         ScrollView {
             VStack(spacing: 6) {
-                Toggle("Show unused", isOn: $showUnused)
-                    .font(.subheadline)
-                    .padding(.horizontal, 4)
-                ForEach(sources) { source in
+                ForEach(target.kind.feeders.flatMap(StripID.all)) { source in
                     SendRow(
                         source: source, target: target, title: mirror.name(source),
                         accent: Theme.color(mirror.color(source)), mirror: mirror)

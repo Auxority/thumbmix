@@ -184,7 +184,9 @@ final class ChannelUITests: DeskUITestCase {
         XCTAssertEqual(
             app.descendants(matching: .any)["/ch/13/mix/01/level"].value as? String, "0.0 dB")
         XCTAssertTrue(app.descendants(matching: .any)["/fxrtn/01/mix/01/level"].exists)
-        XCTAssertFalse(app.descendants(matching: .any)["/ch/20/mix/01/level"].exists)
+        XCTAssertTrue(
+            app.descendants(matching: .any)["/ch/20/mix/01/level"].exists, "unused inputs show too")
+        XCTAssertFalse(app.switches["Show unused"].exists)
         saveScreenshot("task-16-fedby")
     }
 
