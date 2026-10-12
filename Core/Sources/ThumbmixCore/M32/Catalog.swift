@@ -193,8 +193,8 @@ public enum Catalog {
         ParamSpec(sendPrefix(strip, target) + "/on", CoreStrings.text("On"), .toggle, .plain)
     }
 
-    /// Only odd sends have a pan (doc p.26): it places the strip in the linked pair it feeds. Whether it does
-    /// anything while the pair is unlinked is unverified; the app shows it only on linked pairs (m32-probe).
+    /// Only odd sends have a pan (doc p.26): it places the strip in the linked pair it feeds. On a mono, unlinked
+    /// bus it does nothing (the user, from the desk), so the app shows it only on linked pairs.
     public static func sendPan(from strip: StripID, to target: StripID) -> ParamSpec? {
         guard !target.number.isMultiple(of: 2) else { return nil }
         return ParamSpec(
