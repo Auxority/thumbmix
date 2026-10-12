@@ -41,7 +41,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 ## Features
 
 - [ ] **Aux in gets the Input, EQ and Sends tabs like an input.** Today an aux strip has only Mix (`ChannelTab`), but the desk gives aux in Trim and invert, a 4-band EQ and 16 bus sends (`notes/m32-protocol.md` §5.2; no gate, dynamics, delay or low cut).
-- [ ] **Group chips within thumb reach** (asked again 2026-10-10). Move the overview's Inputs/Aux/FX/Buses/DCA/Main chips (`GroupChips`, now at the top) down, so they can be reached easily one-handed with the thumb. Mock it first; the Matrix chip joins that row.
+- [x] **Group chips within thumb reach** (mock A2, 2026-10-12, picked from real iOS 27 screenshots): the overview's chips (`GroupChips`) sit in one dark glass bar along the bottom edge, scrolling sideways, with the list running on under it. Picked over a two-row grid: a new group is just one more chip. Main and Matrix still need a sideways swipe on the SE.
 - [ ] **A SideStore source that updates itself:** a source file listing Thumbmix's versions, updated by each release, so SideStore picks up new versions on its own.
 - [x] **Hold a slider row to type its value** (mock B: the system alert, Set only). Any unit or none ("−6", "1k", "L20", "-inf"), decimal comma or point; text that isn't a value reopens the alert saying so. A number past either end is refused the same way (it was clamped until 2026-10-10). VoiceOver gets an "Enter value" action. (Its finer drags were dropped on 2026-10-12, see Fixes.)
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
