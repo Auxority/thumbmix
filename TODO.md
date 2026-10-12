@@ -25,7 +25,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [x] **Refuse a typed value outside the range instead of clamping it** (decided 2026-10-10, replaces the clamp from 2026-10-09). "1000000" on a fader must not set +10 dB: Set reopens the alert with "“1000000” is out of range." and the range, the text kept. The fader's low end is −∞, so "-200" is −∞, not past it.
 - [ ] **Finer drags (½, ¼) don't help a small nudge.** You first have to drag away from the row to get the finer speed, and by then the fader has already moved. Rethink how to pick the finer speed before the value changes (mock first), or drop it.
 - [x] **Remove the "Show unused" toggle from the Fed by tab** (`FedByTab` in `SendsTabs.swift`): Fed by now lists every source, unused ones too, like the overview.
-- [x] **OLED dark buttons** (2026-10-12, picked from real iOS 27 screenshots over a flat black capsule): Disconnect, Edit strip's Cancel/Done and Connect use glass tinted black on iOS 26+ (`DarkCapsuleStyle`), so they sit with iOS's own back button, which can't be restyled, and swipe-back stays. iOS 17 has no glass: black with a thin edge there. Connect fills white once an address is typed. The app's own greys (fader tracks, chips, M) stay: they show where a control is. System alerts and switches stay iOS's.
+- [x] **OLED dark buttons** (2026-10-12, picked from real iOS 27 screenshots over a flat black capsule): Disconnect, Edit strip's Cancel/Done and Connect use glass tinted black on iOS 26+ (`DarkCapsuleStyle`), so they sit with iOS's own back button, which can't be restyled, and swipe-back stays. Connect fills white once an address is typed. The app's own greys (fader tracks, chips, M) stay: they show where a control is. System alerts and switches stay iOS's.
 
 - [x] **RTA stuck on "waiting for the desk"** after any trip to another app: coming back rebuilds the link, so the EQ tab's borrow found it not live and never retried. It now borrows again once the link is live.
 - [x] **Remove the duplicate meter from the Input tab:** the fader row above already shows the level (decided 2026-10-09).
@@ -36,7 +36,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 - [ ] **Load strips in parallel, show them as they arrive?** Ask the desk for all strips at once and show each row disabled (a placeholder) until its values are in, then make it active. Measure connect and reconnect time first; build it only if it gets them significantly faster.
 - [ ] **Meters only for the strips in view?** Draw (or update) meters only for the rows on screen, not every strip. Measure first; if it saves only 1–2 % CPU, it isn't worth it and this item goes.
-- [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 17.0: iPhone XS/XR, SE 2nd gen). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
+- [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
 
 ## Features
 
@@ -91,4 +91,3 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - The compressor knee is drawn at 2 dB per step: the doc gives the 0–5 knee setting no unit.
 - Gate curves (EXPn 1:n, GATE, DUCK) follow the engineer's confirmation; the doc only lists the modes.
 - The EQ and low-cut curves are RBJ and Butterworth approximations, not measurements of the desk.
-- Xcode's built-in iOS 17.4 simulator doesn't take clicks. Use an iOS 27 simulator for trying the app by hand.

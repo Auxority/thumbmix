@@ -51,7 +51,7 @@ struct EditStripSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }.buttonStyle(.darkCapsule)
                 }
-                .withoutSharedGlass()
+                .sharedBackgroundVisibility(.hidden)
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         mirror.edit(strip, name: name, color: color, icon: icon)
@@ -62,7 +62,7 @@ struct EditStripSheet: View {
                     .buttonStyle(.darkCapsule)
                     .disabled(!mirror.isLive)
                 }
-                .withoutSharedGlass()
+                .sharedBackgroundVisibility(.hidden)
             }
         }
     }

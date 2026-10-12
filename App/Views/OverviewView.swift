@@ -37,7 +37,7 @@ struct OverviewView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Disconnect", action: onDisconnect).buttonStyle(.darkCapsule)
                 }
-                .withoutSharedGlass()
+                .sharedBackgroundVisibility(.hidden)
             }
             .navigationDestination(item: $openStrip) { strip in
                 ChannelView(strip: strip, mirror: mirror)
