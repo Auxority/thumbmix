@@ -18,13 +18,16 @@ extension XCUIElement {
 }
 
 extension XCUIElement {
-    /// True once the element stands still: a sheet still sliding in shows its buttons half drawn.
+    /// True once the element has stood still for 5 looks (250 ms): a sheet still sliding in shows its buttons
+    /// half drawn, and one unchanged look can fall between two animation frames.
     func settles(within timeout: TimeInterval) -> Bool {
         var last = CGRect.null
+        var stillLooks = 0
         return eventually(within: timeout) {
             let now = frame
-            defer { last = now }
-            return now == last
+            stillLooks = now == last ? stillLooks + 1 : 0
+            last = now
+            return stillLooks >= 5
         }
     }
 }

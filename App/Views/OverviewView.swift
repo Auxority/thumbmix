@@ -35,9 +35,9 @@ struct OverviewView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Disconnect", action: onDisconnect).buttonStyle(.outlineCapsule)
+                    Button("Disconnect", action: onDisconnect).buttonStyle(.darkCapsule)
                 }
-                .withoutGlass()
+                .withoutSharedGlass()
             }
             .navigationDestination(item: $openStrip) { strip in
                 ChannelView(strip: strip, mirror: mirror)

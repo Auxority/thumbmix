@@ -35,7 +35,7 @@ struct ConnectView: View {
                         .padding(12)
                         .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
                     Button("Connect") { model.connect(to: trimmedAddress) }
-                        .buttonStyle(.prominentOutlineCapsule)
+                        .buttonStyle(.prominentDarkCapsule)
                         .disabled(!canConnect)
                 }
             }
