@@ -17,7 +17,6 @@ struct TapPointSection: View {
             header(tap)
             TapChainBar(chain: chain, tap: tap) { block in select(block, in: chain, current: tap) }
             explanation(chain, tap)
-            if let partner = sharedWith { Text("\(partner) shares this tap point.").font(.footnote).foregroundStyle(Theme.secondaryText) }
         }
         .padding(.top, 6)
         // The desk's value, never a guess: the chain waits until the tap point has been read.
@@ -60,12 +59,6 @@ struct TapPointSection: View {
         .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// An unlinked odd send's tap point is the pair's (the desk sets it per two buses; m32-probe 10b).
-    private var sharedWith: String? {
-        guard !mirror.isLinked(target), let partner = target.partner else { return nil }
-        return mirror.name(partner)
-    }
-
     private func select(_ block: TapBlock, in chain: TapChain, current: SendTap?) {
         guard let current else { return }
         let next = chain.tap(afterTapping: block, current: current)
@@ -79,29 +72,45 @@ struct TapPointSection: View {
     }
 }
 
-/// Input › Gate › EQ › Comp › Fader (› Pan), lit up to the tap point.
+/// Input › Gate › EQ › Comp › Fader (› Pan or Group), lit up to the tap point by one capsule that slides when the tap
+/// changes: per-block fills switched one by one and their rounded end jumped (the user found it choppy, 2026-10-12).
 private struct TapChainBar: View {
     let chain: TapChain
     let tap: SendTap?
     let select: (TapBlock) -> Void
     @ScaledMetric private var height: CGFloat = 36
+    /// Each block's right edge in the bar, so the capsule can end at the last block the send hears.
+    @State private var edges: [TapBlock: CGFloat] = [:]
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(Array(chain.blocks.enumerated()), id: \.element) { index, block in
                 if index > 0 {
                     Text("›").font(.footnote).foregroundStyle(Theme.secondaryText).frame(height: height)
-                        .background { (isLit(block) ? Self.lit : .clear).padding(.leading, -1) }
                         .accessibilityHidden(true)
                 }
-                blockButton(block, isFirst: index == 0)
+                blockButton(block)
+                    .onGeometryChange(for: CGFloat.self) {
+                        $0.frame(in: .named(Self.space)).maxX
+                    } action: {
+                        edges[block] = $0
+                    }
             }
         }
+        .background(alignment: .leading) {
+            Capsule().fill(Self.lit).frame(width: litWidth).animation(Self.slide, value: litWidth)
+        }
+        .coordinateSpace(.named(Self.space))
         .padding(4)
         .background(Theme.track, in: Capsule())
     }
 
-    private func blockButton(_ block: TapBlock, isFirst: Bool) -> some View {
+    private var litWidth: CGFloat {
+        guard let tap else { return 0 }
+        return edges[chain.lastBlock(tap)] ?? 0
+    }
+
+    private func blockButton(_ block: TapBlock) -> some View {
         let isLit = isLit(block)
         let isLast = tap.map { chain.lastBlock($0) == block } ?? false
         return Button {
@@ -113,15 +122,7 @@ private struct TapChainBar: View {
                 .minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity, minHeight: height)
                 .foregroundStyle(isLit ? Color.green : Theme.secondaryText)
-                .background {
-                    (isLit ? Self.lit : .clear)
-                        .clipShape(
-                            UnevenRoundedRectangle(
-                                topLeadingRadius: isFirst ? height / 2 : 0, bottomLeadingRadius: isFirst ? height / 2 : 0,
-                                bottomTrailingRadius: isLast ? height / 2 : 0, topTrailingRadius: isLast ? height / 2 : 0)
-                        )
-                        .padding(.leading, isFirst ? 0 : -1)
-                }
+                .animation(Self.slide, value: isLit)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -132,7 +133,7 @@ private struct TapChainBar: View {
 
     private func isLit(_ block: TapBlock) -> Bool { tap.map { chain.reaches(block, at: $0) } ?? false }
 
-    /// Opaque, and each lit piece reaches a point under its left neighbour: fills that only touched left a hairline
-    /// seam where the widths round to pixels.
+    private static let space = "tapChain"
+    private static let slide = Animation.snappy(duration: 0.28)
     private static let lit = Theme.track.mix(with: .green, by: 0.22)
 }

@@ -2,7 +2,8 @@ import SwiftUI
 import ThumbmixCore
 
 /// Where this strip goes: one row per bus (from a channel) or matrix (from a bus or main), named and coloured as on the desk.
-/// A linked pair is one send, as on the desk. Every odd send has a tap point, so its › opens its settings (`SendSheet`).
+/// The desk keeps one tap point per pair of buses, so a pair shares one tall › that opens its settings (`SendSheet`,
+/// mock B): a linked pair is one send, an unlinked pair two rows beside the same ›.
 struct SendsTab: View {
     let strip: StripID
     let mirror: ConsoleMirror
@@ -11,18 +12,20 @@ struct SendsTab: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 6) {
-                ForEach(mirror.sendTargets(of: strip)) { target in
-                    let isPair = mirror.isLinked(target)
+                ForEach(mirror.sendPairs(of: strip), id: \.self) { pair in
                     HStack(spacing: 8) {
-                        SendRow(
-                            source: strip, target: target, title: isPair ? mirror.pairName(target) : mirror.name(target),
-                            accent: Theme.color(mirror.color(target)), mirror: mirror)
-                        if Catalog.sendTap(from: strip, to: target) != nil {
-                            SendSettingsButton(address: Catalog.sendLevel(from: strip, to: target).address) {
-                                openSend = target
+                        VStack(spacing: 6) {
+                            ForEach(pair) { target in
+                                SendRow(
+                                    source: strip, target: target, title: title(target),
+                                    accent: Theme.color(mirror.color(target)), mirror: mirror)
                             }
                         }
+                        SendSettingsButton(address: Catalog.sendLevel(from: strip, to: pair[0]).address) {
+                            openSend = pair[0]
+                        }
                     }
+                    .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
@@ -37,6 +40,10 @@ struct SendsTab: View {
                 .presentationBackground { Color.clear.glassEffect(.regular.tint(.black), in: .rect) }
         }
     }
+
+    private func title(_ target: StripID) -> String {
+        mirror.isLinked(target) ? mirror.pairName(target) : mirror.name(target)
+    }
 }
 
 private struct SendSettingsButton: View {
@@ -48,7 +55,8 @@ private struct SendSettingsButton: View {
         Button(action: open) {
             Image(systemName: "chevron.right")
                 .font(.body.weight(.semibold))
-                .frame(width: size * 0.8, height: size)
+                .frame(width: size * 0.8)
+                .frame(minHeight: size, maxHeight: .infinity)
                 .foregroundStyle(Theme.secondaryText)
                 .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
         }
