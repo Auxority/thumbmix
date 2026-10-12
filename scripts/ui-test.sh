@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Runs the UI suite on clones of the iPhone SE simulator, a few test classes at a time. Each test starts its
 # own fake desk inside the test runner (UITests/TestDesk.swift), so no fake-m32 needs to run beside it.
-# Extra arguments go to xcodebuild, e.g. -only-testing:ThumbmixUITests/EQUITests.
+#   scripts/ui-test.sh                         the whole suite, on clones
+#   scripts/ui-test.sh EQUITests/testX ...     only those tests (or classes), one at a time on the SE itself
+#   scripts/ui-test.sh --serial                the whole suite on the SE itself, when cloning fails
+# Other arguments starting with - go to xcodebuild. Screenshots land in build/screens. A run whose first test
+# hasn't started after 2 minutes has hung (CLAUDE.md, "A hung UI run") and is stopped.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 log=build/ui-test.log
@@ -16,13 +20,46 @@ if [ "$destination" = "id=" ]; then
   exit 1
 fi
 
-mkdir -p build
+# The odd expansions below keep empty arrays safe under `set -u` in macOS's bash 3.2.
+only=()
+passthrough=()
+serial=false
+for arg in "$@"; do
+  case "$arg" in
+    --serial) serial=true ;;
+    -*) passthrough+=("$arg") ;;
+    *) only+=("-only-testing:ThumbmixUITests/$arg") ;;
+  esac
+done
+[ ${#only[@]} -gt 0 ] && serial=true
+if $serial; then
+  parallel=(-parallel-testing-enabled NO)
+else
+  parallel=(-parallel-testing-enabled YES -parallel-testing-worker-count "${UI_TEST_WORKERS:-3}")
+fi
+
+mkdir -p build/screens
+export TEST_RUNNER_SCREENSHOT_DIR="$PWD/build/screens"
 xcodegen generate --quiet
-echo "Running the UI suite on: $destination (full log: $log)"
+echo "Running the UI tests on: $destination (full log: $log)"
+xcodebuild test -project Thumbmix.xcodeproj -scheme Thumbmix -destination "$destination" "${parallel[@]}" \
+  -collect-test-diagnostics never ${only[@]+"${only[@]}"} ${passthrough[@]+"${passthrough[@]}"} > "$log" 2>&1 &
+run=$!
+
+# Building takes up to a minute or two; the 2 minutes start once the build has finished.
+waited=0
+until grep -qE "Test [Cc]ase .* (started|passed|failed)|\*\* TEST (SUCCEEDED|FAILED|EXECUTE)" "$log" 2>/dev/null; do
+  kill -0 "$run" 2>/dev/null || break
+  if grep -q "Testing started" "$log" 2>/dev/null; then waited=$((waited + 5)); fi
+  if [ "$waited" -ge 120 ]; then
+    kill "$run" 2>/dev/null || true
+    echo "No test started within 2 minutes of the build: the run hung and was stopped. See CLAUDE.md, \"A hung UI run\"." >&2
+    exit 2
+  fi
+  sleep 5
+done
 status=0
-xcodebuild test -project Thumbmix.xcodeproj -scheme Thumbmix -destination "$destination" \
-  -parallel-testing-enabled YES -parallel-testing-worker-count "${UI_TEST_WORKERS:-3}" \
-  -collect-test-diagnostics never "$@" > "$log" 2>&1 || status=$?
+wait "$run" || status=$?
 
 grep -E ": error: |Test [Cc]ase .* failed" "$log" | sort -u || true
 grep -E "Executed [0-9]+ tests?, with|Test session results" "$log" | tail -1 || true
