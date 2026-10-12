@@ -53,6 +53,8 @@ xcodegen generate && open Thumbmix.xcodeproj
 - how stereo links behave: the Link Preferences, which side moves when a linked fader moves, what linking copies,
   and whether an unticked preference really keeps the sides apart (it asks you to act on the desk)
 - whether the desk's own dB text for each input fader matches what the app shows
+- whether a linked bus pair's send moves both buses, and whether a linked channel pair keeps a send pan per side
+  (it asks you to act on the desk)
 
 ## Acceptance checklist (real M32)
 

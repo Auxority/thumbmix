@@ -31,6 +31,16 @@
         }
       }
     },
+    "%@ → %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ → %2$@"
+          }
+        }
+      }
+    },
     "%@ and %@" : {
       "localizations" : {
         "en" : {
@@ -142,6 +152,9 @@
     "Fader and mute aren't linked on the desk." : {
 
     },
+    "Follow LR pan" : {
+
+    },
     "Gain and delay aren't linked on the desk." : {
 
     },
@@ -209,6 +222,9 @@
     "On" : {
 
     },
+    "Pan settings" : {
+
+    },
     "Red" : {
 
     },
@@ -250,9 +266,6 @@
 
     },
     "Shares an input with %@" : {
-
-    },
-    "Show unused" : {
 
     },
     "Stereo link" : {

@@ -33,6 +33,19 @@ struct CatalogTests {
         #expect(Catalog.headampIndex(forInput: 32) == "/-ha/31/index")
     }
 
+    /// The desk keeps one pan per odd send, for the pair it feeds when linked (doc p.26).
+    @Test func onlyOddSendsHaveAPan() {
+        let vox = StripID(.input, 13)
+        #expect(Catalog.sendPan(from: vox, to: StripID(.bus, 5))?.address == "/ch/13/mix/05/pan")
+        #expect(Catalog.sendPan(from: vox, to: StripID(.bus, 6)) == nil)
+        #expect(Catalog.sendPan(from: StripID(.bus, 1), to: StripID(.matrix, 3))?.address == "/bus/01/mix/03/pan")
+        #expect(Catalog.sendPanFollow(from: vox, to: StripID(.bus, 5))?.address == "/ch/13/mix/05/panFollow")
+        #expect(Catalog.sendPanFollow(from: vox, to: StripID(.bus, 6)) == nil)
+        #expect(!Catalog.syncAddresses().contains("/auxin/01/mix/01/pan"), "no Sends tab shows it: not worth the sync")
+        #expect(DemoState.values()["/ch/13/mix/05/panFollow"] == .int(0), "a toggle, not mid-travel")
+        #expect(DemoState.values()["/ch/13/mix/05/pan"] == .float(0.5), "centre")
+    }
+
     @Test func eqBandCounts() {
         #expect(StripID(.input, 1).eqBandCount == 4)
         #expect(StripID(.bus, 1).eqBandCount == 6)
@@ -127,6 +140,8 @@ struct CatalogTests {
         case .sends:
             (strip.kind.sendTarget.map(StripID.all) ?? []).flatMap {
                 [Catalog.sendLevel(from: strip, to: $0).address, Catalog.sendOn(from: strip, to: $0).address]
+                    + [Catalog.sendPan(from: strip, to: $0)?.address, Catalog.sendPanFollow(from: strip, to: $0)?.address]
+                    .compactMap { $0 }
             }
         case .fedBy:
             strip.kind.feeders.flatMap(StripID.all).map { Catalog.sendLevel(from: $0, to: strip).address }

@@ -642,6 +642,16 @@
         }
       }
     },
+    "Follow LR pan" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Follow LR pan"
+          }
+        }
+      }
+    },
     "Pan" : {
       "localizations" : {
         "en" : {

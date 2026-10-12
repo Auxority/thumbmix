@@ -45,6 +45,8 @@ struct LinkModelTests {
 
     @Test func panAndLabelsAreNeverShared() {
         #expect(LinkSection.of(suffix: "/mix/pan") == nil)
+        #expect(LinkSection.of(suffix: "/mix/05/pan") == nil, "each side places itself in the bus pair")
+        #expect(LinkSection.of(suffix: "/mix/05/panFollow") == nil)
         #expect(LinkSection.of(suffix: "/config/name") == nil)
         #expect(LinkSection.of(suffix: "/grp/dca") == nil)
     }

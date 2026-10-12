@@ -44,6 +44,56 @@ final class SendsUITests: DeskUITestCase {
         XCTAssertEqual(toMon1.value as? String, "0.0 dB")
     }
 
+    /// A linked bus pair is one send, and its › opens the pan settings (mock H): the pan and Follow LR pan reach the
+    /// desk, and while the send follows the LR pan its own pan can't be dragged.
+    func testALinkedBusPairIsOneSendWithPanSettings() {
+        desk.change("/config/buslink/5-6", 1)
+        launch()
+        open("Vox 1")
+        app.buttons["Sends"].tap()
+        let toPair = element("/ch/13/mix/05/level")
+        XCTAssertTrue(toPair.appears(within: 2))
+        XCTAssertEqual(toPair.label, "Bus 5-6")
+        XCTAssertFalse(element("/ch/13/mix/06/level").exists, "the even bus is part of the pair's send")
+        XCTAssertFalse(element("settings-/ch/13/mix/01/level").exists, "an unlinked bus has no pan to set")
+
+        element("settings-/ch/13/mix/05/level").tap()
+        let pan = element("/ch/13/mix/05/pan")
+        XCTAssertTrue(pan.appears(within: 2))
+        XCTAssertEqual(pan.value as? String, "C")
+        drag(pan)
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/mix/05/pan") != .float(0.5) }, "the pan reached the desk")
+
+        app.switches["follow-/ch/13/mix/05/panFollow"].coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/mix/05/panFollow") == .int(1) })
+        XCTAssertTrue(eventually(within: 2) { !pan.isEnabled }, "the desk ignores the send's own pan now")
+        saveScreenshot("send-sheet")
+    }
+
+    /// The demo links Gtr L/R (9-10): each side keeps its own send pan, as it keeps its own LR pan.
+    func testALinkedSourceHasASendPanPerSide() {
+        desk.change("/config/buslink/5-6", 1)
+        launch()
+        app.swipeUp()
+        open("Gtr")
+        app.buttons["Sends"].tap()
+        element("settings-/ch/09/mix/05/level").tap()
+        let left = element("/ch/09/mix/05/pan")
+        XCTAssertTrue(left.appears(within: 2))
+        XCTAssertEqual(left.label, "Pan · Gtr L")
+        XCTAssertEqual(element("/ch/10/mix/05/pan").label, "Pan · Gtr R")
+        saveScreenshot("send-sheet-pair")
+
+        drag(left)
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/09/mix/05/pan") != .float(0.5) })
+        XCTAssertEqual(desk.value("/ch/10/mix/05/pan"), .float(0.5), "the right side's pan stays its own")
+    }
+
+    private func drag(_ row: XCUIElement) {
+        row.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .press(forDuration: 0.05, thenDragTo: row.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.5)))
+    }
+
     func testFedByShowsWhoFeedsTheBus() {
         launch()
         app.buttons["Buses"].tap()

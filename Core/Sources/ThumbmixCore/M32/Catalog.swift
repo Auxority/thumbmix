@@ -193,6 +193,21 @@ public enum Catalog {
         ParamSpec(sendPrefix(strip, target) + "/on", CoreStrings.text("On"), .toggle, .plain)
     }
 
+    /// Only odd sends have a pan (doc p.26): it places the strip in the linked pair it feeds. On a mono, unlinked
+    /// bus it does nothing (the user, from the desk), so the app shows it only on linked pairs.
+    public static func sendPan(from strip: StripID, to target: StripID) -> ParamSpec? {
+        guard !target.number.isMultiple(of: 2) else { return nil }
+        return ParamSpec(
+            sendPrefix(strip, target) + "/pan", CoreStrings.text("Pan"), .linear(min: -100, max: 100, step: 2), .pan,
+            reset: 0)
+    }
+
+    /// On, the send takes the strip's own LR pan instead of `sendPan` (doc p.26, FW 4.0+; odd sends only).
+    public static func sendPanFollow(from strip: StripID, to target: StripID) -> ParamSpec? {
+        guard !target.number.isMultiple(of: 2) else { return nil }
+        return ParamSpec(sendPrefix(strip, target) + "/panFollow", CoreStrings.text("Follow LR pan"), .toggle, .plain)
+    }
+
     /// Every address the mirror reads on connect; the mirror goes live once all have answered.
     public static func syncAddresses() -> [String] {
         StripKind.allCases.flatMap(StripID.all).flatMap(addresses(of:)) + headampAddresses() + rtaAddresses
@@ -229,9 +244,16 @@ public enum Catalog {
 
     private static func sendAddresses(_ strip: StripID) -> [String] {
         guard let target = strip.kind.sendTarget else { return [] }
+        // A send's pan settings are read only where a Sends tab shows them: they'd add ~13 % to every connect.
+        let showsSettings = ChannelTab.tabs(for: strip.kind).contains(.sends)
         return StripID.all(target).flatMap {
             [sendLevel(from: strip, to: $0).address, sendOn(from: strip, to: $0).address]
+                + (showsSettings ? sendSettingsAddresses(from: strip, to: $0) : [])
         }
+    }
+
+    private static func sendSettingsAddresses(from strip: StripID, to target: StripID) -> [String] {
+        [sendPan(from: strip, to: target)?.address, sendPanFollow(from: strip, to: target)?.address].compactMap { $0 }
     }
 
     private static func headampAddresses() -> [String] {

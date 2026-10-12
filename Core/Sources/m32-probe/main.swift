@@ -209,4 +209,18 @@ for input in 1...32 {
     print(String(format: "ch %02d step %4d ", input, step) + "desk \(deskText) app \(app)" + (desk == app ? "" : "  <- DIFFERS"))
 }
 print("RESULT: \(faderMismatches) of 32 differ. Each DIFFERS line goes in FaderLaw.deskExceptions (by step).")
+
+// The Sends tab shows a linked bus pair as one send with a pan (Catalog.sendPan, ConsoleMirror.sendTargets),
+// assuming the desk copies the odd send to the even one.
+print("\n== 9. Send pan: on the DESK, link buses 1-2, then move channel 1's send to them (20 seconds)...")
+let pairSends = await listen(seconds: 20).filter { $0.address.hasPrefix("/ch/01/mix/0") && $0.address.hasSuffix("/level") }
+print("sends pushed: " + Set(pairSends.map(\.address)).sorted().joined(separator: ", "))
+print("RESULT: /mix/01 and /mix/02 = the desk copies the odd send (the app's guess); /mix/01 only = it doesn't.")
+
+// The app keeps a linked channel pair's send pans per side (LinkSection.of), like its LR pans.
+print("\n9a. On the DESK, keep buses 1-2 linked, then turn the bus 1-2 send pan of one side of a linked channel pair (20 s)...")
+let pairPans = await listen(seconds: 20).filter { $0.address.hasSuffix("/mix/01/pan") }
+print("send pans pushed: " + Set(pairPans.map(\.address)).sorted().joined(separator: ", "))
+print("RESULT: one channel = each side keeps its own (the app's guess); both = the desk copies it.")
+
 transport.cancel()
