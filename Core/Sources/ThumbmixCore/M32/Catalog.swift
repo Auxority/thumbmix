@@ -208,6 +208,21 @@ public enum Catalog {
         return ParamSpec(sendPrefix(strip, target) + "/panFollow", CoreStrings.text("Follow LR pan"), .toggle, .plain)
     }
 
+    /// Where the odd send is taken from the strip (`SendTap`, doc p.26). The doc lists GRP for channels only, but
+    /// gives a bus send's range as 0...5 too, so every send keeps all six.
+    public static func sendTap(from strip: StripID, to target: StripID) -> ParamSpec? {
+        guard !target.number.isMultiple(of: 2) else { return nil }
+        return ParamSpec(
+            sendPrefix(strip, target) + "/type", CoreStrings.text("Tap point"),
+            .choice(["IN/LC", "<-EQ", "EQ->", "PRE", "POST", "GRP"]), .plain)
+    }
+
+    /// Whether the strip's comp sits before (0) or after (1) its EQ (doc p.25): the tap chain follows it.
+    public static func dynamicsPosition(_ strip: StripID) -> ParamSpec? {
+        guard strip.hasDynamics else { return nil }
+        return ParamSpec(strip.prefix + "/dyn/pos", CoreStrings.text("Comp position"), .choice(["PRE", "POST"]), .plain)
+    }
+
     /// Every address the mirror reads on connect; the mirror goes live once all have answered.
     public static func syncAddresses() -> [String] {
         StripKind.allCases.flatMap(StripID.all).flatMap(addresses(of:)) + headampAddresses() + rtaAddresses
@@ -234,7 +249,7 @@ public enum Catalog {
     }
 
     private static func dynamicsAddresses(_ strip: StripID) -> [String] {
-        strip.hasDynamics ? dynamics(strip).all.map(\.address) : []
+        strip.hasDynamics ? dynamics(strip).all.map(\.address) + [dynamicsPosition(strip)?.address].compactMap { $0 } : []
     }
 
     private static func eqAddresses(_ strip: StripID) -> [String] {
@@ -244,7 +259,7 @@ public enum Catalog {
 
     private static func sendAddresses(_ strip: StripID) -> [String] {
         guard let target = strip.kind.sendTarget else { return [] }
-        // A send's pan settings are read only where a Sends tab shows them: they'd add ~13 % to every connect.
+        // A send's settings are read only where a Sends tab shows them: they'd add ~15 % to every connect.
         let showsSettings = ChannelTab.tabs(for: strip.kind).contains(.sends)
         return StripID.all(target).flatMap {
             [sendLevel(from: strip, to: $0).address, sendOn(from: strip, to: $0).address]
@@ -253,7 +268,10 @@ public enum Catalog {
     }
 
     private static func sendSettingsAddresses(from strip: StripID, to target: StripID) -> [String] {
-        [sendPan(from: strip, to: target)?.address, sendPanFollow(from: strip, to: target)?.address].compactMap { $0 }
+        [
+            sendPan(from: strip, to: target)?.address, sendPanFollow(from: strip, to: target)?.address,
+            sendTap(from: strip, to: target)?.address,
+        ].compactMap { $0 }
     }
 
     private static func headampAddresses() -> [String] {

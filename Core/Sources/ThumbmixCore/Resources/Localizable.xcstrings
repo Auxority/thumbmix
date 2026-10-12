@@ -41,6 +41,26 @@
         }
       }
     },
+    "After EQ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After EQ"
+          }
+        }
+      }
+    },
+    "After fader" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After fader"
+          }
+        }
+      }
+    },
     "Attack" : {
       "localizations" : {
         "en" : {
@@ -98,6 +118,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bass & guitar"
+          }
+        }
+      }
+    },
+    "Before EQ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before EQ"
+          }
+        }
+      }
+    },
+    "Before fader" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before fader"
           }
         }
       }
@@ -173,12 +213,32 @@
         }
       }
     },
+    "comp" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "comp"
+          }
+        }
+      }
+    },
     "Comp" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comp"
+          }
+        }
+      }
+    },
+    "Comp position" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comp position"
           }
         }
       }
@@ -324,6 +384,16 @@
         }
       }
     },
+    "fader" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fader"
+          }
+        }
+      }
+    },
     "Fader" : {
       "localizations" : {
         "en" : {
@@ -351,6 +421,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fed by"
+          }
+        }
+      }
+    },
+    "Follow LR pan" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Follow LR pan"
+          }
+        }
+      }
+    },
+    "Follows your fader and the channel’s own pan, at a fixed 0 dB: the level and pan here step aside." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Follows your fader and the channel’s own pan, at a fixed 0 dB: the level and pan here step aside."
+          }
+        }
+      }
+    },
+    "Follows your fader at a fixed 0 dB: the level here steps aside." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Follows your fader at a fixed 0 dB: the level here steps aside."
           }
         }
       }
@@ -416,12 +516,42 @@
         }
       }
     },
+    "gate" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gate"
+          }
+        }
+      }
+    },
     "Gate" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gate"
+          }
+        }
+      }
+    },
+    "group" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "group"
+          }
+        }
+      }
+    },
+    "Group" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Group"
           }
         }
       }
@@ -436,8 +566,17 @@
         }
       }
     },
+    "input" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "input"
+          }
+        }
+      }
+    },
     "Input" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -632,6 +771,16 @@
         }
       }
     },
+    "Only the raw input reaches this mix: your %@ don’t." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only the raw input reaches this mix: your %@ don’t."
+          }
+        }
+      }
+    },
     "Other" : {
       "localizations" : {
         "en" : {
@@ -642,12 +791,12 @@
         }
       }
     },
-    "Follow LR pan" : {
+    "pan" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Follow LR pan"
+            "value" : "pan"
           }
         }
       }
@@ -668,6 +817,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peak level"
+          }
+        }
+      }
+    },
+    "Post-EQ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Post-EQ"
+          }
+        }
+      }
+    },
+    "Post-fader" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Post-fader"
+          }
+        }
+      }
+    },
+    "Pre-EQ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pre-EQ"
+          }
+        }
+      }
+    },
+    "Pre-fader" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pre-fader"
+          }
+        }
+      }
+    },
+    "Pull your fader down and this mix drops too: the usual choice for effects." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull your fader down and this mix drops too: the usual choice for effects."
           }
         }
       }
@@ -712,6 +911,16 @@
         }
       }
     },
+    "Riding your fader won’t change this mix: the usual choice for wedges and in-ears." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riding your fader won’t change this mix: the usual choice for wedges and in-ears."
+          }
+        }
+      }
+    },
     "Sends" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -739,6 +948,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Speakers & routing"
+          }
+        }
+      }
+    },
+    "Subgroup" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subgroup"
+          }
+        }
+      }
+    },
+    "Tap point" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap point"
+          }
+        }
+      }
+    },
+    "The %@ reach this mix; your %@ doesn’t." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The %1$@ reach this mix; your %2$@ doesn’t."
+          }
+        }
+      }
+    },
+    "The %@ reach this mix; your %@ don’t." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The %1$@ reach this mix; your %2$@ don’t."
+          }
+        }
+      }
+    },
+    "The %@ reaches this mix; your %@ doesn’t." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The %1$@ reaches this mix; your %2$@ doesn’t."
+          }
+        }
+      }
+    },
+    "The %@ reaches this mix; your %@ don’t." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The %1$@ reaches this mix; your %2$@ don’t."
           }
         }
       }

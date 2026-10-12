@@ -87,7 +87,8 @@ public enum DemoState {
         ("/config/name", .string("")), ("/config/color", .int(0)), ("/config/icon", .int(1)), ("/grp/dca", .int(0)),
         // Delay before the generic "/on": the demo's delays start off, at 0.3 ms.
         ("/delay/on", .int(0)), ("/delay/time", .float(0)),
-        ("/phantom", .int(0)), ("/panFollow", .int(0)), ("/hpon", .int(0)), ("/hpslope", .int(2)), ("/on", .int(1)), ("/type", .int(2)),
+        ("/phantom", .int(0)), ("/panFollow", .int(0)), ("/dyn/pos", .int(1)), ("/hpon", .int(0)), ("/hpslope", .int(2)), ("/on", .int(1)),
+        ("/type", .int(2)),
         ("/dyn/mode", .int(0)), ("/dyn/det", .int(0)), ("/dyn/env", .int(1)), ("/mode", .int(3)), ("/ratio", .int(3)),
         ("/fader", .float(0)), ("/level", .float(0)), ("/rta/source", .int(0)), ("/rta/pos", .int(0)),
     ]
@@ -98,6 +99,8 @@ public enum DemoState {
         // Every Link Preference ticked, every pair unlinked: a desk after a reset (assumed; m32-probe section 7).
         if address.hasPrefix("/config/linkcfg/") { return .int(1) }
         if address.hasPrefix("/config/") { return .int(0) }
+        // A send's tap point, before the EQ type's "/type": the demo's wedges are fed before the fader.
+        if address.contains("/mix/"), address.hasSuffix("/type") { return .int(Int32(SendTap.preFader.rawValue)) }
         return defaultsBySuffix.first { address.hasSuffix($0.suffix) }?.value ?? .float(0.5)
     }
 }

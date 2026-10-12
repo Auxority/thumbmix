@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "›" : {
+
+    },
     "“%@” is out of range. %@" : {
       "localizations" : {
         "en" : {
@@ -63,6 +66,9 @@
           }
         }
       }
+    },
+    "%@ shares this tap point." : {
+
     },
     "%lld" : {
 
@@ -170,7 +176,16 @@
     "Icon" : {
 
     },
+    "In this mix" : {
+
+    },
     "Inverted" : {
+
+    },
+    "It follows %@’s fader and pan at a fixed 0 dB, whatever its level is now." : {
+
+    },
+    "It follows %@’s fader at a fixed 0 dB, whatever its level is now." : {
 
     },
     "LC" : {
@@ -190,6 +205,12 @@
       }
     },
     "Magenta" : {
+
+    },
+    "Make subgroup" : {
+
+    },
+    "Make this send a subgroup?" : {
 
     },
     "Mute %@" : {
@@ -216,13 +237,13 @@
     "No reply from %@. Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix." : {
 
     },
+    "Not in this mix" : {
+
+    },
     "Off" : {
 
     },
     "On" : {
-
-    },
-    "Pan settings" : {
 
     },
     "Red" : {
@@ -259,6 +280,9 @@
     "Search icons" : {
 
     },
+    "Send settings" : {
+
+    },
     "Sends aren't linked on the desk." : {
 
     },
@@ -275,6 +299,12 @@
 
     },
     "Syncing %lld%%" : {
+
+    },
+    "Tap point" : {
+
+    },
+    "Tap point · %@" : {
 
     },
     "the console" : {

@@ -55,6 +55,8 @@ xcodegen generate && open Thumbmix.xcodeproj
 - whether the desk's own dB text for each input fader matches what the app shows
 - whether a linked bus pair's send moves both buses, and whether a linked channel pair keeps a send pan per side
   (it asks you to act on the desk)
+- what each send tap point really hears, by bus meters while you change the desk: a comp before the EQ in a Pre-EQ
+  send, one tap for both buses of a pair, mute and pre-fader sends, Subgroup's fixed level, and Follow LR pan
 
 ## Acceptance checklist (real M32)
 
