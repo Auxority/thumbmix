@@ -2,7 +2,7 @@
 
 iPhone remote for the Midas M32 over OSC/UDP. `Core/` (Swift package: protocol, state, UI maths, all unit-tested) and `App/` (thin SwiftUI layer).
 
-Read `TODO.md` when choosing what to work on next or picking the project back up; tick an item off in the PR that finishes it.
+Read `TODO.md` when choosing what to work on next or picking the project back up; the PR that finishes an item deletes it from the file. Read `DECISIONS.md` before changing how something already behaves: it holds the settled choices and why. Anything lasting a finished item decided goes there.
 
 Read `README.md` before building or running the app, starting `fake-m32`, running `m32-probe`, building the IPA, or checking work against the real-console acceptance checklist: it holds those commands and that list.
 
