@@ -1,6 +1,6 @@
 import XCTest
 
-/// Holding a slider row types its value in the system alert; dragging away from the row drags finer.
+/// Holding a slider row types its value in the system alert.
 @MainActor
 final class ValueInputUITests: DeskUITestCase {
     private func holdKicksFader() -> (fader: XCUIElement, alert: XCUIElement) {
@@ -59,9 +59,10 @@ final class ValueInputUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { frequency.value as? String == "991 Hz" })
     }
 
-    /// The same sideways travel moves the value less when the finger strays below the row. The row only claims a
-    /// mostly sideways drag, and XCUITest drags in a straight line, so the finger leaves the row on a shallow slant.
-    func testDraggingAwayFromTheRowIsFiner() {
+    /// One speed wherever the finger is: the finer speeds off the row came too late for a small nudge, so exact
+    /// values are typed instead (2026-10-12). The row only claims a mostly sideways drag, and XCUITest drags in a
+    /// straight line, so the finger leaves the row on a shallow slant.
+    func testDraggingAwayFromTheRowKeepsItsSpeed() {
         launch()
         open("Kick")
         app.buttons["Input"].tap()
@@ -75,7 +76,7 @@ final class ValueInputUITests: DeskUITestCase {
         start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 160, dy: 150)))
         let farBelow = decibels(trim)
         XCTAssertGreaterThan(alongTheRow, 0)
-        XCTAssertLessThan(farBelow, alongTheRow * 0.9, "\(farBelow) dB far below vs \(alongTheRow) dB along")
+        XCTAssertEqual(farBelow, alongTheRow, accuracy: 0.5, "\(farBelow) dB far below vs \(alongTheRow) dB along")
     }
 
     /// "+6.0 dB" or "−3.5 dB" as a number.

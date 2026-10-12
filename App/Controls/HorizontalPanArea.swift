@@ -5,8 +5,8 @@ import UIKit
 /// scroll the list. SwiftUI's DragGesture can't decline a drag once it starts; UIKit's delegate can.
 struct HorizontalPanArea: UIViewRepresentable {
     var onBegan: () -> Void
-    /// Each movement since the last, and how far the finger is above or below the area (0 on it).
-    var onMoved: (_ distance: CGFloat, _ width: CGFloat, _ outside: CGFloat) -> Void
+    /// Each movement since the last.
+    var onMoved: (_ distance: CGFloat, _ width: CGFloat) -> Void
     var onEnded: () -> Void
     var onDoubleTap: () -> Void
     var onHold: () -> Void
@@ -52,9 +52,7 @@ struct HorizontalPanArea: UIViewRepresentable {
                 parent.onBegan()
             case .changed:
                 let x = recognizer.translation(in: view).x
-                let y = recognizer.location(in: view).y
-                let outside = y < 0 ? -y : Swift.max(0, y - view.bounds.height)
-                parent.onMoved(x - lastX, view.bounds.width, outside)
+                parent.onMoved(x - lastX, view.bounds.width)
                 lastX = x
             case .ended, .cancelled, .failed: parent.onEnded()
             default: break
