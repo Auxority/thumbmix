@@ -43,13 +43,28 @@ struct MirrorStripTests {
     }
 
     @Test func headampFromIndexAndSharing() {
-        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 1), [.int(32)]))
-        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 2), [.int(32)]))
-        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 3), [.int(-1)]))
-        #expect(mirror.headamp(forInput: 1) == 32)
-        #expect(mirror.headamp(forInput: 3) == nil)
-        #expect(mirror.inputsSharingHeadamp(withInput: 1) == [2])
-        #expect(mirror.inputsSharingHeadamp(withInput: 3) == [])
+        let (ch1, ch2, ch3) = (StripID(.input, 1), StripID(.input, 2), StripID(.input, 3))
+        mirror.apply(OSCMessage(Catalog.headampIndex(ch1)!, [.int(32)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(ch2)!, [.int(32)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(ch3)!, [.int(-1)]))
+        #expect(mirror.headamp(of: ch1) == 32)
+        #expect(mirror.headamp(of: ch3) == nil)
+        #expect(mirror.stripsSharingHeadamp(with: ch1) == [ch2])
+        #expect(mirror.stripsSharingHeadamp(with: ch3) == [])
+    }
+
+    /// The desk can route aux 1-6 from inputs (`/config/routing/IN/AUX`, doc p.21): then an aux shares a preamp,
+    /// and its 48V, with the channel on that input.
+    @Test func anAuxRoutedFromAnInputSharesItsHeadamp() {
+        let (ch1, aux1, aux2) = (StripID(.input, 1), StripID(.auxIn, 1), StripID(.auxIn, 2))
+        mirror.apply(OSCMessage(Catalog.headampIndex(ch1)!, [.int(0)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(aux1)!, [.int(0)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(aux2)!, [.int(-1)]))
+        #expect(mirror.headamp(of: aux1) == 0)
+        #expect(mirror.headamp(of: aux2) == nil, "a line-level aux jack has no preamp")
+        #expect(mirror.stripsSharingHeadamp(with: ch1) == [aux1])
+        #expect(mirror.stripsSharingHeadamp(with: aux1) == [ch1])
+        #expect(mirror.headamp(of: StripID(.fxReturn, 1)) == nil)
     }
 
     @Test func dcaBitZeroIsDCAOne() {

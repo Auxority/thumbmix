@@ -93,9 +93,15 @@ public enum DemoState {
         ("/fader", .float(0)), ("/level", .float(0)), ("/rta/source", .int(0)), ("/rta/pos", .int(0)),
     ]
 
+    /// Every input reads from the matching AES50-A preamp (headamps 32-63), like a DL32 patched 1:1; the aux ins
+    /// (slots 32-39) are the desk's line jacks, with no preamp.
+    private static func headampIndexValue(_ address: String) -> OSCArgument {
+        let slot = Int(address.split(separator: "/")[1]) ?? 0
+        return .int(slot < 32 ? Int32(32 + slot) : -1)
+    }
+
     static func defaultValue(for address: String) -> OSCArgument {
-        // Every input reads from the matching AES50-A preamp (headamps 32-63), like a DL32 patched 1:1.
-        if address.hasPrefix("/-ha/") { return .int(Int32(32 + (Int(address.split(separator: "/")[1]) ?? 0))) }
+        if address.hasPrefix("/-ha/") { return headampIndexValue(address) }
         // Every Link Preference ticked, every pair unlinked: a desk after a reset (assumed; m32-probe section 7).
         if address.hasPrefix("/config/linkcfg/") { return .int(1) }
         if address.hasPrefix("/config/") { return .int(0) }

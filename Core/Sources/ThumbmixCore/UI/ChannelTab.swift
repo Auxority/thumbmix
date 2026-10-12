@@ -35,7 +35,8 @@ public enum ChannelTab: String, CaseIterable, Identifiable, Sendable {
         case .matrix: [.mix, .eq, .comp, .fedBy]
         case .mainStereo, .mainMono: [.mix, .eq, .comp, .sends]
         case .dca: [.mix, .members]
-        case .auxIn, .fxReturn: [.mix]
+        case .auxIn: [.mix, .input, .eq, .sends]
+        case .fxReturn: [.mix]
         }
     }
 }

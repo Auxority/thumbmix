@@ -196,24 +196,27 @@ public final class FakeM32: @unchecked Sendable {
         return [OSCMessage(partner.prefix + suffix, message.arguments)]
     }
 
-    /// A linked input's gain and 48V live on its headamp, so the copy goes to the headamp feeding the partner.
+    /// A linked input's (or aux in's) gain and 48V live on its headamp, so the copy goes to the headamp feeding the
+    /// partner.
     private func partnerHeadampCopy(of message: OSCMessage) -> [OSCMessage] {
         let parts = message.address.split(separator: "/", maxSplits: 2)
         guard isCopyingLinkedEdits, state[LinkSection.gainDelay.preferenceAddress] == .int(1), parts.count == 3,
-            let index = Int(parts[1]), let input = onlyInput(onHeadamp: index),
-            let link = input.linkAddress, state[link] == .int(1),
-            let partner = input.partner.flatMap(headamp(of:)), partner != index
+            let index = Int(parts[1]), let strip = onlyStrip(onHeadamp: index),
+            let link = strip.linkAddress, state[link] == .int(1),
+            let partner = strip.partner.flatMap(headamp(of:)), partner != index
         else { return [] }
         return [OSCMessage("/headamp/" + String(format: "%03d", partner) + "/" + parts[2], message.arguments)]
     }
 
-    private func onlyInput(onHeadamp index: Int) -> StripID? {
-        let inputs = (1...32).filter { headamp(of: StripID(.input, $0)) == index }
-        return inputs.count == 1 ? StripID(.input, inputs[0]) : nil
+    private func onlyStrip(onHeadamp index: Int) -> StripID? {
+        let strips = Catalog.preampStrips.filter { headamp(of: $0) == index }
+        return strips.count == 1 ? strips[0] : nil
     }
 
-    private func headamp(of input: StripID) -> Int? {
-        guard case .int(let index)? = state[Catalog.headampIndex(forInput: input.number)], index >= 0 else { return nil }
+    private func headamp(of strip: StripID) -> Int? {
+        guard let address = Catalog.headampIndex(strip), case .int(let index)? = state[address], index >= 0 else {
+            return nil
+        }
         return Int(index)
     }
 

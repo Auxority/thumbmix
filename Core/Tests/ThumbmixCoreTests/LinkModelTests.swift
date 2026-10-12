@@ -86,8 +86,8 @@ struct LinkModelTests {
     @Test func partnerOfAHeadampIsThePartnerInputsHeadamp() {
         mirror.apply(OSCMessage("/config/linkcfg/hadly", [.int(1)]))
         mirror.apply(OSCMessage("/config/chlink/9-10", [.int(1)]))
-        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 9), [.int(40)]))
-        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 10), [.int(41)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(StripID(.input, 9))!, [.int(40)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(StripID(.input, 10))!, [.int(41)]))
         #expect(mirror.partnerAddress(of: "/headamp/040/gain") == "/headamp/041/gain")
         #expect(mirror.partnerAddress(of: "/headamp/041/phantom") == "/headamp/040/phantom")
         #expect(mirror.partnerAddress(of: "/headamp/050/gain") == nil, "feeds no linked input")
@@ -97,10 +97,18 @@ struct LinkModelTests {
     @Test func aSharedHeadampHasNoPartner() {
         mirror.apply(OSCMessage("/config/linkcfg/hadly", [.int(1)]))
         mirror.apply(OSCMessage("/config/chlink/9-10", [.int(1)]))
-        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 9), [.int(40)]))
-        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 10), [.int(41)]))
-        mirror.apply(OSCMessage(Catalog.headampIndex(forInput: 3), [.int(40)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(StripID(.input, 9))!, [.int(40)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(StripID(.input, 10))!, [.int(41)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(StripID(.input, 3))!, [.int(40)]))
         #expect(mirror.partnerAddress(of: "/headamp/040/gain") == nil)
+    }
+
+    @Test func aLinkedAuxPairsGainReachesThePartnersHeadamp() {
+        mirror.apply(OSCMessage("/config/linkcfg/hadly", [.int(1)]))
+        mirror.apply(OSCMessage("/config/auxlink/1-2", [.int(1)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(StripID(.auxIn, 1))!, [.int(0)]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(StripID(.auxIn, 2))!, [.int(1)]))
+        #expect(mirror.partnerAddress(of: "/headamp/000/gain") == "/headamp/001/gain")
     }
 
     @Test func pairNameFromBothSides() {

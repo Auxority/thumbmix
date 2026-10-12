@@ -11,18 +11,6 @@ let transport = UDPTransport(host: host, port: 10023)
 transport.start()
 let recorder = MessageRecorder(transport.messages)
 
-func describe(_ message: OSCMessage) -> String {
-    let arguments = message.arguments.map { argument -> String in
-        switch argument {
-        case .int(let value): "i:\(value)"
-        case .float(let value): "f:\(value)"
-        case .string(let value): "s:\"\(value)\""
-        case .blob(let value): "b:\(value.count) bytes"
-        }
-    }
-    return ([message.address] + arguments).joined(separator: " ")
-}
-
 @MainActor
 func ask(_ address: String) async -> OSCMessage? {
     for _ in 1...3 {
@@ -58,8 +46,20 @@ func listen(seconds: Int) async -> [OSCMessage] {
     return recorder.messages.filter { !$0.address.hasPrefix("/meters") }
 }
 
-func zeroPadded(_ text: String, to width: Int) -> String {
-    String(repeating: "0", count: max(0, width - text.count)) + text
+/// One strip's source, headamp, gain and trim on one line; gain only when a preamp feeds it.
+@MainActor
+func preampLine(_ strip: StripID) async -> String {
+    guard let headampAddress = Catalog.headampIndex(strip) else { return strip.defaultName + " has no preamp slot" }
+    let feed = await ask(strip.prefix + "/config/source")
+    let headamp = await ask(headampAddress)
+    var gain: OSCMessage?
+    if case .int(let index)? = headamp?.arguments.first, (0...127).contains(index) {
+        gain = await ask(Catalog.headampGain(Int(index)).address)
+    }
+    let trim = await ask(Catalog.trim(strip).address)
+    let values = [feed, headamp, gain, trim].map { $0.map { describe($0).split(separator: " ").dropFirst().joined() } }
+    return strip.defaultName + " source " + (values[0] ?? "?") + "  headamp " + (values[1] ?? "?")
+        + "  gain " + (values[2] ?? "-") + "  trim " + (values[3] ?? "?")
 }
 
 print("== 1. Identity")
@@ -88,24 +88,20 @@ for bank in ["IN", "PLAY"] {
     }
 }
 print("(blocks: 0-3 = local preamps AN, 4-9 = AES50-A, 10-15 = AES50-B, 16-19 = CARD (e.g. Dante), 20-23 = USB)")
-for input in 1...32 {
-    let strip = StripID(.input, input)
-    let feed = await ask(strip.prefix + "/config/source")
-    let headamp = await ask(Catalog.headampIndex(forInput: input))
-    var gain: OSCMessage?
-    if case .int(let index)? = headamp?.arguments.first, (0...127).contains(index) {
-        gain = await ask(Catalog.headampGain(Int(index)).address)
-    }
-    let trim = await ask(Catalog.trim(strip).address)
-    let values = [feed, headamp, gain, trim].map { $0.map { describe($0).split(separator: " ").dropFirst().joined() } }
-    print(
-        String(format: "ch %02d", input) + " source " + (values[0] ?? "?") + "  headamp " + (values[1] ?? "?")
-            + "  gain " + (values[2] ?? "-") + "  trim " + (values[3] ?? "?"))
-}
+for strip in StripID.all(.input) { print(await preampLine(strip)) }
 print("(source 1-32 = In01-32; headamp -1 = no preamp; gain and trim 0.5 = 0 dB)")
 print("RESULT: on the desk, open the preamp page of a channel fed by a preamp (AN or AES50) and of one fed by the")
 print("card, in Rec and in Playback: note whether the desk offers Gain, Trim or both. Turn trim on a preamp channel")
 print("and listen: does it change the level?")
+
+// The app shows Gain and 48V on an aux in whose /-ha slot names a preamp (doc p.43); the doc doesn't say whether
+// the desk fills slots 32-39 when it routes aux ins from inputs (/config/routing/IN/AUX, doc p.21).
+print("\n== 3b. Aux ins: routing, preamp and trim")
+print(await ask("/config/routing/IN/AUX").map(describe) ?? "IN/AUX NO REPLY")
+print("(0 = the AUX jacks, 1-3 = AN1-2/1-4/1-6, 4-6 = AES50-A, 7-9 = AES50-B, 10-12 = CARD, 13-15 = UIN)")
+for strip in StripID.all(.auxIn) { print(await preampLine(strip)) }
+print("RESULT: with the jacks (0), every aux headamp should be -1. On the DESK, route aux 1-2 from AN1-2 (or A1-2)")
+print("and run again: aux 1's headamp should match the channel on that input. Then route the aux ins back.")
 
 print("\n== 4. Names and DCA masks: compare with the DCA assignments on the desk")
 for input in 1...32 {
@@ -281,5 +277,19 @@ print("\n10e. Follow LR pan: link buses 15-16, tap PRE, channel 1 panned centre,
 let followChange = await compare(bus: 15, "channel 1's bus 15-16 send pan hard left", "send pan hard right")
 print("RESULT: \(change(followChange)). About 0 = the send's own pan is ignored while it follows (the app dims it).")
 print("Put buses 15-16 and channel 1 back as the show needs them.")
+
+// Reset bands on an aux in writes an input's defaults; the doc gives no defaults for either (TODO "EQ defaults").
+print("\n== 11. EQ defaults: on the DESK, reset channel 1's and aux 1's EQ (or recall an empty scene), then press Enter.")
+_ = readLine()
+for strip in [StripID(.input, 1), StripID(.auxIn, 1)] {
+    var bands: [String] = []
+    for band in 1...strip.eqBandCount {
+        let spec = Catalog.eqBand(strip, band).frequency
+        let normalized = await ask(spec.address)?.arguments.first.flatMap(spec.scale.normalized(from:))
+        bands.append(normalized.map { String(format: "%.0f Hz", spec.scale.value(fromNormalized: $0)) } ?? "?")
+    }
+    print(strip.defaultName + ": " + bands.joined(separator: ", "))
+}
+print("RESULT: the app resets both to 91 Hz, 418 Hz, 1910 Hz and 8730 Hz. Different = fix Catalog.eqDefaults.")
 
 transport.cancel()

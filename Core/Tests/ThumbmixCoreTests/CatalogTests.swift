@@ -29,8 +29,18 @@ struct CatalogTests {
         #expect(Catalog.sendOn(from: StripID(.fxReturn, 1), to: StripID(.bus, 2)).address == "/fxrtn/01/mix/02/on")
         #expect(Catalog.headampGain(32).address == "/headamp/032/gain")
         #expect(Catalog.headampPhantom(5).address == "/headamp/005/phantom")
-        #expect(Catalog.headampIndex(forInput: 1) == "/-ha/00/index")
-        #expect(Catalog.headampIndex(forInput: 32) == "/-ha/31/index")
+        #expect(Catalog.headampIndex(StripID(.input, 1)) == "/-ha/00/index")
+        #expect(Catalog.headampIndex(StripID(.input, 32)) == "/-ha/31/index")
+        #expect(Catalog.headampIndex(StripID(.auxIn, 1)) == "/-ha/32/index", "aux 1-8 follow the 32 inputs (doc p.43)")
+        #expect(Catalog.headampIndex(StripID(.auxIn, 8)) == "/-ha/39/index")
+        #expect(Catalog.headampIndex(StripID(.fxReturn, 1)) == nil)
+    }
+
+    /// The demo's aux ins are the line-level jacks: no preamp, so their Input tab shows Trim only.
+    @Test func theDemosAuxInsHaveNoPreamp() throws {
+        let values = DemoState.values()
+        #expect(values[try #require(Catalog.headampIndex(StripID(.auxIn, 1)))] == .int(-1))
+        #expect(values[try #require(Catalog.headampIndex(StripID(.input, 1)))] == .int(32))
     }
 
     /// The desk keeps one pan per odd send, for the pair it feeds when linked (doc p.26).
@@ -41,7 +51,8 @@ struct CatalogTests {
         #expect(Catalog.sendPan(from: StripID(.bus, 1), to: StripID(.matrix, 3))?.address == "/bus/01/mix/03/pan")
         #expect(Catalog.sendPanFollow(from: vox, to: StripID(.bus, 5))?.address == "/ch/13/mix/05/panFollow")
         #expect(Catalog.sendPanFollow(from: vox, to: StripID(.bus, 6)) == nil)
-        #expect(!Catalog.syncAddresses().contains("/auxin/01/mix/01/pan"), "no Sends tab shows it: not worth the sync")
+        #expect(!Catalog.syncAddresses().contains("/fxrtn/01/mix/01/pan"), "no Sends tab shows it: not worth the sync")
+        #expect(Catalog.syncAddresses().contains("/auxin/01/mix/01/pan"), "an aux in's Sends tab shows it")
         #expect(DemoState.values()["/ch/13/mix/05/panFollow"] == .int(0), "a toggle, not mid-travel")
         #expect(DemoState.values()["/ch/13/mix/05/pan"] == .float(0.5), "centre")
     }
@@ -62,7 +73,8 @@ struct CatalogTests {
         #expect(StripID(.input, 1).eqBandCount == 4)
         #expect(StripID(.bus, 1).eqBandCount == 6)
         #expect(StripID(.mainMono).eqBandCount == 6)
-        #expect(StripID(.auxIn, 1).eqBandCount == 0)
+        #expect(StripID(.auxIn, 1).eqBandCount == 4, "doc p.28")
+        #expect(StripID(.fxReturn, 1).eqBandCount == 0, "not shown yet")
         #expect(Catalog.eqBand(StripID(.bus, 2), 6).q.address == "/bus/02/eq/6/q")
     }
 
@@ -142,7 +154,7 @@ struct CatalogTests {
         case .mix:
             [Catalog.fader(strip).address, Catalog.on(strip).address] + [Catalog.pan(strip)?.address].compactMap { $0 }
         case .input:
-            [Catalog.trim(strip).address, Catalog.headampIndex(forInput: strip.number)]
+            [Catalog.trim(strip).address] + [Catalog.headampIndex(strip)].compactMap { $0 }
                 + (Catalog.delay(strip)?.all.map(\.address) ?? [])
         case .gate: Catalog.gate(strip).all.map(\.address)
         case .eq:

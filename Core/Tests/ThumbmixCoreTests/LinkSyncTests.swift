@@ -69,8 +69,8 @@ struct LinkSyncTests {
         defer { fake.stop() }
         let mirror = await liveMirror(port: port)
         defer { mirror.stop() }
-        let left = try #require(mirror.headamp(forInput: 9))
-        let right = try #require(mirror.headamp(forInput: 10))
+        let left = try #require(mirror.headamp(of: StripID(.input, 9)))
+        let right = try #require(mirror.headamp(of: StripID(.input, 10)))
         let gainR = Catalog.headampGain(right).address
 
         mirror.set(Catalog.headampGain(left).address, .float(0.7))

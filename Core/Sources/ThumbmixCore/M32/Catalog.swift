@@ -51,12 +51,6 @@ public enum Catalog {
         )
     }
 
-    public static func headampGain(_ index: Int) -> ParamSpec {
-        ParamSpec(
-            headamp(index) + "/gain", CoreStrings.text("Gain"), .linear(min: -12, max: 60, step: 0.5),
-            .decibels, reset: 0)
-    }
-
     /// Only input channels have a delay (doc p.25).
     public static func delay(_ strip: StripID) -> DelaySpecs? {
         guard strip.kind == .input else { return nil }
@@ -68,17 +62,6 @@ public enum Catalog {
                 reset: 0.3)
         )
     }
-
-    public static func headampPhantom(_ index: Int) -> ParamSpec {
-        ParamSpec(headamp(index) + "/phantom", CoreStrings.text("48V"), .toggle, .plain)
-    }
-
-    /// The console answers which headamp (0-127) feeds input `n`, or -1 for internal sources (doc p.43).
-    public static func headampIndex(forInput n: Int) -> String {
-        "/-ha/" + String(format: "%02d", n - 1) + "/index"
-    }
-
-    public static let headampIndexAddresses = (1...32).map(headampIndex(forInput:))
 
     public static func gate(_ strip: StripID) -> GateSpecs {
         let p = strip.prefix + "/gate/"
@@ -239,13 +222,17 @@ public enum Catalog {
 
     static func addresses(of strip: StripID) -> [String] {
         [strip.name, strip.color, strip.icon, strip.fader, strip.on] + [strip.pan, strip.dcaMask].compactMap { $0 }
-            + inputAddresses(strip) + dynamicsAddresses(strip) + eqAddresses(strip) + sendAddresses(strip)
+            + inputAddresses(strip) + gateAddresses(strip) + dynamicsAddresses(strip) + eqAddresses(strip)
+            + sendAddresses(strip)
     }
 
     private static func inputAddresses(_ strip: StripID) -> [String] {
-        guard strip.hasGate else { return [] }
-        return [trim(strip).address] + gate(strip).all.map(\.address) + [headampIndex(forInput: strip.number)]
-            + (lowCut(strip)?.all.map(\.address) ?? []) + (delay(strip)?.all.map(\.address) ?? [])
+        guard ChannelTab.tabs(for: strip.kind).contains(.input) else { return [] }
+        return [trim(strip).address] + [headampIndex(strip)].compactMap { $0 } + (delay(strip)?.all.map(\.address) ?? [])
+    }
+
+    private static func gateAddresses(_ strip: StripID) -> [String] {
+        strip.hasGate ? gate(strip).all.map(\.address) : []
     }
 
     private static func dynamicsAddresses(_ strip: StripID) -> [String] {
@@ -254,7 +241,8 @@ public enum Catalog {
 
     private static func eqAddresses(_ strip: StripID) -> [String] {
         guard strip.eqBandCount > 0 else { return [] }
-        return [eqOn(strip).address] + (1...strip.eqBandCount).flatMap { eqBand(strip, $0).all.map(\.address) }
+        return [eqOn(strip).address] + (lowCut(strip)?.all.map(\.address) ?? [])
+            + (1...strip.eqBandCount).flatMap { eqBand(strip, $0).all.map(\.address) }
     }
 
     private static func sendAddresses(_ strip: StripID) -> [String] {
@@ -274,10 +262,6 @@ public enum Catalog {
         ].compactMap { $0 }
     }
 
-    private static func headampAddresses() -> [String] {
-        (0..<128).flatMap { [headampGain($0).address, headampPhantom($0).address] }
-    }
-
     /// The values a stale display would hurt most: what each strip is called and where its fader and mute sit.
     /// The RTA setting is audited too: the doc doesn't say a change on the desk is pushed, and releasing
     /// the RTA must not overwrite a choice the engineer made on the desk meanwhile.
@@ -288,9 +272,6 @@ public enum Catalog {
             }
     }
 
-    private static func headamp(_ index: Int) -> String {
-        "/headamp/" + String(format: "%03d", index)
-    }
     private static func sendPrefix(_ strip: StripID, _ target: StripID) -> String {
         strip.prefix + "/mix/" + String(format: "%02d", target.number)
     }

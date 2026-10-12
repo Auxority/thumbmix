@@ -8,6 +8,8 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - If gain, EQ or dynamics didn't follow, the pair's tab switches to "… aren't linked on the desk." and the L/R buttons in the middle of that drag: content moving under the finger. Then pick a layout that can't jump (mock first), e.g. decide per side before the first edit.
 - [ ] Run `m32-probe` with Mixing Station connected, and record each answer in a comment where the code depends on it:
   - Section 2: does `/xremote` push to a 7th+ client? The doc mentions a 4-client limit.
+  - Section 3b: aux ins. With the aux jacks every aux headamp should read -1. Route aux 1-2 from AN1-2 (or A1-2) on the desk and run again: does aux 1's `/-ha/32/index` name the same preamp as the channel on that input? The app then shows Gain and 48V on the aux and names it in that channel's 48V alert.
+  - Section 11: EQ defaults of channel 1 and aux 1 after resetting their EQs on the desk. The app's Reset bands gives both 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz.
   - Section 3: what feeds each input (local preamp, AES50, card such as Dante, USB; Rec or Playback routing), and the gain/trim question. Since #26 the app shows Trim on every input, but the doc lists trim as "digital sources only". On the desk: does a preamp channel offer Trim, and does it change the level? Does a card channel offer only Trim? Does Playback mode change that? Then decide: keep #26, revert it, or show Trim only for card inputs and in Playback mode.
   - Section 4: the DCA bit order.
   - Section 5: the DCA meter slots.
@@ -22,13 +24,15 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Performance
 
+- [ ] **Read a tab's values only when it opens?** Connect reads every parameter of every strip: 6116 addresses since aux ins got their tabs (5772 before, +6 %). Reading a strip's EQ, sends and the rest when its tab opens would cut connect to names, faders, mutes and pans. The safety rule still holds: a control stays disabled until the desk has answered. Investigate first (pushes for unread cells, how long a tab waits on the real desk), then decide.
 - [ ] **Load strips in parallel, show them as they arrive?** Ask the desk for all strips at once and show each row disabled (a placeholder) until its values are in, then make it active. Measure connect and reconnect time first; build it only if it gets them significantly faster.
 - [ ] **Meters only for the strips in view?** Draw (or update) meters only for the rows on screen, not every strip. Measure first; if it saves only 1–2 % CPU, it isn't worth it and this item goes.
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
 
 ## Features
 
-- [ ] **Aux in gets the Input, EQ and Sends tabs like an input.** Today an aux strip has only Mix (`ChannelTab`), but the desk gives aux in Trim and invert, a 4-band EQ and 16 bus sends (`notes/m32-protocol.md` §5.2; no gate, dynamics, delay or low cut).
+- [ ] **Invert (polarity) on inputs and aux ins** (`/…/preamp/invert`, doc p.25, p.28), on the Input tab. Mock it first: polarity is hard to grasp, so compare a "Ø" button beside Trim, a "Normal | Flipped" row and a "Flip polarity" chip with a line on when to use it. No alert. On a linked pair it follows the Gain/Delay link (`LinkSection.of` already files it there); m32-probe section 7 gets a check whether linking copies it.
+- [ ] **Invert on a matrix?** The doc lists `/mtx/NN/config/preamp/invert` (p.32), odd for a matrix, and Mixing Station shows no such control. The Invert PR's probe reads it once; show it only if the desk answers.
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
 - [ ] **FX returns get EQ (and the other tabs) like an input:** the desk gives them a 4-band EQ. Check first whether that's good practice for returns.

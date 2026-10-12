@@ -8,13 +8,14 @@ struct InputTab: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 8) {
-                if let headamp = mirror.headamp(forInput: strip.number) {
+                if let headamp = mirror.headamp(of: strip) {
                     HStack(spacing: 8) {
                         ParameterRow(spec: Catalog.headampGain(headamp), mirror: mirror)
                         PhantomButton(spec: Catalog.headampPhantom(headamp), strip: strip, mirror: mirror)
                     }
                     sharedWarning
-                } else {
+                } else if strip.kind == .input {
+                    // An aux in without a preamp is its line jack, as expected; an input without one is worth a word.
                     Text("No preamp: this channel reads from an internal source.")
                         .font(.callout)
                         .foregroundStyle(Theme.secondaryText)
@@ -36,9 +37,9 @@ struct InputTab: View {
     }
 
     @ViewBuilder private var sharedWarning: some View {
-        let sharing = mirror.inputsSharingHeadamp(withInput: strip.number)
+        let sharing = mirror.stripsSharingHeadamp(with: strip)
         if !sharing.isEmpty {
-            let names = sharing.map { mirror.name(StripID(.input, $0)) }.formatted(.list(type: .and))
+            let names = sharing.map { mirror.name($0) }.formatted(.list(type: .and))
             Label("Shares an input with \(names)", systemImage: "exclamationmark.triangle.fill")
                 .labelStyle(.titleOnly)
                 .font(.callout)
@@ -96,7 +97,7 @@ private struct PhantomButton: View {
     let partner: String?
 
     init(_ strip: StripID, _ mirror: ConsoleMirror) {
-        let sharing = mirror.inputsSharingHeadamp(withInput: strip.number).map { mirror.name(StripID(.input, $0)) }
+        let sharing = mirror.stripsSharingHeadamp(with: strip).map { mirror.name($0) }
         sameInput = sharing.isEmpty ? nil : sharing.formatted(.list(type: .and))
         partner = mirror.gainDelayPartner(of: strip).map { mirror.name($0) }
     }

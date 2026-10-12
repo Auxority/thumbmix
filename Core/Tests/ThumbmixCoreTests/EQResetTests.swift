@@ -21,7 +21,8 @@ struct EQResetTests {
             #expect(defaults?.map(\.frequency) == [54.5, 153.5, 418, 1140, 3210, 8730], "\(strip)")
             #expect(defaults?.allSatisfy { $0.typeIndex == 2 && $0.gain == 0 && $0.q == 1.7 } == true, "\(strip)")
         }
-        #expect(Catalog.eqDefaults(StripID(.auxIn, 1)) == nil, "the app shows no bands for aux ins")
+        #expect(Catalog.eqDefaults(StripID(.auxIn, 1)) == Catalog.eqDefaults(kick), "assumed like an input's (TODO)")
+        #expect(Catalog.eqDefaults(StripID(.fxReturn, 1)) == nil, "the app shows no bands for FX returns")
     }
 
     /// The desk keeps 201 frequency steps, 3.5% apart: a default must name one step, not fall between two.
