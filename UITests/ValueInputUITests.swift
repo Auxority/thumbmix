@@ -23,9 +23,11 @@ final class ValueInputUITests: DeskUITestCase {
         saveScreenshot("type-a-value")
     }
 
-    /// Text that isn't a value reopens the alert saying so, text kept; a number past the end lands on it.
-    func testOnlyAValueCanBeSetAndItStaysInRange() {
+    /// Text that isn't a value, and a number past either end, reopen the alert saying so, text kept; neither reaches
+    /// the desk. "100" on a fader must not set +10 dB.
+    func testOnlyAValueInRangeCanBeSet() {
         let (fader, alert) = holdKicksFader()
+        let before = fader.value as? String
         alert.textFields.firstMatch.typeText("abc")
         alert.buttons["Set"].tap()
         let again = app.alerts["Fader"]
@@ -34,7 +36,12 @@ final class ValueInputUITests: DeskUITestCase {
         XCTAssertEqual(field.value as? String, "abc", "the text stays to be fixed")
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "100")
         again.buttons["Set"].tap()
-        XCTAssertTrue(eventually(within: 2) { fader.value as? String == "+10.0 dB" })
+        let third = app.alerts["Fader"]
+        XCTAssertTrue(third.staticTexts["“100” is out of range. −∞ dB to +10.0 dB"].appears(within: 3))
+        XCTAssertEqual(third.textFields.firstMatch.value as? String, "100", "the text stays to be fixed")
+        XCTAssertEqual(fader.value as? String, before, "nothing reached the desk")
+        third.buttons["Cancel"].tap()
+        XCTAssertEqual(fader.value as? String, before)
     }
 
     /// The desk keeps 201 frequency steps: 1 kHz lands on the nearest, 991 Hz, and the row shows that.

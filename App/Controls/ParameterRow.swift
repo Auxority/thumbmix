@@ -140,16 +140,21 @@ struct ParameterRow: View {
     }
 }
 
-/// The system alert a held row opens: the current value as placeholder, the range as message. A number past either
-/// end lands on that end (Set is the confirmation); text that isn't a value reopens the alert saying so.
+/// The system alert a held row opens: the current value as placeholder, the range as message. Text that isn't a
+/// value, or a number past either end, reopens the alert saying which; nothing reaches the desk until Set reads a value.
 private struct TypeValueAlert: ViewModifier {
+    /// What Set refused and why; kept so the reopened alert says so and the text stays to be fixed.
+    private struct Refusal {
+        let text: String
+        let isOutOfRange: Bool
+    }
+
     let spec: ParamSpec
     let title: String
     let mirror: ConsoleMirror
     @Binding var isPresented: Bool
     @State private var typed = ""
-    /// What was typed when Set found no value in it; kept so the reopened alert shows it and the text stays.
-    @State private var refused: String?
+    @State private var refused: Refusal?
 
     func body(content: Content) -> some View {
         content
@@ -160,22 +165,26 @@ private struct TypeValueAlert: ViewModifier {
                 // Never .disabled: a disabled state that changes while typing makes Set lose its action (iOS 27).
                 Button("Set", action: set)
             } message: {
-                if let refused {
-                    Text("“\(refused)” isn't a value. \(ValueInput.rangeText(spec))")
-                } else {
-                    Text(ValueInput.rangeText(spec))
-                }
+                message
             }
             .onChange(of: isPresented) { _, isOpen in isOpen ? opened() : closed() }
     }
 
+    private var message: Text {
+        let range = ValueInput.rangeText(spec)
+        guard let refused else { return Text(range) }
+        return refused.isOutOfRange
+            ? Text("“\(refused.text)” is out of range. \(range)") : Text("“\(refused.text)” isn't a value. \(range)")
+    }
+
     private func set() {
-        guard let value = ValueInput.normalized(from: typed, for: spec) else {
-            refused = typed
-            return
+        switch ValueInput.read(typed, for: spec) {
+        case .value(let value):
+            refused = nil
+            mirror.set(spec.address, spec.scale.argument(fromNormalized: value))
+        case .notAValue: refused = Refusal(text: typed, isOutOfRange: false)
+        case .outOfRange: refused = Refusal(text: typed, isOutOfRange: true)
         }
-        refused = nil
-        mirror.set(spec.address, spec.scale.argument(fromNormalized: value))
     }
 
     private func opened() {
