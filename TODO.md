@@ -31,6 +31,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Features
 
+- [ ] **Release notes in the SideStore source.** Each GitHub release already has notes (`scripts/publish-release.sh` runs `gh release create --generate-notes`: one line per merged PR title), but `scripts/sidestore-source.sh` gives a version no `localizedDescription`, AltStore's "What's new", so SideStore shows an update without saying what changed. Copy the notes into it as plain text: the PR titles only, without "by @Auxority in <link>" and the "Full Changelog" line. `scripts/test-sidestore-source.sh` checks it.
 - [ ] **Invert on a matrix?** The doc lists `/mtx/NN/config/preamp/invert` (p.32), odd for a matrix, and Mixing Station shows no such control. m32-probe 7f reads it once; show it only if the desk answers.
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
