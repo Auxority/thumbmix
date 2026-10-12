@@ -17,11 +17,16 @@ extension ConsoleMirror {
         }
     }
 
-    /// Named or fader up, as the overview's `isUnused` has it, plus the linked partner: a pair is read as a whole.
+    /// Strips in use, plus their linked partners: a pair is read as a whole.
     private func stripsInUse() -> [StripID] {
-        let used = StripKind.allCases.flatMap(StripID.all).filter { !isUnused($0) }
+        let used = StripKind.allCases.flatMap(StripID.all).filter(isInUse)
         var seen = Set<StripID>()
         return (used + used.flatMap { linkedPartner(of: $0) }).filter { seen.insert($0).inserted }
+    }
+
+    /// Named and fader up (the user, 2026-10-12): a named spare with its fader down waits until it's opened.
+    private func isInUse(_ strip: StripID) -> Bool {
+        !rawName(strip).isEmpty && (normalized(Catalog.fader(strip)) ?? 0) > 0
     }
 
     private func unread(_ tab: ChannelTab, _ strips: [StripID]) -> [String] {
