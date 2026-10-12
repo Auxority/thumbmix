@@ -4,19 +4,24 @@ import Foundation
 /// of strips in use in the background. Reading everything on connect took ~5 s at a 5 ms round trip; this ~0.6 s.
 extension Catalog {
     /// Read on connect; the mirror goes live once all have answered. Also what decides how strips and tabs look.
-    public static func overviewAddresses() -> [String] {
-        StripKind.allCases.flatMap(StripID.all).flatMap(overviewAddresses(of:)) + headampIndexAddresses
-            + rtaAddresses + linkAddresses
-    }
+    public static func overviewAddresses() -> [String] { overview }
 
     /// Every address the app ever reads: the overview, and every tab of every strip with every preamp.
-    public static func allAddresses() -> [String] {
+    public static func allAddresses() -> [String] { all }
+
+    // Built once: every mirror and every fake desk asks for them, and building all took ~30 ms (debug). A test run
+    // starting ~100 of each at once starved the main actor for seconds on CI.
+    private static let overview: [String] =
+        StripKind.allCases.flatMap(StripID.all).flatMap(overviewAddresses(of:)) + headampIndexAddresses
+        + rtaAddresses + linkAddresses
+
+    private static let all: [String] = {
         let tabs = StripKind.allCases.flatMap(StripID.all).flatMap { strip in
             ChannelTab.tabs(for: strip.kind).flatMap { tabAddresses($0, strip, headamp: nil) }
         }
         var seen = Set<String>()
-        return (overviewAddresses() + tabs + headampAddresses()).filter { seen.insert($0).inserted }
-    }
+        return (overview + tabs + headampAddresses()).filter { seen.insert($0).inserted }
+    }()
 
     /// Every pair's link switch and the four Link Preferences: they decide how the overview and tabs look.
     public static let linkAddresses =

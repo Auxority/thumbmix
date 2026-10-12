@@ -7,7 +7,12 @@ public enum DemoState {
         ("Vox 2", 5),
     ]
 
-    public static func values() -> [String: OSCArgument] {
+    public static func values() -> [String: OSCArgument] { initialValues }
+
+    /// Built once, like `Catalog.allAddresses()`: every fake desk starts from it.
+    private static let initialValues: [String: OSCArgument] = build()
+
+    private static func build() -> [String: OSCArgument] {
         var state = Dictionary(uniqueKeysWithValues: Catalog.allAddresses().map { ($0, defaultValue(for: $0)) })
         addBand(to: &state)
         addMonitors(to: &state)
