@@ -46,5 +46,8 @@ jobs:
       - name: Check release versioning
         run: scripts/test-next-version.sh
 
+      - name: Check the SideStore source
+        run: scripts/test-sidestore-source.sh
+
       - name: Test Core
         run: swift test --package-path Core

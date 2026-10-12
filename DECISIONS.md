@@ -6,6 +6,7 @@ Settled choices about how Thumbmix behaves, with the reason, so nobody proposes 
 
 - **Latest M32 firmware only** (2026-10-12). No fallbacks for older firmware; X32 and X Air are out of scope.
 - **iOS 26 and newer, iPhone only** (2026-10-12): the first iOS with glass, on the same devices as iOS 27 (iPhone 11 and SE 2nd gen onward).
+- **SideStore reads a source on a `sidestore` branch** (2026-10-12): a raw GitHub link, since `main` is protected and Pages adds settings and a deploy job. Each release rebuilds it whole from the GitHub Releases and force-pushes it as the branch's only commit, so nothing can drift or need merging.
 - **Native iOS UI first**: system alerts, switches, sheets and back buttons stay iOS's own.
 
 ## Editing values
