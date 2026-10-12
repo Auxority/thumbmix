@@ -42,7 +42,7 @@ When `scripts/ui-test.sh` stops before any test with "Failed to clone device …
 - **Complexity gate** (`.swiftlint.yml`): functions at complexity ≤ 6 and ≤ 40 lines. Split by responsibility to get under it; the limits stay put.
 - **Timing**: decisions about time live in pure types (`LinkSupervisor`, `EditHolds`) and are tested with explicit instants. Network tests assert end results with `eventually`, never a sleep-then-check race.
 - **Locale**: this Mac's region uses a decimal comma. Unit tests pass `locale: .testEnglish`; UI tests launch with `fixedLocale`. Pin the locale in any new assertion on formatted text.
-- **Localization**: user-facing text in Core goes through `CoreStrings.text(...)` and needs an explicit `en` entry in `Core/Sources/ThumbmixCore/Resources/Localizable.xcstrings` (SwiftPM drops empty entries; `LocalizationTests` fails without it). Refresh the app catalog with `scripts/strings.sh`, which also checks both catalogs are strict JSON.
+- **Localization**: user-facing text in Core goes through `CoreStrings.text(...)`. Run `scripts/strings.sh` after changing user-facing text: it refreshes both catalogs, gives new Core text its English value (SwiftPM drops empty entries; `LocalizationTests` fails on one), and checks both catalogs are strict JSON.
 - **Previews** use `ConsoleMirror.preview()`, which exists only in DEBUG: wrap every `#Preview` in `#if DEBUG` or the release IPA fails to build.
 - **Project file**: `Thumbmix.xcodeproj` is generated; edit `project.yml` and run `xcodegen generate`.
 - **Hooks** (`.claude/settings.json`): an edited Swift file is formatted with `swift format` straight away, and edits inside `Thumbmix.xcodeproj` are blocked.
