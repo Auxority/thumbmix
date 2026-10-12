@@ -158,9 +158,9 @@ public final class ConsoleMirror {
         else { return }
         // A reply of another type (",i" where the parameter is ",f") is garbage, not a new value.
         if let known = cell.argument, !known.hasSameType(as: argument) { return }
+        // Stored before the reply is counted: the last answer turns the status live, and screens rebuild on that.
+        if !holds.isHeld(message.address, now: .now) { store(argument, in: cell, at: message.address) }
         noteReply(message.address)
-        if holds.isHeld(message.address, now: .now) { return }
-        store(argument, in: cell, at: message.address)
     }
 
     /// A reply the connect sync or a tab read asked for frees a slot for the next request.

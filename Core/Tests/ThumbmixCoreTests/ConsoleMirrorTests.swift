@@ -1,4 +1,5 @@
 import FakeM32
+import Observation
 import Testing
 
 @testable import ThumbmixCore
@@ -21,6 +22,23 @@ struct ConsoleMirrorTests {
         #expect(mirror.isLive)
         #expect(mirror.cell("/ch/01/config/name").argument == .string("Kick"))
         #expect(Catalog.overviewAddresses().allSatisfy { mirror.cell($0).argument != nil })
+    }
+
+    /// "Live" must mean every overview value is in: the overview builds its rows when the status turns live, and a
+    /// Link Preference still unread then split a linked pair into two rows (2026-10-12). The last answer is the
+    /// preference, so the status change is checked as it happens.
+    @Test func everyOverviewValueIsStoredBeforeGoingLive() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let overview = ["/ch/01/config/name", "/config/linkcfg/fdrmute"]
+        let mirror = ConsoleMirror(
+            link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast), overview: overview, auditAddresses: [])
+        let watch = UnreadAtStatusChange(mirror, overview)
+        mirror.start()
+        defer { mirror.stop() }
+
+        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
+        #expect(watch.unread == [], "unread as the status turned live")
     }
 
     /// UI tests wait for this before trusting the screen: until then it can still show the previous test's desk.
@@ -193,5 +211,33 @@ struct ConsoleMirrorTests {
 
         fake.silent = false
         #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
+    }
+}
+
+/// Which of `addresses` were unread each time the mirror's status changed, taken as it changed: what a screen
+/// rebuilding on that change could see.
+@MainActor
+private final class UnreadAtStatusChange {
+    private(set) var unread: [String]?
+    private let mirror: ConsoleMirror
+    private let addresses: [String]
+
+    init(_ mirror: ConsoleMirror, _ addresses: [String]) {
+        self.mirror = mirror
+        self.addresses = addresses
+        watch()
+    }
+
+    private func watch() {
+        withObservationTracking {
+            _ = mirror.status
+        } onChange: { [weak self] in
+            MainActor.assumeIsolated { self?.record() }
+        }
+    }
+
+    private func record() {
+        unread = addresses.filter { mirror.cell($0).argument == nil }
+        watch()
     }
 }
