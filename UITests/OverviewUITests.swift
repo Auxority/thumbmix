@@ -27,15 +27,18 @@ final class OverviewUITests: DeskUITestCase {
         XCTAssertTrue(app.buttons["Drums"].isHittable)
     }
 
+    /// A short swipe starting on the fader itself: iOS 27 drops rows scrolled far off screen, so a full swipe
+    /// would leave no Kick row to compare.
     func testVerticalSwipeScrollsInsteadOfMovingFaders() {
         launch()
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
         let before = fader.value as? String
         let frame = app.buttons["Kick"].frame
 
-        app.swipeUp()
+        let start = fader.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -120)))
 
-        XCTAssertNotEqual(app.buttons["Kick"].frame, frame)
+        XCTAssertTrue(eventually(within: 2) { app.buttons["Kick"].frame.minY < frame.minY }, "the list scrolled")
         XCTAssertEqual(fader.value as? String, before)
     }
 

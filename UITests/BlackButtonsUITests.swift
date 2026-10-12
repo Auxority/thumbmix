@@ -1,7 +1,6 @@
 import XCTest
 
-/// iOS 26+ wraps toolbar buttons in grey glass; on an OLED screen they're black with a thin edge, like the rest.
-/// Only an iOS 26+ simulator can catch the glass: on iOS 17 toolbar buttons have no fill at all.
+/// iOS wraps toolbar buttons in grey glass; on an OLED screen they're glass tinted black instead.
 @MainActor
 final class BlackButtonsUITests: DeskUITestCase {
     func testDisconnectIsBlack() {
