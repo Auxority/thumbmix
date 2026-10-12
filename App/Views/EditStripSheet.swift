@@ -48,7 +48,10 @@ struct EditStripSheet: View {
             .navigationTitle(partner == nil ? strip.defaultName : strip.pairDefaultName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }.buttonStyle(.outlineCapsule)
+                }
+                .withoutGlass()
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         mirror.edit(strip, name: name, color: color, icon: icon)
@@ -56,8 +59,10 @@ struct EditStripSheet: View {
                         dismiss()
                     }
                     .fontWeight(.bold)
+                    .buttonStyle(.outlineCapsule)
                     .disabled(!mirror.isLive)
                 }
+                .withoutGlass()
             }
         }
     }

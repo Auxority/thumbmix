@@ -16,3 +16,15 @@ extension XCUIElement {
         eventually(within: timeout) { exists }
     }
 }
+
+extension XCUIElement {
+    /// True once the element stands still: a sheet still sliding in shows its buttons half drawn.
+    func settles(within timeout: TimeInterval) -> Bool {
+        var last = CGRect.null
+        return eventually(within: timeout) {
+            let now = frame
+            defer { last = now }
+            return now == last
+        }
+    }
+}

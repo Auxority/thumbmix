@@ -8,6 +8,8 @@ enum Theme {
     static let raised = Color(white: 0.18)
     static let selected = Color(white: 0.3)
     static let secondaryText = Color(white: 0.6)
+    /// The edge of a black button on a black screen: just enough to show where it is.
+    static let outline = Color(white: 0.29)
     static let muteRed = Color(red: 0.95, green: 0.2, blue: 0.2)
     static let demoPurple = Color(red: 0.6, green: 0.3, blue: 0.85)
 

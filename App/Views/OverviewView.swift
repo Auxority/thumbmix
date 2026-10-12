@@ -34,7 +34,10 @@ struct OverviewView: View {
             .demoTitle("Thumbmix")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button("Disconnect", action: onDisconnect) }
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Disconnect", action: onDisconnect).buttonStyle(.outlineCapsule)
+                }
+                .withoutGlass()
             }
             .navigationDestination(item: $openStrip) { strip in
                 ChannelView(strip: strip, mirror: mirror)
