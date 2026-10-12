@@ -29,7 +29,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 ## Features
 
 - [ ] **Aux in gets the Input, EQ and Sends tabs like an input.** Today an aux strip has only Mix (`ChannelTab`), but the desk gives aux in Trim and invert, a 4-band EQ and 16 bus sends (`notes/m32-protocol.md` §5.2; no gate, dynamics, delay or low cut).
-- [x] **Group chips within thumb reach** (mock A2, 2026-10-12, picked from real iOS 27 screenshots): the overview's chips (`GroupChips`) sit in one dark glass bar along the bottom edge, scrolling sideways, with the list running on under it. Picked over a two-row grid: a new group is just one more chip. Main and Matrix still need a sideways swipe on the SE.
 - [ ] **A SideStore source that updates itself:** a source file listing Thumbmix's versions, updated by each release, so SideStore picks up new versions on its own.
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
