@@ -43,7 +43,7 @@ swift run --package-path Core fake-m32      # a fake M32 on 127.0.0.1:10023 for 
 xcodegen generate && open Thumbmix.xcodeproj
 ```
 
-`scripts/ui-test.sh` runs the UI tests on the iPhone SE (3rd generation) simulator, which is 375 pt wide like the iPhone 11 Pro. It runs three test classes at a time on clones of that simulator, and each test starts its own fake desk inside the test runner, so a `fake-m32` you have running doesn't matter. `UI_TEST_WORKERS` sets how many clones. Extra arguments go to `xcodebuild`, e.g. `-only-testing:ThumbmixUITests/ChannelUITests`; `UI_TEST_DESTINATION` (an `xcodebuild -destination` value) picks another simulator. The full log lands in `build/ui-test.log`. To save screenshots for a layout check, prefix the command with `TEST_RUNNER_SCREENSHOT_DIR="$PWD/build/screens"`.
+`scripts/ui-test.sh` runs the UI tests on the iPhone SE (3rd generation) simulator, which is 375 pt wide like the iPhone 11 Pro. It runs three test classes at a time on clones of that simulator, and each test starts its own fake desk inside the test runner, so a `fake-m32` you have running doesn't matter. `UI_TEST_WORKERS` sets how many clones. Name tests or classes to run only those, one at a time on the simulator itself: `scripts/ui-test.sh ChannelUITests EQUITests/testBusResetsAllSixBands`. `--serial` runs the whole suite that way, for when cloning fails. Other arguments starting with `-` go to `xcodebuild`; `UI_TEST_DESTINATION` (an `xcodebuild -destination` value) picks another simulator. A run whose first test hasn't started 2 minutes after the build has hung, and the script stops it. The full log lands in `build/ui-test.log`, and screenshots taken by the tests in `build/screens`.
 
 ## Check a real console
 
