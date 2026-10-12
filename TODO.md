@@ -24,7 +24,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 
 - [x] **Refuse a typed value outside the range instead of clamping it** (decided 2026-10-10, replaces the clamp from 2026-10-09). "1000000" on a fader must not set +10 dB: Set reopens the alert with "“1000000” is out of range." and the range, the text kept. The fader's low end is −∞, so "-200" is −∞, not past it.
 - [ ] **Finer drags (½, ¼) don't help a small nudge.** You first have to drag away from the row to get the finer speed, and by then the fader has already moved. Rethink how to pick the finer speed before the value changes (mock first), or drop it.
-- [ ] **Remove the "Show unused" toggle from the Fed by tab** (`FedByTab` in `SendsTabs.swift`).
+- [x] **Remove the "Show unused" toggle from the Fed by tab** (`FedByTab` in `SendsTabs.swift`): Fed by now lists every source, unused ones too, like the overview.
 - [ ] **Not every button is OLED black, e.g. Disconnect.** Nothing in the app styles it: it's iOS's default toolbar button. Decide whether toolbar buttons (and other controls with a grey fill) go black, and check every screen.
 
 - [x] **RTA stuck on "waiting for the desk"** after any trip to another app: coming back rebuilds the link, so the EQ tab's borrow found it not live and never retried. It now borrows again once the link is live.
@@ -60,7 +60,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] **Matrix send pan and tap** (`/bus/NN/mix/01/pan`, `…/type`, on the odd sends): needed to feed a stereo matrix pair properly. Neither Fed by tab shows them yet.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
-- [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. The Fed by tab's "Show unused" toggle is being removed (see Fixes).
+- [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. Fed by lost its "Show unused" toggle too and lists every source.
 - [ ] **Solo** per channel.
 - [x] **Delay** per channel (mock C): below Trim on the Input tab, an on/off chip and the time in ms and distance (343 m/s; feet on US-region phones). It follows the Gain/Delay link. A double-tap resets it to 0.3 ms, and preamp gain to 0 dB.
 - [ ] **Inserts** per channel.
