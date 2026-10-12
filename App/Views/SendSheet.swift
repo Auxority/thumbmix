@@ -8,6 +8,8 @@ struct SendSheet: View {
     let source: StripID
     let target: StripID
     let mirror: ConsoleMirror
+    /// Called with the bus whose name was tapped in the title, before the sheet closes.
+    let openBus: (StripID) -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -25,9 +27,9 @@ struct SendSheet: View {
                 .padding(16)
                 .disabled(!mirror.isLive)
             }
-            .navigationTitle("\(sourceName) → \(targetName)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) { title }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }.fontWeight(.bold).buttonStyle(.darkCapsule)
                 }
@@ -60,9 +62,27 @@ struct SendSheet: View {
         return [target, even]
     }
 
-    private var targetName: String {
-        if mirror.isLinked(target) { return mirror.pairName(target) }
-        return levelTargets.map(mirror.name).joined(separator: " & ")
+    /// "Vox 1 → Mon 1 & Mon 2", each bus name a link to that bus (mock A), blue like iOS's own links.
+    private var title: some View {
+        HStack(spacing: 0) {
+            Text("\(sourceName) → ")
+            ForEach(Array(levelTargets.enumerated()), id: \.element) { index, bus in
+                if index > 0 { Text(" & ") }
+                Button(busName(bus)) {
+                    openBus(bus)
+                    dismiss()
+                }
+                .foregroundStyle(.blue)
+                .accessibilityLabel("Open \(busName(bus))")
+            }
+        }
+        .font(.headline)
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
+    }
+
+    private func busName(_ bus: StripID) -> String {
+        mirror.isLinked(bus) ? mirror.pairName(bus) : mirror.name(bus)
     }
 
     private func panTitle(_ side: StripID) -> String? { sides.count > 1 ? "Pan · \(mirror.name(side))" : nil }
@@ -111,7 +131,7 @@ private struct FollowLRPanToggle: View {
 #if DEBUG
     #Preview {
         Color.black.sheet(isPresented: .constant(true)) {
-            SendSheet(source: StripID(.input, 9), target: StripID(.bus, 5), mirror: .preview())
+            SendSheet(source: StripID(.input, 9), target: StripID(.bus, 5), mirror: .preview()) { _ in }
                 .presentationDetents([.medium])
         }
     }

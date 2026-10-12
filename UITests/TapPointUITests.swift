@@ -21,7 +21,8 @@ final class TapPointUITests: DeskUITestCase {
         XCTAssertTrue(element("settings-/ch/13/mix/03/level").appears(within: 2), "every pair has a ›")
         XCTAssertFalse(element("settings-/ch/13/mix/02/level").exists, "Mon 2 shares Mon 1's")
         element("settings-/ch/13/mix/01/level").tap()
-        XCTAssertTrue(app.staticTexts["Vox 1 → Mon 1 & Mon 2"].appears(within: 2))
+        XCTAssertTrue(app.buttons["Open Mon 1"].appears(within: 2), "one sheet for the pair")
+        XCTAssertTrue(app.buttons["Open Mon 2"].exists)
         XCTAssertTrue(app.staticTexts["Before fader"].exists)
         XCTAssertFalse(element("tap-Pan").exists, "a mono mix has no pan to follow")
         saveScreenshot("tap-point")
@@ -34,6 +35,26 @@ final class TapPointUITests: DeskUITestCase {
         element("tap-Input").tap()
         element("tap-EQ").tap()
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/mix/01/type") == .int(2) })
+    }
+
+    /// The bus names in a send pair's title are links (mock A): one opens that bus on its Fed by tab, the desk's
+    /// sends-on-faders view, with Vox 1 among its sources; Back returns to Vox 1's Sends.
+    func testABusNameInTheSheetOpensTheBus() {
+        launch()
+        openSend("Vox 1", "/ch/13/mix/01/level")
+        let mon2 = app.buttons["Open Mon 2"]
+        XCTAssertTrue(mon2.appears(within: 2))
+        mon2.tap()
+        XCTAssertTrue(app.staticTexts["Bus 2"].appears(within: 3), "Mon 2's own screen")
+        XCTAssertTrue(app.buttons["Fed by"].isSelected)
+        XCTAssertTrue(
+            eventually(within: 2) { self.element("/ch/13/mix/02/level").isHittable },
+            "Vox 1's send to Mon 2 is in view, though it's the 13th source")
+        saveScreenshot("goto-bus")
+
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["Ch 13"].appears(within: 3))
+        XCTAssertTrue(app.buttons["Sends"].isSelected, "back where it left")
     }
 
     /// A mono mix's chain ends in Group, so a Subgroup set on the desk doesn't look like After fader.

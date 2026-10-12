@@ -7,7 +7,10 @@ import ThumbmixCore
 struct SendsTab: View {
     let strip: StripID
     let mirror: ConsoleMirror
+    /// Opens a bus's own screen; the sheet's bus names call it once the sheet is gone.
+    let open: (StripID) -> Void
     @State private var openSend: StripID?
+    @State private var busToOpen: StripID?
 
     var body: some View {
         ScrollView {
@@ -29,8 +32,9 @@ struct SendsTab: View {
                 }
             }
         }
-        .sheet(item: $openSend) { target in
-            SendSheet(source: strip, target: target, mirror: mirror)
+        // Pushing the bus while the sheet still covers the screen would be lost: it waits for the sheet to close.
+        .sheet(item: $openSend, onDismiss: openChosenBus) { target in
+            SendSheet(source: strip, target: target, mirror: mirror) { busToOpen = $0 }
                 // A stereo mix's sheet adds pans below the tap point: it can be dragged up to see them all.
                 .presentationDetents(mirror.isLinked(target) ? [.medium, .large] : [.medium])
                 // The strip's fader and mute above the sheet stay usable: a channel that rings can still be pulled.
@@ -39,6 +43,12 @@ struct SendsTab: View {
                 // chips behind don't bleed through.
                 .presentationBackground { Color.clear.glassEffect(.regular.tint(.black), in: .rect) }
         }
+    }
+
+    private func openChosenBus() {
+        guard let bus = busToOpen else { return }
+        busToOpen = nil
+        open(bus)
     }
 
     private func title(_ target: StripID) -> String {
@@ -71,16 +81,23 @@ private struct SendSettingsButton: View {
 struct FedByTab: View {
     let target: StripID
     let mirror: ConsoleMirror
+    /// Opened from a channel's send, that channel's row comes into view: it can be the 13th source or further down.
+    var focus: StripID?
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 6) {
-                ForEach(target.kind.feeders.flatMap(StripID.all)) { source in
-                    SendRow(
-                        source: source, target: target, title: mirror.name(source),
-                        accent: Theme.color(mirror.color(source)), mirror: mirror)
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 6) {
+                    ForEach(target.kind.feeders.flatMap(StripID.all)) { source in
+                        SendRow(
+                            source: source, target: target, title: mirror.name(source),
+                            accent: Theme.color(mirror.color(source)), mirror: mirror
+                        )
+                        .id(source)
+                    }
                 }
             }
+            .onAppear { if let focus { proxy.scrollTo(focus, anchor: .center) } }
         }
     }
 }
@@ -111,7 +128,7 @@ struct SendRow: View {
 
 #if DEBUG
     #Preview("Sends") {
-        SendsTab(strip: StripID(.input, 13), mirror: .preview()).padding().background(Theme.background)
+        SendsTab(strip: StripID(.input, 13), mirror: .preview()) { _ in }.padding().background(Theme.background)
     }
 
     #Preview("Fed by") {

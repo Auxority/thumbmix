@@ -6,8 +6,20 @@ import ThumbmixCore
 struct ChannelView: View {
     let strip: StripID
     let mirror: ConsoleMirror
-    @State private var tab = ChannelTab.mix
+    @State private var tab: ChannelTab
+    /// The strip this one was opened from, whose row Fed by brings into view.
+    private let focus: StripID?
     @State private var showsRight = false
+    /// A strip opened from this one, such as the bus a send goes to; Back returns here.
+    @State private var openStrip: StripID?
+
+    /// Every strip opens on Mix; a bus opened from a send opens on Fed by, its sends-on-faders view.
+    init(strip: StripID, mirror: ConsoleMirror, tab: ChannelTab = .mix, focus: StripID? = nil) {
+        self.strip = strip
+        self.mirror = mirror
+        self.focus = focus
+        _tab = State(initialValue: tab)
+    }
 
     var body: some View {
         let tabs = ChannelTab.tabs(for: strip.kind)
@@ -18,7 +30,8 @@ struct ChannelView: View {
             if unlinked != nil { PairSidePicker(odd: main, tab: tab, mirror: mirror, showsRight: $showsRight) }
             ChannelTabContent(
                 tab: tab, strip: unlinked == nil ? main : side, mirror: mirror,
-                ghost: unlinked == nil ? nil : side.partner, panPartner: mixPanPartner)
+                ghost: unlinked == nil ? nil : side.partner, panPartner: mixPanPartner, focus: focus
+            ) { openStrip = $0 }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 12)
@@ -33,6 +46,7 @@ struct ChannelView: View {
         .navigationTitle(title)
         .demoTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(item: $openStrip) { ChannelView(strip: $0, mirror: mirror, tab: .fedBy, focus: main) }
     }
 
     private var isPair: Bool { mirror.isLinked(strip) }
@@ -60,6 +74,8 @@ private struct ChannelTabContent: View {
     let mirror: ConsoleMirror
     let ghost: StripID?
     let panPartner: StripID?
+    let focus: StripID?
+    let open: (StripID) -> Void
 
     var body: some View {
         switch tab {
@@ -69,8 +85,8 @@ private struct ChannelTabContent: View {
         case .gate: GateTab(strip: strip, mirror: mirror, ghost: ghost)
         case .comp: CompTab(strip: strip, mirror: mirror, ghost: ghost)
         case .eq: EQTab(strip: strip, mirror: mirror, ghost: ghost)
-        case .sends: SendsTab(strip: strip, mirror: mirror)
-        case .fedBy: FedByTab(target: strip, mirror: mirror)
+        case .sends: SendsTab(strip: strip, mirror: mirror, open: open)
+        case .fedBy: FedByTab(target: strip, mirror: mirror, focus: focus)
         }
     }
 }
