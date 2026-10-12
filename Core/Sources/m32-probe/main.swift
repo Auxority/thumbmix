@@ -184,6 +184,14 @@ print("bus 1 sends pushed: " + Set(sends.map(\.address)).sorted().joined(separat
 print("RESULT: one side = sends follow Mute/Fader Link (the app's guess); both = they're always linked.")
 print("Tick EQ Link and Mute/Fader Link again before the show.")
 
+// The app files polarity under Gain/Delay (LinkSection.of) and its Ø alert names the partner on that assumption.
+print("\n7e. On the DESK, with Gain/Delay Link ticked, flip the polarity (Ø) of one side of a linked pair (20 seconds)...")
+let flips = await listen(seconds: 20).filter { $0.address.hasSuffix("/preamp/invert") }
+print("polarity pushed: " + Set(flips.map(\.address)).sorted().joined(separator: ", "))
+print("RESULT: both sides = the link carries polarity (the app's model); one side = it doesn't. Flip it back.")
+// The doc lists a matrix polarity (p.32) that Mixing Station doesn't show: an answer means it exists.
+print("\n7f. " + (await ask("/mtx/01/config/preamp/invert").map(describe) ?? "matrix polarity: NO REPLY (no such setting)"))
+
 // The app shows each fader step as the doc's table has it (p.145, FaderLaw.shownDecibels), including a detent
 // that reads 0 from -0.09 to +0.07 dB and two steps rounded the other way. The desk's own text checks that.
 print("\n== 8. Fader text: with the desk's encoder, set a few input faders to about 0 dB, -8.6 and -23.2 first")
@@ -278,18 +286,6 @@ let followChange = await compare(bus: 15, "channel 1's bus 15-16 send pan hard l
 print("RESULT: \(change(followChange)). About 0 = the send's own pan is ignored while it follows (the app dims it).")
 print("Put buses 15-16 and channel 1 back as the show needs them.")
 
-// Reset bands on an aux in writes an input's defaults; the doc gives no defaults for either (TODO "EQ defaults").
-print("\n== 11. EQ defaults: on the DESK, reset channel 1's and aux 1's EQ (or recall an empty scene), then press Enter.")
-_ = readLine()
-for strip in [StripID(.input, 1), StripID(.auxIn, 1)] {
-    var bands: [String] = []
-    for band in 1...strip.eqBandCount {
-        let spec = Catalog.eqBand(strip, band).frequency
-        let normalized = await ask(spec.address)?.arguments.first.flatMap(spec.scale.normalized(from:))
-        bands.append(normalized.map { String(format: "%.0f Hz", spec.scale.value(fromNormalized: $0)) } ?? "?")
-    }
-    print(strip.defaultName + ": " + bands.joined(separator: ", "))
-}
-print("RESULT: the app resets both to 91 Hz, 418 Hz, 1910 Hz and 8730 Hz. Different = fix Catalog.eqDefaults.")
+await probeEQDefaults()
 
 transport.cancel()

@@ -22,7 +22,10 @@ struct InputTab: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 // Engineers trim preamp channels too, so Trim shows on every input, not only digital sources.
-                ParameterRow(spec: Catalog.trim(strip), mirror: mirror)
+                HStack(spacing: 8) {
+                    ParameterRow(spec: Catalog.trim(strip), mirror: mirror)
+                    if let invert = Catalog.invert(strip) { PolarityButton(spec: invert, strip: strip, mirror: mirror) }
+                }
                 if let delay = Catalog.delay(strip) { delayRow(delay) }
             }
         }

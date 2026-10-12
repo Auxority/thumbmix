@@ -228,7 +228,8 @@ public enum Catalog {
 
     private static func inputAddresses(_ strip: StripID) -> [String] {
         guard ChannelTab.tabs(for: strip.kind).contains(.input) else { return [] }
-        return [trim(strip).address] + [headampIndex(strip)].compactMap { $0 } + (delay(strip)?.all.map(\.address) ?? [])
+        return [trim(strip).address] + [headampIndex(strip), invert(strip)?.address].compactMap { $0 }
+            + (delay(strip)?.all.map(\.address) ?? [])
     }
 
     private static func gateAddresses(_ strip: StripID) -> [String] {

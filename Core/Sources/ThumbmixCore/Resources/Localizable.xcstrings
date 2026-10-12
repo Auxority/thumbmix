@@ -61,6 +61,26 @@
         }
       }
     },
+    "Also flips %@ (linked)." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Also flips %@ (linked)."
+          }
+        }
+      }
+    },
+    "Also sets %@ back (linked)." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Also sets %@ back (linked)."
+          }
+        }
+      }
+    },
     "Attack" : {
       "localizations" : {
         "en" : {
@@ -425,6 +445,26 @@
         }
       }
     },
+    "Flip" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flip"
+          }
+        }
+      }
+    },
+    "Flip the polarity of %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flip the polarity of %@?"
+          }
+        }
+      }
+    },
     "Follow LR pan" : {
       "localizations" : {
         "en" : {
@@ -751,6 +791,16 @@
         }
       }
     },
+    "Normal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal"
+          }
+        }
+      }
+    },
     "Off" : {
       "localizations" : {
         "en" : {
@@ -817,6 +867,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peak level"
+          }
+        }
+      }
+    },
+    "Polarity" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Polarity"
           }
         }
       }
@@ -932,6 +992,16 @@
         }
       }
     },
+    "Set %@'s polarity back to normal?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set %@'s polarity back to normal?"
+          }
+        }
+      }
+    },
     "Slope" : {
       "localizations" : {
         "en" : {
@@ -1038,6 +1108,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trim"
+          }
+        }
+      }
+    },
+    "Turns the signal upside down. Try it when two mics on one source sound thin together." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turns the signal upside down. Try it when two mics on one source sound thin together."
           }
         }
       }

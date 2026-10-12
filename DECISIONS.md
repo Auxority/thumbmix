@@ -17,7 +17,7 @@ Settled choices about how Thumbmix behaves, with the reason, so nobody proposes 
 - **A drag has one speed** (2026-10-12). Finer drags (½, ¼) came only after the value had moved, so they didn't help a small nudge. Hold-then-drag (it would overload the hold that types a value), slow-finger acceleration and a Fine button were mocked and turned down. Exact values are typed or nudged ±1 dB.
 - **No tap-to-step, no hold-to-reset.**
 - **A double-tap resets at once, without asking**: preamp gain to 0 dB, delay to 0.3 ms, Makeup gain to 0 dB, Ratio to 3:1, an EQ band's Freq to its Reset bands frequency, Q to 1.7, Gain to 0 dB.
-- **Changes that are hard to undo ask first, with the system alert**: linking, 48V ("Turn on 48V for Vox 2?", naming a channel that shares the input or a linked partner), and Reset bands ("Reset all 4 bands of Kick?"). The reset alert names no frequencies: they mean little to non-technical users, and engineers know their desk.
+- **Changes that are hard to undo ask first, with the system alert**: linking, 48V ("Turn on 48V for Vox 2?", naming a channel that shares the input or a linked partner), Reset bands ("Reset all 4 bands of Kick?"), and polarity ("Flip the polarity of Kick?", which also explains it). The reset alert names no frequencies: they mean little to non-technical users, and engineers know their desk.
 
 ## Layout
 
@@ -34,6 +34,7 @@ Settled choices about how Thumbmix behaves, with the reason, so nobody proposes 
 - **Every strip shows, used or not**: the overview's and Fed by's "Show unused" toggles are gone until hiding is redesigned (TODO).
 - **Toolbar buttons and Connect are glass tinted black** (`DarkCapsuleStyle`, 2026-10-12, picked from real iOS 27 screenshots over a flat black capsule), so they sit with iOS's own back button and swipe-back stays. The app's own greys (fader tracks, chips, M) stay: they show where a control is.
 - **48V is a button beside the Gain row**, the same height, red when on, like MUTE beside a fader.
+- **Polarity is a "Ø" button beside Trim** (2026-10-12, mock A over a Normal | Flipped row and a chip with a hint line), on inputs and aux ins, amber when flipped: it changes the sound but harms nothing, so not red. Few people know the symbol, so its alert explains it: "Turns the signal upside down. Try it when two mics on one source sound thin together." Flipping back only asks. It follows the Gain/Delay link, and the alert names a linked partner.
 - **Delay sits below Trim on the Input tab**: an on/off chip and the time in ms and distance (343 m/s; feet on US-region phones). It follows the Gain/Delay link.
 - **The Input tab has no meter of its own**: the fader row above already shows the level (2026-10-09).
 - **Comp and Gate Mode, Detector and Envelope are dropdowns**, like EQ Type: the open list says each choice in words with the desk's name under it ("Average level" · RMS); the closed row shows the desk's name.
