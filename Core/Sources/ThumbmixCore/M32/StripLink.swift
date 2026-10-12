@@ -66,10 +66,11 @@ public enum LinkSection: String, CaseIterable, Sendable {
     public var preferenceAddress: String { "/config/linkcfg/" + rawValue }
 
     /// The preference governing a strip parameter, by the part after the strip prefix; nil means never shared.
-    /// Pan stays per side (seen on the desk). Sends follow the fader and the low cut follows the EQ: both are
-    /// assumptions until m32-probe section 7 answers them.
+    /// Pan stays per side (seen on the desk), and so, assumed, do a send's pan and Follow LR pan: each side places
+    /// itself in a stereo bus. Sends follow the fader and the low cut follows the EQ: assumptions until m32-probe
+    /// sections 7 and 9 answer them.
     public static func of(suffix: String) -> LinkSection? {
-        if suffix == "/mix/pan" { return nil }
+        if suffix.hasSuffix("/pan") || suffix.hasSuffix("/panFollow") { return nil }
         if suffix.hasPrefix("/mix/") { return .faderMute }
         if suffix.hasPrefix("/eq/") || suffix.hasPrefix("/preamp/hp") { return .eq }
         if suffix.hasPrefix("/preamp/") || suffix.hasPrefix("/delay/") { return .gainDelay }

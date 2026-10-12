@@ -46,7 +46,6 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [x] **Hold a slider row to type its value** (mock B: the system alert, Set only). Any unit or none ("−6", "1k", "L20", "-inf"), decimal comma or point; text that isn't a value reopens the alert saying so. A number past either end is refused the same way (it was clamped until 2026-10-10). VoiceOver gets an "Enter value" action. (Its finer drags were dropped on 2026-10-12, see Fixes.)
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
-- [ ] **Send pan on an input's Sends tab** (the pan on odd-numbered sends, `/ch/NN/mix/01/pan`, `…/03/pan`, …): missing today.
 - [ ] **FX returns get EQ (and the other tabs) like an input:** the desk gives them a 4-band EQ. Check first whether that's good practice for returns.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Input meter marks at −18 dBFS and 0 dBFS?** A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
@@ -57,7 +56,7 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [x] **Matrix group.** Matrix 1–6 have a chip (last in the row, so DCA and Main stay on an iPhone SE screen) and a strip screen with Mix, EQ (6 bands), Comp and Fed by (the buses and both mains). They link in pairs (`/config/mtxlink/1-2` … `5-6`).
 - [ ] **Fed by on Main LR and Main M.** Like a bus's Fed by: every input, aux in, FX return and bus with its LR switch on (`/…/mix/st`), and for Main M those with mono on (`/…/mix/mono`) with their mono level (`/…/mix/mlevel`). Matrices can't feed the mains; they're fed by them.
 - [x] **Sends to the matrices from a bus or main screen** (mock B): buses get Mix · EQ · Comp · Sends · Fed by, the mains Mix · EQ · Comp · Sends, with one row per matrix.
-- [ ] **Matrix send pan and tap** (`/bus/NN/mix/01/pan`, `…/type`, on the odd sends): needed to feed a stereo matrix pair properly. Neither Fed by tab shows them yet.
+- [ ] **Matrix send tap** (`/bus/NN/mix/01/type`, on the odd sends): needed to feed a stereo matrix pair properly. A bus's or main's Sends tab sets the pan of a linked matrix pair (the send sheet); neither Fed by tab shows pan or tap yet.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
 - [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. Fed by lost its "Show unused" toggle too and lists every source.

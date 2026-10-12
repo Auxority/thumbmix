@@ -2,20 +2,54 @@ import SwiftUI
 import ThumbmixCore
 
 /// Where this strip goes: one row per bus (from a channel) or matrix (from a bus or main), named and coloured as on the desk.
+/// A linked pair is one send, as on the desk; its › opens the pan settings (`SendSheet`).
 struct SendsTab: View {
     let strip: StripID
     let mirror: ConsoleMirror
+    @State private var openSend: StripID?
 
     var body: some View {
         ScrollView {
             VStack(spacing: 6) {
-                ForEach(strip.kind.sendTarget.map(StripID.all) ?? []) { target in
-                    SendRow(
-                        source: strip, target: target, title: mirror.name(target),
-                        accent: Theme.color(mirror.color(target)), mirror: mirror)
+                ForEach(mirror.sendTargets(of: strip)) { target in
+                    let isPair = mirror.isLinked(target)
+                    HStack(spacing: 8) {
+                        SendRow(
+                            source: strip, target: target, title: isPair ? mirror.pairName(target) : mirror.name(target),
+                            accent: Theme.color(mirror.color(target)), mirror: mirror)
+                        if isPair { SendSettingsButton(address: Catalog.sendLevel(from: strip, to: target).address) { openSend = target } }
+                    }
                 }
             }
         }
+        .sheet(item: $openSend) { target in
+            SendSheet(source: strip, target: target, mirror: mirror)
+                .presentationDetents([.medium])
+                // The strip's fader and mute above the sheet stay usable: a channel that rings can still be pulled.
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                // Glass tinted black, like the toolbar buttons (`DarkCapsuleStyle`): the edge still shows, the
+                // chips behind don't bleed through.
+                .presentationBackground { Color.clear.glassEffect(.regular.tint(.black), in: .rect) }
+        }
+    }
+}
+
+private struct SendSettingsButton: View {
+    let address: String
+    let open: () -> Void
+    @ScaledMetric private var size: CGFloat = 44
+
+    var body: some View {
+        Button(action: open) {
+            Image(systemName: "chevron.right")
+                .font(.body.weight(.semibold))
+                .frame(width: size * 0.8, height: size)
+                .foregroundStyle(Theme.secondaryText)
+                .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Pan settings")
+        .accessibilityIdentifier("settings-" + address)
     }
 }
 
