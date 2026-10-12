@@ -11,16 +11,19 @@ final class TapPointUITests: DeskUITestCase {
         settings.tap()
     }
 
-    /// The demo's wedges are fed before the fader. Tapping a block takes the send right after it, Input too, and a
-    /// second tap on the current tap point changes nothing. Nothing below the explanation moves.
-    func testTappingTheChainSetsTheTapPoint() {
+    /// The desk keeps one tap point per pair of buses, so an unlinked pair shares one › and one sheet (mock B). The
+    /// demo's wedges are fed before the fader. Tapping a block takes the send right after it, Input too, and a second
+    /// tap on the current tap point changes nothing.
+    func testTappingTheChainSetsThePairsTapPoint() {
         launch()
-        openSend("Vox 1", "/ch/13/mix/01/level")
-        XCTAssertTrue(app.staticTexts["Before fader"].appears(within: 2))
+        open("Vox 1")
+        app.buttons["Sends"].tap()
+        XCTAssertTrue(element("settings-/ch/13/mix/03/level").appears(within: 2), "every pair has a ›")
+        XCTAssertFalse(element("settings-/ch/13/mix/02/level").exists, "Mon 2 shares Mon 1's")
+        element("settings-/ch/13/mix/01/level").tap()
+        XCTAssertTrue(app.staticTexts["Vox 1 → Mon 1 & Mon 2"].appears(within: 2))
+        XCTAssertTrue(app.staticTexts["Before fader"].exists)
         XCTAssertFalse(element("tap-Pan").exists, "a mono mix has no pan to follow")
-        let note = app.staticTexts["Mon 2 shares this tap point."]
-        XCTAssertTrue(note.exists)
-        let noteTop = note.frame.minY
         saveScreenshot("tap-point")
 
         element("tap-Fader").tap()
@@ -31,7 +34,6 @@ final class TapPointUITests: DeskUITestCase {
         element("tap-Input").tap()
         element("tap-EQ").tap()
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/mix/01/type") == .int(2) })
-        XCTAssertEqual(note.frame.minY, noteTop, "the explanation keeps the longest one's room")
     }
 
     /// A mono mix's chain ends in Group, so a Subgroup set on the desk doesn't look like After fader.
@@ -58,10 +60,17 @@ final class TapPointUITests: DeskUITestCase {
         let pan = element("tap-Pan")
         XCTAssertTrue(pan.appears(within: 2), "a stereo mix's chain ends in Pan")
 
+        // The explanation keeps the longest one's room, so the pans below it never move.
+        let panRow = element("/ch/13/mix/05/pan")
+        let panTop = panRow.frame.minY
+        for block in ["tap-EQ", "tap-Input", "tap-Fader"] { element(block).tap() }
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/mix/05/type") == .int(4) })
+        XCTAssertEqual(panRow.frame.minY, panTop)
+
         pan.tap()
         XCTAssertTrue(app.alerts["Make this send a subgroup?"].appears(within: 2))
         app.alerts.buttons["Cancel"].tap()
-        XCTAssertEqual(desk.value("/ch/13/mix/05/type"), .int(3))
+        XCTAssertEqual(desk.value("/ch/13/mix/05/type"), .int(4))
 
         pan.tap()
         XCTAssertTrue(app.alerts.buttons["Make subgroup"].appears(within: 2))

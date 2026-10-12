@@ -1,8 +1,9 @@
 import SwiftUI
 import ThumbmixCore
 
-/// One odd send's settings (mock H): its level, its tap point, and on a linked pair of buses or matrices the pan
-/// each side of `source` takes in that stereo mix. Half height, so the strip's fader and mute stay usable above it.
+/// A pair of sends' settings (mock H, pairs mock B): the level of each, the one tap point the desk keeps for the pair,
+/// and on a linked pair the pan each side of `source` takes in that stereo mix. `target` is the pair's odd side. Half
+/// height, so the strip's fader and mute stay usable above it.
 struct SendSheet: View {
     let source: StripID
     let target: StripID
@@ -13,9 +14,11 @@ struct SendSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 8) {
-                    SendRow(
-                        source: source, target: target, title: "Level",
-                        accent: Theme.color(mirror.color(target)), mirror: mirror, isLevelFixed: isSubgroup)
+                    ForEach(levelTargets) { send in
+                        SendRow(
+                            source: source, target: send, title: levelTargets.count > 1 ? mirror.name(send) : "Level",
+                            accent: Theme.color(mirror.color(send)), mirror: mirror, isLevelFixed: isSubgroup)
+                    }
                     TapPointSection(source: source, target: target, mirror: mirror)
                     if mirror.isLinked(target) { panRows }
                 }
@@ -51,7 +54,16 @@ struct SendSheet: View {
     }
 
     private var sourceName: String { mirror.isLinked(source) ? mirror.pairName(source) : mirror.name(source) }
-    private var targetName: String { mirror.isLinked(target) ? mirror.pairName(target) : mirror.name(target) }
+    /// A linked pair is one send; an unlinked pair two, which share the tap point.
+    private var levelTargets: [StripID] {
+        guard !mirror.isLinked(target), let even = target.partner else { return [target] }
+        return [target, even]
+    }
+
+    private var targetName: String {
+        if mirror.isLinked(target) { return mirror.pairName(target) }
+        return levelTargets.map(mirror.name).joined(separator: " & ")
+    }
 
     private func panTitle(_ side: StripID) -> String? { sides.count > 1 ? "Pan · \(mirror.name(side))" : nil }
 
