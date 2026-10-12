@@ -14,7 +14,6 @@ struct ParameterRow: View {
 
     /// Where the drag has taken the value, unsnapped: slow movements add up even below one desk step.
     @State private var dragPosition: Float?
-    @State private var dragSpeed = 1.0
     @State private var unityTicks = 0
     @State private var isTyping = false
     /// `.disabled` doesn't reach the UIKit pan area, so the row checks it itself.
@@ -38,7 +37,7 @@ struct ParameterRow: View {
                 }
             }
             HStack {
-                Text(speedLabel ?? title ?? spec.label)
+                Text(title ?? spec.label)
                     .font(.subheadline)
                     .foregroundStyle(Theme.secondaryText)
                     .lineLimit(1)
@@ -61,7 +60,6 @@ struct ParameterRow: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .opacity(isEnabled ? 1 : 0.38)
         .sensoryFeedback(.selection, trigger: unityTicks)
-        .sensoryFeedback(.selection, trigger: dragSpeed)
         .sensoryFeedback(.impact(weight: .light), trigger: isTyping) { _, opened in opened }
         .modifier(TypeValueAlert(spec: spec, title: alertTitle, mirror: mirror, isPresented: $isTyping))
         .accessibilityElement(children: .ignore)
@@ -73,15 +71,6 @@ struct ParameterRow: View {
     }
 
     private var alertTitle: String { title.flatMap { $0.isEmpty ? nil : $0 } ?? spec.label }
-
-    /// While a drag is slowed by straying from the row, the label says how much.
-    private var speedLabel: String? {
-        switch dragSpeed {
-        case 0.5: String(localized: "½ speed")
-        case 0.25: String(localized: "¼ speed")
-        default: nil
-        }
-    }
 
     /// Like a drag, nothing to type over before the desk has sent the value.
     private func startTyping() {
@@ -115,14 +104,12 @@ struct ParameterRow: View {
     private func endDrag() {
         guard dragPosition != nil else { return }
         dragPosition = nil
-        dragSpeed = 1
         mirror.endEdit(spec.address)
     }
 
-    private func drag(_ distance: CGFloat, _ width: CGFloat, _ outside: CGFloat) {
+    private func drag(_ distance: CGFloat, _ width: CGFloat) {
         guard let position = dragPosition else { return }
-        dragSpeed = RelativeDrag.speed(outside: outside, rowHeight: height * sizeScale)
-        let moved = RelativeDrag.moved(position, by: distance, width: width, speed: dragSpeed)
+        let moved = RelativeDrag.moved(position, by: distance, width: width)
         dragPosition = moved
         let old = mirror.normalized(spec) ?? position
         let new = spec.scale.snap(moved)
