@@ -223,4 +223,63 @@ let pairPans = await listen(seconds: 20).filter { $0.address.hasSuffix("/mix/01/
 print("send pans pushed: " + Set(pairPans.map(\.address)).sorted().joined(separator: ", "))
 print("RESULT: one channel = each side keeps its own (the app's guess); both = the desk copies it.")
 
+/// A bus's average level in dB over `seconds`, from the bus meters (/meters/2, doc p.17-19).
+@MainActor
+func busLevel(_ bus: Int, seconds: Int) async -> Float? {
+    recorder.clear()
+    transport.send(OSCMessage("/meters", [.string("/meters/2")]))
+    try? await Task.sleep(for: .seconds(seconds))
+    let levels = recorder.messages.filter { $0.address == "/meters/2" }.compactMap { message -> Float? in
+        guard case .blob(let blob)? = message.arguments.first else { return nil }
+        return MeterBanks.readings(address: "/meters/2", values: MeterBlob.floats(from: blob))[StripID(.bus, bus)]?.level
+    }
+    guard !levels.isEmpty else { return nil }
+    return 20 * log10(max(levels.reduce(0, +) / Float(levels.count), 1e-6))
+}
+
+/// The engineer sets `first` on the desk, then `second`; the probe measures `bus` after each and prints both.
+@MainActor
+func compare(bus: Int, _ first: String, _ second: String) async -> Float? {
+    var levels: [Float] = []
+    for step in [first, second] {
+        print("  On the DESK: \(step) (10 seconds), then hands off while it measures...")
+        try? await Task.sleep(for: .seconds(10))
+        guard let level = await busLevel(bus, seconds: 4) else {
+            print("  bus \(bus) meters: NO REPLY")
+            return nil
+        }
+        print(String(format: "  bus %d: %.1f dB", bus, level))
+        levels.append(level)
+    }
+    return levels[1] - levels[0]
+}
+
+func change(_ difference: Float?) -> String {
+    difference.map { String(format: "%+.1f dB", $0) } ?? "unknown"
+}
+
+// The tap point's chain (TapChain) and its explanations rest on these; one tutorial and the user's memory so far.
+print("\n== 10. Tap points. Set up on the DESK first: channel 1 with a steady signal (pink noise or a track),")
+print("buses 15-16 unused, unlinked, faders at 0 dB and unmuted, channel 1's sends to bus 15 and 16 at 0 dB.")
+print("\n10a. Comp before the EQ: set channel 1's comp before the EQ, threshold -40, ratio 10; its bus 15-16 tap <-EQ.")
+let compChange = await compare(bus: 15, "channel 1's comp ON", "channel 1's comp OFF")
+print("RESULT: \(change(compChange)). Louder with it off (> +2 dB) = a Pre-EQ send includes a comp set before the EQ (the app's model).")
+
+print("\n10b. One tap for both buses: set the bus 15-16 tap to PRE; listen on bus 16, the even one.")
+let evenChange = await compare(bus: 16, "channel 1's fader at 0 dB", "channel 1's fader all the way down")
+print("RESULT: \(change(evenChange)). About 0 = bus 16 is pre-fader too: the odd send's tap sets the pair (the app's model).")
+
+print("\n10c. Mute and pre-fader sends: keep the tap at PRE, channel 1's fader at 0 dB.")
+let muteChange = await compare(bus: 15, "channel 1 unmuted", "channel 1 MUTED")
+print("RESULT: \(change(muteChange)). A big drop = muting a channel silences its pre-fader sends too.")
+
+print("\n10d. Subgroup: set the bus 15-16 tap to GRP.")
+let groupChange = await compare(bus: 15, "channel 1's bus 15 send at 0 dB", "channel 1's bus 15 send at -20 dB")
+print("RESULT: \(change(groupChange)). About 0 = a subgroup send's level is fixed (the app's model).")
+
+print("\n10e. Follow LR pan: link buses 15-16, tap PRE, channel 1 panned centre, its send's Follow LR pan ON.")
+let followChange = await compare(bus: 15, "channel 1's bus 15-16 send pan hard left", "send pan hard right")
+print("RESULT: \(change(followChange)). About 0 = the send's own pan is ignored while it follows (the app dims it).")
+print("Put buses 15-16 and channel 1 back as the show needs them.")
+
 transport.cancel()

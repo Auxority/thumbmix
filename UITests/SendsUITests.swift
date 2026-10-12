@@ -55,7 +55,7 @@ final class SendsUITests: DeskUITestCase {
         XCTAssertTrue(toPair.appears(within: 2))
         XCTAssertEqual(toPair.label, "Bus 5-6")
         XCTAssertFalse(element("/ch/13/mix/06/level").exists, "the even bus is part of the pair's send")
-        XCTAssertFalse(element("settings-/ch/13/mix/01/level").exists, "an unlinked bus has no pan to set")
+        XCTAssertFalse(element("settings-/ch/13/mix/02/level").exists, "an even send has no tap point of its own")
 
         element("settings-/ch/13/mix/05/level").tap()
         let pan = element("/ch/13/mix/05/pan")

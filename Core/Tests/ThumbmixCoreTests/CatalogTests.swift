@@ -46,6 +46,18 @@ struct CatalogTests {
         #expect(DemoState.values()["/ch/13/mix/05/pan"] == .float(0.5), "centre")
     }
 
+    /// The tap point is the odd send's too (doc p.26); the chain also needs where the strip's comp sits.
+    @Test func oddSendsHaveATapPoint() {
+        let vox = StripID(.input, 13)
+        #expect(Catalog.sendTap(from: vox, to: StripID(.bus, 1))?.address == "/ch/13/mix/01/type")
+        #expect(Catalog.sendTap(from: vox, to: StripID(.bus, 2)) == nil)
+        #expect(Catalog.dynamicsPosition(vox)?.address == "/ch/13/dyn/pos")
+        #expect(Catalog.dynamicsPosition(StripID(.mainStereo))?.address == "/main/st/dyn/pos")
+        #expect(Catalog.dynamicsPosition(StripID(.auxIn, 1)) == nil, "an aux in has no dynamics")
+        #expect(DemoState.values()["/ch/13/mix/01/type"] == .int(3), "the demo's wedges are fed before the fader")
+        #expect(DemoState.values()["/ch/13/dyn/pos"] == .int(1), "the demo's comps sit after the EQ")
+    }
+
     @Test func eqBandCounts() {
         #expect(StripID(.input, 1).eqBandCount == 4)
         #expect(StripID(.bus, 1).eqBandCount == 6)
@@ -142,7 +154,8 @@ struct CatalogTests {
                 [Catalog.sendLevel(from: strip, to: $0).address, Catalog.sendOn(from: strip, to: $0).address]
                     + [Catalog.sendPan(from: strip, to: $0)?.address, Catalog.sendPanFollow(from: strip, to: $0)?.address]
                     .compactMap { $0 }
-            }
+                    + [Catalog.sendTap(from: strip, to: $0)?.address].compactMap { $0 }
+            } + [Catalog.dynamicsPosition(strip)?.address].compactMap { $0 }
         case .fedBy:
             strip.kind.feeders.flatMap(StripID.all).map { Catalog.sendLevel(from: $0, to: strip).address }
         case .members: StripKind.allCases.flatMap(StripID.all).compactMap(\.dcaMask)

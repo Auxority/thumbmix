@@ -2,7 +2,7 @@ import SwiftUI
 import ThumbmixCore
 
 /// Where this strip goes: one row per bus (from a channel) or matrix (from a bus or main), named and coloured as on the desk.
-/// A linked pair is one send, as on the desk; its › opens the pan settings (`SendSheet`).
+/// A linked pair is one send, as on the desk. Every odd send has a tap point, so its › opens its settings (`SendSheet`).
 struct SendsTab: View {
     let strip: StripID
     let mirror: ConsoleMirror
@@ -17,14 +17,19 @@ struct SendsTab: View {
                         SendRow(
                             source: strip, target: target, title: isPair ? mirror.pairName(target) : mirror.name(target),
                             accent: Theme.color(mirror.color(target)), mirror: mirror)
-                        if isPair { SendSettingsButton(address: Catalog.sendLevel(from: strip, to: target).address) { openSend = target } }
+                        if Catalog.sendTap(from: strip, to: target) != nil {
+                            SendSettingsButton(address: Catalog.sendLevel(from: strip, to: target).address) {
+                                openSend = target
+                            }
+                        }
                     }
                 }
             }
         }
         .sheet(item: $openSend) { target in
             SendSheet(source: strip, target: target, mirror: mirror)
-                .presentationDetents([.medium])
+                // A stereo mix's sheet adds pans below the tap point: it can be dragged up to see them all.
+                .presentationDetents(mirror.isLinked(target) ? [.medium, .large] : [.medium])
                 // The strip's fader and mute above the sheet stay usable: a channel that rings can still be pulled.
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 // Glass tinted black, like the toolbar buttons (`DarkCapsuleStyle`): the edge still shows, the
@@ -48,7 +53,7 @@ private struct SendSettingsButton: View {
                 .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Pan settings")
+        .accessibilityLabel("Send settings")
         .accessibilityIdentifier("settings-" + address)
     }
 }
@@ -78,6 +83,8 @@ struct SendRow: View {
     let title: String
     let accent: Color
     let mirror: ConsoleMirror
+    /// A subgroup send's level is fixed at 0 dB; it can still be switched off.
+    var isLevelFixed = false
 
     var body: some View {
         HStack(spacing: 8) {
@@ -87,7 +94,9 @@ struct SendRow: View {
             )
             ParameterRow(
                 spec: Catalog.sendLevel(from: source, to: target), mirror: mirror, title: title,
-                accent: accent)
+                accent: accent
+            )
+            .disabled(isLevelFixed)
         }
     }
 }
