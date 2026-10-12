@@ -23,6 +23,18 @@ struct ConsoleMirrorTests {
         #expect(Catalog.syncAddresses().allSatisfy { mirror.cell($0).argument != nil })
     }
 
+    /// UI tests wait for this before trusting the screen: until then it can still show the previous test's desk.
+    @Test func fakeKnowsWhenTheAppReachedIt() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        #expect(!fake.hasClients)
+        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port))
+        mirror.start()
+        defer { mirror.stop() }
+
+        #expect(await eventually { fake.hasClients })
+    }
+
     @Test func syncSurvivesLostReplies() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }

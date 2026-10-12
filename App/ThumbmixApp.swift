@@ -5,6 +5,11 @@ import ThumbmixCore
 struct ThumbmixApp: App {
     @State private var model = AppModel()
 
+    init() {
+        // UI tests launch with -disableAnimations YES: every step waits for the screen to settle first.
+        if UserDefaults.standard.bool(forKey: "disableAnimations") { UIView.setAnimationsEnabled(false) }
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView(model: model)
@@ -23,12 +28,17 @@ struct RootView: View {
             if let mirror = model.mirror, model.failure == nil {
                 OverviewView(mirror: mirror, onDisconnect: model.disconnect)
                     .environment(\.isDemoConsole, model.isOffline)
+                    // A new desk starts from the overview, with no screen, sheet or alert left open.
+                    .id(ObjectIdentifier(mirror))
             } else {
                 ConnectView(model: model)
             }
         }
         .background(Theme.background.ignoresSafeArea())
         .task { model.connectToLastConsole() }
+        #if DEBUG
+            .onOpenURL(perform: model.openTestURL)
+        #endif
         .onChange(of: scenePhase) { old, new in
             if old == .background, new != .background { model.wake() }
         }
