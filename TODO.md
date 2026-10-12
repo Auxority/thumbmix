@@ -1,6 +1,6 @@
 # TODO
 
-What's next for Thumbmix, newest decisions first within each section. Tick an item off (or delete it) in the PR that finishes it.
+What's next for Thumbmix, newest decisions first within each section. The PR that finishes an item deletes it, and records anything lasting it decided in `DECISIONS.md`.
 
 ## On the real M32
 
@@ -20,18 +20,6 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 - [ ] Walk the acceptance checklist in `README.md`.
 - [ ] Check on a device that VoiceOver's swipe up/down adjusts parameter rows. XCUITest can't drive it.
 
-## Fixes
-
-- [x] **Refuse a typed value outside the range instead of clamping it** (decided 2026-10-10, replaces the clamp from 2026-10-09). "1000000" on a fader must not set +10 dB: Set reopens the alert with "“1000000” is out of range." and the range, the text kept. The fader's low end is −∞, so "-200" is −∞, not past it.
-- [x] **Finer drags (½, ¼) dropped** (2026-10-12): they came only after the value had moved, so they didn't help a small nudge. Mocked instead: hold then drag (it overloads the hold that types a value: a wobble would change the desk live), slow-finger acceleration, and a Fine button. Drags have one speed; exact values are typed (hold the row) or nudged ±1 dB.
-- [x] **Remove the "Show unused" toggle from the Fed by tab** (`FedByTab` in `SendsTabs.swift`): Fed by now lists every source, unused ones too, like the overview.
-- [x] **OLED dark buttons** (2026-10-12, picked from real iOS 27 screenshots over a flat black capsule): Disconnect, Edit strip's Cancel/Done and Connect use glass tinted black on iOS 26+ (`DarkCapsuleStyle`), so they sit with iOS's own back button, which can't be restyled, and swipe-back stays. Connect fills white once an address is typed. The app's own greys (fader tracks, chips, M) stay: they show where a control is. System alerts and switches stay iOS's.
-
-- [x] **RTA stuck on "waiting for the desk"** after any trip to another app: coming back rebuilds the link, so the EQ tab's borrow found it not live and never retried. It now borrows again once the link is live.
-- [x] **Remove the duplicate meter from the Input tab:** the fader row above already shows the level (decided 2026-10-09).
-- [x] **Offline mode opened every EQ with all bands stacked at 632 Hz:** the demo desk now starts each EQ on its Reset bands values.
-- [x] **Title and DEMO pill got truncated** on iOS 27 ("Thu…", "DE…"): the bar measured the pill too narrow even with room to spare, and on the overview the Unused button left too little. The pill keeps its size, and the overview's Unused button is gone.
-
 ## Performance
 
 - [ ] **Load strips in parallel, show them as they arrive?** Ask the desk for all strips at once and show each row disabled (a placeholder) until its values are in, then make it active. Measure connect and reconnect time first; build it only if it gets them significantly faster.
@@ -41,35 +29,24 @@ What's next for Thumbmix, newest decisions first within each section. Tick an it
 ## Features
 
 - [ ] **Aux in gets the Input, EQ and Sends tabs like an input.** Today an aux strip has only Mix (`ChannelTab`), but the desk gives aux in Trim and invert, a 4-band EQ and 16 bus sends (`notes/m32-protocol.md` §5.2; no gate, dynamics, delay or low cut).
-- [x] **Group chips within thumb reach** (mock A2, 2026-10-12, picked from real iOS 27 screenshots): the overview's chips (`GroupChips`) sit in one dark glass bar along the bottom edge, scrolling sideways, with the list running on under it. Picked over a two-row grid: a new group is just one more chip. Main and Matrix still need a sideways swipe on the SE.
 - [ ] **A SideStore source that updates itself:** a source file listing Thumbmix's versions, updated by each release, so SideStore picks up new versions on its own.
-- [x] **Hold a slider row to type its value** (mock B: the system alert, Set only). Any unit or none ("−6", "1k", "L20", "-inf"), decimal comma or point; text that isn't a value reopens the alert saying so. A number past either end is refused the same way (it was clamped until 2026-10-10). VoiceOver gets an "Enter value" action. (Its finer drags were dropped on 2026-10-12, see Fixes.)
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
+- [ ] **A send's tap point, made clear** (asked 2026-10-12). Each odd send has one (`/ch/NN/mix/01/type`: IN/LC, <-EQ, EQ->, PRE, POST, GRP; Maillot p.26), and it confuses fellow engineers more than any other send setting. Don't just copy the desk's labels: find words or a picture of where in the strip the send is taken. Mock it first; it belongs in the send's settings sheet (`SendSheet`, PR #73). Today only a linked pair's send has a ›, since a send pan does nothing on a mono bus; the tap exists on every odd send, so with it every odd send gets a ›, and the sheet shows pan only for a linked pair. Check with `m32-probe` whether an odd send's tap also sets the even bus's.
 - [ ] **FX returns get EQ (and the other tabs) like an input:** the desk gives them a 4-band EQ. Check first whether that's good practice for returns.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Input meter marks at −18 dBFS and 0 dBFS?** A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
-- [x] **The 48V alert names a linked partner.** When the pair's Gain/Delay is linked on the desk, the alert adds "Also powers Gtr R (linked).", like the shared-input line.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
-- [x] **48V as a button beside the Gain row** (mock R2), the same height, red when on, like MUTE beside a fader. Switching phantom power on or off asks first with the system alert ("Turn on 48V for Vox 2?"), plus "Also powers Vox 1 (same input)." when two channels share an input.
-- [x] **Reset bands asks with the system alert** ("Reset all 4 bands of Kick?"), like linking and 48V. It names no frequencies: they mean little to non-technical users, and engineers know their desk.
-- [x] **Matrix group.** Matrix 1–6 have a chip (last in the row, so DCA and Main stay on an iPhone SE screen) and a strip screen with Mix, EQ (6 bands), Comp and Fed by (the buses and both mains). They link in pairs (`/config/mtxlink/1-2` … `5-6`).
 - [ ] **Fed by on Main LR and Main M.** Like a bus's Fed by: every input, aux in, FX return and bus with its LR switch on (`/…/mix/st`), and for Main M those with mono on (`/…/mix/mono`) with their mono level (`/…/mix/mlevel`). Matrices can't feed the mains; they're fed by them.
-- [x] **Sends to the matrices from a bus or main screen** (mock B): buses get Mix · EQ · Comp · Sends · Fed by, the mains Mix · EQ · Comp · Sends, with one row per matrix.
 - [ ] **Matrix send tap** (`/bus/NN/mix/01/type`, on the odd sends): needed to feed a stereo matrix pair properly. A bus's or main's Sends tab sets the pan of a linked matrix pair (the send sheet); neither Fed by tab shows pan or tap yet.
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
 - [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. Fed by lost its "Show unused" toggle too and lists every source.
 - [ ] **Solo** per channel.
-- [x] **Delay** per channel (mock C): below Trim on the Input tab, an on/off chip and the time in ms and distance (343 m/s; feet on US-region phones). It follows the Gain/Delay link. A double-tap resets it to 0.3 ms, and preamp gain to 0 dB.
 - [ ] **Inserts** per channel.
 - [ ] **Dynamics before or after the EQ:** the toggle that moves the compressor ahead of the EQ.
 - [ ] **More compressor settings:** auto time and the key filter frequency.
-- [x] **Comp and Gate Mode, Detector and Envelope as dropdowns**, like EQ Type. Mode wasn't broken: it was a drag row that flips only past half its width, easy to miss. The open list says each choice in words with the desk's name under it ("Average level" · RMS); the closed row shows the desk's name. Detector and Envelope sit as a pair under Makeup gain (was "Makeup").
-- [x] **Double-tap resets on the Comp and EQ rows**, at once like a double-tap on the EQ graph's point (no reset asks any more; preamp gain and delay lost their prompts too): Makeup gain to 0 dB, Ratio to 3:1, an EQ band's Freq to its Reset bands frequency, Q to 1.7, Gain to 0 dB.
-- [x] **A cut filter's Gain and Q are disabled** (LCut, HCut, and BU6…LR24 on matrices and mains): dimmed and showing "—", still in place, and the graph's drag and pinch leave them alone.
 - [ ] **Gate key filter.** Lower priority than the compressor's.
-- [x] **Reset bands for buses, matrices and mains** (6 bands): PEQ at 54.5 Hz, 153.5 Hz, 418 Hz, 1.14 kHz, 3.21 kHz and 8.73 kHz, Q 1.7, 0 dB. Inputs keep 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz.
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
 
 ## Maybe later
