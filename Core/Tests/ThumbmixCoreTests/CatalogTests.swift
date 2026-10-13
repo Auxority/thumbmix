@@ -153,7 +153,8 @@ struct CatalogTests {
     private static func shownAddresses(_ tab: ChannelTab, _ strip: StripID) -> [String] {
         switch tab {
         case .mix:
-            [Catalog.fader(strip).address, Catalog.on(strip).address] + [Catalog.pan(strip)?.address].compactMap { $0 }
+            [Catalog.fader(strip).address, Catalog.on(strip).address, strip.solo]
+                + [Catalog.pan(strip)?.address].compactMap { $0 }
         case .input:
             [Catalog.trim(strip).address] + [Catalog.headampIndex(strip), Catalog.invert(strip)?.address].compactMap { $0 }
                 + (Catalog.delay(strip)?.all.map(\.address) ?? [])

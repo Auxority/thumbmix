@@ -112,7 +112,7 @@ public enum DemoState {
         if address.hasPrefix("/-ha/") { return headampIndexValue(address) }
         // Every Link Preference ticked, every pair unlinked: a desk after a reset (assumed; m32-probe section 7).
         if address.hasPrefix("/config/linkcfg/") { return .int(1) }
-        if address.hasPrefix("/config/") { return .int(0) }
+        if address.hasPrefix("/config/") || address.hasPrefix("/-stat/solosw/") { return .int(0) }
         // A send's tap point, before the EQ type's "/type": the demo's wedges are fed before the fader.
         if address.contains("/mix/"), address.hasSuffix("/type") { return .int(Int32(SendTap.preFader.rawValue)) }
         return defaultsBySuffix.first { address.hasSuffix($0.suffix) }?.value ?? .float(0.5)

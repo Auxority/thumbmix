@@ -50,7 +50,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab: give it the same pan and tap point controls as the Sends settings sheet, plus mute.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
 - [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. Fed by lost its "Show unused" toggle too and lists every source. Idea: a "Show unused" button at the bottom of the overview, Sends and Fed by lists; or rethink it from the engineer's task.
-- [ ] **Solo** per channel.
 - [ ] **Inserts** per channel.
 - [ ] **Dynamics before or after the EQ:** the toggle that moves the compressor ahead of the EQ.
 - [ ] **More compressor settings:** auto time and the key filter frequency.
