@@ -76,16 +76,17 @@ struct RTATests {
         mirror.followRTA(kick)
         #expect(await eventually { mirror.spectrum.decibels.count == RTA.bandCount })
 
+        let flat = mirror.spectrum.decibels[index]
+
+        // Waits for a spectrum each edit shaped: one sampled after a fixed sleep can predate it on a slow runner.
         mirror.set(gain.address, gain.scale.argument(fromNormalized: 1))
-        #expect(await eventually { fake.value(at: gain.address) == .float(1) })
-        try await Task.sleep(for: .milliseconds(200))
+        #expect(await eventually { mirror.spectrum.decibels[index] - flat > 10 }, "boost at \(Int(bandFrequency)) Hz")
         let boosted = mirror.spectrum.decibels[index]
         mirror.set(gain.address, gain.scale.argument(fromNormalized: 0))
-        #expect(await eventually { fake.value(at: gain.address) == .float(0) })
-        try await Task.sleep(for: .milliseconds(200))
-        let cut = mirror.spectrum.decibels[index]
 
-        #expect(boosted - cut > 20, "boosted \(boosted) dB, cut \(cut) dB at \(Int(bandFrequency)) Hz")
+        #expect(
+            await eventually { boosted - mirror.spectrum.decibels[index] > 20 },
+            "boosted \(boosted) dB, cut \(mirror.spectrum.decibels[index]) dB at \(Int(bandFrequency)) Hz")
     }
 
     @Test func aChangeMadeOnTheDeskMeanwhileIsKept() async throws {
