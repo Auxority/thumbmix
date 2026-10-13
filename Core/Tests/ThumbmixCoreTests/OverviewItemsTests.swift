@@ -32,6 +32,29 @@ struct OverviewItemsTests {
         #expect(OverviewItem.strip(StripID(.input, 8), .full).opens == StripID(.input, 8))
     }
 
+    /// A row's controls belong to `held`; a pair's row stands for both sides, under their shared name.
+    @Test func aPairRowHoldsBothSidesUnderItsSharedName() {
+        let pair = OverviewItem.pair(StripID(.input, 9))
+        #expect(pair.held == StripID(.input, 9))
+        #expect(pair.holds(StripID(.input, 10)))
+        #expect(!pair.holds(StripID(.input, 11)))
+        #expect(mirror.title(of: pair) == "Gtr")
+        let half = OverviewItem.strip(StripID(.input, 10), .bottom)
+        #expect(half.held == StripID(.input, 10))
+        #expect(!half.holds(StripID(.input, 9)))
+        #expect(mirror.title(of: half) == "Gtr R")
+    }
+
+    /// Rows changed while a finger is down wait for this before they regroup: lifting a finger isn't observed.
+    @Test func waitingForTheFingerEndsOnceItLifts() async throws {
+        mirror.beginEdit("/ch/01/mix/fader")
+        let waiting = Task { try await mirror.fingerLifted() }
+        try await Task.sleep(for: .milliseconds(150))
+        mirror.endEdit("/ch/01/mix/fader")
+        try await waiting.value
+        #expect(!mirror.isFingerDown)
+    }
+
     @Test func pairShowsWhenEitherSideIsUsed() {
         let odd = StripID(.input, 21)
         mirror.apply(OSCMessage("/config/chlink/21-22", [.int(1)]))

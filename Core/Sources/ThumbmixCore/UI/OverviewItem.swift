@@ -17,6 +17,22 @@ public enum OverviewItem: Hashable, Identifiable, Sendable {
         }
     }
 
+    /// The strip whose controls the row shows: a pair's, like its screen, belong to its odd side.
+    public var held: StripID {
+        switch self {
+        case .strip(let strip, _): strip
+        case .pair(let odd): odd
+        }
+    }
+
+    /// Whether `strip` is this row's: a pair's row stands for both its sides.
+    public func holds(_ strip: StripID) -> Bool {
+        switch self {
+        case .strip(let own, _): own == strip
+        case .pair(let odd): strip.oddSide == odd
+        }
+    }
+
     /// The strip screen the row opens: a pair's screen belongs to its odd side.
     public var opens: StripID {
         switch self {
@@ -31,6 +47,12 @@ extension ConsoleMirror {
     /// While true, rows must not change shape: the finger owns a control.
     public var isFingerDown: Bool { holds.isFingerDown }
 
+    /// Returns once no finger owns a control; throws when cancelled. Lifting a finger isn't observed, so it looks
+    /// every 100 ms.
+    public func fingerLifted() async throws {
+        while isFingerDown { try await Task.sleep(for: .milliseconds(100)) }
+    }
+
     /// The rows for `strips`. A pair is unused, and hidden, only when both its sides are.
     public func overviewItems(_ strips: [StripID], showUnused: Bool) -> [OverviewItem] {
         strips.compactMap { strip in
@@ -40,6 +62,12 @@ extension ConsoleMirror {
             guard showUnused || !(isUnused(strip) && isUnused(partner)) else { return nil }
             return pairItem(for: strip)
         }
+    }
+
+    /// A pair's row goes by what both names share ("Gtr"); a half row by its own side's name.
+    public func title(of item: OverviewItem) -> String {
+        if case .pair(let odd) = item { return pairName(odd) }
+        return name(item.held)
     }
 
     private func pairItem(for strip: StripID) -> OverviewItem? {

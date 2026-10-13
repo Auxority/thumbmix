@@ -77,7 +77,8 @@ private struct SendSettingsButton: View {
 }
 
 /// What feeds this bus or matrix: the sends of every kind that feeds it (`StripKind.feeders`).
-/// Unused sources show too, like the overview, until hiding them is redesigned (TODO).
+/// Unused sources show too, like the overview, until hiding them is redesigned (TODO). A linked source pair is one
+/// row whenever it is on the overview: the desk links sends with the faders (`LinkSection.of`).
 struct FedByTab: View {
     let target: StripID
     let mirror: ConsoleMirror
@@ -87,18 +88,29 @@ struct FedByTab: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(spacing: 6) {
-                    ForEach(target.kind.feeders.flatMap(StripID.all)) { source in
-                        SendRow(
-                            source: source, target: target, title: mirror.name(source),
-                            accent: Theme.color(mirror.color(source)), mirror: mirror
-                        )
-                        .id(source)
+                SteadyRows(wanted: rows, mirror: mirror) { rows in
+                    VStack(spacing: 6) {
+                        ForEach(rows) { row in
+                            SendRow(
+                                source: row.held, target: target, title: mirror.title(of: row),
+                                accent: Theme.color(mirror.color(row.held)), mirror: mirror
+                            )
+                            .id(row)
+                        }
                     }
                 }
             }
-            .onAppear { if let focus { proxy.scrollTo(focus, anchor: .center) } }
+            .onAppear { scrollToFocus(proxy) }
         }
+    }
+
+    private var rows: [OverviewItem] {
+        mirror.overviewItems(target.kind.feeders.flatMap(StripID.all), showUnused: true)
+    }
+
+    private func scrollToFocus(_ proxy: ScrollViewProxy) {
+        guard let focus, let row = rows.first(where: { $0.holds(focus) }) else { return }
+        proxy.scrollTo(row, anchor: .center)
     }
 }
 

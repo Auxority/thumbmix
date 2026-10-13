@@ -6,16 +6,16 @@ struct OverviewView: View {
     let onDisconnect: () -> Void
     @State private var group: StripGroup = .inputs
     @State private var openStrip: StripID?
-    /// The rows as they were when a finger last went down; see `rows`.
-    @State private var heldItems: [OverviewItem] = []
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 10) {
                 ScrollView {
-                    LazyVStack(spacing: 6) {
-                        ForEach(rows) { item in
-                            StripRow(item: item, mirror: mirror) { openStrip = item.opens }
+                    SteadyRows(wanted: wantedItems, mirror: mirror) { rows in
+                        LazyVStack(spacing: 6) {
+                            ForEach(rows) { item in
+                                StripRow(item: item, mirror: mirror) { openStrip = item.opens }
+                            }
                         }
                     }
                     .padding(.horizontal, 12)
@@ -45,34 +45,13 @@ struct OverviewView: View {
             .navigationDestination(item: $openStrip) { strip in
                 ChannelView(strip: strip, mirror: mirror)
             }
-            .onChange(of: wantedItems, initial: true) { holdItemsUnlessFingerIsDown() }
-            .task(id: wantedItems) { await regroupOnceNoFingerIsDown() }
         }
     }
-
-    /// The rows the desk's links call for, computed as the list draws: a cached list missed the last of a status and
-    /// link change arriving together and left a linked pair split (2026-10-12, once connect got ~10x faster).
-    /// While a finger is down the rows stay as they were: a link changed on the desk mid-drag would rebuild the row
-    /// under the finger.
-    private var rows: [OverviewItem] { mirror.isFingerDown ? heldItems : wantedItems }
 
     /// Linking or unlinking a pair, here or on the desk, merges or splits rows. Reads no faders, so it never changes
     /// per fader move. Every strip shows until the Unused toggle's redesign (TODO): hiding them left some out of reach.
     private var wantedItems: [OverviewItem] {
         mirror.overviewItems(group.strips, showUnused: true)
-    }
-
-    private func holdItemsUnlessFingerIsDown() {
-        if !mirror.isFingerDown { heldItems = wantedItems }
-    }
-
-    /// Lifting a finger isn't observed, so a change held back by it is drawn once the finger lifts. The next change or
-    /// leaving the screen cancels the wait.
-    private func regroupOnceNoFingerIsDown() async {
-        while mirror.isFingerDown {
-            do { try await Task.sleep(for: .milliseconds(100)) } catch { return }
-        }
-        heldItems = wantedItems
     }
 }
 

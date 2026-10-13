@@ -24,19 +24,11 @@ struct StripRow: View {
         }
     }
 
-    private var strip: StripID {
-        switch item {
-        case .strip(let strip, _): strip
-        case .pair(let odd): odd
-        }
-    }
+    private var strip: StripID { item.held }
 
     private var color: Color { Theme.color(mirror.color(strip)) }
 
-    private var name: String {
-        if case .pair(let odd) = item { return mirror.pairName(odd) }
-        return mirror.name(strip)
-    }
+    private var name: String { mirror.title(of: item) }
 
     /// The number printed on the desk, both numbers for a pair; the mains have none.
     private var number: String {

@@ -35,7 +35,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Presets from the channel name**, based on James Attaway's *Live Mixing Field Guide*: a channel called "Kick" offers kick presets first (EQ, gate, compressor, low cut). Find a good spot to pick them from (mock first).
 - [ ] **Mix tab: a switch for "to Main LR"** on inputs and mix buses (`/…/mix/st`), so a strip can be taken off the main mix.
 - [ ] **DCA members from the DCA view:** a Members tab that adds and removes strips, the reverse of "Channel membership" below. Consider whether both are worth having.
-- [ ] **Fed by: linked pairs as one row, consistently.** Some pairs still show as two rows.
 - [ ] **Fed by: meters?** Consider a meter per source row; weigh the performance cost (see "Meters only for the strips in view?").
 - [ ] **Strip numbers on Fed by and Sends** (Ch 01, Aux 3, Bus 12…), so two strips with similar names can be told apart.
 - [ ] **The group pill design everywhere?** Consider using the pills (Inputs, Aux, FX…) more consistently: on the channel, aux, FX and bus screens too.
