@@ -20,8 +20,28 @@ func assertFillIsBlack(_ element: XCUIElement, file: StaticString = #filePath, l
     XCTAssertLessThan(fill, 12, "\(element.label) is filled grey (\(fill)/255), not black", file: file, line: line)
 }
 
+/// A state that's on almost all show is a dark green tint (`Theme.usualOnTint`, 18/61/32), not a bright fill: fills
+/// mean "look here". The fill is the median pixel by brightness of the button's central half, as above.
+@MainActor
+func assertFillIsTint(_ element: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
+    let pixels = rgbValues(inMiddleOf: element.screenshot().image).sorted { $0.brightness < $1.brightness }
+    guard !pixels.isEmpty else { return XCTFail("could not read the button's pixels", file: file, line: line) }
+    let fill = pixels[pixels.count / 2]
+    XCTAssertLessThan(fill.brightness, 64, "\(element.identifier) is a bright fill, not a tint", file: file, line: line)
+    XCTAssertGreaterThan(fill.green - max(fill.red, fill.blue), 15, "\(element.identifier) isn't green", file: file, line: line)
+}
+
+private struct Pixel {
+    let red, green, blue: Int
+    var brightness: Int { (red + green + blue) / 3 }
+}
+
 /// Mean of R, G and B (0–255) for each pixel in the central half of the image.
 private func brightnessValues(inMiddleOf image: UIImage) -> [Int] {
+    rgbValues(inMiddleOf: image).map(\.brightness)
+}
+
+private func rgbValues(inMiddleOf image: UIImage) -> [Pixel] {
     guard let full = image.cgImage else { return [] }
     let crop = CGRect(x: full.width / 4, y: full.height / 4, width: full.width / 2, height: full.height / 2)
     guard let middle = full.cropping(to: crop) else { return [] }
@@ -40,6 +60,6 @@ private func brightnessValues(inMiddleOf image: UIImage) -> [Int] {
     }
     guard drawn else { return [] }
     return stride(from: 0, to: pixels.count, by: 4).map { offset in
-        (Int(pixels[offset]) + Int(pixels[offset + 1]) + Int(pixels[offset + 2])) / 3
+        Pixel(red: Int(pixels[offset]), green: Int(pixels[offset + 1]), blue: Int(pixels[offset + 2]))
     }
 }

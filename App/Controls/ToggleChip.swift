@@ -6,6 +6,7 @@ struct ToggleChip: View {
     let mirror: ConsoleMirror
     var title: String?
     var onColor: Color = .white
+    var onText: Color = .black
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
@@ -18,7 +19,7 @@ struct ToggleChip: View {
                 .lineLimit(1)
                 .frame(minWidth: 52 * sizeScale, minHeight: 44 * sizeScale)
                 .padding(.horizontal, 8)
-                .foregroundStyle(isOn ? .black : Theme.secondaryText)
+                .foregroundStyle(isOn ? onText : Theme.secondaryText)
                 .background(isOn ? onColor : Theme.track, in: RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)

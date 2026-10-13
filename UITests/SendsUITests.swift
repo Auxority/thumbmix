@@ -14,7 +14,7 @@ final class SendsUITests: DeskUITestCase {
         sends.tap()
         let toFill = element("/bus/01/mix/01/level")
         XCTAssertTrue(toFill.appears(within: 2))
-        XCTAssertEqual(toFill.label, "Fill")
+        XCTAssertEqual(toFill.label, "Fill, Matrix 1")
         XCTAssertEqual(toFill.value as? String, "−∞ dB")
         XCTAssertTrue(element("/bus/01/mix/06/level").exists, "all six matrices")
         saveScreenshot("bus-sends")
@@ -30,7 +30,7 @@ final class SendsUITests: DeskUITestCase {
         app.buttons["Sends"].tap()
         let toFill = element("/main/st/mix/01/level")
         XCTAssertTrue(toFill.appears(within: 2))
-        XCTAssertEqual(toFill.label, "Fill")
+        XCTAssertEqual(toFill.label, "Fill, Matrix 1")
         XCTAssertEqual(toFill.value as? String, "0.0 dB")
     }
 
@@ -40,7 +40,7 @@ final class SendsUITests: DeskUITestCase {
         app.buttons["Sends"].tap()
         let toMon1 = app.descendants(matching: .any)["/ch/13/mix/01/level"]
         XCTAssertTrue(toMon1.appears(within: 2))
-        XCTAssertEqual(toMon1.label, "Mon 1")
+        XCTAssertEqual(toMon1.label, "Mon 1, Bus 1")
         XCTAssertEqual(toMon1.value as? String, "0.0 dB")
     }
 
@@ -118,7 +118,7 @@ final class SendsUITests: DeskUITestCase {
         app.buttons["Fed by"].tap()
         let pair = element("/ch/09/mix/01/level")
         XCTAssertTrue(pair.appears(within: 2))
-        XCTAssertEqual(pair.label, "Gtr")
+        XCTAssertEqual(pair.label, "Gtr, Ch 9-10")
         XCTAssertFalse(element("/ch/10/mix/01/level").exists, "the even side has no row of its own")
     }
 
@@ -155,10 +155,28 @@ final class SendsUITests: DeskUITestCase {
         app.buttons["Fed by"].tap()
         let fromMain = element("/main/st/mix/01/level")
         XCTAssertTrue(fromMain.appears(within: 2))
-        XCTAssertEqual(fromMain.label, "LR")
+        XCTAssertEqual(fromMain.label, "LR, Main LR")
         XCTAssertEqual(fromMain.value as? String, "0.0 dB")
         XCTAssertTrue(element("/bus/01/mix/01/level").exists)
         XCTAssertFalse(element("/ch/01/mix/01/level").exists, "inputs feed buses, not matrices")
         saveScreenshot("matrix-fedby")
+    }
+
+    /// A named source carries its desk number like the overview (2026-10-13), an unnamed one's title already is it. Its On chip
+    /// is tinted, not filled: a send is on almost all show, and fills mean "look here".
+    func testFedByRowsShowTheNumberAndATintedOn() {
+        launch()
+        app.buttons["Buses"].tap()
+        open("Mon 1")
+        app.buttons["Fed by"].tap()
+        let vox = element("/ch/13/mix/01/level")
+        XCTAssertTrue(vox.appears(within: 2))
+        XCTAssertEqual(vox.label, "Vox 1, Ch 13")
+        XCTAssertEqual(element("/ch/20/mix/01/level").label, "Ch 20")
+        let on = element("toggle-/ch/01/mix/01/on")
+        XCTAssertEqual(on.value as? String, "On")
+        assertFillIsTint(on)
+        assertLabelContrasts(on)
+        saveScreenshot("fedby-numbers")
     }
 }

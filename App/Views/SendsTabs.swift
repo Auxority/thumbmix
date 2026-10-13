@@ -20,7 +20,7 @@ struct SendsTab: View {
                         VStack(spacing: 6) {
                             ForEach(pair) { target in
                                 SendRow(
-                                    source: strip, target: target, title: title(target),
+                                    source: strip, target: target, title: title(target), caption: caption(target),
                                     accent: Theme.color(mirror.color(target)), mirror: mirror)
                             }
                         }
@@ -53,6 +53,10 @@ struct SendsTab: View {
 
     private func title(_ target: StripID) -> String {
         mirror.isLinked(target) ? mirror.pairName(target) : mirror.name(target)
+    }
+
+    private func caption(_ target: StripID) -> String? {
+        mirror.numberCaption(of: mirror.isLinked(target) ? .pair(target.oddSide) : .strip(target, .full))
     }
 }
 
@@ -93,7 +97,8 @@ struct FedByTab: View {
                         ForEach(rows) { row in
                             SendRow(
                                 source: row.held, target: target, title: mirror.title(of: row),
-                                accent: Theme.color(mirror.color(row.held)), mirror: mirror
+                                caption: mirror.numberCaption(of: row), accent: Theme.color(mirror.color(row.held)),
+                                mirror: mirror
                             )
                             .id(row)
                         }
@@ -118,6 +123,8 @@ struct SendRow: View {
     let source: StripID
     let target: StripID
     let title: String
+    /// nil in the send sheet, whose title names the buses.
+    var caption: String?
     let accent: Color
     let mirror: ConsoleMirror
     /// A subgroup send's level is fixed at 0 dB; it can still be switched off.
@@ -125,12 +132,14 @@ struct SendRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            // Green like every other "on" chip: a red source colour would read as mute.
+            // Tinted, not filled like the other "on" chips: a send is on almost all show, and a column of green fills
+            // would shout. Green, as a red source colour would read as mute.
             ToggleChip(
-                spec: Catalog.sendOn(from: source, to: target), mirror: mirror, title: "On", onColor: .green
+                spec: Catalog.sendOn(from: source, to: target), mirror: mirror, title: "On",
+                onColor: Theme.usualOnTint, onText: Theme.usualOnGreen
             )
             ParameterRow(
-                spec: Catalog.sendLevel(from: source, to: target), mirror: mirror, title: title,
+                spec: Catalog.sendLevel(from: source, to: target), mirror: mirror, title: title, caption: caption,
                 accent: accent
             )
             .disabled(isLevelFixed)
