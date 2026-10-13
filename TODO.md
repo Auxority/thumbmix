@@ -2,10 +2,6 @@
 
 What's next for Thumbmix, newest decisions first within each section. The PR that finishes an item deletes it, and records anything lasting it decided in `DECISIONS.md`.
 
-## Fixes
-
-- [ ] **Compressor knee drawing.** The knee in the compressor curve looks wrong; find out how and fix it. See also "Known limits": the knee is drawn at 2 dB per step because the doc gives the 0–5 setting no unit.
-
 ## On the real M32
 
 - [ ] **Before using stereo pairs live:** link two channels on the desk, then move the pair's fader in Thumbmix. Does the desk move the other side by itself? The app writes one side and trusts the desk to copy it, then re-reads the other side. If a fader, mute or send didn't follow, the app writes both sides from then on; if anything else didn't follow (gain, EQ incl. low cut, dynamics: unverified), it shows that section per side and writes nothing. Either way it logs "didn't follow a linked edit". **So the other channel moves either way: watching the desk can't tell. Keep Console.app open on the Mac with the iPhone connected, filtered on "thumbmix", and look for that line.** No test can tell either: the fake console was written to copy.
@@ -23,6 +19,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - Section 8: fader text. Does the desk's own dB text match the app's for every input fader? The app follows the doc's table (p.145), incl. a 0 dB detent and two odd steps (−8.7, −23.2). Set faders near 0, −8.6 and −23.2 with the desk's encoder first; each DIFFERS line goes in `FaderLaw.deskExceptions`. Untested: the fake desk doesn't answer `/node`.
 - [ ] **After the probe: a formula instead of a list where the desk's steps look inconsistent** (e.g. the fader text's odd steps in `FaderLaw.deskExceptions`). Once the probe's answers are in, check whether a formula reproduces them, and drop the list if it does.
 - [ ] **EQ defaults and cut filters.** (a) Reset bands on a bus or main, then compare the six frequencies with what the desk shows: the app writes the desk steps nearest the engineer's 55.1, 152, 418, 1150, 3170 and 8730 Hz (54.5, 153.5, 418, 1.14k, 3.21k, 8.73k). Fix `Catalog.eqDefaults` if the desk shows other values. (b) Set a band to LCut, HCut and (on a main) BU12: do Gain and Q really do nothing? The app disables both rows there (`Catalog.eqTypeShapesLevel`); the doc lists gain and Q for every type without saying.
+- [ ] **Compressor knee width per step.** The app draws 6 dB per knee step (knee 5 = 30 dB), a guess: no source gives the unit, and `m32-probe` can't read it. Set knee 0 and 5 on the desk and compare its dynamics screen with the app's curve, or measure: a test tone at the threshold, 4:1, and the gain reduction meter at each knee step. Then set `TransferCurve.kneeDecibelsPerStep`.
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
 - [ ] Walk the acceptance checklist in `README.md`.
 - [ ] Check on a device that VoiceOver's swipe up/down adjusts parameter rows. XCUITest can't drive it.
@@ -75,6 +72,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 ## Known limits
 
 - Offline mode's meters are a time-based animation (`FakeState.meterBlob`): gain, trim, gate and compressor don't move them. Simulating the signal wasn't worth the complexity (decided 2026-10-09).
-- The compressor knee is drawn at 2 dB per step: the doc gives the 0–5 knee setting no unit.
+- The compressor knee is drawn at 6 dB per step: the doc gives the 0–5 knee setting no unit (see "Compressor knee width per step").
 - Gate curves (EXPn 1:n, GATE, DUCK) follow the engineer's confirmation; the doc only lists the modes.
 - The EQ and low-cut curves are RBJ and Butterworth approximations, not measurements of the desk.
