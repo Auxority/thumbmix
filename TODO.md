@@ -39,7 +39,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - From a strip: pick its mute groups and DCAs on its strip screen, in a quick multi-select.
   - From a DCA: a Members tab that adds and removes strips, the reverse. Consider whether both are worth having.
 - [ ] **The group pill design everywhere?** Consider using the pills (Inputs, Aux, FX…) more consistently: on the channel, aux, FX and bus screens too.
-- [ ] **Release notes in the SideStore source.** Each GitHub release already has notes (`scripts/publish-release.sh` runs `gh release create --generate-notes`: one line per merged PR title), but `scripts/sidestore-source.sh` gives a version no `localizedDescription`, AltStore's "What's new", so SideStore shows an update without saying what changed. Copy the notes into it as plain text: the PR titles only, without "by @Auxority in <link>" and the "Full Changelog" line. `scripts/test-sidestore-source.sh` checks it.
 - [ ] **FX returns get EQ, compressor and the other tabs like an input.** The desk gives them a 4-band EQ; check what else it offers, and whether it's good practice for returns.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.

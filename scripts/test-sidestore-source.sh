@@ -6,9 +6,11 @@ failures=0
 
 releases='[
   {"tag_name": "v0.20.0", "name": "Thumbmix 0.20.0 (build 67)", "draft": false, "published_at": "2026-10-12T09:11:38Z",
+   "body": "## What'"'"'s Changed\n* docs: a TODO by @Auxority in https://github.com/Auxority/thumbmix/pull/60\n\n\n**Full Changelog**: https://github.com/Auxority/thumbmix/compare/v0.19.0...v0.20.0",
    "assets": [{"name": "Thumbmix.ipa", "size": 560000,
                "browser_download_url": "https://github.com/Auxority/thumbmix/releases/download/v0.20.0/Thumbmix.ipa"}]},
   {"tag_name": "v0.23.0", "name": "Thumbmix 0.23.0 (build 74)", "draft": false, "published_at": "2026-10-12T14:15:43Z",
+   "body": "## What'"'"'s Changed\n* feat: send settings open in a sheet by @Auxority in https://github.com/Auxority/thumbmix/pull/73\n* docs: record the decisions by @Auxority in https://github.com/Auxority/thumbmix/pull/74\n* fix(ui): a \"to Main LR\" pill by @Auxority in https://github.com/Auxority/thumbmix/pull/75\n* feat!: iOS 26 is the minimum by @Auxority in https://github.com/Auxority/thumbmix/pull/69\n* test: one launch per class by @Auxority in https://github.com/Auxority/thumbmix/pull/70\n\n\n**Full Changelog**: https://github.com/Auxority/thumbmix/compare/v0.22.0...v0.23.0",
    "assets": [{"name": "Thumbmix.ipa", "size": 563622,
                "browser_download_url": "https://github.com/Auxority/thumbmix/releases/download/v0.23.0/Thumbmix.ipa"}]},
   {"tag_name": "v0.24.0", "name": "Thumbmix 0.24.0 (build 80)", "draft": true, "published_at": null, "assets": []},
@@ -43,6 +45,11 @@ expect "size and date come from the release" '.apps[0].versions[0] | [.size, .da
 expect "0.21.0 onward needs iOS 26, earlier ones iOS 17" '[.apps[0].versions[].minOSVersion]' '["26.0","17.0","17.0"]'
 expect "an unsigned IPA has no entitlements" '.apps[0].appPermissions.entitlements' '[]'
 expect "a source says whether it's NSFW" '.nsfw' 'false'
+# "What's new": the user-facing PR titles (feat, fix, perf), without their prefix, author and link.
+expect "what's new lists the user-facing PR titles" '.apps[0].versions[0].localizedDescription' \
+  '"• Send settings open in a sheet\n• A \"to Main LR\" pill\n• iOS 26 is the minimum"'
+expect "a version with no user-facing title, or no notes, has no what's new" \
+  '[.apps[0].versions[1:][] | has("localizedDescription")]' '[false,false]'
 
 # SideStore refuses an install whose permissions differ from the IPA's Info.plist, so the text must match project.yml.
 plist=$(sed -n 's/^ *NSLocalNetworkUsageDescription: //p' ../project.yml)

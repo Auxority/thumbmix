@@ -12,6 +12,16 @@ jq --arg repo "$repo" --arg localNetwork "$local_network" '
   # The release title carries the build number: "Thumbmix 0.23.0 (build 74)".
   def build: capture("\\(build (?<n>[0-9]+)\\)").n;
   def semver: ltrimstr("v") | split("-")[0] | split(".") | map(tonumber);
+  # The version notes SideStore shows as what is new, from the notes GitHub generates ("* <PR title> by @<author> in
+  # <link>"): only titles a user notices (feat, fix, perf, as next-version.sh counts them), unprefixed; capitalised
+  # unless a word like "iOS" leads.
+  def whatsNew:
+    [ (.body // "") | split("\n")[]
+      | capture("^\\* (?:feat|fix|perf)(?:\\([^)]*\\))?!?: (?<title>.+) by @\\S+ in https://\\S+$")
+      | .title
+      | if test("^[a-z]+( |$)") then (.[:1] | ascii_upcase) + .[1:] else . end
+      | "• " + . ]
+    | join("\n");
   {
     name: "Thumbmix",
     subtitle: "An iPhone remote for the Midas M32",
@@ -43,6 +53,7 @@ jq --arg repo "$repo" --arg localNetwork "$local_network" '
             # 0.21.0 (#69) was the first to need iOS 26.
             minOSVersion: (if (.release.tag_name | semver) >= [0, 21, 0] then "26.0" else "17.0" end)
           }
+          + (.release | whatsNew | if . == "" then {} else { localizedDescription: . } end)
       ]
       # AltStore takes the first version as the newest.
       | sort_by(.date) | reverse
