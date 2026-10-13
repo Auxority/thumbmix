@@ -50,6 +50,17 @@ struct TransferCurveTests {
         #expect(compressor(0, knee: 5) == -15)
     }
 
+    /// At 2 dB per step the widest knee bent a 4:1 curve under 1 dB: invisible on the 80 dB graph. At 6 dB per
+    /// step (30 dB, Pro Tools' widest) it bends ~2.8 dB.
+    @Test func widestKneeBendsVisibly() {
+        #expect(compressor(-20, knee: 5) < -22.5)
+        #expect(compressor(-36, knee: 5) == -36, "the knee starts 15 dB below the threshold")
+    }
+
+    @Test func demoKneeIsAWholeStep() {
+        #expect(DemoState.values()["/ch/01/dyn/knee"] == .float(0.6), "knee 3 of 0-5")
+    }
+
     @Test func expanderModeSteepensBelowTheThreshold() {
         #expect(compressor(-25, expander: true) == -40)
         #expect(compressor(-10, expander: true) == -10)

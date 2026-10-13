@@ -95,6 +95,8 @@ public enum DemoState {
         ("/phantom", .int(0)), ("/invert", .int(0)), ("/panFollow", .int(0)), ("/dyn/pos", .int(1)),
         ("/hpon", .int(0)), ("/hpslope", .int(2)), ("/on", .int(1)),
         ("/type", .int(2)),
+        // Knee is linf 0-5 in whole steps (p.25); mid-travel 0.5 would show 2.5, a value the desk can't hold.
+        ("/dyn/knee", .float(0.6)),
         ("/dyn/mode", .int(0)), ("/dyn/det", .int(0)), ("/dyn/env", .int(1)), ("/mode", .int(3)), ("/ratio", .int(3)),
         ("/fader", .float(0)), ("/level", .float(0)), ("/rta/source", .int(0)), ("/rta/pos", .int(0)),
     ]

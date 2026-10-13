@@ -21,17 +21,21 @@ public enum TransferCurve {
         }
     }
 
-    /// `knee` is the desk's 0-5 setting. The doc gives it no unit, so it is drawn as 2 dB of soft-knee
-    /// width per step: an approximation for seeing the shape, like `EQResponse`.
+    /// `knee` is the desk's 0-5 setting. The doc gives it no unit, so it is drawn as `kneeDecibelsPerStep` of
+    /// soft-knee width per step: an approximation for seeing the shape, like `EQResponse`.
     public static func dynamicsOutput(
         _ input: Double, isExpander: Bool, threshold: Double, ratio: Double, knee: Double, makeup: Double
     ) -> Double {
         let curve =
             isExpander
             ? expanded(input, threshold: threshold, ratio: ratio)
-            : compressed(input, threshold: threshold, ratio: ratio, kneeWidth: knee * 2)
+            : compressed(input, threshold: threshold, ratio: ratio, kneeWidth: knee * kneeDecibelsPerStep)
         return curve + makeup
     }
+
+    /// Knee 5 spans 30 dB, the widest common soft knee (Pro Tools' Dynamics III): 2 dB per step bent the curve
+    /// under 1 dB, invisible on the graph. Replace with the desk's width once measured (TODO.md, "On the real M32").
+    static let kneeDecibelsPerStep = 6.0
 
     private static func expanded(_ input: Double, threshold: Double, ratio: Double) -> Double {
         input < threshold ? threshold + (input - threshold) * ratio : input
