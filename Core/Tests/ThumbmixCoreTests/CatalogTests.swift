@@ -51,7 +51,7 @@ struct CatalogTests {
         #expect(Catalog.sendPan(from: StripID(.bus, 1), to: StripID(.matrix, 3))?.address == "/bus/01/mix/03/pan")
         #expect(Catalog.sendPanFollow(from: vox, to: StripID(.bus, 5))?.address == "/ch/13/mix/05/panFollow")
         #expect(Catalog.sendPanFollow(from: vox, to: StripID(.bus, 6)) == nil)
-        #expect(!Catalog.allAddresses().contains("/fxrtn/01/mix/01/pan"), "no Sends tab shows it: not worth the sync")
+        #expect(Catalog.allAddresses().contains("/fxrtn/01/mix/01/pan"), "an FX return's Sends tab shows it")
         #expect(Catalog.allAddresses().contains("/auxin/01/mix/01/pan"), "an aux in's Sends tab shows it")
         #expect(DemoState.values()["/ch/13/mix/05/panFollow"] == .int(0), "a toggle, not mid-travel")
         #expect(DemoState.values()["/ch/13/mix/05/pan"] == .float(0.5), "centre")
@@ -74,7 +74,7 @@ struct CatalogTests {
         #expect(StripID(.bus, 1).eqBandCount == 6)
         #expect(StripID(.mainMono).eqBandCount == 6)
         #expect(StripID(.auxIn, 1).eqBandCount == 4, "doc p.28")
-        #expect(StripID(.fxReturn, 1).eqBandCount == 0, "not shown yet")
+        #expect(StripID(.fxReturn, 1).eqBandCount == 4, "doc p.30")
         #expect(Catalog.eqBand(StripID(.bus, 2), 6).q.address == "/bus/02/eq/6/q")
     }
 

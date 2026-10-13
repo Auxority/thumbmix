@@ -1,12 +1,12 @@
 import ThumbmixCore
 
-/// Section 11. Reset bands on an aux in writes an input's defaults; the doc gives no defaults for either
-/// (TODO "EQ defaults").
+/// Section 11. Reset bands on an aux in or FX return writes an input's defaults; the doc gives no defaults for any
+/// of them (TODO "EQ defaults").
 @MainActor
 func probeEQDefaults() async {
-    print("\n== 11. EQ defaults: on the DESK, reset channel 1's and aux 1's EQ (or recall an empty scene), then press Enter.")
+    print("\n== 11. EQ defaults: on the DESK, reset channel 1's, aux 1's and FX 1's EQ (or recall an empty scene), then press Enter.")
     _ = readLine()
-    for strip in [StripID(.input, 1), StripID(.auxIn, 1)] {
+    for strip in [StripID(.input, 1), StripID(.auxIn, 1), StripID(.fxReturn, 1)] {
         var bands: [String] = []
         for band in 1...strip.eqBandCount {
             let spec = Catalog.eqBand(strip, band).frequency
@@ -15,5 +15,5 @@ func probeEQDefaults() async {
         }
         print(strip.defaultName + ": " + bands.joined(separator: ", "))
     }
-    print("RESULT: the app resets both to 91 Hz, 418 Hz, 1910 Hz and 8730 Hz. Different = fix Catalog.eqDefaults.")
+    print("RESULT: the app resets all three to 91 Hz, 418 Hz, 1910 Hz and 8730 Hz. Different = fix Catalog.eqDefaults.")
 }
