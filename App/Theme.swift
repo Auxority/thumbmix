@@ -10,6 +10,8 @@ enum Theme {
     static let secondaryText = Color(white: 0.6)
     static let muteRed = Color(red: 0.95, green: 0.2, blue: 0.2)
     static let polarityAmber = Color(red: 1, green: 0.84, blue: 0.04)
+    /// The desk's solo buttons light yellow.
+    static let soloYellow = Color(red: 1, green: 0.84, blue: 0.04)
     static let demoPurple = Color(red: 0.6, green: 0.3, blue: 0.85)
 
     /// Inverted scribble strips get their base colour: the inversion is an LCD effect, not a different colour.

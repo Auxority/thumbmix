@@ -63,6 +63,12 @@ public struct StripID: Hashable, Sendable, Identifiable {
     public var fader: String { kind == .dca ? prefix + "/fader" : prefix + "/mix/fader" }
     public var on: String { kind == .dca ? prefix + "/on" : prefix + "/mix/on" }
 
+    /// The desk numbers its solo switches 01-80 through every strip, in `StripKind`'s order (doc p.64).
+    public var solo: String {
+        let before = StripKind.allCases.prefix { $0 != kind }.map(\.count).reduce(0, +)
+        return "/-stat/solosw/" + String(format: "%02d", before + number)
+    }
+
     public var pan: String? {
         [.input, .auxIn, .fxReturn, .bus, .mainStereo].contains(kind) ? prefix + "/mix/pan" : nil
     }

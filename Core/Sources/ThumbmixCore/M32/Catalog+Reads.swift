@@ -51,7 +51,9 @@ extension Catalog {
     }
 
     private static func overviewAddresses(of strip: StripID) -> [String] {
-        [strip.name, strip.color, strip.icon, strip.fader, strip.on] + [strip.pan, strip.dcaMask].compactMap { $0 }
+        // Solo too: S sits beside the slim fader on every tab, and an unread switch ignores taps.
+        [strip.name, strip.color, strip.icon, strip.fader, strip.on, strip.solo]
+            + [strip.pan, strip.dcaMask].compactMap { $0 }
     }
 
     private static func inputAddresses(_ strip: StripID, headamp: Int?) -> [String] {

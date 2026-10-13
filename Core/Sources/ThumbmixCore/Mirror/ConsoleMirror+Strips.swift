@@ -36,6 +36,18 @@ extension ConsoleMirror {
         cell(strip.on).argument == .int(0)
     }
 
+    public func isSoloed(_ strip: StripID) -> Bool {
+        cell(strip.solo).argument == .int(1)
+    }
+
+    /// A linked pair solos both sides: the doc doesn't say whether the desk links solo, and half a stereo source
+    /// soloed is never wanted. Writing the partner too is harmless if the desk does copy it.
+    public func toggleSolo(_ strip: StripID) {
+        let soloed: OSCArgument = .int(isSoloed(strip) ? 0 : 1)
+        let partner = isLinked(strip) ? strip.partner : nil
+        for side in [strip, partner].compactMap({ $0 }) { set(side.solo, soloed) }
+    }
+
     /// Unnamed and pulled all the way down: almost certainly not patched for this show.
     public func isUnused(_ strip: StripID) -> Bool {
         rawName(strip).isEmpty && (normalized(Catalog.fader(strip)) ?? 0) == 0

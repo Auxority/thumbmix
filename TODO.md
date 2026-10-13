@@ -26,7 +26,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Performance
 
-- [ ] **More requests in flight (8 → 32)?** Connect reads the overview (610 values) 8 at a time; simulated, 32 at a time is ~4× faster, but the doc warns that a router can drop reply bursts (p.6). m32-probe section 12 times both on the real desk: raise it only if 32 is much faster with 0 unanswered.
+- [ ] **More requests in flight (8 → 32)?** Connect reads the overview (690 values) 8 at a time; simulated, 32 at a time is ~4× faster, but the doc warns that a router can drop reply bursts (p.6). m32-probe section 12 times both on the real desk: raise it only if 32 is much faster with 0 unanswered.
 - [ ] **Meters only for the strips in view?** Draw (or update) meters only for the rows on screen, not every strip. Measure first; if it saves only 1–2 % CPU, it isn't worth it and this item goes.
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
 
@@ -50,7 +50,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab: give it the same pan and tap point controls as the Sends settings sheet, plus mute.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
 - [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. Fed by lost its "Show unused" toggle too and lists every source. Idea: a "Show unused" button at the bottom of the overview, Sends and Fed by lists; or rethink it from the engineer's task.
-- [ ] **Solo** per channel.
 - [ ] **Inserts** per channel.
 - [ ] **Dynamics before or after the EQ:** the toggle that moves the compressor ahead of the EQ.
 - [ ] **More compressor settings:** auto time and the key filter frequency.

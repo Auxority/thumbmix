@@ -16,7 +16,11 @@ struct MixTab: View {
             HStack(spacing: 10) {
                 NudgeButton(label: "−1 dB", fader: Catalog.fader(strip).address, mirror: mirror) { nudge(by: -1) }
                 NudgeButton(label: "+1 dB", fader: Catalog.fader(strip).address, mirror: mirror) { nudge(by: 1) }
-                MuteButton(strip: strip, mirror: mirror, title: "MUTE", width: 96, height: 52)
+            }
+            // Solo and mute are hit mid-show, often in a hurry: they get the bigger targets.
+            HStack(spacing: 10) {
+                SoloButton(strip: strip, mirror: mirror)
+                MuteButton(strip: strip, mirror: mirror, title: "MUTE", width: nil, height: 52)
             }
             if let panPartner {
                 ForEach([strip, panPartner]) { side in panRow(side, title: "Pan · \(mirror.name(side))") }
@@ -41,7 +45,8 @@ struct MixTab: View {
     }
 }
 
-/// Above every tab but Mix, so the engineer can pull or mute a channel that rings while editing its EQ.
+/// Above every tab but Mix, so the engineer can pull, mute or solo a channel while editing its EQ. Letters keep the
+/// fader wide; the overview's mute already reads "M".
 struct SlimMixRow: View {
     let strip: StripID
     let mirror: ConsoleMirror
@@ -51,7 +56,8 @@ struct SlimMixRow: View {
             ParameterRow(
                 spec: Catalog.fader(strip), mirror: mirror, accent: Theme.color(mirror.color(strip)), height: 44,
                 meter: mirror.meter(strip))
-            MuteButton(strip: strip, mirror: mirror, title: "MUTE", width: 80, height: 44)
+            SoloButton(strip: strip, mirror: mirror, title: "S", width: 48, height: 44)
+            MuteButton(strip: strip, mirror: mirror, title: "M", width: 48, height: 44)
         }
     }
 }
@@ -68,7 +74,7 @@ private struct NudgeButton: View {
     @GestureState private var isPressed = false
     @State private var ownsFader = false
     @Environment(\.scenePhase) private var scenePhase
-    @ScaledMetric private var minHeight: CGFloat = 52
+    @ScaledMetric private var minHeight: CGFloat = 44
 
     /// Further than this from where it landed, the finger has slid off and lets go, like on any button.
     private static let slideOff: CGFloat = 44
