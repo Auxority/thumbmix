@@ -57,14 +57,24 @@ final class ChannelUITests: DeskUITestCase {
         XCTAssertEqual(fader.value as? String, "+1.0 dB")
     }
 
-    /// Mix holds the full controls; every other tab keeps a slim fader and mute, to pull a channel mid-EQ.
-    func testOtherTabsKeepTheFaderAndMuteInReach() {
+    /// Mix holds the full controls; every other tab keeps a slim fader with S and M (mock T2), to pull or solo a
+    /// channel mid-EQ.
+    func testOtherTabsKeepTheFaderSoloAndMuteInReach() {
         launch()
         open("Kick")
         app.buttons["EQ"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["/ch/01/mix/fader"].exists)
-        XCTAssertTrue(app.buttons["mute-/ch/01/mix/on"].exists)
+        let fader = element("/ch/01/mix/fader")
+        XCTAssertTrue(fader.exists)
+        let solo = app.buttons["solo-/-stat/solosw/01"]
+        let mute = app.buttons["mute-/ch/01/mix/on"]
+        XCTAssertTrue(solo.exists)
+        XCTAssertTrue(mute.exists)
+        XCTAssertGreaterThan(solo.frame.minX, fader.frame.maxX, "S right of the fader")
+        XCTAssertGreaterThan(mute.frame.minX, solo.frame.maxX, "M right of S")
+        XCTAssertEqual(solo.label, "Solo Kick")
         XCTAssertFalse(app.buttons["+1 dB"].exists, "the nudges live on the Mix tab")
+        solo.tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/-stat/solosw/01") == .int(1) })
         saveScreenshot("slim-mix-row")
     }
 

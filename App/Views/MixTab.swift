@@ -45,7 +45,8 @@ struct MixTab: View {
     }
 }
 
-/// Above every tab but Mix, so the engineer can pull or mute a channel that rings while editing its EQ.
+/// Above every tab but Mix, so the engineer can pull, mute or solo a channel while editing its EQ. Letters keep the
+/// fader wide; the overview's mute already reads "M".
 struct SlimMixRow: View {
     let strip: StripID
     let mirror: ConsoleMirror
@@ -55,7 +56,8 @@ struct SlimMixRow: View {
             ParameterRow(
                 spec: Catalog.fader(strip), mirror: mirror, accent: Theme.color(mirror.color(strip)), height: 44,
                 meter: mirror.meter(strip))
-            MuteButton(strip: strip, mirror: mirror, title: "MUTE", width: 80, height: 44)
+            SoloButton(strip: strip, mirror: mirror, title: "S", width: 48, height: 44)
+            MuteButton(strip: strip, mirror: mirror, title: "M", width: 48, height: 44)
         }
     }
 }

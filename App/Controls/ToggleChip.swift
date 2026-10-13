@@ -63,6 +63,9 @@ struct MuteButton: View {
 struct SoloButton: View {
     let strip: StripID
     let mirror: ConsoleMirror
+    var title = "SOLO"
+    /// nil fills the row, as beside MUTE on the Mix tab.
+    var width: CGFloat?
     var height: CGFloat = 52
     @ScaledMetric private var sizeScale: CGFloat = 1
 
@@ -72,12 +75,12 @@ struct SoloButton: View {
         Button {
             mirror.toggleSolo(strip)
         } label: {
-            Text("SOLO")
+            Text(title)
                 .font(.headline)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-                .frame(maxWidth: .infinity)
-                .frame(height: height * sizeScale)
+                .frame(width: width.map { $0 * sizeScale }, height: height * sizeScale)
+                .frame(maxWidth: width == nil ? .infinity : nil)
                 .foregroundStyle(soloed ? .black : Theme.secondaryText)
                 .background(soloed ? Theme.soloYellow : Theme.track, in: RoundedRectangle(cornerRadius: 10))
         }
