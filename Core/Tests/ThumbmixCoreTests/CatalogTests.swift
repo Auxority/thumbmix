@@ -154,7 +154,7 @@ struct CatalogTests {
         switch tab {
         case .mix:
             [Catalog.fader(strip).address, Catalog.on(strip).address, strip.solo]
-                + [Catalog.pan(strip)?.address].compactMap { $0 }
+                + [Catalog.pan(strip)?.address, strip.mainLR].compactMap { $0 }
         case .input:
             [Catalog.trim(strip).address] + [Catalog.headampIndex(strip), Catalog.invert(strip)?.address].compactMap { $0 }
                 + (Catalog.delay(strip)?.all.map(\.address) ?? [])

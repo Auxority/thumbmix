@@ -53,6 +53,9 @@
     "%@ fader" : {
 
     },
+    "%@ in the main mix" : {
+
+    },
     "%@ is a %@. Thumbmix supports the Midas M32 only." : {
       "localizations" : {
         "en" : {
@@ -62,6 +65,15 @@
           }
         }
       }
+    },
+    "%@ out of the main mix" : {
+
+    },
+    "%@ stops reaching Main LR. Its sends keep working." : {
+
+    },
+    "%@ will be heard in Main LR at its fader level." : {
+
     },
     "%lld" : {
 
@@ -200,6 +212,9 @@
         }
       }
     },
+    "LR" : {
+
+    },
     "Magenta" : {
 
     },
@@ -285,7 +300,13 @@
     "Search icons" : {
 
     },
+    "Send %@ to the main mix?" : {
+
+    },
     "Send settings" : {
+
+    },
+    "Send to LR" : {
 
     },
     "Sends aren't linked on the desk." : {
@@ -297,6 +318,9 @@
     "Shares an input with %@" : {
 
     },
+    "Solo %@" : {
+
+    },
     "Stereo link" : {
 
     },
@@ -304,6 +328,12 @@
 
     },
     "Syncing %lld%%" : {
+
+    },
+    "Take %@ out of the main mix?" : {
+
+    },
+    "Take out" : {
 
     },
     "Tap point" : {
@@ -359,6 +389,9 @@
       }
     },
     "Unmute %@" : {
+
+    },
+    "Unsolo %@" : {
 
     },
     "White" : {

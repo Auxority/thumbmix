@@ -36,6 +36,18 @@ extension ConsoleMirror {
         cell(strip.on).argument == .int(0)
     }
 
+    /// nil for a strip without the switch, or one not read yet.
+    public func isInMainLR(_ strip: StripID) -> Bool? {
+        guard let address = strip.mainLR, case .int(let value)? = cell(address).argument else { return nil }
+        return value == 1
+    }
+
+    /// One side of a linked pair is enough: the desk links `mix/st` with fader and mute (`LinkSection.faderMute`).
+    public func setInMainLR(_ strip: StripID, _ inMix: Bool) {
+        guard let address = strip.mainLR else { return }
+        set(address, .int(inMix ? 1 : 0))
+    }
+
     public func isSoloed(_ strip: StripID) -> Bool {
         cell(strip.solo).argument == .int(1)
     }

@@ -1,13 +1,25 @@
 import SwiftUI
 import ThumbmixCore
 
-/// The strip's colour and name; tapping it opens Edit strip.
+/// The strip's colour and name; tapping it opens Edit strip. The Mix tab adds the "to Main LR" pill on the right.
 struct ChannelHeader: View {
     let strip: StripID
     let mirror: ConsoleMirror
+    var showsMainLR = false
     @State private var isEditing = false
+    /// The LR pill's height on every tab: content mustn't jump 4 pt when switching to or from Mix.
+    @ScaledMetric private var minHeight: CGFloat = 32
 
     var body: some View {
+        HStack(spacing: 10) {
+            editButton
+            // Beside the edit button, not in it: a tap on the pill must not open Edit strip.
+            if showsMainLR, strip.mainLR != nil { MainLRPill(strip: strip, mirror: mirror) }
+        }
+        .frame(minHeight: minHeight)
+    }
+
+    private var editButton: some View {
         Button {
             isEditing = true
         } label: {

@@ -93,7 +93,7 @@ public enum DemoState {
         // Delay before the generic "/on": the demo's delays start off, at 0.3 ms.
         ("/delay/on", .int(0)), ("/delay/time", .float(0)),
         ("/phantom", .int(0)), ("/invert", .int(0)), ("/panFollow", .int(0)), ("/dyn/pos", .int(1)),
-        ("/hpon", .int(0)), ("/hpslope", .int(2)), ("/on", .int(1)),
+        ("/hpon", .int(0)), ("/hpslope", .int(2)), ("/on", .int(1)), ("/mix/st", .int(1)),
         ("/type", .int(2)),
         // Knee is linf 0-5 in whole steps (p.25); mid-travel 0.5 would show 2.5, a value the desk can't hold.
         ("/dyn/knee", .float(0.6)),
