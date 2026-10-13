@@ -6,6 +6,8 @@ struct ParameterRow: View {
     let spec: ParamSpec
     let mirror: ConsoleMirror
     var title: String?
+    /// The desk number under the title (Sends, Fed by), as the overview shows it, so two "Vox" rows can be told apart.
+    var caption: String?
     var accent: Color = .white
     var height: CGFloat = 48
     var meter: MeterCell?
@@ -37,11 +39,16 @@ struct ParameterRow: View {
                 }
             }
             HStack {
-                Text(title ?? spec.label)
-                    .font(.subheadline)
-                    .foregroundStyle(Theme.secondaryText)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title ?? spec.label)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.secondaryText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    if let caption {
+                        Text(caption).font(.caption2).foregroundStyle(Theme.secondaryText).lineLimit(1)
+                    }
+                }
                 Spacer(minLength: 8)
                 Text(text)
                     .font(
@@ -64,7 +71,7 @@ struct ParameterRow: View {
         .modifier(TypeValueAlert(spec: spec, title: alertTitle, mirror: mirror, isPresented: $isTyping))
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier(spec.address)
-        .accessibilityLabel(title.flatMap { $0.isEmpty ? nil : $0 } ?? spec.label)
+        .accessibilityLabel([alertTitle, caption].compactMap { $0 }.joined(separator: ", "))
         .accessibilityValue(text)
         .accessibilityAdjustableAction(adjust)
         .accessibilityAction(named: "Enter value", startTyping)

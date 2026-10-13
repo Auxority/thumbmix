@@ -70,6 +70,18 @@ extension ConsoleMirror {
         return name(item.held)
     }
 
+    /// The desk number under a Sends or Fed by row's name, as the overview shows it but with the kind ("Ch 9-10"):
+    /// Fed by mixes kinds. nil while the row is unnamed: its title, "Ch 20", already holds the number.
+    public func numberCaption(of item: OverviewItem) -> String? {
+        switch item {
+        case .strip(let strip, _):
+            return rawName(strip).isEmpty ? nil : strip.defaultName
+        case .pair(let odd):
+            let sides = [odd, odd.partner ?? odd]
+            return sides.allSatisfy { rawName($0).isEmpty } ? nil : odd.pairDefaultName
+        }
+    }
+
     private func pairItem(for strip: StripID) -> OverviewItem? {
         let isOdd = strip == strip.oddSide
         guard !isShared(.faderMute) else { return isOdd ? .pair(strip) : nil }

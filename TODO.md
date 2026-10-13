@@ -30,9 +30,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 ## Features
 
 - [ ] **Presets from the channel name**, based on James Attaway's *Live Mixing Field Guide*: a channel called "Kick" offers kick presets first (EQ, gate, compressor, low cut). Find a good spot to pick them from (mock first).
-- [ ] **Sends and Fed by rows:**
-  - Tint the On chips, like the LR pill. Rule (2026-10-13): a state that's on almost all show gets the green tint (`Theme.usualOnTint`), a fill means "look here" (SOLO, MUTE, 48V, Ø). The On chips are nearly all on, so today they make a column of bright green fills.
-  - Strip numbers (Ch 01, Aux 3, Bus 12…), so two strips with similar names can be told apart.
 - [ ] **More meters**, each weighed by its usefulness and its performance cost (see "Meters only for the strips in view?"):
   - Fed by: a meter per source row?
   - Output meter on the Mix tab: the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too.
