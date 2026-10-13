@@ -17,6 +17,22 @@ public enum OverviewItem: Hashable, Identifiable, Sendable {
         }
     }
 
+    /// The strip whose controls the row shows: a pair's, like its screen, belong to its odd side.
+    public var held: StripID {
+        switch self {
+        case .strip(let strip, _): strip
+        case .pair(let odd): odd
+        }
+    }
+
+    /// Whether `strip` is this row's: a pair's row stands for both its sides.
+    public func holds(_ strip: StripID) -> Bool {
+        switch self {
+        case .strip(let own, _): own == strip
+        case .pair(let odd): strip.oddSide == odd
+        }
+    }
+
     /// The strip screen the row opens: a pair's screen belongs to its odd side.
     public var opens: StripID {
         switch self {
@@ -40,6 +56,12 @@ extension ConsoleMirror {
             guard showUnused || !(isUnused(strip) && isUnused(partner)) else { return nil }
             return pairItem(for: strip)
         }
+    }
+
+    /// A pair's row goes by what both names share ("Gtr"); a half row by its own side's name.
+    public func title(of item: OverviewItem) -> String {
+        if case .pair(let odd) = item { return pairName(odd) }
+        return name(item.held)
     }
 
     private func pairItem(for strip: StripID) -> OverviewItem? {

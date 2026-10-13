@@ -32,6 +32,19 @@ struct OverviewItemsTests {
         #expect(OverviewItem.strip(StripID(.input, 8), .full).opens == StripID(.input, 8))
     }
 
+    /// A row's controls belong to `held`; a pair's row stands for both sides, under their shared name.
+    @Test func aPairRowHoldsBothSidesUnderItsSharedName() {
+        let pair = OverviewItem.pair(StripID(.input, 9))
+        #expect(pair.held == StripID(.input, 9))
+        #expect(pair.holds(StripID(.input, 10)))
+        #expect(!pair.holds(StripID(.input, 11)))
+        #expect(mirror.title(of: pair) == "Gtr")
+        let half = OverviewItem.strip(StripID(.input, 10), .bottom)
+        #expect(half.held == StripID(.input, 10))
+        #expect(!half.holds(StripID(.input, 9)))
+        #expect(mirror.title(of: half) == "Gtr R")
+    }
+
     @Test func pairShowsWhenEitherSideIsUsed() {
         let odd = StripID(.input, 21)
         mirror.apply(OSCMessage("/config/chlink/21-22", [.int(1)]))

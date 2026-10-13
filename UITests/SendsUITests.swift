@@ -110,6 +110,18 @@ final class SendsUITests: DeskUITestCase {
         saveScreenshot("task-16-fedby")
     }
 
+    /// Like the overview, the demo's linked Gtr L/R (9-10) is one row, held by its odd side.
+    func testFedByShowsALinkedPairAsOneRow() {
+        launch()
+        app.buttons["Buses"].tap()
+        open("Mon 1")
+        app.buttons["Fed by"].tap()
+        let pair = element("/ch/09/mix/01/level")
+        XCTAssertTrue(pair.appears(within: 2))
+        XCTAssertEqual(pair.label, "Gtr")
+        XCTAssertFalse(element("/ch/10/mix/01/level").exists, "the even side has no row of its own")
+    }
+
     /// A matrix is fed by the buses and the mains; the demo's Fill takes the main mix at 0 dB.
     func testMatrixIsFedByTheMains() {
         launch()
