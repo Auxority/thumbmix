@@ -176,6 +176,26 @@ public enum Catalog {
         ParamSpec(sendPrefix(strip, target) + "/on", CoreStrings.text("On"), .toggle, .plain)
     }
 
+    /// A Fed by row's switch (mock A, 2026-10-13): the send to a bus or matrix, the mono send to Main M, and the LR
+    /// switch to Main LR (doc p.25-31).
+    public static func feedOn(from source: StripID, to target: StripID) -> ParamSpec {
+        switch target.kind {
+        case .mainStereo: ParamSpec(source.prefix + "/mix/st", target.defaultName, .toggle, .plain)
+        case .mainMono: ParamSpec(source.prefix + "/mix/mono", CoreStrings.text("On"), .toggle, .plain)
+        default: sendOn(from: source, to: target)
+        }
+    }
+
+    /// A Fed by row's level. Main LR has no send level: a strip reaches it at its own fader. The mono level is a
+    /// send's 161-step level (p.26; a bus's is written [0…1], like its matrix sends).
+    public static func feedLevel(from source: StripID, to target: StripID) -> ParamSpec {
+        switch target.kind {
+        case .mainStereo: fader(source)
+        case .mainMono: ParamSpec(source.prefix + "/mix/mlevel", target.defaultName, .sendLevel, .decibels, reset: 0)
+        default: sendLevel(from: source, to: target)
+        }
+    }
+
     /// Only odd sends have a pan (doc p.26): it places the strip in the linked pair it feeds. On a mono, unlinked
     /// bus it does nothing (the user, from the desk), so the app shows it only on linked pairs.
     /// An FX return's list (p.30) starts this pan, tap and pan follow at bus 3; bus 1 is assumed left out by

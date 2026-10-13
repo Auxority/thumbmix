@@ -42,7 +42,10 @@ extension Catalog {
         case .eq: eqAddresses(strip)
         case .comp: dynamicsAddresses(strip)
         case .sends: sendAddresses(strip) + [dynamicsPosition(strip)?.address].compactMap { $0 }
-        case .fedBy: strip.kind.feeders.flatMap(StripID.all).flatMap { levelAndOn(from: $0, to: strip) }
+        case .fedBy:
+            strip.kind.feeders.flatMap(StripID.all).flatMap {
+                [feedOn(from: $0, to: strip).address, feedLevel(from: $0, to: strip).address]
+            }
         }
     }
 

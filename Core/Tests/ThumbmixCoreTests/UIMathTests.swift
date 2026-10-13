@@ -117,8 +117,8 @@ struct UIMathTests {
         #expect(ChannelTab.tabs(for: .input) == [.mix, .input, .gate, .eq, .comp, .sends])
         // Mock B: a bus's Sends (to the matrices) sit before Fed by, which mix buses use more and keeps the far right.
         #expect(ChannelTab.tabs(for: .bus) == [.mix, .eq, .comp, .sends, .fedBy])
-        #expect(ChannelTab.tabs(for: .mainStereo) == [.mix, .eq, .comp, .sends])
-        #expect(ChannelTab.tabs(for: .mainMono) == [.mix, .eq, .comp, .sends])
+        #expect(ChannelTab.tabs(for: .mainStereo) == [.mix, .eq, .comp, .sends, .fedBy])
+        #expect(ChannelTab.tabs(for: .mainMono) == [.mix, .eq, .comp, .sends, .fedBy])
         #expect(ChannelTab.tabs(for: .matrix) == [.mix, .eq, .comp, .fedBy], "a matrix sends nowhere")
         #expect(ChannelTab.tabs(for: .dca) == [.mix, .members])
         #expect(ChannelTab.tabs(for: .auxIn) == [.mix, .input, .eq, .sends], "no gate, comp or delay (doc p.28)")

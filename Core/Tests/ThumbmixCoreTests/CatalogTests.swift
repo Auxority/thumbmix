@@ -171,7 +171,9 @@ struct CatalogTests {
                     + [Catalog.sendTap(from: strip, to: $0)?.address].compactMap { $0 }
             } + [Catalog.dynamicsPosition(strip)?.address].compactMap { $0 }
         case .fedBy:
-            strip.kind.feeders.flatMap(StripID.all).map { Catalog.sendLevel(from: $0, to: strip).address }
+            strip.kind.feeders.flatMap(StripID.all).flatMap {
+                [Catalog.feedOn(from: $0, to: strip).address, Catalog.feedLevel(from: $0, to: strip).address]
+            }
         case .members: StripKind.allCases.flatMap(StripID.all).compactMap(\.dcaMask)
         }
     }

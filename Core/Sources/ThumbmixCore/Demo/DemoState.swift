@@ -18,6 +18,7 @@ public enum DemoState {
         addMonitors(to: &state)
         addReturnsDCAsAndMain(to: &state)
         addFill(to: &state)
+        addSub(to: &state)
         addEQDefaults(to: &state)
         return state
     }
@@ -87,6 +88,14 @@ public enum DemoState {
         state[Catalog.sendLevel(from: StripID(.mainStereo), to: fill).address] = .float(0.75)
     }
 
+    /// Main M feeds a sub from the kick and the bass at 0 dB.
+    private static func addSub(to state: inout [String: OSCArgument]) {
+        for source in [StripID(.input, 1), StripID(.input, 8)] {
+            state[Catalog.feedOn(from: source, to: StripID(.mainMono)).address] = .int(1)
+            state[Catalog.feedLevel(from: source, to: StripID(.mainMono)).address] = .float(0.75)
+        }
+    }
+
     /// First matching suffix wins; anything else is a continuous parameter at mid-travel.
     private static let defaultsBySuffix: [(suffix: String, value: OSCArgument)] = [
         ("/config/name", .string("")), ("/config/color", .int(0)), ("/config/icon", .int(1)), ("/grp/dca", .int(0)),
@@ -94,6 +103,8 @@ public enum DemoState {
         ("/delay/on", .int(0)), ("/delay/time", .float(0)),
         ("/phantom", .int(0)), ("/invert", .int(0)), ("/panFollow", .int(0)), ("/dyn/pos", .int(1)),
         ("/hpon", .int(0)), ("/hpslope", .int(2)), ("/on", .int(1)), ("/mix/st", .int(1)),
+        // Mono off, its level at -∞: a desk after a reset (assumed).
+        ("/mix/mono", .int(0)), ("/mix/mlevel", .float(0)),
         ("/type", .int(2)),
         // Knee is linf 0-5 in whole steps (p.25); mid-travel 0.5 would show 2.5, a value the desk can't hold.
         ("/dyn/knee", .float(0.6)),
