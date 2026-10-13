@@ -27,8 +27,9 @@ let syncTimeout = Duration.seconds(30)
 /// A mirror that finished its initial sync against the fake on `port`; a mirror that never goes live
 /// fails here instead of as a confusing timeout further down the test.
 @MainActor
-func liveMirror(port: UInt16) async -> ConsoleMirror {
-    let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast))
+func liveMirror(port: UInt16, auditAddresses: [String] = Catalog.auditAddresses()) async -> ConsoleMirror {
+    let mirror = ConsoleMirror(
+        link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast), auditAddresses: auditAddresses)
     mirror.start()
     #expect(await eventually(timeout: syncTimeout) { mirror.isLive }, "the mirror never finished its sync")
     return mirror

@@ -81,6 +81,24 @@ struct EditHoldsTests {
         #expect(!holds.isHeld("/f", now: now + .milliseconds(400)))
     }
 
+    /// A reply to a question asked just before the set carries the old value; landing after the hold, it would
+    /// stand until the audit came round again.
+    @Test func aSetIsReadBackOnceItsHoldEnds() {
+        var holds = EditHolds(hold: hold)
+        holds.edited("/f", now: now)
+        holds.edited("/f", now: now + .milliseconds(100))
+        #expect(holds.takeDueRereads(now: now + .milliseconds(399)).isEmpty, "each further set moves the read")
+        #expect(holds.takeDueRereads(now: now + .milliseconds(401)) == ["/f"])
+    }
+
+    /// A drag sets on every frame; the release asks for the one read.
+    @Test func aSetDuringAGestureWaitsForTheRelease() {
+        var holds = EditHolds(hold: hold)
+        holds.begin("/f")
+        holds.edited("/f", now: now)
+        #expect(holds.takeDueRereads(now: now + .seconds(1)).isEmpty)
+    }
+
     /// The overview waits for this before it regroups rows after a link change.
     @Test func aFingerIsDownOnlyDuringAGesture() {
         var holds = EditHolds(hold: hold)

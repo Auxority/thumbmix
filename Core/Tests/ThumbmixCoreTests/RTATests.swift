@@ -35,12 +35,18 @@ struct RTATests {
         #expect(abs(RTA.bandFrequency(99) - 18_660) < 1)
     }
 
+    /// Release judges by what the mirror shows. An audit question asked just before the app's set, answered after
+    /// the hold, shows the old value until the re-read answers, so these tests leave the audit out (it has its own).
+    private func loanMirror(port: UInt16) async -> ConsoleMirror {
+        await liveMirror(port: port, auditAddresses: [])
+    }
+
     @Test func followingPointsTheDeskRTAAndReleasingPutsItBack() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         fake.deskChange(RTA.source, .int(50))
         fake.deskChange(RTA.position, .int(0))
-        let mirror = await liveMirror(port: port)
+        let mirror = await loanMirror(port: port)
         defer { mirror.stop() }
         #expect(await eventually { mirror.cell(RTA.source).argument == .int(50) })
 
@@ -85,7 +91,7 @@ struct RTATests {
     @Test func aChangeMadeOnTheDeskMeanwhileIsKept() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
+        let mirror = await loanMirror(port: port)
         defer { mirror.stop() }
         mirror.followRTA(StripID(.input, 1))
         #expect(await eventually { fake.value(at: RTA.source) == .int(2) })
@@ -106,7 +112,7 @@ struct RTATests {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         fake.deskChange(RTA.source, .int(72))
-        let mirror = await liveMirror(port: port)
+        let mirror = await loanMirror(port: port)
         defer { mirror.stop() }
         #expect(await eventually { mirror.cell(RTA.source).argument == .int(72) })
 

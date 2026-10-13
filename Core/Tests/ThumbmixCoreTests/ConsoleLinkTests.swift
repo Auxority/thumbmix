@@ -1,4 +1,5 @@
 import FakeM32
+import Foundation
 import Testing
 
 @testable import ThumbmixCore
@@ -118,6 +119,28 @@ struct ConsoleLinkTests {
         #expect(await eventually { if case .live = link.state { true } else { false } })
     }
 
+    /// Replies the old socket still held when the app woke answer questions from before the outage; arriving
+    /// after the resync forgot the tab values, they would show those values as live.
+    @Test func wakeDropsWhatTheOldSocketStillHeld() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
+        defer { link.stop() }
+        var heard: [String] = []
+        link.onMessage = { heard.append($0.address) }
+        link.start()
+        #expect(await eventually { if case .live = link.state { true } else { false } })
+        let stale = "/ch/20/eq/1/q"
+
+        for _ in 0..<5 { link.send(OSCMessage(stale)) }
+        // Blocking the main actor leaves the replies waiting in the old socket's stream, as a suspended app does.
+        blockMainActor(seconds: 0.2)
+        link.wake()
+        try await Task.sleep(for: .milliseconds(300))
+
+        #expect(!heard.contains(stale))
+    }
+
     /// The mirror stops a link that found no M32; coming back from the background must not revive it.
     @Test func wakeLeavesAStoppedLinkStopped() async throws {
         let (fake, port) = try await startFake(model: "X32")
@@ -133,4 +156,10 @@ struct ConsoleLinkTests {
         #expect(link.transportGeneration == generation)
         #expect(link.state == .failed(.notAnM32(model: "X32")))
     }
+}
+
+/// Synchronous on purpose: nothing else on the main actor runs meanwhile.
+@MainActor
+private func blockMainActor(seconds: TimeInterval) {
+    Thread.sleep(forTimeInterval: seconds)
 }
