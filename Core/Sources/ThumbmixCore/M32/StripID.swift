@@ -63,6 +63,11 @@ public struct StripID: Hashable, Sendable, Identifiable {
     public var fader: String { kind == .dca ? prefix + "/fader" : prefix + "/mix/fader" }
     public var on: String { kind == .dca ? prefix + "/on" : prefix + "/mix/on" }
 
+    /// "To Main LR" (doc p.25-31); matrices, the mains and DCAs don't feed the main mix this way.
+    public var mainLR: String? {
+        [.input, .auxIn, .fxReturn, .bus].contains(kind) ? prefix + "/mix/st" : nil
+    }
+
     /// The desk numbers its solo switches 01-80 through every strip, in `StripKind`'s order (doc p.64).
     public var solo: String {
         let before = StripKind.allCases.prefix { $0 != kind }.map(\.count).reduce(0, +)

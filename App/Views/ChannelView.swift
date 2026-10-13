@@ -25,7 +25,7 @@ struct ChannelView: View {
         let tabs = ChannelTab.tabs(for: strip.kind)
         let unlinked = mirror.unlinkedSection(of: tab, for: main)
         VStack(spacing: 12) {
-            ChannelHeader(strip: main, mirror: mirror)
+            ChannelHeader(strip: main, mirror: mirror, showsMainLR: tab == .mix)
             if tab != .mix { SlimMixRow(strip: slimStrip, mirror: mirror) }
             if unlinked != nil { PairSidePicker(odd: main, tab: tab, mirror: mirror, showsRight: $showsRight) }
             ChannelTabContent(

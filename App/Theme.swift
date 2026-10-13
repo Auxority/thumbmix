@@ -12,6 +12,12 @@ enum Theme {
     static let polarityAmber = Color(red: 1, green: 0.84, blue: 0.04)
     /// The desk's solo buttons light yellow.
     static let soloYellow = Color(red: 1, green: 0.84, blue: 0.04)
+    /// A state that's on almost all show (in the main mix) is tinted, not filled: fills mean "look here" (solo,
+    /// mute). Green on the tint is 6.1:1.
+    static let usualOnTint = Color(red: 18 / 255, green: 61 / 255, blue: 32 / 255)
+    static let usualOnGreen = Color(red: 48 / 255, green: 209 / 255, blue: 88 / 255)
+    /// Off text on `raised`, 6.3:1; `secondaryText` there is only 4.3:1, under AA for 15 pt.
+    static let offText = Color(white: 0.69)
     static let demoPurple = Color(red: 0.6, green: 0.3, blue: 0.85)
 
     /// Inverted scribble strips get their base colour: the inversion is an LCD effect, not a different colour.
