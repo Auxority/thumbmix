@@ -2,6 +2,11 @@
 
 What's next for Thumbmix, newest decisions first within each section. The PR that finishes an item deletes it, and records anything lasting it decided in `DECISIONS.md`.
 
+## Fixes
+
+- [ ] **Group chips bar jumps back to the start.** Tapping Main or Matrix scrolls the chips bar back to its first chips (Inputs, Aux), so the chip just tapped scrolls out of view. The bar should keep its scroll position, or scroll the selected chip into view.
+- [ ] **Compressor knee drawing.** The knee in the compressor curve looks wrong; find out how and fix it. See also "Known limits": the knee is drawn at 2 dB per step because the doc gives the 0–5 setting no unit.
+
 ## On the real M32
 
 - [ ] **Before using stereo pairs live:** link two channels on the desk, then move the pair's fader in Thumbmix. Does the desk move the other side by itself? The app writes one side and trusts the desk to copy it, then re-reads the other side. If a fader, mute or send didn't follow, the app writes both sides from then on; if anything else didn't follow (gain, EQ incl. low cut, dynamics: unverified), it shows that section per side and writes nothing. Either way it logs "didn't follow a linked edit". **So the other channel moves either way: watching the desk can't tell. Keep Console.app open on the Mac with the iPhone connected, filtered on "thumbmix", and look for that line.** No test can tell either: the fake console was written to copy.
@@ -31,18 +36,25 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Features
 
+- [ ] **Presets from the channel name**, based on James Attaway's *Live Mixing Field Guide*: a channel called "Kick" offers kick presets first (EQ, gate, compressor, low cut). Find a good spot to pick them from (mock first).
+- [ ] **Mix tab: a switch for "to Main LR"** on inputs and mix buses (`/…/mix/st`), so a strip can be taken off the main mix.
+- [ ] **DCA members from the DCA view:** a Members tab that adds and removes strips, the reverse of "Channel membership" below. Consider whether both are worth having.
+- [ ] **Fed by: linked pairs as one row, consistently.** Some pairs still show as two rows.
+- [ ] **Fed by: meters?** Consider a meter per source row; weigh the performance cost (see "Meters only for the strips in view?").
+- [ ] **Strip numbers on Fed by and Sends** (Ch 01, Aux 3, Bus 12…), so two strips with similar names can be told apart.
+- [ ] **The group pill design everywhere?** Consider using the pills (Inputs, Aux, FX…) more consistently: on the channel, aux, FX and bus screens too.
 - [ ] **Release notes in the SideStore source.** Each GitHub release already has notes (`scripts/publish-release.sh` runs `gh release create --generate-notes`: one line per merged PR title), but `scripts/sidestore-source.sh` gives a version no `localizedDescription`, AltStore's "What's new", so SideStore shows an update without saying what changed. Copy the notes into it as plain text: the PR titles only, without "by @Auxority in <link>" and the "Full Changelog" line. `scripts/test-sidestore-source.sh` checks it.
 - [ ] **Invert on a matrix?** The doc lists `/mtx/NN/config/preamp/invert` (p.32), odd for a matrix, and Mixing Station shows no such control. m32-probe 7f reads it once; show it only if the desk answers.
 - [ ] **Output meter on the Mix tab:** the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too, by usefulness and the performance cost.
 - [ ] **Muted strips' meters:** check whether muting should grey out the meters, or anything else.
-- [ ] **FX returns get EQ (and the other tabs) like an input:** the desk gives them a 4-band EQ. Check first whether that's good practice for returns.
+- [ ] **FX returns get EQ, compressor and the other tabs like an input.** The desk gives them a 4-band EQ; check what else it offers, and whether it's good practice for returns.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Input meter marks at −18 dBFS and 0 dBFS?** A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
 - [ ] **Fed by on Main LR and Main M.** Like a bus's Fed by: every input, aux in, FX return and bus with its LR switch on (`/…/mix/st`), and for Main M those with mono on (`/…/mix/mono`) with their mono level (`/…/mix/mlevel`). Matrices can't feed the mains; they're fed by them.
-- [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab.
+- [ ] **Inputs view on buses, like fader flip** on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab: give it the same pan and tap point controls as the Sends settings sheet, plus mute.
 - [ ] **Channel membership:** pick a channel's mute groups and DCAs from its strip screen, in a quick multi-select.
-- [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. Fed by lost its "Show unused" toggle too and lists every source.
+- [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. Fed by lost its "Show unused" toggle too and lists every source. Idea: a "Show unused" button at the bottom of the overview, Sends and Fed by lists; or rethink it from the engineer's task.
 - [ ] **Solo** per channel.
 - [ ] **Inserts** per channel.
 - [ ] **Dynamics before or after the EQ:** the toggle that moves the compressor ahead of the EQ.
@@ -52,7 +64,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Maybe later
 
-- [ ] **Long term: presets that match the channel name**, so a channel called "Kick" offers kick presets first.
 - [ ] **Long term: a lightweight API and an MCP server** for the desk.
 - [ ] **Long term: effect controls** (reverb and the other FX).
 - [ ] Fold rarely used settings into one line that opens on tap, like "Delay · Off · 12.5 ms ›" (delay mock B). Worth it once the Input tab holds more than gain, trim and delay.
