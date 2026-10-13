@@ -82,6 +82,14 @@ extension ConsoleMirror {
         }
     }
 
+    /// On Main LR a row's level is the strip's own fader, which moves its post-fader sends too, so the caption names
+    /// it (mock F1, 2026-10-13): "Ch 1 · Fader". Elsewhere it's a send, and the number alone.
+    public func fedByCaption(of item: OverviewItem, on target: StripID) -> String? {
+        let number = numberCaption(of: item)
+        guard target.kind == .mainStereo else { return number }
+        return [number, Catalog.fader(item.held).label].compactMap { $0 }.joined(separator: " · ")
+    }
+
     private func pairItem(for strip: StripID) -> OverviewItem? {
         let isOdd = strip == strip.oddSide
         guard !isShared(.faderMute) else { return isOdd ? .pair(strip) : nil }

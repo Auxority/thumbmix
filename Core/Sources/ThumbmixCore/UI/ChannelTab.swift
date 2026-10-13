@@ -31,13 +31,12 @@ public enum ChannelTab: String, CaseIterable, Identifiable, Sendable {
     public static let fillOrder: [ChannelTab] = [.input, .eq, .comp, .sends, .gate, .fedBy]
 
     /// Every strip opens on Mix: its full fader, nudges, mute and pan. The other tabs keep a slim fader and mute.
-    /// A bus's Sends (to the matrices) sit before Fed by, which mix buses use more and so keeps the far right.
+    /// The Sends (to the matrices) of a bus or main sit before Fed by, used more, which keeps the far right.
     public static func tabs(for kind: StripKind) -> [ChannelTab] {
         switch kind {
         case .input: [.mix, .input, .gate, .eq, .comp, .sends]
-        case .bus: [.mix, .eq, .comp, .sends, .fedBy]
         case .matrix: [.mix, .eq, .comp, .fedBy]
-        case .mainStereo, .mainMono: [.mix, .eq, .comp, .sends]
+        case .bus, .mainStereo, .mainMono: [.mix, .eq, .comp, .sends, .fedBy]
         case .dca: [.mix, .members]
         case .auxIn: [.mix, .input, .eq, .sends]
         case .fxReturn: [.mix, .eq, .sends]

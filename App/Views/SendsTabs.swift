@@ -80,7 +80,8 @@ private struct SendSettingsButton: View {
     }
 }
 
-/// What feeds this bus or matrix: the sends of every kind that feeds it (`StripKind.feeders`).
+/// What feeds this bus, matrix or main: a row per strip of every kind that feeds it (`StripKind.feeders`), its
+/// switch and level from `Catalog.feedOn` and `feedLevel`.
 /// Unused sources show too, like the overview, until hiding them is redesigned (TODO). A linked source pair is one
 /// row whenever it is on the overview: the desk links sends with the faders (`LinkSection.of`).
 struct FedByTab: View {
@@ -94,10 +95,11 @@ struct FedByTab: View {
             ScrollView {
                 SteadyRows(wanted: rows, mirror: mirror) { rows in
                     VStack(spacing: 6) {
+                        if target.kind == .mainStereo { FaderNote() }
                         ForEach(rows) { row in
                             SendRow(
                                 source: row.held, target: target, title: mirror.title(of: row),
-                                caption: mirror.numberCaption(of: row), accent: Theme.color(mirror.color(row.held)),
+                                caption: mirror.fedByCaption(of: row, on: target), accent: Theme.color(mirror.color(row.held)),
                                 mirror: mirror
                             )
                             .id(row)
@@ -119,6 +121,21 @@ struct FedByTab: View {
     }
 }
 
+/// Main LR's rows look like send rows, but a drag moves the strip's fader and so its post-fader sends too. The
+/// caption says "Fader" on every row; this line says it once more, for whoever skips captions (mock F4, 2026-10-13).
+private struct FaderNote: View {
+    var body: some View {
+        Label("Levels here are each strip's own fader.", systemImage: "info.circle")
+            .font(.footnote)
+            .foregroundStyle(Theme.secondaryText)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 2)
+            .padding(.bottom, 4)
+            .accessibilityIdentifier("fader-note")
+    }
+}
+
+/// One send, or one row of Fed by: On and level, or on Main LR the LR switch and the strip's own fader.
 struct SendRow: View {
     let source: StripID
     let target: StripID
@@ -132,14 +149,18 @@ struct SendRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            // Tinted, not filled like the other "on" chips: a send is on almost all show, and a column of green fills
-            // would shout. Green, as a red source colour would read as mute.
-            ToggleChip(
-                spec: Catalog.sendOn(from: source, to: target), mirror: mirror, title: "On",
-                onColor: Theme.usualOnTint, onText: Theme.usualOnGreen
-            )
+            if target.kind == .mainStereo {
+                MainLRChip(strip: source, mirror: mirror)
+            } else {
+                // Tinted, not filled like the other "on" chips: a send is on almost all show, and a column of green
+                // fills would shout. Green, as a red source colour would read as mute.
+                ToggleChip(
+                    spec: Catalog.feedOn(from: source, to: target), mirror: mirror, title: "On",
+                    onColor: Theme.usualOnTint, onText: Theme.usualOnGreen
+                )
+            }
             ParameterRow(
-                spec: Catalog.sendLevel(from: source, to: target), mirror: mirror, title: title, caption: caption,
+                spec: Catalog.feedLevel(from: source, to: target), mirror: mirror, title: title, caption: caption,
                 accent: accent
             )
             .disabled(isLevelFixed)
@@ -158,5 +179,13 @@ struct SendRow: View {
 
     #Preview("Matrix fed by") {
         FedByTab(target: StripID(.matrix, 1), mirror: .preview()).padding().background(Theme.background)
+    }
+
+    #Preview("Main LR fed by") {
+        FedByTab(target: StripID(.mainStereo), mirror: .preview()).padding().background(Theme.background)
+    }
+
+    #Preview("Main M fed by") {
+        FedByTab(target: StripID(.mainMono), mirror: .preview()).padding().background(Theme.background)
     }
 #endif

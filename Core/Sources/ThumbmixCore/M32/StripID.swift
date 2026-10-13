@@ -23,8 +23,14 @@ public enum StripKind: String, CaseIterable, Sendable {
         }
     }
 
-    /// The kinds that send to this one.
-    public var feeders: [StripKind] { StripKind.allCases.filter { $0.sendTarget == self } }
+    /// The kinds a Fed by tab lists: those that send to this one, and for the mains every kind with an LR switch and
+    /// a mono send (`mix/st`, `mix/mono`; doc p.25-31). Matrices can't feed the mains; they're fed by them.
+    public var feeders: [StripKind] {
+        switch self {
+        case .mainStereo, .mainMono: [.input, .auxIn, .fxReturn, .bus]
+        default: StripKind.allCases.filter { $0.sendTarget == self }
+        }
+    }
 }
 
 /// One channel strip on the console. `number` is 1-based, as printed on the desk.
