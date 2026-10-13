@@ -64,7 +64,8 @@ struct SoloTests {
 
         mirror.toggleSolo(gtrL)
 
+        // Both sides go out in one tick, in no set order.
         #expect(await eventually { fake.value(at: StripID(.input, 10).solo) == .int(1) })
-        #expect(fake.value(at: gtrL.solo) == .int(1))
+        #expect(await eventually { fake.value(at: gtrL.solo) == .int(1) })
     }
 }

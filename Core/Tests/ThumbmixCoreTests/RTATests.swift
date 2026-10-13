@@ -35,12 +35,18 @@ struct RTATests {
         #expect(abs(RTA.bandFrequency(99) - 18_660) < 1)
     }
 
+    /// Release judges by what the mirror shows. An audit question asked just before the app's set, answered after
+    /// the hold, shows the old value until the re-read answers, so these tests leave the audit out (it has its own).
+    private func loanMirror(port: UInt16) async -> ConsoleMirror {
+        await liveMirror(port: port, auditAddresses: [])
+    }
+
     @Test func followingPointsTheDeskRTAAndReleasingPutsItBack() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         fake.deskChange(RTA.source, .int(50))
         fake.deskChange(RTA.position, .int(0))
-        let mirror = await liveMirror(port: port)
+        let mirror = await loanMirror(port: port)
         defer { mirror.stop() }
         #expect(await eventually { mirror.cell(RTA.source).argument == .int(50) })
 
@@ -70,22 +76,23 @@ struct RTATests {
         mirror.followRTA(kick)
         #expect(await eventually { mirror.spectrum.decibels.count == RTA.bandCount })
 
+        let flat = mirror.spectrum.decibels[index]
+
+        // Waits for a spectrum each edit shaped: one sampled after a fixed sleep can predate it on a slow runner.
         mirror.set(gain.address, gain.scale.argument(fromNormalized: 1))
-        #expect(await eventually { fake.value(at: gain.address) == .float(1) })
-        try await Task.sleep(for: .milliseconds(200))
+        #expect(await eventually { mirror.spectrum.decibels[index] - flat > 10 }, "boost at \(Int(bandFrequency)) Hz")
         let boosted = mirror.spectrum.decibels[index]
         mirror.set(gain.address, gain.scale.argument(fromNormalized: 0))
-        #expect(await eventually { fake.value(at: gain.address) == .float(0) })
-        try await Task.sleep(for: .milliseconds(200))
-        let cut = mirror.spectrum.decibels[index]
 
-        #expect(boosted - cut > 20, "boosted \(boosted) dB, cut \(cut) dB at \(Int(bandFrequency)) Hz")
+        #expect(
+            await eventually { boosted - mirror.spectrum.decibels[index] > 20 },
+            "boosted \(boosted) dB, cut \(mirror.spectrum.decibels[index]) dB at \(Int(bandFrequency)) Hz")
     }
 
     @Test func aChangeMadeOnTheDeskMeanwhileIsKept() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
+        let mirror = await loanMirror(port: port)
         defer { mirror.stop() }
         mirror.followRTA(StripID(.input, 1))
         #expect(await eventually { fake.value(at: RTA.source) == .int(2) })
@@ -106,7 +113,7 @@ struct RTATests {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         fake.deskChange(RTA.source, .int(72))
-        let mirror = await liveMirror(port: port)
+        let mirror = await loanMirror(port: port)
         defer { mirror.stop() }
         #expect(await eventually { mirror.cell(RTA.source).argument == .int(72) })
 

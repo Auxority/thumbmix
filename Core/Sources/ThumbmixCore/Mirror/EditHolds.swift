@@ -21,9 +21,11 @@ struct EditHolds {
         rereadAt[address] = now + hold
     }
 
-    /// A set outside a gesture (nudge, toggle, double-tap) holds briefly against its own echo.
+    /// A set outside a gesture (nudge, toggle, double-tap) holds briefly against its own echo, then is read back:
+    /// a reply to a question asked just before the set carries the old value and may land after the hold.
     mutating func edited(_ address: String, now: ContinuousClock.Instant) {
         heldUntil[address] = max(heldUntil[address] ?? now, now + hold)
+        if !editing.contains(address) { rereadAt[address] = now + hold }
     }
 
     /// A value the desk changes as a side effect of the app's edit (a linked partner) and may not push back.

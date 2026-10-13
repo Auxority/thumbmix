@@ -115,7 +115,9 @@ public final class ConsoleLink {
         transport.start()
         let messages = transport.messages
         receiveTask = Task { [weak self] in
-            for await message in messages { self?.received(message) }
+            // A replaced socket's stream still hands out what it buffered: replies from before the outage,
+            // which would land after the resync forgot those values and show them as live.
+            for await message in messages where !Task.isCancelled { self?.received(message) }
         }
     }
 
