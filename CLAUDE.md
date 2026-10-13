@@ -17,7 +17,7 @@ A remote that shows a stale or guessed value as live makes the engineer's next d
 
 ## Protocol facts
 
-OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unofficial X32/M32 OSC Remote Protocol* (v4.09), cited by page in the code. Look facts up there: grep `notes/maillot-v4.09.txt`, its `pdftotext -layout` text, and cite the page; the fake console (`FakeM32`) encodes assumptions, not the real desk. Behaviour the doc leaves open (the `/xremote` client limit, whether the desk echoes a sender's own sets, DCA bit order, DCA meter slots) is answered by `m32-probe` on real hardware; record the answer in a comment where the code depends on it.
+OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unofficial X32/M32 OSC Remote Protocol* (v4.09), cited by page in the code. Look facts up there: grep `notes/maillot-v4.09.txt`, its `pdftotext -layout` text, and cite the printed page, the first footer after the hit (`awk 'NR>=<line> && /Unofficial X32\/M32 OSC Remote Protocol/ {print; exit}' notes/maillot-v4.09.txt`); the fake console (`FakeM32`) encodes assumptions, not the real desk. Behaviour the doc leaves open (the `/xremote` client limit, whether the desk echoes a sender's own sets, DCA bit order, DCA meter slots) is answered by `m32-probe` on real hardware; record the answer in a comment where the code depends on it.
 
 ## Done means
 
@@ -33,7 +33,7 @@ When `scripts/ui-test.sh` stops before any test with "Failed to clone device …
 
 ## How we work
 
-- **New UI starts with a mock.** Show the options side by side in the browser (the superpowers visual companion) and build the one the user picks; they choose layouts by seeing them.
+- **New UI starts with a browser mock.** Show the options side by side in the browser (the superpowers visual companion), never as a text preview in a question, and build the one the user picks; they choose layouts by seeing them. Each option's note says what the engineer's touch changes mid-show (what else moves), not only how it looks.
 - **`m32-probe` stays read-only.** It never sends a set to the real desk: when a check needs a setting changed, the probe asks the engineer to change it on the desk, then reports what it sees.
 - **One PR per concern**, branched from `main`. A change that builds on an unmerged PR waits on its own branch, and its PR opens after the base merges.
 

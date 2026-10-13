@@ -9,6 +9,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 log=build/ui-test.log
+results=build/ui-test.xcresult
 
 # By id, and on iOS 26+ (the app's minimum): a bare name means the newest runtime, where the SE may be missing.
 se=$(xcrun simctl list devices available | awk '
@@ -39,11 +40,12 @@ else
 fi
 
 mkdir -p build/screens
+rm -rf "$results"
 export TEST_RUNNER_SCREENSHOT_DIR="$PWD/build/screens"
 xcodegen generate --quiet
 echo "Running the UI tests on: $destination (full log: $log)"
 xcodebuild test -project Thumbmix.xcodeproj -scheme Thumbmix -destination "$destination" "${parallel[@]}" \
-  -collect-test-diagnostics never ${only[@]+"${only[@]}"} ${passthrough[@]+"${passthrough[@]}"} > "$log" 2>&1 &
+  -collect-test-diagnostics never -resultBundlePath "$results" ${only[@]+"${only[@]}"} ${passthrough[@]+"${passthrough[@]}"} > "$log" 2>&1 &
 run=$!
 
 # Building takes up to a minute or two; the 2 minutes start once the build has finished.
@@ -62,6 +64,9 @@ status=0
 wait "$run" || status=$?
 
 grep -E ": error: |Test [Cc]ase .* failed" "$log" | sort -u || true
-grep -E "Executed [0-9]+ tests?, with|Test session results" "$log" | tail -1 || true
+# Counted from the result bundle: on clones, xcodebuild's own lines cut test lines in half, so the log undercounts.
+summary=$(xcrun xcresulttool get test-results summary --path "$results" 2>/dev/null || true)
+count() { printf '%s\n' "$summary" | sed -nE "s/^  \"$1\" : ([0-9]+),?$/\1/p"; }
+if [ -n "$summary" ]; then echo "$(count passedTests) passed, $(count failedTests) failed, $(count skippedTests) skipped"; fi
 grep -E "\*\* TEST " "$log" || true
 exit "$status"
