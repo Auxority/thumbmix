@@ -18,9 +18,23 @@ struct SoloTests {
         #expect(StripID(.dca, 8).solo == "/-stat/solosw/80")
     }
 
-    @Test func theMixTabReadsSoloAndTheDemoStartsUnsoloed() {
-        #expect(Catalog.tabAddresses(.mix, StripID(.dca, 1), headamp: nil) == ["/-stat/solosw/73"])
+    @Test func theDemoStartsUnsoloed() {
         #expect(DemoState.values()["/-stat/solosw/01"] == .int(0))
+    }
+
+    /// S sits beside the slim fader on every tab, so solo is read on connect, like mute: read only with the Mix tab,
+    /// a strip opened on Fed by, or a resync while on EQ, left S unread, and an unread switch ignores taps.
+    @Test func soloWorksWithoutOpeningTheMixTab() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
+        let bus = StripID(.bus, 1)
+        #expect(mirror.cell(bus.solo).argument == .int(0), "read before going live")
+
+        mirror.toggleSolo(bus)
+
+        #expect(await eventually { fake.value(at: bus.solo) == .int(1) })
     }
 
     @Test func soloTogglesTheStrip() async throws {

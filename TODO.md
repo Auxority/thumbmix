@@ -26,7 +26,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Performance
 
-- [ ] **More requests in flight (8 → 32)?** Connect reads the overview (610 values) 8 at a time; simulated, 32 at a time is ~4× faster, but the doc warns that a router can drop reply bursts (p.6). m32-probe section 12 times both on the real desk: raise it only if 32 is much faster with 0 unanswered.
+- [ ] **More requests in flight (8 → 32)?** Connect reads the overview (690 values) 8 at a time; simulated, 32 at a time is ~4× faster, but the doc warns that a router can drop reply bursts (p.6). m32-probe section 12 times both on the real desk: raise it only if 32 is much faster with 0 unanswered.
 - [ ] **Meters only for the strips in view?** Draw (or update) meters only for the rows on screen, not every strip. Measure first; if it saves only 1–2 % CPU, it isn't worth it and this item goes.
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
 
