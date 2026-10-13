@@ -85,12 +85,11 @@ public struct StripID: Hashable, Sendable, Identifiable {
     public var hasGate: Bool { kind == .input }
     public var hasDynamics: Bool { [.input, .bus, .matrix, .mainStereo, .mainMono].contains(kind) }
 
-    /// FX returns have a 4-band EQ on the desk too, but the app shows only their header so far.
     public var eqBandCount: Int {
         switch kind {
-        case .input, .auxIn: 4
+        case .input, .auxIn, .fxReturn: 4
         case .bus, .matrix, .mainStereo, .mainMono: 6
-        case .fxReturn, .dca: 0
+        case .dca: 0
         }
     }
 

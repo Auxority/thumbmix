@@ -191,6 +191,8 @@ print("polarity pushed: " + Set(flips.map(\.address)).sorted().joined(separator:
 print("RESULT: both sides = the link carries polarity (the app's model); one side = it doesn't. Flip it back.")
 // The doc lists a matrix polarity (p.32) that Mixing Station doesn't show: an answer means it exists.
 print("\n7f. " + (await ask("/mtx/01/config/preamp/invert").map(describe) ?? "matrix polarity: NO REPLY (no such setting)"))
+// The doc lists an FX return's send tap from bus 3 on (p.30); the app assumes bus 1 has one too (Catalog.sendPan).
+print("\n7g. " + (await ask("/fxrtn/01/mix/01/type").map(describe) ?? "FX 1 bus 1 tap: NO REPLY (remove it from the app)"))
 
 // The app shows each fader step as the doc's table has it (p.145, FaderLaw.shownDecibels), including a detent
 // that reads 0 from -0.09 to +0.07 dB and two steps rounded the other way. The desk's own text checks that.

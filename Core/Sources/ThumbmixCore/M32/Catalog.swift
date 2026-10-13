@@ -178,6 +178,8 @@ public enum Catalog {
 
     /// Only odd sends have a pan (doc p.26): it places the strip in the linked pair it feeds. On a mono, unlinked
     /// bus it does nothing (the user, from the desk), so the app shows it only on linked pairs.
+    /// An FX return's list (p.30) starts this pan, tap and pan follow at bus 3; bus 1 is assumed left out by
+    /// mistake, as channels and aux ins have it (m32-probe section 7g).
     public static func sendPan(from strip: StripID, to target: StripID) -> ParamSpec? {
         guard !target.number.isMultiple(of: 2) else { return nil }
         return ParamSpec(
