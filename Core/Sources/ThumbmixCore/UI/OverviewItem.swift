@@ -47,6 +47,12 @@ extension ConsoleMirror {
     /// While true, rows must not change shape: the finger owns a control.
     public var isFingerDown: Bool { holds.isFingerDown }
 
+    /// Returns once no finger owns a control; throws when cancelled. Lifting a finger isn't observed, so it looks
+    /// every 100 ms.
+    public func fingerLifted() async throws {
+        while isFingerDown { try await Task.sleep(for: .milliseconds(100)) }
+    }
+
     /// The rows for `strips`. A pair is unused, and hidden, only when both its sides are.
     public func overviewItems(_ strips: [StripID], showUnused: Bool) -> [OverviewItem] {
         strips.compactMap { strip in

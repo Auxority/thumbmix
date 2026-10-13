@@ -45,6 +45,16 @@ struct OverviewItemsTests {
         #expect(mirror.title(of: half) == "Gtr R")
     }
 
+    /// Rows changed while a finger is down wait for this before they regroup: lifting a finger isn't observed.
+    @Test func waitingForTheFingerEndsOnceItLifts() async throws {
+        mirror.beginEdit("/ch/01/mix/fader")
+        let waiting = Task { try await mirror.fingerLifted() }
+        try await Task.sleep(for: .milliseconds(150))
+        mirror.endEdit("/ch/01/mix/fader")
+        try await waiting.value
+        #expect(!mirror.isFingerDown)
+    }
+
     @Test func pairShowsWhenEitherSideIsUsed() {
         let odd = StripID(.input, 21)
         mirror.apply(OSCMessage("/config/chlink/21-22", [.int(1)]))

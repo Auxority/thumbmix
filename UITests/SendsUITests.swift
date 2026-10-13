@@ -122,6 +122,29 @@ final class SendsUITests: DeskUITestCase {
         XCTAssertFalse(element("/ch/10/mix/01/level").exists, "the even side has no row of its own")
     }
 
+    /// Unlinked on the desk while a finger holds the pair's send: the rows hold still under the finger (`SteadyRows`;
+    /// XCUITest can't look during a hold) and split once it lifts, never stuck as they were.
+    func testFedByRegroupsOnceTheFingerLifts() {
+        launch()
+        app.buttons["Buses"].tap()
+        open("Mon 1")
+        app.buttons["Fed by"].tap()
+        let pair = element("/ch/09/mix/01/level")
+        XCTAssertTrue(pair.appears(within: 2))
+        // The 9th source sits below the screen's edge: scroll four rows, starting on a visible row.
+        element("/ch/05/mix/01/level").press(forDuration: 0.05, thenDragTo: element("/ch/01/mix/01/level"))
+        XCTAssertTrue(eventually(within: 2) { pair.isHittable })
+        let desk = self.desk!
+        DispatchQueue.global().asyncAfter(deadline: .now() + 0.8) { desk.change("/config/chlink/9-10", 0) }
+        pair.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5))
+            .press(
+                forDuration: 0.05, thenDragTo: pair.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)),
+                withVelocity: .slow, thenHoldForDuration: 2)
+        XCTAssertTrue(
+            eventually(within: 3) { self.element("/ch/10/mix/01/level").exists }, "the pair split once lifted")
+        XCTAssertNotEqual(element("/ch/09/mix/01/level").value as? String, "−∞ dB", "the drag moved the send")
+    }
+
     /// A matrix is fed by the buses and the mains; the demo's Fill takes the main mix at 0 dB.
     func testMatrixIsFedByTheMains() {
         launch()

@@ -88,13 +88,15 @@ struct FedByTab: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(spacing: 6) {
-                    ForEach(rows) { row in
-                        SendRow(
-                            source: row.held, target: target, title: mirror.title(of: row),
-                            accent: Theme.color(mirror.color(row.held)), mirror: mirror
-                        )
-                        .id(row)
+                SteadyRows(wanted: rows, mirror: mirror) { rows in
+                    VStack(spacing: 6) {
+                        ForEach(rows) { row in
+                            SendRow(
+                                source: row.held, target: target, title: mirror.title(of: row),
+                                accent: Theme.color(mirror.color(row.held)), mirror: mirror
+                            )
+                            .id(row)
+                        }
                     }
                 }
             }
