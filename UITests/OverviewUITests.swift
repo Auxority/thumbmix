@@ -109,6 +109,19 @@ final class OverviewUITests: DeskUITestCase {
         XCTAssertTrue(app.buttons["Mon 1"].appears(within: 2))
     }
 
+    /// A chip past the screen's edge stays in view once tapped: the bar jumped back to Inputs and Aux.
+    func testTappedChipStaysInView() {
+        launch()
+        app.buttons["Buses"].swipeLeft()
+        let main = app.buttons["Main"]
+        main.tap()
+        XCTAssertTrue(app.buttons["LR"].appears(within: 2))
+        sleep(1)  // let a jump back play out before judging where the bar rests
+        XCTAssertLessThanOrEqual(main.frame.maxX, app.frame.maxX, "the Main chip is still on screen")
+        saveScreenshot("chips-main-tapped")
+        XCTAssertTrue(main.isHittable)
+    }
+
     /// The group chips sit along the bottom edge, where a thumb reaches them one-handed, and the list's last
     /// strip still scrolls clear of their bar.
     func testGroupChipsSitWithinThumbReach() {

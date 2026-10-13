@@ -4,7 +4,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Fixes
 
-- [ ] **Group chips bar jumps back to the start.** Tapping Main or Matrix scrolls the chips bar back to its first chips (Inputs, Aux), so the chip just tapped scrolls out of view. The bar should keep its scroll position, or scroll the selected chip into view.
 - [ ] **Compressor knee drawing.** The knee in the compressor curve looks wrong; find out how and fix it. See also "Known limits": the knee is drawn at 2 dB per step because the doc gives the 0–5 setting no unit.
 
 ## On the real M32
