@@ -27,9 +27,10 @@ struct OverviewView: View {
                 .id(group)
                 .disabled(!mirror.isLive)
                 .opacity(mirror.isLive ? 1 : 0.4)
-                // In thumb reach; the list scrolls on under the glass, and its last row scrolls clear of it.
-                .safeAreaInset(edge: .bottom, spacing: 0) { GroupChips(selection: $group) }
             }
+            // In thumb reach; the list scrolls on under the glass, and its last row scrolls clear of it. Kept off the
+            // list's `.id(group)`: a new list rebuilt the chips too, jumping their bar back to Inputs.
+            .safeAreaInset(edge: .bottom, spacing: 0) { GroupChips(selection: $group) }
             .background(Theme.background)
             .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
             .navigationTitle("Thumbmix")
