@@ -158,11 +158,13 @@ struct CatalogTests {
         case .input:
             [Catalog.trim(strip).address] + [Catalog.headampIndex(strip), Catalog.invert(strip)?.address].compactMap { $0 }
                 + (Catalog.delay(strip)?.all.map(\.address) ?? [])
-        case .gate: Catalog.gate(strip).all.map(\.address)
+        case .gate: Catalog.gate(strip).all.map(\.address) + Catalog.gateKey(strip).addresses
         case .eq:
             [Catalog.eqOn(strip).address] + (Catalog.lowCut(strip)?.all.map(\.address) ?? [])
                 + (1...strip.eqBandCount).flatMap { Catalog.eqBand(strip, $0).all.map(\.address) }
-        case .comp: Catalog.dynamics(strip).all.map(\.address)
+        case .comp:
+            Catalog.dynamics(strip).all.map(\.address) + Catalog.dynamicsKey(strip).addresses
+                + [Catalog.dynamicsPosition(strip)?.address].compactMap { $0 } + sendTapsAndSwitches(strip)
         case .sends:
             (strip.kind.sendTarget.map(StripID.all) ?? []).flatMap {
                 [Catalog.sendLevel(from: strip, to: $0).address, Catalog.sendOn(from: strip, to: $0).address]
@@ -175,6 +177,13 @@ struct CatalogTests {
                 [Catalog.feedOn(from: $0, to: strip).address, Catalog.feedLevel(from: $0, to: strip).address]
             }
         case .members: StripKind.allCases.flatMap(StripID.all).compactMap(\.dcaMask)
+        }
+    }
+
+    /// The comp position asks first when a send tapped around the EQ would change, so the Comp tab knows every tap.
+    private static func sendTapsAndSwitches(_ strip: StripID) -> [String] {
+        (strip.kind.sendTarget.map(StripID.all) ?? []).flatMap {
+            [Catalog.sendOn(from: strip, to: $0).address] + [Catalog.sendTap(from: strip, to: $0)?.address].compactMap { $0 }
         }
     }
 

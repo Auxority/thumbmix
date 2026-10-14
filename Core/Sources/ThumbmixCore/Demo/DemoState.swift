@@ -102,6 +102,8 @@ public enum DemoState {
         // Delay before the generic "/on": the demo's delays start off, at 0.3 ms.
         ("/delay/on", .int(0)), ("/delay/time", .float(0)),
         ("/phantom", .int(0)), ("/invert", .int(0)), ("/panFollow", .int(0)), ("/dyn/pos", .int(1)),
+        // Key filters off before the generic "/on"; key sources on the strip itself, filter type HC12.
+        ("/filter/on", .int(0)), ("/filter/type", .int(3)), ("/keysrc", .int(0)), ("/dyn/auto", .int(0)),
         ("/hpon", .int(0)), ("/hpslope", .int(2)), ("/on", .int(1)), ("/mix/st", .int(1)),
         // Mono off, its level at -∞: a desk after a reset (assumed).
         ("/mix/mono", .int(0)), ("/mix/mlevel", .float(0)),

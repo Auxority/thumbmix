@@ -24,6 +24,7 @@ struct GateTab: View {
                 ForEach([gate.threshold, gate.range, gate.attack, gate.hold, gate.release]) {
                     ParameterRow(spec: $0, mirror: mirror)
                 }
+                KeySection(key: Catalog.gateKey(strip), mirror: mirror)
             }
         }
     }
@@ -68,6 +69,13 @@ struct CompTab: View {
                     ChoiceMenu(spec: dynamics.detector, mirror: mirror)
                     ChoiceMenu(spec: dynamics.envelope, mirror: mirror)
                 }
+                HStack(spacing: 8) {
+                    if let position = Catalog.dynamicsPosition(strip) {
+                        CompPositionMenu(spec: position, strip: strip, mirror: mirror)
+                    }
+                    ToggleChip(spec: dynamics.auto, mirror: mirror, onColor: .green)
+                }
+                KeySection(key: Catalog.dynamicsKey(strip), mirror: mirror)
             }
         }
     }
@@ -84,6 +92,76 @@ struct CompTab: View {
                 input, isExpander: isExpander, threshold: threshold, ratio: ratio, knee: knee, makeup: makeup)
         }
         return (output, threshold)
+    }
+}
+
+/// What the gate or comp listens to (layout A, 2026-10-14): last, below everything an engineer rides.
+struct KeySection: View {
+    let key: KeySpecs
+    let mirror: ConsoleMirror
+
+    var body: some View {
+        Text("Key")
+            .font(.footnote).textCase(.uppercase).foregroundStyle(Theme.secondaryText)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4).padding(.top, 10)
+        if let source = key.sourceAddress {
+            ChoiceMenu(spec: Catalog.keySource(source, rawName: mirror.rawName), mirror: mirror)
+        }
+        HStack(spacing: 8) {
+            ToggleChip(spec: key.filterOn, mirror: mirror, onColor: .green)
+            ChoiceMenu(spec: key.filterType, mirror: mirror)
+        }
+        // Stays live with the filter off, like Delay's time: set the frequency, then switch it on.
+        ParameterRow(spec: key.filterFrequency, mirror: mirror)
+    }
+}
+
+/// Moving the comp across the EQ changes what sends tapped around the EQ hear, so it names those mixes and asks
+/// first (mock b1, 2026-10-14). Disabled until every tap is read: unknown mustn't pass for "no mix changes".
+struct CompPositionMenu: View {
+    let spec: ParamSpec
+    let strip: StripID
+    let mirror: ConsoleMirror
+    @State private var pending: OSCArgument?
+
+    var body: some View {
+        let mixes = mirror.mixesChangedByMovingComp(of: strip)
+        ChoiceMenu(spec: spec, mirror: mirror) { argument in
+            guard argument != mirror.cell(spec.address).argument else { return }
+            if mixes?.isEmpty == false { pending = argument } else { mirror.set(spec.address, argument) }
+        }
+        .disabled(mixes == nil)
+        .alert(title, isPresented: isAsking, presenting: pending) { argument in
+            Button("Move") { mirror.set(spec.address, argument) }
+            Button("Cancel", role: .cancel) {}
+        } message: { _ in
+            Text(message(mixes ?? []))
+        }
+    }
+
+    /// PRE (0) puts the comp before the EQ (doc p.25).
+    private var movesBeforeEQ: Bool { pending == .int(0) }
+
+    private var title: String {
+        movesBeforeEQ ? String(localized: "Move the comp before the EQ?") : String(localized: "Move the comp after the EQ?")
+    }
+
+    /// Every mix named changes the same way: all start hearing the comp, or all stop.
+    private func message(_ mixes: [String]) -> String {
+        let names = mixes.joined(separator: " · ")
+        if mixes.count == 1 {
+            return movesBeforeEQ
+                ? String(localized: "\(names) will start hearing the compressor.")
+                : String(localized: "\(names) will stop hearing the compressor.")
+        }
+        return movesBeforeEQ
+            ? String(localized: "These \(mixes.count) mixes will start hearing the compressor:\n\n\(names)")
+            : String(localized: "These \(mixes.count) mixes will stop hearing the compressor:\n\n\(names)")
+    }
+
+    private var isAsking: Binding<Bool> {
+        Binding(get: { pending != nil }, set: { if !$0 { pending = nil } })
     }
 }
 

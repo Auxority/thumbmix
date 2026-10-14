@@ -19,6 +19,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - Section 7g: an FX return's send to bus 1. The doc lists a return's send pan, tap point and pan follow from bus 3 on (p.30); the app assumes bus 1 has them too. The probe reads `/fxrtn/01/mix/01/type` once; if the desk doesn't answer, drop them for buses 1-2 of returns.
   - Mono mode (not in the probe yet). The doc only names `/config/mono/mode` (LR+M or LCR) and `/config/mono/link` ("M/C depends on Main L/R", p.21). Set LCR on the desk: what does a channel's M/C level do then? Tick the link: does a strip with its LR switch off still reach Main M? Main M's Fed by shows the same rows either way; if the link gates it, say so on that tab.
   - Section 8: fader text. Does the desk's own dB text match the app's for every input fader? The app follows the doc's table (p.145), incl. a 0 dB detent and two odd steps (−8.7, −23.2). Set faders near 0, −8.6 and −23.2 with the desk's encoder first; each DIFFERS line goes in `FaderLaw.deskExceptions`. Untested: the fake desk doesn't answer `/node`. Then check whether a formula reproduces the desk's steps, and drop the list if it does; the same goes for any other list of steps that look inconsistent.
+- [ ] **Key source and Auto time.** Does the desk's key source list call 0 "Self" (the X32 manual) or "Off" (the doc)? The app says Self. With Auto time on, does the desk ignore Attack and Release? If it does, dim them like a cut filter's Gain and Q.
 - [ ] **EQ cut filters.** Set a band to LCut, HCut and (on a main) BU12: do Gain and Q really do nothing? The app disables both rows there (`Catalog.eqTypeShapesLevel`); the doc lists gain and Q for every type without saying.
 - [ ] **Compressor knee width per step.** The app draws 6 dB per knee step (knee 5 = 30 dB), a guess: no source gives the unit, and `m32-probe` can't read it. Set knee 0 and 5 on the desk and compare its dynamics screen with the app's curve, or measure: a test tone at the threshold, 4:1, and the gain reduction meter at each knee step. Then set `TransferCurve.kneeDecibelsPerStep`.
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
@@ -33,6 +34,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 - [ ] **Gate graph above the On chip and Mode menu.** `GateTab` puts the chip and the menu first, then the graph. Move the graph up, and decide whether the Compressor tab gets the same order. On the SE, check that the Threshold row stays on the first screen (why `TransferGraph` is one card).
 - [ ] **No "Thumbmix" title on the overview** (`OverviewView`, `.navigationTitle`). Offline mode shows its DEMO pill in that title (`demoTitle`): keep the pill where it moves no control.
+- [ ] **Plain words for the desk's filter terms?** The key filter's types (LC6 … HC12, BP Q 1.0 … 10) and EQ types (LCut, PEQ, BU6 …) show the desk's terms. Revisit both together, like Detector's "Average level" · RMS.
 - [ ] **Draw the main-bus EQ types.** On matrices, Main LR and Main M, the types BU6 … LR24 draw flat (`EQResponse.coefficients`, `default:`). Find which way each one cuts and its slope (doc first, else the desk), then draw it. See also "EQ cut filters" under "On the real M32".
 - [ ] **An EQ that's off greys its graph.** Today the graph draws flat (`ConsoleMirror.eqBands` returns no bands). Grey it instead, keeping the bands' curve (greyed), so it shows what switching the EQ on brings back (decided 2026-10-14).
 
@@ -57,11 +59,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **An inputs view on buses**, like fader flip on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab: give it the same pan and tap point controls as the Sends settings sheet, plus mute. Show the source's mute on every Fed by (matrices and the mains too).
 - [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. Fed by lost its "Show unused" toggle too and lists every source. Idea: a "Show unused" button at the bottom of the overview, Sends and Fed by lists; or rethink it from the engineer's task.
 - [ ] **Inserts** per channel.
-- [ ] **Dynamics settings the app lacks:**
-  - Dynamics before or after the EQ: the toggle that moves the compressor ahead of the EQ.
-  - More compressor settings: auto time and the key filter frequency.
-  - The gate's missing settings: its key filter (on, type, frequency) and key source (`gate/filter/…`, `gate/keysrc`, p.25). Wanted (2026-10-14); the app doesn't read them yet.
-  - Maybe later: the compressor mix (the app doesn't read it yet).
+- [ ] Maybe later: **the compressor mix** (`dyn/mix`, p.25; the app doesn't read it yet).
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
 
 ## Code and docs
