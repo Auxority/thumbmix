@@ -172,9 +172,14 @@ public enum EQReading {
             slopeIndex: Int(specs.slope.scale.value(fromNormalized: slope)))
     }
 
-    /// Empty when the strip's EQ is off, so the curve is flat.
+    /// What is heard: empty when the strip's EQ is off, so the curve is flat.
     public static func bands(_ strip: StripID, value: (String) -> OSCArgument?) -> [EQBandState] {
-        guard strip.eqBandCount > 0, value(Catalog.eqOn(strip).address) == .int(1) else { return [] }
+        value(Catalog.eqOn(strip).address) == .int(1) ? bandsAsSet(strip, value: value) : []
+    }
+
+    /// The bands as set, heard or not.
+    public static func bandsAsSet(_ strip: StripID, value: (String) -> OSCArgument?) -> [EQBandState] {
+        guard strip.eqBandCount > 0 else { return [] }
         func real(_ spec: ParamSpec, _ fallback: Float) -> Double {
             spec.scale.value(fromNormalized: normalized(spec, value) ?? fallback)
         }
@@ -202,9 +207,19 @@ extension ConsoleMirror {
         EQReading.lowCut(strip) { cell($0).argument }
     }
 
-    /// Empty when the strip's EQ is off, so the graph draws flat.
+    /// What is heard: empty when the strip's EQ is off, as for an unlinked partner's faint curve.
     public func eqBands(_ strip: StripID) -> [EQBandState] {
         EQReading.bands(strip) { cell($0).argument }
+    }
+
+    /// The bands as set, heard or not: the graph draws them dashed while the EQ is off.
+    public func eqBandsAsSet(_ strip: StripID) -> [EQBandState] {
+        EQReading.bandsAsSet(strip) { cell($0).argument }
+    }
+
+    /// false while the EQ is off or not read yet.
+    public func isEQOn(_ strip: StripID) -> Bool {
+        cell(Catalog.eqOn(strip).address).argument == .int(1)
     }
 
     /// false on a cut filter, whose Gain and Q do nothing; nil until the desk sent the band's type.

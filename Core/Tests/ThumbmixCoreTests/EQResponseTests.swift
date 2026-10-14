@@ -83,4 +83,17 @@ struct EQResponseTests {
         mirror.apply(OSCMessage(Catalog.eqOn(strip).address, [.int(1)]))
         #expect(mirror.eqBands(strip).count == 4)
     }
+
+    /// The graph draws the bands as set even while the EQ is off (dashed), so it shows what EQ On brings back.
+    @Test @MainActor func bandsAsSetStayWhileEQIsOff() {
+        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: 9))
+        let strip = StripID(.input, 1)
+        #expect(!mirror.isEQOn(strip), "unread is not on")
+        mirror.apply(OSCMessage(Catalog.eqOn(strip).address, [.int(0)]))
+        #expect(!mirror.isEQOn(strip))
+        #expect(mirror.eqBandsAsSet(strip).count == 4)
+        mirror.apply(OSCMessage(Catalog.eqOn(strip).address, [.int(1)]))
+        #expect(mirror.isEQOn(strip))
+        #expect(mirror.eqBandsAsSet(strip) == mirror.eqBands(strip))
+    }
 }
