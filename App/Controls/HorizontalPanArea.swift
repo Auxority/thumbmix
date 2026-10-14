@@ -10,6 +10,8 @@ struct HorizontalPanArea: UIViewRepresentable {
     var onEnded: () -> Void
     var onDoubleTap: () -> Void
     var onHold: () -> Void
+    /// A finger on the area from touch-down to lift, before and during any drag: rows must not change under it.
+    var onTouch: (_ isDown: Bool) -> Void = { _ in }
 
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
@@ -28,6 +30,9 @@ struct HorizontalPanArea: UIViewRepresentable {
         hold.minimumPressDuration = 0.5
         hold.allowableMovement = 10
         view.addGestureRecognizer(hold)
+        let touch = TouchWatch { context.coordinator.parent.onTouch($0) }
+        touch.delegate = context.coordinator
+        view.addGestureRecognizer(touch)
         return view
     }
 
@@ -65,10 +70,53 @@ struct HorizontalPanArea: UIViewRepresentable {
             if recognizer.state == .began { parent.onHold() }
         }
 
+        /// The watch never takes a touch, so it must not be failed when the pan or the list's scroll wins.
+        func gestureRecognizer(
+            _ recognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer
+        ) -> Bool {
+            recognizer is TouchWatch || other is TouchWatch
+        }
+
         func gestureRecognizerShouldBegin(_ recognizer: UIGestureRecognizer) -> Bool {
             guard let pan = recognizer as? UIPanGestureRecognizer else { return true }
             let velocity = pan.velocity(in: pan.view)
             return abs(velocity.x) > abs(velocity.y)
         }
+    }
+}
+
+/// Reports a finger going down and lifting, without claiming the touch. A pan begins only after a few points of
+/// movement; a link change landing before that would rebuild the row and cancel the touch, losing the drag.
+private final class TouchWatch: UIGestureRecognizer {
+    private let report: (Bool) -> Void
+    private var isDown = false
+
+    init(report: @escaping (Bool) -> Void) {
+        self.report = report
+        super.init(target: nil, action: nil)
+        cancelsTouchesInView = false
+        delaysTouchesEnded = false
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        guard !isDown else { return }
+        isDown = true
+        report(true)
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
+        state = .failed
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
+        state = .failed
+    }
+
+    /// Runs after every touch sequence, however it ended (lift, system cancel, view removed).
+    override func reset() {
+        super.reset()
+        guard isDown else { return }
+        isDown = false
+        report(false)
     }
 }

@@ -3,6 +3,8 @@
 struct EditHolds {
     let hold: Duration
     private var editing: Set<String> = []
+    /// Fingers on a control whose drag hasn't started yet: a pan begins only after a few points of movement.
+    private var touches = 0
     private var heldUntil: [String: ContinuousClock.Instant] = [:]
     private var rereadAt: [String: ContinuousClock.Instant] = [:]
 
@@ -34,7 +36,16 @@ struct EditHolds {
         rereadAt[address] = now + hold
     }
 
-    var isFingerDown: Bool { !editing.isEmpty }
+    mutating func touchBegan() {
+        touches += 1
+    }
+
+    mutating func touchEnded() {
+        touches = max(touches - 1, 0)
+    }
+
+    /// From touch-down: a row rebuilt before the drag starts cancels the touch, and the drag is lost.
+    var isFingerDown: Bool { !editing.isEmpty || touches > 0 }
 
     func isHeld(_ address: String, now: ContinuousClock.Instant) -> Bool {
         if editing.contains(address) { return true }

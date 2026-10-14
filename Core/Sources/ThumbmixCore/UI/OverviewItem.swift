@@ -47,6 +47,11 @@ extension ConsoleMirror {
     /// While true, rows must not change shape: the finger owns a control.
     public var isFingerDown: Bool { holds.isFingerDown }
 
+    /// A finger on a control, from touch-down to lift, whether or not it becomes a drag (`HorizontalPanArea`).
+    public func touchBegan() { holds.touchBegan() }
+
+    public func touchEnded() { holds.touchEnded() }
+
     /// Returns once no finger owns a control; throws when cancelled. Lifting a finger isn't observed, so it looks
     /// every 100 ms.
     public func fingerLifted() async throws {

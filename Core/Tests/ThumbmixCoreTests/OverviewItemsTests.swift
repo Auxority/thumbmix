@@ -55,6 +55,17 @@ struct OverviewItemsTests {
         #expect(!mirror.isFingerDown)
     }
 
+    /// A touch that hasn't become a drag yet still keeps the rows still.
+    @Test func aTouchKeepsTheRowsStillBeforeItsDragStarts() async throws {
+        mirror.touchBegan()
+        #expect(mirror.isFingerDown)
+        let waiting = Task { try await mirror.fingerLifted() }
+        try await Task.sleep(for: .milliseconds(150))
+        mirror.touchEnded()
+        try await waiting.value
+        #expect(!mirror.isFingerDown)
+    }
+
     @Test func pairShowsWhenEitherSideIsUsed() {
         let odd = StripID(.input, 21)
         mirror.apply(OSCMessage("/config/chlink/21-22", [.int(1)]))

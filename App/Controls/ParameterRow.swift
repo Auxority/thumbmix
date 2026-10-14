@@ -61,7 +61,8 @@ struct ParameterRow: View {
             .padding(.horizontal, 12)
             .allowsHitTesting(false)
             HorizontalPanArea(
-                onBegan: beginDrag, onMoved: drag, onEnded: endDrag, onDoubleTap: reset, onHold: startTyping)
+                onBegan: beginDrag, onMoved: drag, onEnded: endDrag, onDoubleTap: reset, onHold: startTyping,
+                onTouch: { $0 ? mirror.touchBegan() : mirror.touchEnded() })
         }
         .frame(height: height * sizeScale)
         .clipShape(RoundedRectangle(cornerRadius: 10))
