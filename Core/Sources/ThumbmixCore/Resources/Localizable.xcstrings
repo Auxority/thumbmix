@@ -91,6 +91,16 @@
         }
       }
     },
+    "Auto time" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto time"
+          }
+        }
+      }
+    },
     "Aux" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -441,6 +451,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fed by"
+          }
+        }
+      }
+    },
+    "Filter" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter"
+          }
+        }
+      }
+    },
+    "Filter freq" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter freq"
           }
         }
       }
@@ -981,6 +1011,16 @@
         }
       }
     },
+    "Self" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Self"
+          }
+        }
+      }
+    },
     "Sends" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1008,6 +1048,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Slope"
+          }
+        }
+      }
+    },
+    "Source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
           }
         }
       }

@@ -42,9 +42,20 @@ public struct GateSpecs: Sendable {
 }
 
 public struct DynamicsSpecs: Sendable {
-    public let on, mode, threshold, ratio, knee, attack, hold, release, makeup, detector, envelope: ParamSpec
+    public let on, mode, threshold, ratio, knee, attack, hold, release, makeup, detector, envelope, auto: ParamSpec
     public var all: [ParamSpec] {
-        [on, mode, threshold, ratio, knee, attack, hold, release, makeup, detector, envelope]
+        [on, mode, threshold, ratio, knee, attack, hold, release, makeup, detector, envelope, auto]
+    }
+}
+
+/// What a gate or comp listens to: its key source and the filter on that signal.
+public struct KeySpecs: Sendable {
+    /// nil where the desk has no key source: a matrix's or main's comp (doc p.32-37). A choice needs the strips'
+    /// names, so `Catalog.keySource` builds it.
+    public let sourceAddress: String?
+    public let filterOn, filterType, filterFrequency: ParamSpec
+    public var addresses: [String] {
+        [sourceAddress].compactMap { $0 } + [filterOn, filterType, filterFrequency].map(\.address)
     }
 }
 

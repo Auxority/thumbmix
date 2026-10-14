@@ -6,6 +6,8 @@ import ThumbmixCore
 struct ChoiceMenu: View {
     let spec: ParamSpec
     let mirror: ConsoleMirror
+    /// Takes the picked value instead of sending it, for a choice that asks first.
+    var onSelect: ((OSCArgument) -> Void)?
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
@@ -51,6 +53,7 @@ struct ChoiceMenu: View {
     }
 
     private func select(_ option: Int) {
-        mirror.set(spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: Double(option))))
+        let argument = spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: Double(option)))
+        if let onSelect { onSelect(argument) } else { mirror.set(spec.address, argument) }
     }
 }

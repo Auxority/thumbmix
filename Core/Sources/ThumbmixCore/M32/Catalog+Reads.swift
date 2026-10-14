@@ -38,7 +38,7 @@ extension Catalog {
         case .mix: [strip.mainLR].compactMap { $0 }
         case .members: []
         case .input: inputAddresses(strip, headamp: headamp)
-        case .gate: strip.hasGate ? gate(strip).all.map(\.address) : []
+        case .gate: strip.hasGate ? gate(strip).all.map(\.address) + gateKey(strip).addresses : []
         case .eq: eqAddresses(strip)
         case .comp: dynamicsAddresses(strip)
         case .sends: sendAddresses(strip) + [dynamicsPosition(strip)?.address].compactMap { $0 }
@@ -66,8 +66,13 @@ extension Catalog {
             + (delay(strip)?.all.map(\.address) ?? [])
     }
 
+    /// The sends' taps and switches too: moving the comp asks first when a send tapped around the EQ would change.
     private static func dynamicsAddresses(_ strip: StripID) -> [String] {
-        strip.hasDynamics ? dynamics(strip).all.map(\.address) + [dynamicsPosition(strip)?.address].compactMap { $0 } : []
+        guard strip.hasDynamics else { return [] }
+        let sends = strip.kind.sendTarget.map(StripID.all) ?? []
+        return dynamics(strip).all.map(\.address) + dynamicsKey(strip).addresses
+            + [dynamicsPosition(strip)?.address].compactMap { $0 }
+            + sends.flatMap { [sendOn(from: strip, to: $0).address] + [sendTap(from: strip, to: $0)?.address].compactMap { $0 } }
     }
 
     private static func eqAddresses(_ strip: StripID) -> [String] {

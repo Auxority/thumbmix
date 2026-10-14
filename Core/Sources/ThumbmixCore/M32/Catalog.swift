@@ -109,7 +109,8 @@ public enum Catalog {
                 optionNames: [CoreStrings.text("Peak level"), CoreStrings.text("Average level")]),
             envelope: ParamSpec(
                 p + "env", CoreStrings.text("Envelope"), .choice(dynamicsEnvelopes), .plain,
-                optionNames: [CoreStrings.text("Linear"), CoreStrings.text("Logarithmic")])
+                optionNames: [CoreStrings.text("Linear"), CoreStrings.text("Logarithmic")]),
+            auto: ParamSpec(p + "auto", CoreStrings.text("Auto time"), .toggle, .plain)
         )
     }
 
@@ -225,7 +226,9 @@ public enum Catalog {
     /// Whether the strip's comp sits before (0) or after (1) its EQ (doc p.25): the tap chain follows it.
     public static func dynamicsPosition(_ strip: StripID) -> ParamSpec? {
         guard strip.hasDynamics else { return nil }
-        return ParamSpec(strip.prefix + "/dyn/pos", CoreStrings.text("Comp position"), .choice(["PRE", "POST"]), .plain)
+        return ParamSpec(
+            strip.prefix + "/dyn/pos", CoreStrings.text("Comp position"), .choice(["PRE", "POST"]), .plain,
+            optionNames: [CoreStrings.text("Before EQ"), CoreStrings.text("After EQ")])
     }
 
     /// The values a stale display would hurt most: what each strip is called and where its fader and mute sit.

@@ -75,6 +75,12 @@
     "%@ will be heard in Main LR at its fader level." : {
 
     },
+    "%@ will start hearing the compressor." : {
+
+    },
+    "%@ will stop hearing the compressor." : {
+
+    },
     "%lld" : {
 
     },
@@ -196,6 +202,9 @@
     "It follows %@’s fader at a fixed 0 dB, whatever its level is now." : {
 
     },
+    "Key" : {
+
+    },
     "LC" : {
 
     },
@@ -225,6 +234,15 @@
 
     },
     "Make this send a subgroup?" : {
+
+    },
+    "Move" : {
+
+    },
+    "Move the comp after the EQ?" : {
+
+    },
+    "Move the comp before the EQ?" : {
 
     },
     "Mute %@" : {
@@ -350,6 +368,26 @@
     },
     "The demo console couldn't start. Try again, or restart Thumbmix." : {
 
+    },
+    "These %lld mixes will start hearing the compressor:\n\n%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "These %1$lld mixes will start hearing the compressor:\n\n%2$@"
+          }
+        }
+      }
+    },
+    "These %lld mixes will stop hearing the compressor:\n\n%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "These %1$lld mixes will stop hearing the compressor:\n\n%2$@"
+          }
+        }
+      }
     },
     "They'll work as one stereo channel." : {
 
