@@ -38,7 +38,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Gate graph above the On chip and Mode menu.** `GateTab` puts the chip and the menu first, then the graph. Move the graph up, and decide whether the Compressor tab gets the same order. On the SE, check that the Threshold row stays on the first screen (why `TransferGraph` is one card).
 - [ ] **No "Thumbmix" title on the overview** (`OverviewView`, `.navigationTitle`). Offline mode shows its DEMO pill in that title (`demoTitle`): keep the pill where it moves no control.
 - [ ] **Plain words for the desk's filter terms?** The key filter's types (LC6 … HC12, BP Q 1.0 … 10) and EQ types (LCut, PEQ, BU6 …) show the desk's terms. Revisit both together, like Detector's "Average level" · RMS.
-- [ ] **An EQ that's off greys its graph.** Today the graph draws flat (`ConsoleMirror.eqBands` returns no bands). Grey it instead, keeping the bands' curve (greyed), so it shows what switching the EQ on brings back (decided 2026-10-14).
 
 ## Features
 

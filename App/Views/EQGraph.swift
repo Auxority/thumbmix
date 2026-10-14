@@ -31,7 +31,9 @@ struct EQGraph: View {
 
     var body: some View {
         // Read the bands here, not inside Canvas: Observation only tracks reads made during body.
-        let bands = mirror.eqBands(strip)
+        // Off, the bands as set stay drawn, dashed and grey: what switching the EQ on brings back (2026-10-14, mock C).
+        let isEQOn = mirror.isEQOn(strip)
+        let bands = mirror.eqBandsAsSet(strip)
         let lowCut = mirror.lowCut(strip)
         let ghostCurve = ghost.map { (bands: mirror.eqBands($0), lowCut: mirror.lowCut($0)) }
         GeometryReader { geometry in
@@ -44,9 +46,13 @@ struct EQGraph: View {
                         let path = curve(ghostCurve.bands, ghostCurve.lowCut, in: canvasSize)
                         context.stroke(path, with: .color(.white.opacity(0.3)), lineWidth: 2)
                     }
-                    context.stroke(curve(bands, lowCut, in: canvasSize), with: .color(.white), lineWidth: 2)
+                    context.stroke(
+                        curve(bands, lowCut, in: canvasSize), with: .color(isEQOn ? .white : Theme.secondaryText),
+                        style: StrokeStyle(lineWidth: 2, dash: isEQOn ? [] : [5, 4]))
                     if let lowCut {
-                        let cutPart = curve(bands, lowCut, in: canvasSize, upTo: lowCut.frequency * 2)
+                        // Solid yellow means live: with the EQ off it shows the cut alone, never an unheard band.
+                        let heard = isEQOn ? bands : []
+                        let cutPart = curve(heard, lowCut, in: canvasSize, upTo: lowCut.frequency * 2)
                         context.stroke(cutPart, with: .color(Self.lowCutColor), lineWidth: 3)
                     }
                 }
@@ -55,6 +61,7 @@ struct EQGraph: View {
                         label: band == Self.lowCutBand ? "L" : "\(band)", isSelected: band == selectedBand,
                         tint: band == Self.lowCutBand && lowCut != nil ? Self.lowCutColor : nil
                     )
+                    .opacity(band == Self.lowCutBand || isEQOn ? 1 : 0.5)
                     .position(position(of: band, in: size))
                 }
             }
@@ -70,6 +77,7 @@ struct EQGraph: View {
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier("eq-graph")
         .accessibilityLabel("EQ curve")
+        .accessibilityValue(isEQOn ? Text(verbatim: "") : Text("EQ off"))
     }
 
     private var points: [Int] {

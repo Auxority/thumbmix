@@ -18,6 +18,23 @@ final class EQBandUITests: DeskUITestCase {
         XCTAssertEqual(app.alerts.count, 0)
     }
 
+    /// Off, the graph keeps the bands as set, drawn dashed (mock C), and says so to VoiceOver.
+    func testAnEQThatIsOffKeepsItsCurve() {
+        desk.change("/ch/01/eq/on", 0)
+        desk.change("/ch/01/eq/2/g", float: 0.3)
+        // A band 1 boost under the live low cut: the yellow piece must not take its shape.
+        desk.change("/ch/01/eq/1/g", float: 0.75)
+        desk.change("/ch/01/preamp/hpon", 1)
+        launch()
+        open("Kick")
+        app.buttons["EQ"].tap()
+        let graph = element("eq-graph")
+        XCTAssertTrue(eventually(within: 2) { graph.value as? String == "EQ off" })
+        saveScreenshot("eq-off-dashed")
+        desk.change("/ch/01/eq/on", 1)
+        XCTAssertTrue(eventually(within: 2) { graph.value as? String != "EQ off" })
+    }
+
     /// Offline mode opens a bus on its Reset bands frequencies, then Reset bands brings a moved band back.
     func testBusResetsAllSixBands() {
         launch()
