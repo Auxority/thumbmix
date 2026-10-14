@@ -21,6 +21,21 @@ extension ConsoleMirror {
         cell(section.preferenceAddress).argument == .int(1) && !sectionsSeenUnlinked.contains(section)
     }
 
+    /// Judges a partner's answer after the app's linked edit (`LinkCopyCheck`).
+    func judgeLinkCopy(_ address: String, _ argument: OSCArgument) {
+        switch linkCopies.received(address, argument, now: .now) {
+        case .none:
+            return
+        case .askAgain:
+            log.notice("\(address, privacy: .public) answered a linked edit with another value; asking again")
+            holds.rereadSoon(address, now: .now)
+        case .leftBehind(let wanted):
+            guard let section = linkSection(of: address) else { return }
+            log.warning("\(address, privacy: .public) didn't follow a linked edit (\(section.rawValue, privacy: .public))")
+            partnerDidNotFollow(address, wanted: wanted, section: section)
+        }
+    }
+
     /// Fader, mute and sends are seen linked on the desk, so a partner left behind means the desk doesn't copy OSC
     /// edits: it is put right and both sides are written from then on. Every other section is unverified (m32-probe
     /// section 7): it is shown per side instead, and nothing is written.
