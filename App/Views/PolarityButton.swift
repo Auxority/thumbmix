@@ -8,6 +8,7 @@ struct PolarityButton: View {
     let strip: StripID
     let mirror: ConsoleMirror
     @State private var isConfirming = false
+    @Environment(\.isEnabled) private var isEnabled
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
@@ -27,9 +28,10 @@ struct PolarityButton: View {
         }
         .buttonStyle(.plain)
         .disabled(state == nil)
+        .opacity(isEnabled && state != nil ? 1 : 0.38)
         .accessibilityIdentifier("toggle-" + spec.address)
         .accessibilityLabel(Text("Polarity"))
-        .accessibilityValue(isFlipped ? Text("Flipped") : Text("Normal"))
+        .accessibilityValue(state == nil ? Text(verbatim: "") : isFlipped ? Text("Flipped") : Text("Normal"))
         .alert(prompt.title, isPresented: $isConfirming) {
             Button("Cancel", role: .cancel) {}
             Button(prompt.confirm) { mirror.set(spec.address, .int(isFlipped ? 0 : 1)) }

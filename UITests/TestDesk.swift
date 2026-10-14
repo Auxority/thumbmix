@@ -51,6 +51,11 @@ final class TestDesk: Sendable {
         fake.deskChange(address, .float(value))
     }
 
+    /// The app never reads this address: call it before `launch()`.
+    func forget(_ address: String) {
+        fake.forget(address)
+    }
+
     /// What the desk holds now, as the app's edits left it.
     func value(_ address: String) -> OSCArgument? {
         fake.value(at: address)

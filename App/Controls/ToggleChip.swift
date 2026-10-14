@@ -7,10 +7,12 @@ struct ToggleChip: View {
     var title: String?
     var onColor: Color = .white
     var onText: Color = .black
+    @Environment(\.isEnabled) private var isEnabled
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
-        let isOn = mirror.cell(spec.address).argument == .int(1)
+        let state = mirror.cell(spec.address).argument
+        let isOn = state == .int(1)
         Button {
             mirror.set(spec.address, .int(isOn ? 0 : 1))
         } label: {
@@ -23,8 +25,11 @@ struct ToggleChip: View {
                 .background(isOn ? onColor : Theme.track, in: RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
+        .disabled(state == nil)
+        // Dimmed like a disabled ParameterRow: an unread chip in full grey would still read as a real "Off".
+        .opacity(isEnabled && state != nil ? 1 : 0.38)
         .accessibilityIdentifier("toggle-" + spec.address)
-        .accessibilityValue(isOn ? "On" : "Off")
+        .accessibilityValue(state == nil ? "" : isOn ? "On" : "Off")
     }
 }
 

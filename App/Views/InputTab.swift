@@ -59,6 +59,7 @@ private struct PhantomButton: View {
     let strip: StripID
     let mirror: ConsoleMirror
     @State private var isConfirming = false
+    @Environment(\.isEnabled) private var isEnabled
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
@@ -75,8 +76,9 @@ private struct PhantomButton: View {
         }
         .buttonStyle(.plain)
         .disabled(state == nil)
+        .opacity(isEnabled && state != nil ? 1 : 0.38)
         .accessibilityIdentifier("toggle-" + spec.address)
-        .accessibilityValue(isOn ? "On" : "Off")
+        .accessibilityValue(state == nil ? "" : isOn ? "On" : "Off")
         .alert(title(isOn), isPresented: $isConfirming) {
             Button("Cancel", role: .cancel) {}
             Button(isOn ? "Turn Off" : "Turn On") { mirror.set(spec.address, .int(isOn ? 0 : 1)) }

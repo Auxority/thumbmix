@@ -95,6 +95,11 @@ public final class FakeM32: @unchecked Sendable {
     /// True once an app has sent anything: from then on, its screen shows this desk.
     public var hasClients: Bool { queue.sync { !clients.isEmpty } }
 
+    /// Plays a desk that doesn't know this address: a get for it goes unanswered, so the app never reads it.
+    public func forget(_ address: String) {
+        queue.sync { _ = state.removeValue(forKey: address) }
+    }
+
     /// Someone moved a control on the desk.
     public func deskChange(_ address: String, _ value: OSCArgument) {
         queue.sync {
