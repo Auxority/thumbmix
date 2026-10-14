@@ -19,8 +19,16 @@ public struct EQBandState: Equatable, Sendable {
 public enum EQResponse {
     private static let sampleRate = 48_000.0
 
+    /// `bands` in band order: on a main or matrix, band 1 and 6 can be crossovers (`Crossover`).
     public static func decibels(at frequency: Double, bands: [EQBandState]) -> Double {
-        bands.reduce(0) { $0 + decibels(of: $1, at: frequency) }
+        bands.indices.reduce(0) { $0 + decibels(ofBand: $1 + 1, in: bands, at: frequency) }
+    }
+
+    private static func decibels(ofBand number: Int, in bands: [EQBandState], at frequency: Double) -> Double {
+        if let crossover = Crossover(bands[number - 1], band: number, of: bands.count) {
+            return crossover.decibels(at: frequency)
+        }
+        return Crossover.silences(band: number, in: bands) ? 0 : decibels(of: bands[number - 1], at: frequency)
     }
 
     private static func decibels(of band: EQBandState, at frequency: Double) -> Double {
@@ -70,9 +78,67 @@ public enum EQResponse {
             return Coefficients(
                 b0: (1 - cosine) / 2, b1: 1 - cosine, b2: (1 - cosine) / 2,
                 a0: 1 + cutAlpha, a1: -2 * cosine, a2: 1 - cutAlpha)
-        default:  // Main-bus crossover types: drawn flat; the band rows still show their numbers.
+        default:  // A crossover type on a band that takes none (`Crossover`): drawn flat.
             return nil
         }
+    }
+}
+
+/// A main or matrix EQ's LOW (1) or HIGH (6) band set to BU6…LR24: Butterworth, Bessel or Linkwitz-Riley at
+/// 6-24 dB/oct, and the band next to it (LOW2, HIGH2) is off (X32 manual; Maillot p.33 lists only the names).
+/// Assumed: LOW cuts lows and HIGH cuts highs, like LCut and HCut; Bessel is -3 dB at the cutoff (TODO: desk).
+struct Crossover {
+    let typeIndex: Int
+    let frequency: Double
+    let highPass: Bool
+
+    init?(_ band: EQBandState, band number: Int, of count: Int) {
+        guard Self.isCrossover(band.typeIndex), count == 6, number == 1 || number == 6 else { return nil }
+        typeIndex = band.typeIndex
+        frequency = band.frequency
+        highPass = number == 1
+    }
+
+    static func silences(band number: Int, in bands: [EQBandState]) -> Bool {
+        guard bands.count == 6 else { return false }
+        return (number == 2 && isCrossover(bands[0].typeIndex)) || (number == 5 && isCrossover(bands[5].typeIndex))
+    }
+
+    private static func isCrossover(_ typeIndex: Int) -> Bool { (6...13).contains(typeIndex) }
+
+    func decibels(at hertz: Double) -> Double {
+        // A high-pass is the low-pass mirrored around the cutoff.
+        let ratio = highPass ? frequency / hertz : hertz / frequency
+        switch typeIndex {
+        case 6: return Self.butterworth(order: 1, ratio)  // BU6
+        case 7: return Self.butterworth(order: 2, ratio)  // BU12
+        case 8: return Self.bessel2(ratio)  // BS12
+        case 9: return 2 * Self.butterworth(order: 1, ratio)  // LR12: two BU6 in series, -6 dB at the cutoff
+        case 10: return Self.butterworth(order: 3, ratio)  // BU18
+        case 11: return Self.butterworth(order: 4, ratio)  // BU24
+        case 12: return Self.bessel4(ratio)  // BS24
+        default: return 2 * Self.butterworth(order: 2, ratio)  // LR24: two BU12 in series
+        }
+    }
+
+    private static func butterworth(order: Double, _ ratio: Double) -> Double {
+        -10 * log10(1 + pow(ratio, 2 * order))
+    }
+
+    /// 3 / (s² + 3s + 3), its frequency scaled so the cutoff is at -3 dB.
+    private static func bessel2(_ ratio: Double) -> Double {
+        let w = ratio * 1.36165
+        let real = 3 - w * w
+        let imaginary = 3 * w
+        return -10 * log10((real * real + imaginary * imaginary) / 9)
+    }
+
+    /// 105 / (s⁴ + 10s³ + 45s² + 105s + 105), scaled like `bessel2`.
+    private static func bessel4(_ ratio: Double) -> Double {
+        let w = ratio * 2.11391
+        let real = pow(w, 4) - 45 * w * w + 105
+        let imaginary = 105 * w - 10 * pow(w, 3)
+        return -10 * log10((real * real + imaginary * imaginary) / (105 * 105))
     }
 }
 

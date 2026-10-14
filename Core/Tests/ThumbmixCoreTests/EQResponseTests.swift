@@ -20,10 +20,54 @@ struct EQResponseTests {
         #expect(abs(EQResponse.decibels(at: 15_000, bands: [band]) - 6) < 0.5)
     }
 
-    @Test func crossoverTypesDrawFlat() {
-        #expect(
-            EQResponse.decibels(
-                at: 1000, bands: [EQBandState(typeIndex: 9, frequency: 1000, gain: 6, q: 2)]) == 0)
+    /// A main's six bands, flat, with `changes` swapped in by band number (1...6).
+    private func mainBands(_ changes: [Int: EQBandState]) -> [EQBandState] {
+        (1...6).map { changes[$0] ?? EQBandState(typeIndex: 2, frequency: 1000, gain: 0, q: 2) }
+    }
+
+    private func crossover(_ type: String, at frequency: Double) -> EQBandState {
+        EQBandState(typeIndex: Catalog.mainEQTypes.firstIndex(of: type)!, frequency: frequency, gain: 6, q: 2)
+    }
+
+    @Test func crossoverOnBandOneIsAHighPass() {
+        let bands = mainBands([1: crossover("BU24", at: 100)])
+        #expect(abs(EQResponse.decibels(at: 100, bands: bands) + 3) < 0.1)
+        #expect(EQResponse.decibels(at: 20, bands: bands) < -50)
+        #expect(abs(EQResponse.decibels(at: 10_000, bands: bands)) < 0.1)
+    }
+
+    @Test func crossoverOnBandSixIsALowPass() {
+        let bands = mainBands([6: crossover("LR24", at: 1000)])
+        #expect(abs(EQResponse.decibels(at: 1000, bands: bands) + 6) < 0.1)
+        #expect(EQResponse.decibels(at: 4000, bands: bands) < -40)
+        #expect(abs(EQResponse.decibels(at: 50, bands: bands)) < 0.1)
+    }
+
+    @Test(arguments: [("BU6", 20.0), ("BU12", 40), ("BU18", 60), ("BU24", 80), ("LR12", 40), ("LR24", 80)])
+    func crossoverSlopeIsSixDecibelsPerOctavePerStep(type: String, decadeDrop: Double) {
+        let bands = mainBands([6: crossover(type, at: 1000)])
+        #expect(abs(EQResponse.decibels(at: 10_000, bands: bands) + decadeDrop) < 1)
+    }
+
+    @Test(arguments: ["BS12", "BS24"])
+    func besselIsMinusThreeAtCutoffAndGentlerThanButterworth(type: String) {
+        let bands = mainBands([6: crossover(type, at: 1000)])
+        let butterworth = mainBands([6: crossover(type == "BS12" ? "BU12" : "BU24", at: 1000)])
+        #expect(abs(EQResponse.decibels(at: 1000, bands: bands) + 3) < 0.1)
+        #expect(EQResponse.decibels(at: 2000, bands: bands) > EQResponse.decibels(at: 2000, bands: butterworth))
+    }
+
+    @Test func crossoverSilencesTheBandNextToIt() {
+        let boost = EQBandState(typeIndex: 2, frequency: 1000, gain: 6, q: 2)
+        let low = mainBands([1: crossover("BU12", at: 20), 2: boost])
+        let high = mainBands([6: crossover("BU12", at: 20_000), 5: boost])
+        #expect(abs(EQResponse.decibels(at: 1000, bands: low)) < 0.1)
+        #expect(abs(EQResponse.decibels(at: 1000, bands: high)) < 0.1)
+        #expect(abs(EQResponse.decibels(at: 1000, bands: mainBands([2: boost])) - 6) < 0.05)
+    }
+
+    @Test func crossoverOnAMiddleBandDrawsFlat() {
+        #expect(EQResponse.decibels(at: 1000, bands: mainBands([3: crossover("LR12", at: 1000)])) == 0)
     }
 
     @Test func bandsAdd() {
