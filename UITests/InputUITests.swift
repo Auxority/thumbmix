@@ -23,6 +23,18 @@ final class InputUITests: DeskUITestCase {
         saveScreenshot("input-delay")
     }
 
+    /// The safety rule: a chip shows nothing the desk didn't send. Unread, it waits disabled rather than claim "Off".
+    func testAChipWaitsUntilItsValueIsRead() {
+        desk.forget("/ch/01/delay/on")
+        openKicksInput()
+        let on = element("toggle-/ch/01/delay/on")
+        let time = element("/ch/01/delay/time")
+        XCTAssertTrue(eventually(within: 3) { time.value as? String == "0.30 ms · 0.3 ft" }, "the tab was read")
+        XCTAssertFalse(on.isEnabled)
+        XCTAssertNotEqual(on.value as? String, "Off", "VoiceOver claims nothing either")
+        saveScreenshot("input-delay-unread")
+    }
+
     /// Like every double-tap in the app: the reset goes at once.
     func testDoubleTapResetsTheDelayAtOnce() {
         openKicksInput()
