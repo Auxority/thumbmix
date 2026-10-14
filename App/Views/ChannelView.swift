@@ -10,7 +10,7 @@ struct ChannelView: View {
     /// The strip this one was opened from, whose row Fed by brings into view.
     private let focus: StripID?
     @State private var showsRight = false
-    /// A strip opened from this one, such as the bus a send goes to; Back returns here.
+    /// A strip opened from this one: a send's bus or its source, named in the send sheet's title. Back returns here.
     @State private var openStrip: StripID?
 
     /// Every strip opens on Mix; a bus opened from a send opens on Fed by, its sends-on-faders view.
@@ -31,7 +31,7 @@ struct ChannelView: View {
             ChannelTabContent(
                 tab: tab, strip: unlinked == nil ? main : side, mirror: mirror,
                 ghost: unlinked == nil ? nil : side.partner, panPartner: mixPanPartner, focus: focus
-            ) { openStrip = $0 }
+            ) { openFromSheet($0) }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 12)
@@ -54,7 +54,16 @@ struct ChannelView: View {
         .navigationTitle(title)
         .demoTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(item: $openStrip) { ChannelView(strip: $0, mirror: mirror, tab: .fedBy, focus: main) }
+        .navigationDestination(item: $openStrip) {
+            ChannelView(strip: $0, mirror: mirror, tab: ChannelTab.opened($0, from: main) ?? .mix, focus: main)
+        }
+    }
+
+    /// A strip named in a send sheet's title. This screen's own strip, either side of a linked pair, only closes
+    /// the sheet.
+    private func openFromSheet(_ other: StripID) {
+        let named = isPair && other.oddSide == main ? main : other
+        if ChannelTab.opened(named, from: main) != nil { openStrip = named }
     }
 
     private var isPair: Bool { mirror.isLinked(strip) }
@@ -94,7 +103,7 @@ private struct ChannelTabContent: View {
         case .comp: CompTab(strip: strip, mirror: mirror, ghost: ghost)
         case .eq: EQTab(strip: strip, mirror: mirror, ghost: ghost)
         case .sends: SendsTab(strip: strip, mirror: mirror, open: open)
-        case .fedBy: FedByTab(target: strip, mirror: mirror, focus: focus)
+        case .fedBy: FedByTab(target: strip, mirror: mirror, focus: focus, open: open)
         }
     }
 }
