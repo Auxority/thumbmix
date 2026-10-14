@@ -64,6 +64,11 @@ public struct DelaySpecs: Sendable, Equatable {
     public var all: [ParamSpec] { [on, time] }
 }
 
+public struct InsertSpecs: Sendable, Equatable {
+    public let on, position, slot: ParamSpec
+    public var all: [ParamSpec] { [on, position, slot] }
+}
+
 public struct LowCutSpecs: Sendable {
     public let on, frequency, slope: ParamSpec
     public var all: [ParamSpec] { [on, frequency, slope] }

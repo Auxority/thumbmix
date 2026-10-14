@@ -35,7 +35,9 @@ extension Catalog {
     /// Input tab shows its gain and 48V.
     public static func tabAddresses(_ tab: ChannelTab, _ strip: StripID, headamp: Int?) -> [String] {
         switch tab {
-        case .mix: [strip.mainLR].compactMap { $0 }
+        case .mix:
+            [strip.mainLR].compactMap { $0 } + (insert(strip)?.all.map(\.address) ?? [])
+                + (strip.hasInsert ? fxTypeAddresses : [])
         case .members: []
         case .input: inputAddresses(strip, headamp: headamp)
         case .gate: strip.hasGate ? gate(strip).all.map(\.address) + gateKey(strip).addresses : []

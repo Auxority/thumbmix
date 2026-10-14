@@ -155,6 +155,8 @@ struct CatalogTests {
         case .mix:
             [Catalog.fader(strip).address, Catalog.on(strip).address, strip.solo]
                 + [Catalog.pan(strip)?.address, strip.mainLR].compactMap { $0 }
+                + (Catalog.insert(strip)?.all.map(\.address) ?? [])
+                + (strip.hasInsert ? Catalog.fxTypeAddresses : [])
         case .input:
             [Catalog.trim(strip).address] + [Catalog.headampIndex(strip), Catalog.invert(strip)?.address].compactMap { $0 }
                 + (Catalog.delay(strip)?.all.map(\.address) ?? [])

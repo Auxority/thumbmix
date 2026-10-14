@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    " and " : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " and "
+          }
+        }
+      }
+    },
     "%@ stay separate." : {
       "localizations" : {
         "en" : {
@@ -27,6 +37,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ to %@"
+          }
+        }
+      }
+    },
+    "%@ will play only what comes back from the gear on %@. If nothing is connected there, %@ goes silent." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ will play only what comes back from the gear on %2$@. If nothing is connected there, %3$@ goes silent."
           }
         }
       }
@@ -127,6 +147,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aux %lld-%lld"
+          }
+        }
+      }
+    },
+    "Aux out %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aux out %lld"
           }
         }
       }
@@ -684,6 +714,16 @@
         }
       }
     },
+    "Insert" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insert"
+          }
+        }
+      }
+    },
     "Keys" : {
       "localizations" : {
         "en" : {
@@ -837,6 +877,16 @@
         }
       }
     },
+    "None" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        }
+      }
+    },
     "Normal" : {
       "localizations" : {
         "en" : {
@@ -887,6 +937,16 @@
         }
       }
     },
+    "outboard" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "outboard"
+          }
+        }
+      }
+    },
     "pan" : {
       "localizations" : {
         "en" : {
@@ -923,6 +983,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Polarity"
+          }
+        }
+      }
+    },
+    "Position" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
           }
         }
       }
@@ -1068,6 +1138,16 @@
         }
       }
     },
+    "Slot" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slot"
+          }
+        }
+      }
+    },
     "Source" : {
       "localizations" : {
         "en" : {
@@ -1174,6 +1254,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trim"
+          }
+        }
+      }
+    },
+    "Turn On" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn On"
+          }
+        }
+      }
+    },
+    "Turn on the insert for %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on the insert for %@?"
           }
         }
       }
