@@ -41,12 +41,11 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 ## Features
 
 - [ ] **Remove the ±1 dB buttons on the Mix tab?** Holding a parameter row now types a value (`ParameterRow`, `onHold`), and the buttons repeat while held (`NudgeButton`). Removing them moves Solo, Mute and the pan up: mid-show, the thumb finds them in a new place.
-- [ ] **M (mute) instead of On in Sends and Fed by?** The chip switches the send itself; an M chip shows the same switch inverted. Weigh it against "An inputs view on buses", which puts the source's own mute on Fed by rows: two mutes in one row (the send's and the strip's) must read apart. Mock first.
 - [ ] **A gain helper:** listen to an input for a few seconds (the engineer picks how long) and suggest the gain that puts its peaks at a target level. Ties in with the input meter marks under "More meters". Mock first.
 - [ ] **Solo on the overview?** A row there is mostly fader, and a solo target competes with it for the thumb. Find a place that keeps the faders easy to drag (mock first).
 - [ ] **Presets from the channel name**, based on James Attaway's *Live Mixing Field Guide*: a channel called "Kick" offers kick presets first (EQ, gate, compressor, low cut). Find a good spot to pick them from (mock first).
 - [ ] **More meters**, each weighed by its usefulness and its performance cost (see "Meters only for the strips in view?"):
-  - Fed by: a meter per source row?
+  - Fed by: a meter per source row showing what it puts into the bus: its signal at the send's tap point (with the fader when post-fader) plus the send level, so a +10 dB fader and a +10 dB send show clipping (2026-10-14, mocks in `notes/mocks/2026-10-14-fed-by-inputs/`). Waits on `m32-probe` section 13: the doc names no per-send meter, only "16 bus send meters" (`/meters/7`, p.18) without saying whose. If they are the selected channel's sends, they cover one strip at a time; computing it from the strip's own meters misses the EQ on Pre/Post EQ taps (only post gain and post-fade are metered, `/meters/6`), a guess the safety rule forbids.
   - Output meter on the Mix tab: the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too.
   - Input meter marks at −18 dBFS and 0 dBFS? A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
   - Muted strips: check whether muting should grey out the meters, or anything else.
@@ -56,7 +55,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **The group pill design everywhere?** Consider using the pills (Inputs, Aux, FX…) more consistently: on the channel, aux, FX and bus screens too.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
-- [ ] **An inputs view on buses**, like fader flip on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab: give it the same pan and tap point controls as the Sends settings sheet, plus mute. Show the source's mute on every Fed by (matrices and the mains too).
+- [ ] **An inputs view on buses**, like fader flip on the desk: a tall › on each Fed by row (as on Sends) opens the send sheet, with its tap point, send pan and "follow LR pan". The mains have no tap or send pan, so no ›. No strip mute (see DECISIONS); the level part is the meter under "More meters". Still open: does the sheet's title, opened from Fed by, link the source strip ("**Kick** → Mon 1") or nothing?
 - [ ] **Inserts** per channel.
 - [ ] Maybe later: **the compressor mix** (`dyn/mix`, p.25; the app doesn't read it yet).
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
