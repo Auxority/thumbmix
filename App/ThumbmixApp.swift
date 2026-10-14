@@ -8,6 +8,14 @@ struct ThumbmixApp: App {
     init() {
         // UI tests launch with -disableAnimations YES: every step waits for the screen to settle first.
         if UserDefaults.standard.bool(forKey: "disableAnimations") { UIView.setAnimationsEnabled(false) }
+        #if DEBUG
+            // UI tests pick whether lists start folded. Written, not passed as the keys themselves: a launch argument
+            // outranks what the app saves, so Show and Hide would do nothing.
+            if UserDefaults.standard.object(forKey: "showsUnusedStrips") != nil {
+                let shown = UserDefaults.standard.bool(forKey: "showsUnusedStrips")
+                for key in UnusedFoldRow.storageKeys { UserDefaults.standard.set(shown, forKey: key) }
+            }
+        #endif
     }
 
     var body: some Scene {

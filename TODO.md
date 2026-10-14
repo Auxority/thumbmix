@@ -57,7 +57,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
 - [ ] **An inputs view on buses**, like fader flip on the desk. For each input feeding the bus: its send level, its tap (pre/post EQ, pre/post fader), its send pan and "follow LR pan", the input's own fader level, and its mute. Builds on today's "Fed by" tab: give it the same pan and tap point controls as the Sends settings sheet, plus mute. Show the source's mute on every Fed by (matrices and the mains too).
-- [ ] **A way to hide unused strips again** (mock first). The overview's Unused button was removed (it crowded the title on iOS 27), so the overview shows every strip for now. Fed by lost its "Show unused" toggle too and lists every source. Idea: a "Show unused" button at the bottom of the overview, Sends and Fed by lists; or rethink it from the engineer's task.
 - [ ] **Inserts** per channel.
 - [ ] Maybe later: **the compressor mix** (`dyn/mix`, p.25; the app doesn't read it yet).
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.

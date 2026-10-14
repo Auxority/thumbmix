@@ -46,6 +46,11 @@ final class TestDesk: Sendable {
         fake.deskChange(address, .int(value))
     }
 
+    /// A level or fader moved on the desk (0...1 on the wire).
+    func change(_ address: String, float value: Float) {
+        fake.deskChange(address, .float(value))
+    }
+
     /// What the desk holds now, as the app's edits left it.
     func value(_ address: String) -> OSCArgument? {
         fake.value(at: address)

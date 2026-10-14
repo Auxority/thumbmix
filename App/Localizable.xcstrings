@@ -84,6 +84,9 @@
     "%lld" : {
 
     },
+    "%lld unused" : {
+
+    },
     "%lld/%lld" : {
       "localizations" : {
         "en" : {
@@ -185,6 +188,12 @@
 
     },
     "Green" : {
+
+    },
+    "Hide" : {
+
+    },
+    "Hide unused" : {
 
     },
     "Icon" : {
@@ -337,6 +346,12 @@
 
     },
     "Shares an input with %@" : {
+
+    },
+    "Show" : {
+
+    },
+    "Show unused" : {
 
     },
     "Solo %@" : {

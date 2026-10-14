@@ -42,16 +42,6 @@ final class OverviewUITests: DeskUITestCase {
         XCTAssertEqual(fader.value as? String, before)
     }
 
-    /// The Unused toggle is gone until its redesign (TODO): every strip shows, so none is out of reach.
-    func testEveryChannelShowsWithoutAToggle() {
-        launch()
-        XCTAssertTrue(app.buttons["Kick"].appears(within: 5))
-        XCTAssertFalse(app.buttons["Unused"].exists)
-        app.swipeUp()
-        app.swipeUp()
-        XCTAssertTrue(app.buttons["Ch 20"].appears(within: 2))
-    }
-
     func testRowStaysWhileItsFaderIsPulledDown() {
         launch()
         app.swipeUp()

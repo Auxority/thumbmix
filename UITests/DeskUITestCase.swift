@@ -20,8 +20,13 @@ class DeskUITestCase: XCTestCase {
         super.tearDown()
     }
 
+    /// Every list shows its unused strips, as these tests were written for; `UnusedFoldUITests` starts them folded.
+    /// Set at each launch, so a fold opened in another class doesn't leak in.
+    class var showsUnusedStrips: Bool { true }
+
     /// Launched per test rather than in setUp: the setUp override is nonisolated, XCUIApplication is main-actor.
-    func launch(_ arguments: [String] = []) {
+    func launch(_ extraArguments: [String] = []) {
+        let arguments = extraArguments + ["-showsUnusedStrips", Self.showsUnusedStrips ? "YES" : "NO"]
         if let running = Self.running, running.arguments == arguments, running.app.state == .runningForeground {
             app = running.app
             // Through the system: XCUIApplication.open relaunches the app and attaches again, the cost this avoids.
