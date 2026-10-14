@@ -684,6 +684,16 @@
         }
       }
     },
+    "Insert" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insert"
+          }
+        }
+      }
+    },
     "Keys" : {
       "localizations" : {
         "en" : {
@@ -927,6 +937,16 @@
         }
       }
     },
+    "Position" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
+          }
+        }
+      }
+    },
     "Post-EQ" : {
       "localizations" : {
         "en" : {
@@ -1064,6 +1084,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Slope"
+          }
+        }
+      }
+    },
+    "Slot" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slot"
           }
         }
       }

@@ -19,6 +19,7 @@ public enum DemoState {
         addReturnsDCAsAndMain(to: &state)
         addFill(to: &state)
         addSub(to: &state)
+        addInserts(to: &state)
         addEQDefaults(to: &state)
         return state
     }
@@ -96,11 +97,21 @@ public enum DemoState {
         }
     }
 
+    /// Vox 1 runs through a de-esser on FX5 L; the bass is patched to outboard gear on Aux out 3, switched off.
+    private static func addInserts(to state: inout [String: OSCArgument]) {
+        state[Catalog.fxType(5)] = .int(4)
+        state["/ch/13/insert/sel"] = .int(9)
+        state["/ch/13/insert/on"] = .int(1)
+        state["/ch/08/insert/sel"] = .int(19)
+    }
+
     /// First matching suffix wins; anything else is a continuous parameter at mid-travel.
     private static let defaultsBySuffix: [(suffix: String, value: OSCArgument)] = [
         ("/config/name", .string("")), ("/config/color", .int(0)), ("/config/icon", .int(1)), ("/grp/dca", .int(0)),
         // Delay before the generic "/on": the demo's delays start off, at 0.3 ms.
         ("/delay/on", .int(0)), ("/delay/time", .float(0)),
+        // Inserts before the generic "/on": off, after the EQ, no slot.
+        ("/insert/on", .int(0)), ("/insert/pos", .int(1)), ("/insert/sel", .int(0)),
         ("/phantom", .int(0)), ("/invert", .int(0)), ("/panFollow", .int(0)), ("/dyn/pos", .int(1)),
         // Key filters off before the generic "/on"; key sources on the strip itself, filter type HC12.
         ("/filter/on", .int(0)), ("/filter/type", .int(3)), ("/keysrc", .int(0)), ("/dyn/auto", .int(0)),
@@ -124,6 +135,8 @@ public enum DemoState {
     static func defaultValue(for address: String) -> OSCArgument {
         if address.hasPrefix("/-ha/") { return headampIndexValue(address) }
         // Every Link Preference ticked, every pair unlinked: a desk after a reset (assumed; m32-probe section 7).
+        // FX types are ints; the generic "/type" would give 2.
+        if address.hasPrefix("/fx/") { return .int(0) }
         if address.hasPrefix("/config/linkcfg/") { return .int(1) }
         if address.hasPrefix("/config/") || address.hasPrefix("/-stat/solosw/") { return .int(0) }
         // A send's tap point, before the EQ type's "/type": the demo's wedges are fed before the fader.

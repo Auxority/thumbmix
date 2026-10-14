@@ -90,6 +90,8 @@ public struct StripID: Hashable, Sendable, Identifiable {
 
     public var hasGate: Bool { kind == .input }
     public var hasDynamics: Bool { [.input, .bus, .matrix, .mainStereo, .mainMono].contains(kind) }
+    /// Channels, buses, matrices and the mains have an insert (doc p.26-37); aux ins and FX returns don't.
+    public var hasInsert: Bool { [.input, .bus, .matrix, .mainStereo, .mainMono].contains(kind) }
 
     public var eqBandCount: Int {
         switch kind {
