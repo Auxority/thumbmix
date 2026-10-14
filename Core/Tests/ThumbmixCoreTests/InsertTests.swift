@@ -41,7 +41,7 @@ struct InsertTests {
     }
 
     /// No source says which Link Preference carries the insert (searched 2026-10-14). Dynamics is assumed: a wrong
-    /// guess only decides one block vs. per side, since the partner is re-read after every edit.
+    /// guess shows per-side blocks, and after the first edit Gate and Comp go per side too until reconnect (fails safe).
     @Test func insertsFollowTheDynamicsLink() {
         #expect(LinkSection.of(suffix: "/insert/on") == .dynamics)
         #expect(LinkSection.of(suffix: "/insert/pos") == .dynamics)

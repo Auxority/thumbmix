@@ -9,26 +9,37 @@ struct MixTab: View {
     var panPartner: StripID?
 
     var body: some View {
-        VStack(spacing: 10) {
-            ParameterRow(
-                spec: Catalog.fader(strip), mirror: mirror, accent: Theme.color(mirror.color(strip)), height: 72,
-                meter: mirror.meter(strip))
-            HStack(spacing: 10) {
-                NudgeButton(label: "−1 dB", fader: Catalog.fader(strip).address, mirror: mirror) { nudge(by: -1) }
-                NudgeButton(label: "+1 dB", fader: Catalog.fader(strip).address, mirror: mirror) { nudge(by: 1) }
+        ScrollView {
+            VStack(spacing: 10) {
+                ParameterRow(
+                    spec: Catalog.fader(strip), mirror: mirror, accent: Theme.color(mirror.color(strip)), height: 72,
+                    meter: mirror.meter(strip))
+                HStack(spacing: 10) {
+                    NudgeButton(label: "−1 dB", fader: Catalog.fader(strip).address, mirror: mirror) { nudge(by: -1) }
+                    NudgeButton(label: "+1 dB", fader: Catalog.fader(strip).address, mirror: mirror) { nudge(by: 1) }
+                }
+                // Solo and mute are hit mid-show, often in a hurry: they get the bigger targets.
+                HStack(spacing: 10) {
+                    SoloButton(strip: strip, mirror: mirror)
+                    MuteButton(strip: strip, mirror: mirror, title: "MUTE", width: nil, height: 52)
+                }
+                if let panPartner {
+                    ForEach([strip, panPartner]) { side in panRow(side, title: "Pan · \(mirror.name(side))") }
+                } else {
+                    panRow(strip, title: nil)
+                }
+                if strip.linkAddress != nil { LinkButton(strip: strip, mirror: mirror) }
+                // Under Pan and Link: nothing above moves (mock A′). A pair the desk doesn't link inserts for shows both.
+                let blocks = mirror.insertBlocks(strip, partner: panPartner)
+                ForEach(blocks, id: \.self) { sides in
+                    InsertBlock(
+                        sides: sides, mirror: mirror,
+                        title: blocks.count == 2 ? String(localized: "Insert · \(mirror.name(sides[0]))") : nil)
+                }
             }
-            // Solo and mute are hit mid-show, often in a hurry: they get the bigger targets.
-            HStack(spacing: 10) {
-                SoloButton(strip: strip, mirror: mirror)
-                MuteButton(strip: strip, mirror: mirror, title: "MUTE", width: nil, height: 52)
-            }
-            if let panPartner {
-                ForEach([strip, panPartner]) { side in panRow(side, title: "Pan · \(mirror.name(side))") }
-            } else {
-                panRow(strip, title: nil)
-            }
-            if strip.linkAddress != nil { LinkButton(strip: strip, mirror: mirror) }
         }
+        // A single strip fits the SE and can't scroll, so a fader drag never turns into a page scroll.
+        .scrollBounceBehavior(.basedOnSize)
     }
 
     @ViewBuilder private func panRow(_ side: StripID, title: String?) -> some View {

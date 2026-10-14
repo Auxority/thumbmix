@@ -76,6 +76,7 @@ public enum LinkSection: String, CaseIterable, Sendable {
         if suffix.hasPrefix("/preamp/") || suffix.hasPrefix("/delay/") { return .gainDelay }
         if suffix.hasPrefix("/gate/") || suffix.hasPrefix("/dyn/") { return .dynamics }
         // Assumed: no manual or forum says which preference carries the insert (m32-probe section 7 answers it).
+        // A wrong guess also marks Dynamics unlinked after the first edit, so Gate and Comp show per side (fails safe).
         if suffix.hasPrefix("/insert/") { return .dynamics }
         return nil
     }
