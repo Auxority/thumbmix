@@ -38,7 +38,7 @@ struct MixTab: View {
                 }
             }
         }
-        // A single strip fits the SE and can't scroll, so a fader drag never turns into a page scroll.
+        // A single strip fits the SE at default text size and can't scroll, so a fader drag never turns into a page scroll.
         .scrollBounceBehavior(.basedOnSize)
     }
 

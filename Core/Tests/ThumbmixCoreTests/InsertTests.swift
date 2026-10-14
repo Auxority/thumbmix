@@ -62,3 +62,86 @@ struct InsertTests {
         #expect(mirror.insertBlocks(gtr, partner: gtr.partner) == [[gtr], [StripID(.input, 10)]])
     }
 }
+
+/// The block shows On and Position as live controls, so it needs every side's slot, On and Position from the desk.
+extension InsertTests {
+    @MainActor @Test func anInsertIsReadOnlyOnceEverySideSentSlotOnAndPosition() {
+        let gtr = StripID(.input, 9)
+        let pair = [gtr, StripID(.input, 10)]
+        #expect(ConsoleMirror.preview().isInsertRead(pair))
+        for address in ["/ch/09/insert/sel", "/ch/10/insert/on", "/ch/10/insert/pos"] {
+            var state = DemoState.values()
+            state[address] = nil
+            #expect(!ConsoleMirror.preview(state).isInsertRead(pair), "\(address) unread")
+        }
+    }
+
+    @MainActor @Test func aSlotReadWithOnUnreadIsNotAReadInsert() {
+        var state = DemoState.values()
+        state["/ch/13/insert/on"] = nil
+        let mirror = ConsoleMirror.preview(state)
+        #expect(mirror.insertSlot(StripID(.input, 13)) != nil)
+        #expect(!mirror.isInsertRead([StripID(.input, 13)]))
+    }
+
+    @MainActor @Test func aPairWhoseSidesAgreeStaysOneBlock() {
+        let gtr = StripID(.input, 9)
+        let mirror = ConsoleMirror.preview()
+        #expect(mirror.insertBlocks(gtr, partner: gtr.partner) == [[gtr, StripID(.input, 10)]])
+    }
+
+    @MainActor @Test func aPairWhoseOnDiffersShowsBlocksPerSide() {
+        var state = DemoState.values()
+        state["/ch/09/insert/on"] = .int(1)
+        state["/ch/10/insert/on"] = .int(0)
+        let gtr = StripID(.input, 9)
+        #expect(ConsoleMirror.preview(state).insertBlocks(gtr, partner: gtr.partner) == [[gtr], [StripID(.input, 10)]])
+    }
+
+    @MainActor @Test func aPairWhosePositionDiffersShowsBlocksPerSide() {
+        var state = DemoState.values()
+        state["/ch/09/insert/pos"] = .int(0)
+        state["/ch/10/insert/pos"] = .int(1)
+        let gtr = StripID(.input, 9)
+        #expect(ConsoleMirror.preview(state).insertBlocks(gtr, partner: gtr.partner) == [[gtr], [StripID(.input, 10)]])
+    }
+
+    @MainActor @Test func aPairWithOneSideUnreadStaysOneBlock() {
+        var state = DemoState.values()
+        state["/ch/09/insert/on"] = .int(1)
+        state["/ch/10/insert/on"] = nil
+        let gtr = StripID(.input, 9)
+        #expect(ConsoleMirror.preview(state).insertBlocks(gtr, partner: gtr.partner) == [[gtr, StripID(.input, 10)]])
+    }
+
+    @MainActor @Test func aSlotDiffersButOnAndPositionAgreeStaysOneBlock() {
+        var state = DemoState.values()
+        state["/ch/09/insert/sel"] = .int(9)
+        state["/ch/10/insert/sel"] = .int(10)
+        let gtr = StripID(.input, 9)
+        #expect(ConsoleMirror.preview(state).insertBlocks(gtr, partner: gtr.partner) == [[gtr, StripID(.input, 10)]])
+    }
+}
+
+/// An unverified section a partner didn't follow is shown per side and the partner isn't written (see LinkSyncTests).
+@MainActor
+struct InsertLinkSyncTests {
+    @Test func aPartnerThatDoesNotFollowAnInsertEditIsShownPerSideNotWritten() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        fake.copiesLinkedEdits = false
+        let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
+        let gtr = StripID(.input, 9)
+        await openTab(.mix, of: gtr, in: mirror)
+        let onR = "/ch/10/insert/on"
+        let before = fake.value(at: onR)
+        #expect(mirror.insertBlocks(gtr, partner: gtr.partner).count == 1)
+
+        mirror.set("/ch/09/insert/on", .int(1))
+
+        #expect(await eventually { mirror.insertBlocks(gtr, partner: gtr.partner).count == 2 }, "per side now")
+        #expect(fake.value(at: onR) == before)
+        #expect(!fake.receivedSets.contains { $0.address == onR })
+    }
+}

@@ -20,10 +20,30 @@ extension ConsoleMirror {
         return first.label(effect: first.fx.flatMap { effectName(fx: $0) })
     }
 
-    /// A pair whose fader the desk links shows one block while it links inserts too, else one per side. `partner`
-    /// is the Mix tab's pan partner: nil for a single strip, or for a pair already shown one side at a time.
+    /// True once every side's slot, On and Position came from the desk: until then the block's controls stay disabled.
+    public func isInsertRead(_ sides: [StripID]) -> Bool {
+        sides.allSatisfy { side in
+            guard let spec = Catalog.insert(side) else { return false }
+            return insertSlot(side) != nil && cell(spec.on.address).argument != nil
+                && cell(spec.position.address).argument != nil
+        }
+    }
+
+    /// A pair shows one block while the desk links inserts too and the read On and Position agree, else one per
+    /// side. The slot isn't compared: a pair normally holds FX5 L and FX5 R. `partner` is the Mix tab's pan partner:
+    /// nil for a single strip, or for a pair already shown one side at a time.
     public func insertBlocks(_ strip: StripID, partner: StripID?) -> [[StripID]] {
         guard let partner else { return [[strip]] }
-        return isShared(.dynamics) ? [[strip, partner]] : [[strip], [partner]]
+        let differs = sidesDiffer(strip, partner, \.on) || sidesDiffer(strip, partner, \.position)
+        return isShared(.dynamics) && !differs ? [[strip, partner]] : [[strip], [partner]]
+    }
+
+    /// Both sides' cells were read and hold different values; an unread side never counts as a difference.
+    private func sidesDiffer(_ a: StripID, _ b: StripID, _ param: KeyPath<InsertSpecs, ParamSpec>) -> Bool {
+        guard let specA = Catalog.insert(a), let specB = Catalog.insert(b),
+            let valueA = cell(specA[keyPath: param].address).argument,
+            let valueB = cell(specB[keyPath: param].address).argument
+        else { return false }
+        return valueA != valueB
     }
 }

@@ -13,8 +13,8 @@ struct InsertBlock: View {
     var body: some View {
         if let spec = Catalog.insert(sides[0]) {
             let slots = sides.compactMap(mirror.insertSlot)
-            // Unread counts as neither empty nor set: controls stay disabled and no note claims anything.
-            let isRead = slots.count == sides.count
+            // Unread (slot, On or Position) counts as neither empty nor set: controls stay disabled, no note claims anything.
+            let isRead = mirror.isInsertRead(sides)
             let isEmpty = isRead && slots.allSatisfy { $0 == .none }
             VStack(alignment: .leading, spacing: 8) {
                 Text(title ?? String(localized: "Insert"))
@@ -45,6 +45,7 @@ private struct SlotRow: View {
             Text(spec.label).font(.subheadline).foregroundStyle(Theme.secondaryText)
             Spacer(minLength: 8)
             Text(verbatim: text ?? "—").font(.body.weight(.semibold)).foregroundStyle(.white)
+                .minimumScaleFactor(0.8)
         }
         .lineLimit(1)
         .padding(.horizontal, 12)
