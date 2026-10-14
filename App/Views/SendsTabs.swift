@@ -7,10 +7,10 @@ import ThumbmixCore
 struct SendsTab: View {
     let strip: StripID
     let mirror: ConsoleMirror
-    /// Opens a bus's own screen; the sheet's bus names call it once the sheet is gone.
+    /// Opens a strip's own screen; the names in the sheet's title call it once the sheet is gone.
     let open: (StripID) -> Void
     @State private var openSend: StripID?
-    @State private var busToOpen: StripID?
+    @State private var stripToOpen: StripID?
     @AppStorage(UnusedFoldRow.sendsKey) private var showsUnused = false
 
     var body: some View {
@@ -24,16 +24,10 @@ struct SendsTab: View {
             }
         }
         .keepsFoldInPlace()
-        // Pushing the bus while the sheet still covers the screen would be lost: it waits for the sheet to close.
-        .sheet(item: $openSend, onDismiss: openChosenBus) { target in
-            SendSheet(source: strip, target: target, mirror: mirror) { busToOpen = $0 }
-                // A stereo mix's sheet adds pans below the tap point: it can be dragged up to see them all.
-                .presentationDetents(mirror.isLinked(target) ? [.medium, .large] : [.medium])
-                // The strip's fader and mute above the sheet stay usable: a channel that rings can still be pulled.
-                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
-                // Glass tinted black, like the toolbar buttons (`DarkCapsuleStyle`): the edge still shows, the
-                // chips behind don't bleed through.
-                .presentationBackground { Color.clear.glassEffect(.regular.tint(.black), in: .rect) }
+        // Pushing a strip while the sheet still covers the screen would be lost: it waits for the sheet to close.
+        .sheet(item: $openSend, onDismiss: openChosenStrip) { target in
+            SendSheet(source: strip, target: target, mirror: mirror) { stripToOpen = $0 }
+                .sendSheetPresentation(stereo: mirror.isLinked(target))
         }
     }
 
@@ -59,10 +53,10 @@ struct SendsTab: View {
         return showsUnused ? pairs : pairs.filter { !$0.allSatisfy(unused.contains) }
     }
 
-    private func openChosenBus() {
-        guard let bus = busToOpen else { return }
-        busToOpen = nil
-        open(bus)
+    private func openChosenStrip() {
+        guard let chosen = stripToOpen else { return }
+        stripToOpen = nil
+        open(chosen)
     }
 
     private func title(_ target: StripID) -> String {
@@ -98,11 +92,17 @@ private struct SendSettingsButton: View {
 /// switch and level from `Catalog.feedOn` and `feedLevel`.
 /// Unused sources whose send here is at −∞ fold into the last row (`UnusedFoldRow`). A linked source pair is one row
 /// whenever it is on the overview: the desk links sends with the faders (`LinkSection.of`).
+/// A row's tall › opens the send's sheet, as on Sends; the mains have no tap or send pan, so no › (2026-10-14).
 struct FedByTab: View {
     let target: StripID
     let mirror: ConsoleMirror
     /// Opened from a channel's send, that channel's row comes into view: it can be the 13th source or further down.
     var focus: StripID?
+    /// Opens a strip's own screen; the names in the sheet's title call it once the sheet is gone.
+    let open: (StripID) -> Void
+    /// The source whose send sheet is open.
+    @State private var openSend: StripID?
+    @State private var stripToOpen: StripID?
     @AppStorage(UnusedFoldRow.fedByKey) private var showsUnused = false
 
     var body: some View {
@@ -113,13 +113,7 @@ struct FedByTab: View {
                     VStack(spacing: 6) {
                         if target.kind == .mainStereo { FaderNote() }
                         ForEach(rows) { row in
-                            SendRow(
-                                source: row.held, target: target, title: mirror.title(of: row),
-                                caption: mirror.fedByCaption(of: row, on: target), accent: Theme.color(mirror.color(row.held)),
-                                mirror: mirror
-                            )
-                            .opacity(unused.contains(row.held) ? 0.45 : 1)
-                            .id(row)
+                            sourceRow(row).opacity(unused.contains(row.held) ? 0.45 : 1).id(row)
                         }
                         if !unused.isEmpty { UnusedFoldRow(strips: unused, isOpen: $showsUnused) }
                     }
@@ -128,6 +122,34 @@ struct FedByTab: View {
             .keepsFoldInPlace()
             .onAppear { scrollToFocus(proxy) }
         }
+        // Pushing a strip while the sheet still covers the screen would be lost: it waits for the sheet to close.
+        .sheet(item: $openSend, onDismiss: openChosenStrip) { source in
+            // The pair's odd side: it keeps the tap and pans, and an unlinked pair's sheet shows both levels.
+            SendSheet(source: source, target: target.oddSide, mirror: mirror) { stripToOpen = $0 }
+                .sendSheetPresentation(stereo: mirror.isLinked(target))
+        }
+    }
+
+    private func sourceRow(_ row: OverviewItem) -> some View {
+        HStack(spacing: 8) {
+            SendRow(
+                source: row.held, target: target, title: mirror.title(of: row),
+                caption: mirror.fedByCaption(of: row, on: target), accent: Theme.color(mirror.color(row.held)),
+                mirror: mirror
+            )
+            if Catalog.sendTap(from: row.held, to: target.oddSide) != nil {
+                SendSettingsButton(address: Catalog.sendLevel(from: row.held, to: target).address) {
+                    openSend = row.held
+                }
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func openChosenStrip() {
+        guard let chosen = stripToOpen else { return }
+        stripToOpen = nil
+        open(chosen)
     }
 
     private func rows(hiding unused: [StripID]) -> [OverviewItem] {
@@ -196,18 +218,18 @@ struct SendRow: View {
     }
 
     #Preview("Fed by") {
-        FedByTab(target: StripID(.bus, 1), mirror: .preview()).padding().background(Theme.background)
+        FedByTab(target: StripID(.bus, 1), mirror: .preview()) { _ in }.padding().background(Theme.background)
     }
 
     #Preview("Matrix fed by") {
-        FedByTab(target: StripID(.matrix, 1), mirror: .preview()).padding().background(Theme.background)
+        FedByTab(target: StripID(.matrix, 1), mirror: .preview()) { _ in }.padding().background(Theme.background)
     }
 
     #Preview("Main LR fed by") {
-        FedByTab(target: StripID(.mainStereo), mirror: .preview()).padding().background(Theme.background)
+        FedByTab(target: StripID(.mainStereo), mirror: .preview()) { _ in }.padding().background(Theme.background)
     }
 
     #Preview("Main M fed by") {
-        FedByTab(target: StripID(.mainMono), mirror: .preview()).padding().background(Theme.background)
+        FedByTab(target: StripID(.mainMono), mirror: .preview()) { _ in }.padding().background(Theme.background)
     }
 #endif

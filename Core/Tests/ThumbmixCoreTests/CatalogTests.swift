@@ -175,9 +175,22 @@ struct CatalogTests {
         case .fedBy:
             strip.kind.feeders.flatMap(StripID.all).flatMap {
                 [Catalog.feedOn(from: $0, to: strip).address, Catalog.feedLevel(from: $0, to: strip).address]
+                    + sendSheet($0, strip)
             }
         case .members: StripKind.allCases.flatMap(StripID.all).compactMap(\.dcaMask)
         }
+    }
+
+    /// A Fed by row's › opens the send sheet: both sends of the pair (an unlinked pair shows two levels), the tap
+    /// point with the chain's comp position, and the pans. The mains have no sheet.
+    private static func sendSheet(_ source: StripID, _ target: StripID) -> [String] {
+        let odd = target.oddSide
+        guard let tap = Catalog.sendTap(from: source, to: odd) else { return [] }
+        return [odd, odd.partner].compactMap { $0 }.flatMap {
+            [Catalog.sendLevel(from: source, to: $0).address, Catalog.sendOn(from: source, to: $0).address]
+        }
+            + [tap.address, Catalog.sendPan(from: source, to: odd)?.address, Catalog.sendPanFollow(from: source, to: odd)?.address]
+            .compactMap { $0 } + [Catalog.dynamicsPosition(source)?.address].compactMap { $0 }
     }
 
     /// The comp position asks first when a send tapped around the EQ would change, so the Comp tab knows every tap.

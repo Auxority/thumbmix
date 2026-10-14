@@ -18,7 +18,8 @@ final class ReadQueue {
 
     /// Urgent addresses (an opened tab) go to the front, taking along any already waiting in the fill.
     func add(_ addresses: [String], urgent: Bool) {
-        let new = addresses.filter { inFlight[$0] == nil && (urgent || !queued.contains($0)) }
+        var seen = Set<String>()
+        let new = addresses.filter { inFlight[$0] == nil && (urgent || !queued.contains($0)) && seen.insert($0).inserted }
         guard !new.isEmpty else { return }
         if urgent {
             let moving = Set(new)

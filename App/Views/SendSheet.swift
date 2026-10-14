@@ -8,8 +8,8 @@ struct SendSheet: View {
     let source: StripID
     let target: StripID
     let mirror: ConsoleMirror
-    /// Called with the bus whose name was tapped in the title, before the sheet closes.
-    let openBus: (StripID) -> Void
+    /// Called with the strip whose name was tapped in the title, before the sheet closes.
+    let open: (StripID) -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -62,23 +62,29 @@ struct SendSheet: View {
         return [target, even]
     }
 
-    /// "Vox 1 → Mon 1 & Mon 2", each bus name a link to that bus (mock A), blue like iOS's own links.
+    /// "Vox 1 → Mon 1 & Mon 2", each name a link to that strip (mock A; the source too since 2026-10-14), blue like
+    /// iOS's own links. The strip already on screen only closes the sheet (`ChannelTab.opened`).
     private var title: some View {
         HStack(spacing: 0) {
-            Text("\(sourceName) → ")
+            link(source, sourceName)
+            Text(" → ")
             ForEach(Array(levelTargets.enumerated()), id: \.element) { index, bus in
                 if index > 0 { Text(" & ") }
-                Button(busName(bus)) {
-                    openBus(bus)
-                    dismiss()
-                }
-                .foregroundStyle(.blue)
-                .accessibilityLabel("Open \(busName(bus))")
+                link(bus, busName(bus))
             }
         }
         .font(.headline)
         .lineLimit(1)
         .minimumScaleFactor(0.7)
+    }
+
+    private func link(_ strip: StripID, _ name: String) -> some View {
+        Button(name) {
+            open(strip)
+            dismiss()
+        }
+        .foregroundStyle(.blue)
+        .accessibilityLabel("Open \(name)")
     }
 
     private func busName(_ bus: StripID) -> String {
@@ -91,6 +97,19 @@ struct SendSheet: View {
 
     /// A subgroup send is at a fixed 0 dB and takes the strip's own pan (one tutorial; m32-probe 10d).
     private var isSubgroup: Bool { mirror.sendTap(from: source, to: target) == .subgroup }
+}
+
+extension View {
+    /// How Sends and Fed by present a `SendSheet`.
+    func sendSheetPresentation(stereo: Bool) -> some View {
+        // A stereo mix's sheet adds pans below the tap point: it can be dragged up to see them all.
+        presentationDetents(stereo ? [.medium, .large] : [.medium])
+            // The fader and mute above the sheet stay usable: a channel that rings can still be pulled.
+            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+            // Glass tinted black, like the toolbar buttons (`DarkCapsuleStyle`): the edge still shows, the chips
+            // behind don't bleed through.
+            .presentationBackground { Color.clear.glassEffect(.regular.tint(.black), in: .rect) }
+    }
 }
 
 /// One switch for every side: a stereo source half following its LR pan would make no sense.

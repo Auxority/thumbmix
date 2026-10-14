@@ -43,10 +43,20 @@ extension Catalog {
         case .comp: dynamicsAddresses(strip)
         case .sends: sendAddresses(strip) + [dynamicsPosition(strip)?.address].compactMap { $0 }
         case .fedBy:
+            // The rows' values first, so they light up before the sheets' (read in the same batch).
             strip.kind.feeders.flatMap(StripID.all).flatMap {
                 [feedOn(from: $0, to: strip).address, feedLevel(from: $0, to: strip).address]
-            }
+            } + strip.kind.feeders.flatMap(StripID.all).flatMap { sendSheetAddresses(from: $0, to: strip) }
         }
+    }
+
+    /// What a Fed by row's send sheet shows: both sends of the pair, which share its tap and pans, and where the
+    /// source's comp sits (the tap chain). Nothing for the mains, which have no sheet.
+    private static func sendSheetAddresses(from source: StripID, to target: StripID) -> [String] {
+        let odd = target.oddSide
+        guard sendTap(from: source, to: odd) != nil else { return [] }
+        return [odd, odd.partner].compactMap { $0 }.flatMap { levelAndOn(from: source, to: $0) }
+            + settings(from: source, to: odd) + [dynamicsPosition(source)?.address].compactMap { $0 }
     }
 
     /// Everything one strip shows: its overview values and every tab's.

@@ -55,7 +55,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **The group pill design everywhere?** Consider using the pills (Inputs, Aux, FX…) more consistently: on the channel, aux, FX and bus screens too.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
-- [ ] **An inputs view on buses**, like fader flip on the desk: a tall › on each Fed by row (as on Sends) opens the send sheet, with its tap point, send pan and "follow LR pan". The mains have no tap or send pan, so no ›. No strip mute (see DECISIONS); the level part is the meter under "More meters". Still open: does the sheet's title, opened from Fed by, link the source strip ("**Kick** → Mon 1") or nothing?
 - [ ] **Inserts** per channel.
 - [ ] Maybe later: **the compressor mix** (`dyn/mix`, p.25; the app doesn't read it yet).
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.

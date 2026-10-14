@@ -42,4 +42,11 @@ public enum ChannelTab: String, CaseIterable, Identifiable, Sendable {
         case .fxReturn: [.mix, .eq, .sends]
         }
     }
+
+    /// The tab a strip named in a send sheet's title opens on: a source on Sends, a mix on Fed by, each showing that
+    /// send. nil for the strip already on screen: the sheet just closes.
+    public static func opened(_ strip: StripID, from current: StripID) -> ChannelTab? {
+        guard strip != current else { return nil }
+        return current.kind.feeders.contains(strip.kind) ? .sends : .fedBy
+    }
 }

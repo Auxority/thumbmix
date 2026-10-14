@@ -38,6 +38,15 @@ struct ReadQueueTests {
         #expect(reads.due(now: now) == [], "asked once only")
     }
 
+    /// A linked pair's two Fed by tabs share their send sheets' taps and pans, read in one batch.
+    @Test func anAddressTwiceInOneBatchIsAskedOnce() {
+        for urgent in [false, true] {
+            let reads = queue(window: 4)
+            reads.add(["/a", "/b", "/a"], urgent: urgent)
+            #expect(reads.due(now: .now) == ["/a", "/b"])
+        }
+    }
+
     @Test func anAddressInFlightIsNotAskedTwice() {
         let reads = queue()
         reads.add(["/a"], urgent: false)

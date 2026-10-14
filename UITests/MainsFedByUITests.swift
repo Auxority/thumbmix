@@ -15,6 +15,8 @@ final class MainsFedByUITests: DeskUITestCase {
         let chip = element("mainLR-/ch/01/mix/st")
         XCTAssertEqual(chip.label, "Kick in the main mix")
         XCTAssertTrue(element("fader-note").exists, "said once more above the list (F4)")
+        let settings = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'settings-'"))
+        XCTAssertEqual(settings.count, 0, "no tap point or send pan into the mains, so no ›")
         saveScreenshot("main-lr-fedby")
 
         chip.tap()

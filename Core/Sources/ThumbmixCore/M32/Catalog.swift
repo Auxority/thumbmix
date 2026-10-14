@@ -202,7 +202,7 @@ public enum Catalog {
     /// An FX return's list (p.30) starts this pan, tap and pan follow at bus 3; bus 1 is assumed left out by
     /// mistake, as channels and aux ins have it (m32-probe section 7g).
     public static func sendPan(from strip: StripID, to target: StripID) -> ParamSpec? {
-        guard !target.number.isMultiple(of: 2) else { return nil }
+        guard hasSendSettings(target) else { return nil }
         return ParamSpec(
             sendPrefix(strip, target) + "/pan", CoreStrings.text("Pan"), .linear(min: -100, max: 100, step: 2), .pan,
             reset: 0)
@@ -210,14 +210,14 @@ public enum Catalog {
 
     /// On, the send takes the strip's own LR pan instead of `sendPan` (doc p.26, FW 4.0+; odd sends only).
     public static func sendPanFollow(from strip: StripID, to target: StripID) -> ParamSpec? {
-        guard !target.number.isMultiple(of: 2) else { return nil }
+        guard hasSendSettings(target) else { return nil }
         return ParamSpec(sendPrefix(strip, target) + "/panFollow", CoreStrings.text("Follow LR pan"), .toggle, .plain)
     }
 
     /// Where the odd send is taken from the strip (`SendTap`, doc p.26). The doc lists GRP for channels only, but
     /// gives a bus send's range as 0...5 too, so every send keeps all six.
     public static func sendTap(from strip: StripID, to target: StripID) -> ParamSpec? {
-        guard !target.number.isMultiple(of: 2) else { return nil }
+        guard hasSendSettings(target) else { return nil }
         return ParamSpec(
             sendPrefix(strip, target) + "/type", CoreStrings.text("Tap point"),
             .choice(["IN/LC", "<-EQ", "EQ->", "PRE", "POST", "GRP"]), .plain)
@@ -239,6 +239,12 @@ public enum Catalog {
             + StripKind.allCases.flatMap(StripID.all).flatMap { strip in
                 [strip.name, strip.color, strip.fader, strip.on] + [strip.pan].compactMap { $0 }
             }
+    }
+
+    /// Pan, pan follow and tap sit on the odd send to a bus or matrix. The mains are numbered 1 too, but a strip's
+    /// way into them is `mix/st` or `mix/mono`: `mix/01` would be bus 1's.
+    private static func hasSendSettings(_ target: StripID) -> Bool {
+        [.bus, .matrix].contains(target.kind) && !target.number.isMultiple(of: 2)
     }
 
     private static func sendPrefix(_ strip: StripID, _ target: StripID) -> String {
