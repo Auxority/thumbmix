@@ -24,9 +24,19 @@ extension Catalog {
     public static func keySource(_ address: String, rawName: (StripID) -> String) -> ParamSpec {
         let names = keySources.map { strip in
             let name = rawName(strip)
-            return name.isEmpty ? strip.defaultName : strip.defaultName + " · " + name
+            return name.isEmpty ? keySourceTerm(strip) : keySourceTerm(strip) + " · " + name
         }
         return ParamSpec(address, CoreStrings.text("Source"), .choice([CoreStrings.text("Self")] + names), .plain)
+    }
+
+    /// The desk's own term where the app's strip name would mislead: FX return 2 is "FX 1R", not a second effect.
+    private static func keySourceTerm(_ strip: StripID) -> String {
+        switch (strip.kind, strip.number) {
+        case (.auxIn, 7): "USB L"
+        case (.auxIn, 8): "USB R"
+        case (.fxReturn, let number): "FX \((number + 1) / 2)" + (number.isMultiple(of: 2) ? "R" : "L")
+        default: strip.defaultName
+        }
     }
 
     private static func key(_ prefix: String, hasSource: Bool) -> KeySpecs {
