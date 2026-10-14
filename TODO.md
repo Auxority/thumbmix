@@ -19,6 +19,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - Section 7g: an FX return's send to bus 1. The doc lists a return's send pan, tap point and pan follow from bus 3 on (p.30); the app assumes bus 1 has them too. The probe reads `/fxrtn/01/mix/01/type` once; if the desk doesn't answer, drop them for buses 1-2 of returns.
   - Mono mode (not in the probe yet). The doc only names `/config/mono/mode` (LR+M or LCR) and `/config/mono/link` ("M/C depends on Main L/R", p.21). Set LCR on the desk: what does a channel's M/C level do then? Tick the link: does a strip with its LR switch off still reach Main M? Main M's Fed by shows the same rows either way; if the link gates it, say so on that tab.
   - Section 8: fader text. Does the desk's own dB text match the app's for every input fader? The app follows the doc's table (p.145), incl. a 0 dB detent and two odd steps (−8.7, −23.2). Set faders near 0, −8.6 and −23.2 with the desk's encoder first; each DIFFERS line goes in `FaderLaw.deskExceptions`. Untested: the fake desk doesn't answer `/node`. Then check whether a formula reproduces the desk's steps, and drop the list if it does; the same goes for any other list of steps that look inconsistent.
+  - Inserts (not in the probe yet): does Pre/Post mean before/after EQ on an input channel too (the X32 quick start says so for buses, mains and matrices)? With an aux slot and nothing patched, does the strip go silent, and does that aux in become the return? Does a linked pair's insert follow the link, and under which Link Preference (assumed Dynamics)? What does picking a slot another strip holds do?
 - [ ] **Key source and Auto time.** Does the desk's key source list call 0 "Self" (the X32 manual) or "Off" (the doc)? The app says Self. With Auto time on, does the desk ignore Attack and Release? If it does, dim them like a cut filter's Gain and Q.
 - [ ] **EQ cut filters.** Set a band to LCut, HCut and (on a main) BU12: do Gain and Q really do nothing? The app disables both rows there (`Catalog.eqTypeShapesLevel`); the doc lists gain and Q for every type without saying.
   - Crossovers (`Crossover`, guessed): on a matrix or main, set band 1 and band 6 to LR24 at 1 kHz. Does band 1 cut the lows and band 6 the highs? Is it −6 dB at 1 kHz, and BS24 −3 dB? Is band 2 (or 5) really off meanwhile? Can bands 2-5 be set to BU6 … LR24 at all? The app draws those flat.
@@ -40,6 +41,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Features
 
+- [ ] **Make the insert slot editable** once m32-probe answers what picking a held slot does. The Slot row becomes a menu in place (mock `insert-slot-future-v2.html`): each slot names its effect and the strip holding it; a held slot asks first, naming the strip that loses it.
 - [ ] **Remove the ±1 dB buttons on the Mix tab?** Holding a parameter row now types a value (`ParameterRow`, `onHold`), and the buttons repeat while held (`NudgeButton`). Removing them moves Solo, Mute and the pan up: mid-show, the thumb finds them in a new place.
 - [ ] **A gain helper:** listen to an input for a few seconds (the engineer picks how long) and suggest the gain that puts its peaks at a target level. Ties in with the input meter marks under "More meters". Mock first.
 - [ ] **Solo on the overview?** A row there is mostly fader, and a solo target competes with it for the thumb. Find a place that keeps the faders easy to drag (mock first).
@@ -55,7 +57,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **The group pill design everywhere?** Consider using the pills (Inputs, Aux, FX…) more consistently: on the channel, aux, FX and bus screens too.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
-- [ ] **Inserts** per channel.
 - [ ] Maybe later: **the compressor mix** (`dyn/mix`, p.25; the app doesn't read it yet).
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
 
