@@ -34,7 +34,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Gate graph above the On chip and Mode menu.** `GateTab` puts the chip and the menu first, then the graph. Move the graph up, and decide whether the Compressor tab gets the same order. On the SE, check that the Threshold row stays on the first screen (why `TransferGraph` is one card).
 - [ ] **No "Thumbmix" title on the overview** (`OverviewView`, `.navigationTitle`). Offline mode shows its DEMO pill in that title (`demoTitle`): keep the pill where it moves no control.
 - [ ] **Draw the main-bus EQ types.** On matrices, Main LR and Main M, the types BU6 … LR24 draw flat (`EQResponse.coefficients`, `default:`). Find which way each one cuts and its slope (doc first, else the desk), then draw it. See also "EQ cut filters" under "On the real M32".
-- [ ] **An EQ that's off greys its graph.** Today the graph draws flat (`ConsoleMirror.eqBands` returns no bands). Grey it instead, and decide whether it keeps the bands' curve, greyed, to show what switching the EQ on brings back.
+- [ ] **An EQ that's off greys its graph.** Today the graph draws flat (`ConsoleMirror.eqBands` returns no bands). Grey it instead, keeping the bands' curve (greyed), so it shows what switching the EQ on brings back (decided 2026-10-14).
 
 ## Features
 
