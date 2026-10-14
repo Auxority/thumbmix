@@ -1,6 +1,6 @@
 # TODO
 
-What's next for Thumbmix, newest decisions first within each section. The PR that finishes an item deletes it, and records anything lasting it decided in `DECISIONS.md`.
+What's next for Thumbmix, newest decisions first within each section. The PR that finishes an item deletes it, and records anything lasting it decided in `DECISIONS.md`. For now, pick older items (lower in a section) before the newest ones (2026-10-14).
 
 ## On the real M32
 
@@ -29,8 +29,19 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
   - **Meters only for the strips in view?** Draw (or update) meters only for the rows on screen, not every strip. Measure first; if it saves only 1–2 % CPU, it isn't worth it and this sub-item goes.
 
+## Small fixes
+
+- [ ] **Gate graph above the On chip and Mode menu.** `GateTab` puts the chip and the menu first, then the graph. Move the graph up, and decide whether the Compressor tab gets the same order. On the SE, check that the Threshold row stays on the first screen (why `TransferGraph` is one card).
+- [ ] **No "Thumbmix" title on the overview** (`OverviewView`, `.navigationTitle`). Offline mode shows its DEMO pill in that title (`demoTitle`): keep the pill where it moves no control.
+- [ ] **Draw the main-bus EQ types.** On matrices, Main LR and Main M, the types BU6 … LR24 draw flat (`EQResponse.coefficients`, `default:`). Find which way each one cuts and its slope (doc first, else the desk), then draw it. See also "EQ cut filters" under "On the real M32".
+- [ ] **An EQ that's off greys its graph.** Today the graph draws flat (`ConsoleMirror.eqBands` returns no bands). Grey it instead, and decide whether it keeps the bands' curve, greyed, to show what switching the EQ on brings back.
+
 ## Features
 
+- [ ] **Remove the ±1 dB buttons on the Mix tab?** Holding a parameter row now types a value (`ParameterRow`, `onHold`), and the buttons repeat while held (`NudgeButton`). Removing them moves Solo, Mute and the pan up: mid-show, the thumb finds them in a new place.
+- [ ] **M (mute) instead of On in Sends and Fed by?** The chip switches the send itself; an M chip shows the same switch inverted. Weigh it against "An inputs view on buses", which puts the source's own mute on Fed by rows: two mutes in one row (the send's and the strip's) must read apart. Mock first.
+- [ ] **A gain helper:** listen to an input for a few seconds (the engineer picks how long) and suggest the gain that puts its peaks at a target level. Ties in with the input meter marks under "More meters". Mock first.
+- [ ] **Solo on the overview?** A row there is mostly fader, and a solo target competes with it for the thumb. Find a place that keeps the faders easy to drag (mock first).
 - [ ] **Presets from the channel name**, based on James Attaway's *Live Mixing Field Guide*: a channel called "Kick" offers kick presets first (EQ, gate, compressor, low cut). Find a good spot to pick them from (mock first).
 - [ ] **More meters**, each weighed by its usefulness and its performance cost (see "Meters only for the strips in view?"):
   - Fed by: a meter per source row?
@@ -39,7 +50,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - Muted strips: check whether muting should grey out the meters, or anything else.
 - [ ] **Membership: mute groups and DCAs.**
   - From a strip: pick its mute groups and DCAs on its strip screen, in a quick multi-select.
-  - From a DCA: a Members tab that adds and removes strips, the reverse. Consider whether both are worth having.
+  - From a DCA: add and remove strips on its Members tab (`MembersTab`), which today only lists them. Wanted (2026-10-14); start here, then consider whether the strip side is worth having too.
 - [ ] **The group pill design everywhere?** Consider using the pills (Inputs, Aux, FX…) more consistently: on the channel, aux, FX and bus screens too.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
@@ -49,12 +60,21 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Dynamics settings the app lacks:**
   - Dynamics before or after the EQ: the toggle that moves the compressor ahead of the EQ.
   - More compressor settings: auto time and the key filter frequency.
-  - Gate key filter. Lower priority than the compressor's.
-  - Maybe later: the gate key source and the compressor mix (the app doesn't read them yet).
+  - The gate's missing settings: its key filter (on, type, frequency) and key source (`gate/filter/…`, `gate/keysrc`, p.25). Wanted (2026-10-14); the app doesn't read them yet.
+  - Maybe later: the compressor mix (the app doesn't read it yet).
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
+
+## Code and docs
+
+- [ ] **Review the code** for simplification, duplication, single responsibility, maintainability and architecture. One PR per concern found.
+- [ ] **Update the README:** it's out of date. Check each command and the acceptance checklist against today's app.
 
 ## Maybe later
 
+- [ ] **Headphone correction on a monitor mix:** load a headphone's AutoEQ profile into the EQ of the bus that feeds it. Can 4 bands do it? Fits with "Roles" below (a musician's in-ear mix).
+- [ ] **Long term: a landscape layout.**
+- [ ] **Long term: Low Power Mode** spends less (e.g. slower meters and spectrum), if that's simple.
+- [ ] **Long, long term: iPad.**
 - [ ] **Long term: a lightweight API and an MCP server** for the desk.
 - [ ] **Long term: effect controls** (reverb and the other FX).
 - [ ] Fold rarely used settings into one line that opens on tap, like "Delay · Off · 12.5 ms ›" (delay mock B). Worth it once the Input tab holds more than gain, trim and delay.
