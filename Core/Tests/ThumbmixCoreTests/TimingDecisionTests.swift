@@ -109,6 +109,19 @@ struct EditHoldsTests {
         #expect(!holds.isFingerDown, "the brief hold after release is not a finger")
     }
 
+    /// A drag starts only after the finger has moved a few points; a link change landing in between must not
+    /// rebuild the row under it, or the touch is cancelled and the drag lost (2026-10-14).
+    @Test func aFingerIsDownFromTouchDownBeforeItsDragStarts() {
+        var holds = EditHolds(hold: hold)
+        holds.touchBegan()
+        #expect(holds.isFingerDown)
+        holds.begin("/f")
+        holds.touchEnded()
+        #expect(holds.isFingerDown, "the drag still holds the control")
+        holds.end("/f", now: now)
+        #expect(!holds.isFingerDown)
+    }
+
     @Test func resyncClearsTimedHoldsButNotActiveGestures() {
         var holds = EditHolds(hold: hold)
         holds.edited("/a", now: now)
