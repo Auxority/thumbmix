@@ -67,14 +67,16 @@ public enum LinkSection: String, CaseIterable, Sendable {
 
     /// The preference governing a strip parameter, by the part after the strip prefix; nil means never shared.
     /// Pan stays per side (seen on the desk), and so, assumed, do a send's pan and Follow LR pan: each side places
-    /// itself in a stereo bus. Sends follow the fader and the low cut follows the EQ: assumptions until m32-probe
-    /// sections 7 and 9 answer them.
+    /// itself in a stereo bus. Sends follow the fader, the low cut follows the EQ, and the insert follows the dynamics:
+    /// assumptions until m32-probe sections 7 and 9 answer them.
     public static func of(suffix: String) -> LinkSection? {
         if suffix.hasSuffix("/pan") || suffix.hasSuffix("/panFollow") { return nil }
         if suffix.hasPrefix("/mix/") { return .faderMute }
         if suffix.hasPrefix("/eq/") || suffix.hasPrefix("/preamp/hp") { return .eq }
         if suffix.hasPrefix("/preamp/") || suffix.hasPrefix("/delay/") { return .gainDelay }
         if suffix.hasPrefix("/gate/") || suffix.hasPrefix("/dyn/") { return .dynamics }
+        // Assumed: no manual or forum says which preference carries the insert (m32-probe section 7 answers it).
+        if suffix.hasPrefix("/insert/") { return .dynamics }
         return nil
     }
 }

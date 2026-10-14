@@ -19,4 +19,11 @@ extension ConsoleMirror {
         if slots.count == 2 { return InsertSlot.pairLabel(first, slots[1]) { effectName(fx: $0) } }
         return first.label(effect: first.fx.flatMap { effectName(fx: $0) })
     }
+
+    /// A pair whose fader the desk links shows one block while it links inserts too, else one per side. `partner`
+    /// is the Mix tab's pan partner: nil for a single strip, or for a pair already shown one side at a time.
+    public func insertBlocks(_ strip: StripID, partner: StripID?) -> [[StripID]] {
+        guard let partner else { return [[strip]] }
+        return isShared(.dynamics) ? [[strip, partner]] : [[strip], [partner]]
+    }
 }

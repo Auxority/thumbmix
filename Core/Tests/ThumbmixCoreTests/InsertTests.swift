@@ -39,4 +39,26 @@ struct InsertTests {
         #expect(demo["/ch/13/insert/on"] == .int(1))
         #expect(demo["/ch/08/insert/sel"] == .int(19), "Bass on Aux out 3")
     }
+
+    /// No source says which Link Preference carries the insert (searched 2026-10-14). Dynamics is assumed: a wrong
+    /// guess only decides one block vs. per side, since the partner is re-read after every edit.
+    @Test func insertsFollowTheDynamicsLink() {
+        #expect(LinkSection.of(suffix: "/insert/on") == .dynamics)
+        #expect(LinkSection.of(suffix: "/insert/pos") == .dynamics)
+    }
+
+    @MainActor @Test func aLinkedPairShowsOneBlock() {
+        let mirror = ConsoleMirror.preview()
+        let gtr = StripID(.input, 9)
+        #expect(mirror.insertBlocks(gtr, partner: gtr.partner) == [[gtr, StripID(.input, 10)]])
+        #expect(mirror.insertBlocks(StripID(.input, 13), partner: nil) == [[StripID(.input, 13)]])
+    }
+
+    @MainActor @Test func unsharedPairShowsBlocksPerSide() {
+        var state = DemoState.values()
+        state[LinkSection.dynamics.preferenceAddress] = .int(0)
+        let mirror = ConsoleMirror.preview(state)
+        let gtr = StripID(.input, 9)
+        #expect(mirror.insertBlocks(gtr, partner: gtr.partner) == [[gtr], [StripID(.input, 10)]])
+    }
 }
