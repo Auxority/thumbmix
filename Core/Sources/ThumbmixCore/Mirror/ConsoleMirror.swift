@@ -36,7 +36,7 @@ public final class ConsoleMirror {
     @ObservationIgnored private let auditAddresses: [String]
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
-    @ObservationIgnored private let log = Logger(subsystem: "thumbmix", category: "mirror")
+    @ObservationIgnored let log = Logger(subsystem: "thumbmix", category: "mirror")
 
     /// While the user drags, pushes for that control are ignored so it doesn't jump under the finger.
     static let editHold: Duration = .milliseconds(300)
@@ -176,10 +176,7 @@ public final class ConsoleMirror {
         let old = cell.argument
         cell.argument = argument
         if let old, old != argument { linkSettingChanged(address) }
-        guard let wanted = linkCopies.received(address, argument, now: .now), let section = linkSection(of: address)
-        else { return }
-        log.warning("\(address, privacy: .public) didn't follow a linked edit (\(section.rawValue, privacy: .public))")
-        partnerDidNotFollow(address, wanted: wanted, section: section)
+        judgeLinkCopy(address, argument)
     }
 
     /// Every cell float is a 0...1 position; NaN or out-of-range values would crash or break the drawing.
