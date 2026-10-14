@@ -102,7 +102,6 @@
       }
     },
     "Aux" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -182,6 +181,16 @@
         }
       }
     },
+    "Bus" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus"
+          }
+        }
+      }
+    },
     "Bus %lld" : {
       "localizations" : {
         "en" : {
@@ -219,6 +228,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cables & playback"
+          }
+        }
+      }
+    },
+    "Ch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ch"
           }
         }
       }
@@ -284,7 +303,6 @@
       }
     },
     "DCA" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -536,7 +554,6 @@
       }
     },
     "FX" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -759,7 +776,6 @@
       }
     },
     "Matrix" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

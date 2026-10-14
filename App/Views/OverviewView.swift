@@ -6,21 +6,27 @@ struct OverviewView: View {
     let onDisconnect: () -> Void
     @State private var group: StripGroup = .inputs
     @State private var openStrip: StripID?
+    /// One open fold for every group of the overview.
+    @AppStorage(UnusedFoldRow.overviewKey) private var showsUnused = false
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 10) {
                 ScrollView {
-                    SteadyRows(wanted: wantedItems, mirror: mirror) { rows in
+                    let unused = mirror.unusedStrips(group.strips, where: mirror.isUnused)
+                    SteadyRows(wanted: mirror.overviewItems(group.strips, showUnused: showsUnused), mirror: mirror) { rows in
                         LazyVStack(spacing: 6) {
                             ForEach(rows) { item in
                                 StripRow(item: item, mirror: mirror) { openStrip = item.opens }
+                                    .opacity(unused.contains(item.held) ? 0.45 : 1)
                             }
+                            if !unused.isEmpty { UnusedFoldRow(strips: unused, isOpen: $showsUnused) }
                         }
                     }
                     .padding(.horizontal, 12)
                     .padding(.bottom, 12)
                 }
+                .keepsFoldInPlace()
                 // Each list gets its own scroll view, so it starts where a list naturally starts. Keeping
                 // one left the old offset past a shorter list (only black), and scrolling it to a top
                 // anchor shifted the rows on iOS 27. A reconnect keeps the position: no list moves under a finger.
@@ -46,12 +52,6 @@ struct OverviewView: View {
                 ChannelView(strip: strip, mirror: mirror)
             }
         }
-    }
-
-    /// Linking or unlinking a pair, here or on the desk, merges or splits rows. Reads no faders, so it never changes
-    /// per fader move. Every strip shows until the Unused toggle's redesign (TODO): hiding them left some out of reach.
-    private var wantedItems: [OverviewItem] {
-        mirror.overviewItems(group.strips, showUnused: true)
     }
 }
 

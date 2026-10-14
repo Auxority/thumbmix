@@ -11,27 +11,19 @@ struct SendsTab: View {
     let open: (StripID) -> Void
     @State private var openSend: StripID?
     @State private var busToOpen: StripID?
+    @AppStorage(UnusedFoldRow.sendsKey) private var showsUnused = false
 
     var body: some View {
         ScrollView {
+            let unused = mirror.unusedSendTargets(of: strip)
             VStack(spacing: 6) {
-                ForEach(mirror.sendPairs(of: strip), id: \.self) { pair in
-                    HStack(spacing: 8) {
-                        VStack(spacing: 6) {
-                            ForEach(pair) { target in
-                                SendRow(
-                                    source: strip, target: target, title: title(target), caption: caption(target),
-                                    accent: Theme.color(mirror.color(target)), mirror: mirror)
-                            }
-                        }
-                        SendSettingsButton(address: Catalog.sendLevel(from: strip, to: pair[0]).address) {
-                            openSend = pair[0]
-                        }
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
+                ForEach(pairs(hiding: unused), id: \.self) { pair in
+                    sendPair(pair).opacity(pair.allSatisfy(unused.contains) ? 0.45 : 1)
                 }
+                if !unused.isEmpty { UnusedFoldRow(strips: unused, isOpen: $showsUnused) }
             }
         }
+        .keepsFoldInPlace()
         // Pushing the bus while the sheet still covers the screen would be lost: it waits for the sheet to close.
         .sheet(item: $openSend, onDismiss: openChosenBus) { target in
             SendSheet(source: strip, target: target, mirror: mirror) { busToOpen = $0 }
@@ -43,6 +35,28 @@ struct SendsTab: View {
                 // chips behind don't bleed through.
                 .presentationBackground { Color.clear.glassEffect(.regular.tint(.black), in: .rect) }
         }
+    }
+
+    private func sendPair(_ pair: [StripID]) -> some View {
+        HStack(spacing: 8) {
+            VStack(spacing: 6) {
+                ForEach(pair) { target in
+                    SendRow(
+                        source: strip, target: target, title: title(target), caption: caption(target),
+                        accent: Theme.color(mirror.color(target)), mirror: mirror)
+                }
+            }
+            SendSettingsButton(address: Catalog.sendLevel(from: strip, to: pair[0]).address) {
+                openSend = pair[0]
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// A pair folds as a whole (`unusedSendTargets`): it shares one ›.
+    private func pairs(hiding unused: [StripID]) -> [[StripID]] {
+        let pairs = mirror.sendPairs(of: strip)
+        return showsUnused ? pairs : pairs.filter { !$0.allSatisfy(unused.contains) }
     }
 
     private func openChosenBus() {
@@ -82,18 +96,20 @@ private struct SendSettingsButton: View {
 
 /// What feeds this bus, matrix or main: a row per strip of every kind that feeds it (`StripKind.feeders`), its
 /// switch and level from `Catalog.feedOn` and `feedLevel`.
-/// Unused sources show too, like the overview, until hiding them is redesigned (TODO). A linked source pair is one
-/// row whenever it is on the overview: the desk links sends with the faders (`LinkSection.of`).
+/// Unused sources whose send here is at −∞ fold into the last row (`UnusedFoldRow`). A linked source pair is one row
+/// whenever it is on the overview: the desk links sends with the faders (`LinkSection.of`).
 struct FedByTab: View {
     let target: StripID
     let mirror: ConsoleMirror
     /// Opened from a channel's send, that channel's row comes into view: it can be the 13th source or further down.
     var focus: StripID?
+    @AppStorage(UnusedFoldRow.fedByKey) private var showsUnused = false
 
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                SteadyRows(wanted: rows, mirror: mirror) { rows in
+                let unused = mirror.unusedSources(of: target)
+                SteadyRows(wanted: rows(hiding: unused), mirror: mirror) { rows in
                     VStack(spacing: 6) {
                         if target.kind == .mainStereo { FaderNote() }
                         ForEach(rows) { row in
@@ -102,21 +118,27 @@ struct FedByTab: View {
                                 caption: mirror.fedByCaption(of: row, on: target), accent: Theme.color(mirror.color(row.held)),
                                 mirror: mirror
                             )
+                            .opacity(unused.contains(row.held) ? 0.45 : 1)
                             .id(row)
                         }
+                        if !unused.isEmpty { UnusedFoldRow(strips: unused, isOpen: $showsUnused) }
                     }
                 }
             }
+            .keepsFoldInPlace()
             .onAppear { scrollToFocus(proxy) }
         }
     }
 
-    private var rows: [OverviewItem] {
-        mirror.overviewItems(target.kind.feeders.flatMap(StripID.all), showUnused: true)
+    private func rows(hiding unused: [StripID]) -> [OverviewItem] {
+        let sources = target.kind.feeders.flatMap(StripID.all)
+        return mirror.overviewItems(showsUnused ? sources : sources.filter { !unused.contains($0) }, showUnused: true)
     }
 
+    /// A folded source has no row to bring into view: the list then opens at its top.
     private func scrollToFocus(_ proxy: ScrollViewProxy) {
-        guard let focus, let row = rows.first(where: { $0.holds(focus) }) else { return }
+        guard let focus, let row = rows(hiding: mirror.unusedSources(of: target)).first(where: { $0.holds(focus) })
+        else { return }
         proxy.scrollTo(row, anchor: .center)
     }
 }

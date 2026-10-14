@@ -53,14 +53,12 @@ extension ConsoleMirror {
         while isFingerDown { try await Task.sleep(for: .milliseconds(100)) }
     }
 
-    /// The rows for `strips`. A pair is unused, and hidden, only when both its sides are.
+    /// The rows for `strips`, without the unused ones unless `showUnused` (`unusedStrips`: a pair hides only when both
+    /// its sides are unused).
     public func overviewItems(_ strips: [StripID], showUnused: Bool) -> [OverviewItem] {
-        strips.compactMap { strip in
-            guard isLinked(strip), let partner = strip.partner else {
-                return showUnused || !isUnused(strip) ? .strip(strip, .full) : nil
-            }
-            guard showUnused || !(isUnused(strip) && isUnused(partner)) else { return nil }
-            return pairItem(for: strip)
+        let hidden = showUnused ? [] : Set(unusedStrips(strips, where: isUnused))
+        return strips.filter { !hidden.contains($0) }.compactMap { strip in
+            isLinked(strip) && strip.partner != nil ? pairItem(for: strip) : .strip(strip, .full)
         }
     }
 
