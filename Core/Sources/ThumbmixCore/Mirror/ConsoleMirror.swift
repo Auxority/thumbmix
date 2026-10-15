@@ -56,7 +56,7 @@ public final class ConsoleMirror {
             for strip in StripID.all(kind) { meterCells[strip] = MeterCell() }
         }
         link.renewals = { [weak self] in self?.renewalMessages ?? [] }
-        link.onMessage = { [weak self] in self?.apply($0) }
+        link.onMessage = { [weak self] in self?.apply($0.message, arrivedAt: $0.time) }
         link.onState = { [weak self] in self?.linkChanged($0) }
     }
 
@@ -147,7 +147,7 @@ public final class ConsoleMirror {
         link.wake()
     }
 
-    func apply(_ message: OSCMessage) {
+    func apply(_ message: OSCMessage, arrivedAt arrival: ContinuousClock.Instant = .now) {
         if message.address == RTA.bank {
             applySpectrum(message)
             return
@@ -162,7 +162,7 @@ public final class ConsoleMirror {
         // A reply of another type (",i" where the parameter is ",f") is garbage, not a new value.
         if let known = cell.argument, !known.hasSameType(as: argument) { return }
         // Stored before the reply is counted: the last answer turns the status live, and screens rebuild on that.
-        if !holds.isHeld(message.address, now: .now) { store(argument, in: cell, at: message.address) }
+        if !holds.isHeld(message.address, now: .now) { store(argument, in: cell, at: message.address, arrivedAt: arrival) }
         noteReply(message.address)
     }
 
@@ -171,11 +171,13 @@ public final class ConsoleMirror {
         if reads.received(address) { pumpReads() }
     }
 
-    private func store(_ argument: OSCArgument, in cell: ParamCell, at address: String) {
+    private func store(
+        _ argument: OSCArgument, in cell: ParamCell, at address: String, arrivedAt arrival: ContinuousClock.Instant
+    ) {
         let old = cell.argument
         cell.argument = argument
         if let old, old != argument { linkSettingChanged(address) }
-        judgeLinkCopy(address, argument)
+        judgeLinkCopy(address, argument, arrivedAt: arrival)
     }
 
     /// Every cell float is a 0...1 position; NaN or out-of-range values would crash or break the drawing.

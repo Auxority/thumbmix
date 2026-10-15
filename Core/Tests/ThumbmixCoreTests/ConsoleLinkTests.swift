@@ -71,7 +71,7 @@ struct ConsoleLinkTests {
         let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
         defer { link.stop() }
         var received: [OSCMessage] = []
-        link.onMessage = { received.append($0) }
+        link.onMessage = { received.append($0.message) }
         link.start()
         #expect(await eventually { if case .live = link.state { true } else { false } })
         try await Task.sleep(for: .milliseconds(100))
@@ -127,7 +127,7 @@ struct ConsoleLinkTests {
         let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
         defer { link.stop() }
         var heard: [String] = []
-        link.onMessage = { heard.append($0.address) }
+        link.onMessage = { heard.append($0.message.address) }
         link.start()
         #expect(await eventually { if case .live = link.state { true } else { false } })
         let stale = "/ch/20/eq/1/q"
