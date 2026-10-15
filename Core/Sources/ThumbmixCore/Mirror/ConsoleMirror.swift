@@ -29,7 +29,6 @@ public final class ConsoleMirror {
     @ObservationIgnored private let overviewSet: Set<String>
     @ObservationIgnored var reads = ReadQueue()
     @ObservationIgnored private var meterCells: [StripID: MeterCell] = [:]
-    @ObservationIgnored private var sync: InitialSync?
     @ObservationIgnored private var pendingSends: [String: OSCArgument] = [:]
     @ObservationIgnored var holds = EditHolds(hold: ConsoleMirror.editHold)
     @ObservationIgnored var linkCopies = LinkCopyCheck()
@@ -165,10 +164,6 @@ public final class ConsoleMirror {
 
     /// A reply the connect sync or a tab read asked for frees a slot for the next request.
     private func noteReply(_ address: String) {
-        if sync != nil {
-            sync?.received(address)
-            pumpSync()
-        }
         if reads.received(address) { pumpReads() }
     }
 
@@ -204,7 +199,7 @@ public final class ConsoleMirror {
     private func tick() {
         for (address, argument) in pendingSends { link.send(OSCMessage(address, [argument])) }
         pendingSends.removeAll()
-        if sync != nil { pumpSync() }
+        if isSyncing { pumpReads() }
         guard isLive else { return }
         pumpReads()
         sendDueRereads()
@@ -231,7 +226,6 @@ public final class ConsoleMirror {
         case .live:
             startSync()
         case .lost:
-            sync = nil
             reads = ReadQueue()
             linkCopies.forget()
             status = .lost
@@ -242,32 +236,35 @@ public final class ConsoleMirror {
         }
     }
 
+    private var isSyncing: Bool {
+        if case .syncing = status { return true }
+        return false
+    }
+
     private func startSync() {
         log.info("sync started: \(self.overview.count) addresses")
         forgetTabValues()
         reads = ReadQueue()
-        sync = InitialSync(addresses: overview)
+        reads.add(overview, urgent: false)
         // An edit made just before an outage may never have reached the console; the resync is the truth.
         holds.clearTimedHolds()
         linkCopies.forget()
         sectionsSeenUnlinked.removeAll()
         status = .syncing(0)
-        pumpSync()
+        pumpReads()
     }
 
-    private func pumpSync() {
-        guard let sync else { return }
-        for address in sync.due(now: .now) { link.send(OSCMessage(address)) }
-        guard sync.isDone else {
-            let progress = (sync.progress * 100).rounded() / 100
+    /// The last overview reply is stored before it is counted (see `apply`), so going live here never shows an unread value.
+    private func finishSyncIfDone() {
+        guard reads.isIdle else {
+            let progress = (Double(reads.answered) / Double(overview.count) * 100).rounded() / 100
             if status != .syncing(progress) { status = .syncing(progress) }
             return
         }
-        if !sync.missing.isEmpty {
-            log.warning("sync done; \(sync.missing.count) addresses never answered")
+        if !reads.missing.isEmpty {
+            log.warning("sync done; \(self.reads.missing.count) addresses never answered")
         }
         log.info("sync done")
-        self.sync = nil
         status = .live
         startBackgroundFill()
         pumpReads()
@@ -281,7 +278,9 @@ public final class ConsoleMirror {
     func pumpReads() {
         let missing = reads.missing.count
         for address in reads.due(now: .now) { link.send(OSCMessage(address)) }
-        if reads.missing.count > missing {
+        if isSyncing {
+            finishSyncIfDone()
+        } else if reads.missing.count > missing {
             log.warning("\(self.reads.missing.count - missing) tab values never answered; their rows stay disabled")
         }
     }
