@@ -61,6 +61,23 @@ struct RTATests {
         #expect(mirror.spectrum.decibels.isEmpty)
     }
 
+    /// The stream expires on the desk after 10 s, so it is renewed exactly while the app borrows the RTA.
+    @Test func theRTAStreamIsRenewedOnlyWhileFollowing() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let mirror = await loanMirror(port: port)
+        defer { mirror.stop() }
+        #expect(mirror.link.renewals().contains(OSCMessage("/xremote")))
+        #expect(!mirror.link.renewals().contains(RTA.subscription))
+
+        mirror.followRTA(StripID(.input, 1))
+        #expect(mirror.link.renewals().contains(RTA.subscription))
+        #expect(mirror.link.renewals().contains(OSCMessage("/xremote")))
+
+        mirror.releaseRTA()
+        #expect(!mirror.link.renewals().contains(RTA.subscription))
+    }
+
     /// The offline demo's spectrum is measured "after EQ" like the desk's: a band boosted, then cut, by 15 dB
     /// moves the spectrum there far more than the fake's own wobble (a few dB).
     @Test func theDemoSpectrumFollowsTheEQ() async throws {

@@ -60,8 +60,9 @@ public final class ConsoleLink {
 
     public var onMessage: ((OSCMessage) -> Void)?
     public var onState: ((LinkState) -> Void)?
-    /// Re-sent every `renewEvery`, and at once when the console comes back.
-    public var renewals: [OSCMessage] = [OSCMessage("/xremote")]
+    /// Asked for on every renewal, so its owner (the mirror) decides what is subscribed; re-sent every `renewEvery`,
+    /// and at once when the console comes back.
+    public var renewals: () -> [OSCMessage] = { [OSCMessage("/xremote")] }
 
     /// Bumped each time the socket is rebuilt; tests read it.
     private(set) var transportGeneration = 0
@@ -188,6 +189,6 @@ public final class ConsoleLink {
 
     private func renew() {
         supervisor.renewed(at: .now)
-        renewals.forEach(transport.send)
+        renewals().forEach(transport.send)
     }
 }

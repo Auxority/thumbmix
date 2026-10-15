@@ -6,6 +6,9 @@ public struct EQBandState: Equatable, Sendable {
     public let gain: Double
     public let q: Double
 
+    /// nil for a number the desk doesn't have.
+    public var type: EQFilterType? { EQFilterType(rawValue: typeIndex) }
+
     public init(typeIndex: Int, frequency: Double, gain: Double, q: Double) {
         self.typeIndex = typeIndex
         self.frequency = frequency
@@ -55,30 +58,30 @@ public enum EQResponse {
         let alpha = sin(w0) / (2 * band.q)
         let cutAlpha = sin(w0) / (2 * 0.707)
         let shelf = 2 * sqrt(a) * alpha
-        switch band.typeIndex {
-        case 0:  // LCut: 12 dB/oct high-pass
+        switch band.type {
+        case .lowCut:  // 12 dB/oct high-pass
             return Coefficients(
                 b0: (1 + cosine) / 2, b1: -(1 + cosine), b2: (1 + cosine) / 2,
                 a0: 1 + cutAlpha, a1: -2 * cosine, a2: 1 - cutAlpha)
-        case 1:  // LShv
+        case .lowShelf:
             return Coefficients(
                 b0: a * ((a + 1) - (a - 1) * cosine + shelf), b1: 2 * a * ((a - 1) - (a + 1) * cosine),
                 b2: a * ((a + 1) - (a - 1) * cosine - shelf), a0: (a + 1) + (a - 1) * cosine + shelf,
                 a1: -2 * ((a - 1) + (a + 1) * cosine), a2: (a + 1) + (a - 1) * cosine - shelf)
-        case 2, 3:  // PEQ, VEQ
+        case .parametric, .vintage:
             return Coefficients(
                 b0: 1 + alpha * a, b1: -2 * cosine, b2: 1 - alpha * a,
                 a0: 1 + alpha / a, a1: -2 * cosine, a2: 1 - alpha / a)
-        case 4:  // HShv
+        case .highShelf:
             return Coefficients(
                 b0: a * ((a + 1) + (a - 1) * cosine + shelf), b1: -2 * a * ((a - 1) + (a + 1) * cosine),
                 b2: a * ((a + 1) + (a - 1) * cosine - shelf), a0: (a + 1) - (a - 1) * cosine + shelf,
                 a1: 2 * ((a - 1) - (a + 1) * cosine), a2: (a + 1) - (a - 1) * cosine - shelf)
-        case 5:  // HCut: 12 dB/oct low-pass
+        case .highCut:  // 12 dB/oct low-pass
             return Coefficients(
                 b0: (1 - cosine) / 2, b1: 1 - cosine, b2: (1 - cosine) / 2,
                 a0: 1 + cutAlpha, a1: -2 * cosine, a2: 1 - cutAlpha)
-        default:  // A crossover type on a band that takes none (`Crossover`): drawn flat.
+        default:  // A crossover type (or none) on a band that takes none (`Crossover`): drawn flat.
             return nil
         }
     }
@@ -88,35 +91,33 @@ public enum EQResponse {
 /// 6-24 dB/oct, and the band next to it (LOW2, HIGH2) is off (X32 manual; Maillot p.33 lists only the names).
 /// Assumed: LOW cuts lows and HIGH cuts highs, like LCut and HCut; Bessel is -3 dB at the cutoff (TODO: desk).
 struct Crossover {
-    let typeIndex: Int
+    let type: EQFilterType
     let frequency: Double
     let highPass: Bool
 
     init?(_ band: EQBandState, band number: Int, of count: Int) {
-        guard Self.isCrossover(band.typeIndex), count == 6, number == 1 || number == 6 else { return nil }
-        typeIndex = band.typeIndex
+        guard let type = band.type, type.isCrossover, count == 6, number == 1 || number == 6 else { return nil }
+        self.type = type
         frequency = band.frequency
         highPass = number == 1
     }
 
     static func silences(band number: Int, in bands: [EQBandState]) -> Bool {
         guard bands.count == 6 else { return false }
-        return (number == 2 && isCrossover(bands[0].typeIndex)) || (number == 5 && isCrossover(bands[5].typeIndex))
+        return (number == 2 && bands[0].type?.isCrossover == true) || (number == 5 && bands[5].type?.isCrossover == true)
     }
-
-    private static func isCrossover(_ typeIndex: Int) -> Bool { (6...13).contains(typeIndex) }
 
     func decibels(at hertz: Double) -> Double {
         // A high-pass is the low-pass mirrored around the cutoff.
         let ratio = highPass ? frequency / hertz : hertz / frequency
-        switch typeIndex {
-        case 6: return Self.butterworth(order: 1, ratio)  // BU6
-        case 7: return Self.butterworth(order: 2, ratio)  // BU12
-        case 8: return Self.bessel2(ratio)  // BS12
-        case 9: return 2 * Self.butterworth(order: 1, ratio)  // LR12: two BU6 in series, -6 dB at the cutoff
-        case 10: return Self.butterworth(order: 3, ratio)  // BU18
-        case 11: return Self.butterworth(order: 4, ratio)  // BU24
-        case 12: return Self.bessel4(ratio)  // BS24
+        switch type {
+        case .butterworth6: return Self.butterworth(order: 1, ratio)
+        case .butterworth12: return Self.butterworth(order: 2, ratio)
+        case .bessel12: return Self.bessel2(ratio)
+        case .linkwitzRiley12: return 2 * Self.butterworth(order: 1, ratio)  // two BU6 in series, -6 dB at the cutoff
+        case .butterworth18: return Self.butterworth(order: 3, ratio)
+        case .butterworth24: return Self.butterworth(order: 4, ratio)
+        case .bessel24: return Self.bessel4(ratio)
         default: return 2 * Self.butterworth(order: 2, ratio)  // LR24: two BU12 in series
         }
     }
@@ -225,8 +226,8 @@ extension ConsoleMirror {
     /// false on a cut filter, whose Gain and Q do nothing; nil until the desk sent the band's type.
     public func eqBandShapesLevel(_ strip: StripID, _ band: Int) -> Bool? {
         let type = Catalog.eqBand(strip, band).type
-        guard let position = normalized(type), case .choice(let names) = type.scale else { return nil }
-        return Catalog.eqTypeShapesLevel(names[Int(type.scale.value(fromNormalized: position))])
+        guard let position = normalized(type) else { return nil }
+        return EQFilterType(rawValue: Int(type.scale.value(fromNormalized: position)))?.shapesLevel
     }
 
     /// Puts every band back to `Catalog.eqDefaults`; a no-op on strips without defaults.

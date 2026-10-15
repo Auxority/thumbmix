@@ -2,7 +2,8 @@ import Testing
 
 @testable import ThumbmixCore
 
-/// The reads after going live: an opened tab first, then the background fill, paced like the connect sync.
+/// The reads after going live: an opened tab first, then the background fill, paced like the connect sync, which is
+/// the overview added to this same queue.
 @MainActor
 struct ReadQueueTests {
     private func queue(window: Int = 2, maxTries: Int = 3) -> ReadQueue {
@@ -68,5 +69,53 @@ struct ReadQueueTests {
 
     @Test func ignoresRepliesNotAskedFor() {
         #expect(!queue().received("/zzz"))
+    }
+
+    @Test func isIdleOnceEverythingWasAnsweredOrGivenUp() {
+        let reads = queue(window: 2, maxTries: 2)
+        reads.add(["/a", "/b", "/c"], urgent: false)
+        let start = ContinuousClock.now
+        _ = reads.due(now: start)
+        #expect(reads.received("/a"))
+        #expect(!reads.isIdle)
+        #expect(reads.due(now: start) == ["/c"])
+        #expect(reads.received("/b"))
+        #expect(reads.received("/c"))
+        #expect(reads.isIdle)
+    }
+
+    @Test func givingUpMakesTheQueueIdle() {
+        let reads = queue(window: 8, maxTries: 2)
+        reads.add(["/a"], urgent: false)
+        let start = ContinuousClock.now
+        _ = reads.due(now: start)
+        _ = reads.due(now: start + .milliseconds(400))
+        #expect(!reads.isIdle)
+        _ = reads.due(now: start + .milliseconds(800))
+        #expect(reads.isIdle)
+    }
+
+    @Test func answeredCountsOnlyAskedAddresses() {
+        let reads = queue(window: 8)
+        reads.add(["/a", "/b"], urgent: false)
+        _ = reads.due(now: .now)
+        _ = reads.received("/zzz")
+        #expect(reads.answered == 0)
+        _ = reads.received("/a")
+        #expect(reads.answered == 1)
+    }
+
+    @Test func defaultRetriesOutlastAShortWiFiDrop() {
+        let reads = ReadQueue()
+        reads.add(["/a"], urgent: false)
+        var now = ContinuousClock.now
+        _ = reads.due(now: now)
+        for _ in 1...5 {
+            now += .milliseconds(400)
+            #expect(reads.due(now: now) == ["/a"])
+        }
+        #expect(reads.received("/a"))
+        #expect(reads.isIdle)
+        #expect(reads.missing.isEmpty)
     }
 }

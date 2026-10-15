@@ -9,23 +9,24 @@ extension ConsoleMirror {
         pumpReads()
     }
 
-    /// The tabs of every strip in use, one tab across all of them before the next, in `ChannelTab.fillOrder`.
+    /// The tabs of every strip worth prefetching, one tab across all of them before the next, in `ChannelTab.fillOrder`.
     func startBackgroundFill() {
-        let strips = stripsInUse()
+        let strips = stripsWorthPrefetching()
         for tab in ChannelTab.fillOrder {
             reads.add(unread(tab, strips.filter { ChannelTab.tabs(for: $0.kind).contains(tab) }), urgent: false)
         }
     }
 
-    /// Strips in use, plus their linked partners: a pair is read as a whole.
-    private func stripsInUse() -> [StripID] {
-        let used = StripKind.allCases.flatMap(StripID.all).filter(isInUse)
+    /// Strips worth prefetching, plus their linked partners: a pair is read as a whole.
+    private func stripsWorthPrefetching() -> [StripID] {
+        let used = StripKind.allCases.flatMap(StripID.all).filter(isWorthPrefetching)
         var seen = Set<StripID>()
         return (used + used.flatMap { linkedPartner(of: $0) }).filter { seen.insert($0).inserted }
     }
 
-    /// Named and fader up (the user, 2026-10-12): a named spare with its fader down waits until it's opened.
-    private func isInUse(_ strip: StripID) -> Bool {
+    /// The background fill's policy, not the overview's fold (`isUnused`): named and fader up (the user, 2026-10-12).
+    /// A named spare with its fader down waits until it's opened.
+    private func isWorthPrefetching(_ strip: StripID) -> Bool {
         !rawName(strip).isEmpty && (normalized(Catalog.fader(strip)) ?? 0) > 0
     }
 

@@ -1,5 +1,6 @@
-/// The reads after going live (`ConsoleMirror+Reads`): an opened tab's values first, then the background fill. Paced
-/// like `InitialSync`: a few requests in flight, re-asking for replies UDP lost.
+/// Every read of the mirror: the overview on connect, then an opened tab's values first and the background fill
+/// (`ConsoleMirror+Reads`). A few requests in flight, re-asking for replies UDP lost; the author's own dump tools pace
+/// requests the same way to avoid overrunning Wi-Fi (doc p.6).
 @MainActor
 final class ReadQueue {
     private let window: Int
@@ -9,7 +10,9 @@ final class ReadQueue {
     private var queued: Set<String> = []
     private var inFlight: [String: (sentAt: ContinuousClock.Instant, tries: Int)] = [:]
     private(set) var missing: [String] = []
+    private(set) var answered = 0
 
+    /// 10 tries x 300 ms rides out a ~3 s Wi-Fi drop; anything longer makes the link lost and restarts the sync.
     init(window: Int = 8, timeout: Duration = .milliseconds(300), maxTries: Int = 10) {
         self.window = window
         self.timeout = timeout
@@ -30,9 +33,14 @@ final class ReadQueue {
         queued.formUnion(new)
     }
 
+    /// Nothing waiting, nothing in flight: every address was answered or given up on.
+    var isIdle: Bool { pending.isEmpty && inFlight.isEmpty }
+
     /// False for a reply this queue didn't ask for.
     func received(_ address: String) -> Bool {
-        inFlight.removeValue(forKey: address) != nil
+        guard inFlight.removeValue(forKey: address) != nil else { return false }
+        answered += 1
+        return true
     }
 
     /// The addresses to (re)request now.

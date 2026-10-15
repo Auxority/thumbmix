@@ -79,9 +79,8 @@ struct EQResetTests {
 
     /// The doc doesn't say which types ignore gain and Q; cut filters have no level to shape (assumed, see TODO).
     @Test func onlyShapingTypesUseGainAndQ() {
-        for type in ["LShv", "PEQ", "VEQ", "HShv"] { #expect(Catalog.eqTypeShapesLevel(type), "\(type)") }
-        for type in ["LCut", "HCut", "BU6", "BU12", "BS12", "LR12", "BU18", "BU24", "BS24", "LR24"] {
-            #expect(!Catalog.eqTypeShapesLevel(type), "\(type)")
+        for type in EQFilterType.allCases {
+            #expect(type.shapesLevel == ["LShv", "PEQ", "VEQ", "HShv"].contains(type.deskName), "\(type.deskName)")
         }
     }
 

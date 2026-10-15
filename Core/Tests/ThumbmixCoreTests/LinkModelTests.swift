@@ -25,6 +25,14 @@ struct LinkModelTests {
         #expect(StripID(.dca, 1).partner == nil)
     }
 
+    @Test func pairSidesListTheOddSideFirstAndOnlyOddSidesLeadAPair() {
+        #expect(StripID(.bus, 8).pairSides == [StripID(.bus, 7), StripID(.bus, 8)])
+        #expect(StripID(.bus, 7).pairSides == [StripID(.bus, 7), StripID(.bus, 8)])
+        #expect(StripID(.dca, 1).pairSides == [StripID(.dca, 1)])
+        #expect(StripID(.input, 7).isOddSide)
+        #expect(!StripID(.input, 8).isOddSide)
+    }
+
     @Test func linkablePartOfAnAddress() {
         let parsed = StripID.linkable(from: "/ch/09/eq/2/g")
         #expect(parsed?.strip == StripID(.input, 9))
