@@ -25,7 +25,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **How VEQ differs from PEQ.** The M32 manual only says VEQ is "a bell filter that provides a more 'Vintage EQ' sound"; the app draws it exactly like PEQ. Set two bands to PEQ and VEQ with the same frequency, gain and Q, and compare the desk's EQ screen (or the RTA on pink noise): skirts that dip past flat (a forum claim), a wider or narrower Q? Then give `EQResponse` its own VEQ curve.
 - [ ] **Compressor knee width per step.** The app draws 6 dB per knee step (knee 5 = 30 dB), a guess: no source gives the unit, and `m32-probe` can't read it. Set knee 0 and 5 on the desk and compare its dynamics screen with the app's curve, or measure: a test tone at the threshold, 4:1, and the gain reduction meter at each knee step. Then set `TransferCurve.kneeDecibelsPerStep`.
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
-- [ ] Walk the acceptance checklist in `README.md`. On the same device, check that VoiceOver's swipe up/down adjusts parameter rows: XCUITest can't drive it.
+- [ ] Walk the acceptance checklist in `README.md`.
 
 ## Performance
 
@@ -60,7 +60,6 @@ None open.
 ## Code and docs
 
 - [ ] **Review the code** for simplification, duplication, single responsibility, maintainability and architecture. One PR per concern found.
-- [ ] **Update the README:** it's out of date. Check each command and the acceptance checklist against today's app.
 
 ## Maybe later
 
