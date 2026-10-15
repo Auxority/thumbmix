@@ -103,8 +103,7 @@ struct KeySection: View {
     let mirror: ConsoleMirror
 
     var body: some View {
-        Text("Key")
-            .font(.footnote).textCase(.uppercase).foregroundStyle(Theme.secondaryText)
+        Text("Key").sectionLabel()
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4).padding(.top, 10)
         if let source = key.sourceAddress {

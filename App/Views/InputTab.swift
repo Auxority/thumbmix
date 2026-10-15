@@ -40,9 +40,7 @@ struct InputTab: View {
     }
 
     @ViewBuilder private var sharedWarning: some View {
-        let sharing = mirror.stripsSharingHeadamp(with: strip)
-        if !sharing.isEmpty {
-            let names = sharing.map { mirror.name($0) }.formatted(.list(type: .and))
+        if let names = mirror.namesSharingHeadamp(with: strip) {
             Label("Shares an input with \(names)", systemImage: "exclamationmark.triangle.fill")
                 .labelStyle(.titleOnly)
                 .font(.callout)
@@ -99,8 +97,7 @@ private struct PhantomButton: View {
     let partner: String?
 
     init(_ strip: StripID, _ mirror: ConsoleMirror) {
-        let sharing = mirror.stripsSharingHeadamp(with: strip).map { mirror.name($0) }
-        sameInput = sharing.isEmpty ? nil : sharing.formatted(.list(type: .and))
+        sameInput = mirror.namesSharingHeadamp(with: strip)
         partner = mirror.gainDelayPartner(of: strip).map { mirror.name($0) }
     }
 

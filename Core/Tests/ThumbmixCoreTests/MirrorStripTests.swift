@@ -53,6 +53,15 @@ struct MirrorStripTests {
         #expect(mirror.stripsSharingHeadamp(with: ch3) == [])
     }
 
+    /// The Input tab's warning and the 48V alert name them in one list.
+    @Test func namesSharingAnInputReadAsOneList() {
+        for number in 1...3 { mirror.apply(OSCMessage(Catalog.headampIndex(StripID(.input, number))!, [.int(32)])) }
+        mirror.apply(OSCMessage("/ch/02/config/name", [.string("Vox 2")]))
+        mirror.apply(OSCMessage(Catalog.headampIndex(StripID(.input, 4))!, [.int(-1)]))
+        #expect(mirror.namesSharingHeadamp(with: StripID(.input, 1), locale: .testEnglish) == "Vox 2 and Ch 3")
+        #expect(mirror.namesSharingHeadamp(with: StripID(.input, 4), locale: .testEnglish) == nil)
+    }
+
     /// The desk can route aux 1-6 from inputs (`/config/routing/IN/AUX`, doc p.21): then an aux shares a preamp,
     /// and its 48V, with the channel on that input.
     @Test func anAuxRoutedFromAnInputSharesItsHeadamp() {

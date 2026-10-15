@@ -25,6 +25,7 @@ struct UnusedFoldTests {
         fake.deskChange(Catalog.fader(StripID(.input, 3)).address, .float(0))
         fake.deskChange(Catalog.fader(StripID(.input, 4)).address, .float(0.75))
         let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
         let folded = mirror.unusedStrips(StripID.all(.input), where: mirror.isUnused)
         #expect(folded.contains(StripID(.input, 3)))
         #expect(!folded.contains(StripID(.input, 4)), "a fader that's up means it's in use")
@@ -42,6 +43,7 @@ struct UnusedFoldTests {
         fake.deskChange(right.name, .string("Spare R"))
         fake.deskChange("/config/chlink/23-24", .int(1))
         let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
         #expect(mirror.unusedStrips([left, right], where: mirror.isUnused).isEmpty)
     }
 
@@ -58,6 +60,7 @@ struct UnusedFoldTests {
         fake.deskChange(Catalog.sendLevel(from: StripID(.input, 21), to: mon).address, .float(0.6))
         fake.deskChange(Catalog.sendLevel(from: StripID(.input, 22), to: mon).address, .float(0))
         let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
         await openTab(.fedBy, of: mon, in: mirror)
         let folded = mirror.unusedSources(of: mon)
         #expect(!folded.contains(StripID(.input, 21)))
@@ -77,6 +80,7 @@ struct UnusedFoldTests {
         }
         fake.deskChange(Catalog.sendLevel(from: vox, to: StripID(.bus, 14)).address, .float(0.5))
         let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
         await openTab(.sends, of: vox, in: mirror)
         let folded = mirror.unusedSendTargets(of: vox)
         #expect(folded.contains(StripID(.bus, 15)) && folded.contains(StripID(.bus, 16)))
@@ -87,6 +91,7 @@ struct UnusedFoldTests {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
         #expect(mirror.unusedSources(of: StripID(.bus, 1)).isEmpty, "Fed by not read yet: unknown isn't unused")
     }
 }

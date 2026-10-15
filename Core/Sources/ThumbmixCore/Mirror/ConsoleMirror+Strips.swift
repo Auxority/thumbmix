@@ -84,6 +84,12 @@ extension ConsoleMirror {
         return Catalog.preampStrips.filter { $0 != strip && headamp(of: $0) == mine }
     }
 
+    /// `stripsSharingHeadamp` by name in one list ("Vox 2 and Ch 3"); nil when the input is the strip's alone.
+    public func namesSharingHeadamp(with strip: StripID, locale: Locale = .current) -> String? {
+        let names = stripsSharingHeadamp(with: strip).map(name)
+        return names.isEmpty ? nil : names.formatted(.list(type: .and).locale(locale))
+    }
+
     /// Bit 0 = DCA 1. The doc doesn't state the bit order; m32-probe section 4 checks it.
     public func isMember(_ strip: StripID, ofDCA dca: Int) -> Bool {
         guard let address = strip.dcaMask, case .int(let mask)? = cell(address).argument else {
