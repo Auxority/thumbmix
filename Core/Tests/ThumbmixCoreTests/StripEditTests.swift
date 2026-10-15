@@ -42,21 +42,16 @@ struct StripEditTests {
     }
 
     @Test func editReachesTheConsole() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast))
-        mirror.start()
-        defer { mirror.stop() }
-        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
         let drums = StripID(.dca, 1)
+        try await withLiveDesk { fake, mirror in
+            mirror.edit(drums, name: "Kit", color: ConsoleColor(base: .green, inverted: false), icon: 11)
 
-        mirror.edit(drums, name: "Kit", color: ConsoleColor(base: .green, inverted: false), icon: 11)
-
-        #expect(
-            await eventually {
-                fake.value(at: drums.name) == .string("Kit") && fake.value(at: drums.color) == .int(2)
-                    && fake.value(at: drums.icon) == .int(11)
-            })
-        #expect(mirror.name(drums) == "Kit")
+            #expect(
+                await eventually {
+                    fake.value(at: drums.name) == .string("Kit") && fake.value(at: drums.color) == .int(2)
+                        && fake.value(at: drums.icon) == .int(11)
+                })
+            #expect(mirror.name(drums) == "Kit")
+        }
     }
 }

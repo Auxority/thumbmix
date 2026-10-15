@@ -36,19 +36,37 @@ func liveMirror(port: UInt16, auditAddresses: [String] = Catalog.auditAddresses(
 }
 
 /// Runs `body` against a fresh fake desk and a mirror that is live on it, and stops both afterwards, however
-/// `body` ends. The fake's quirks are set before the mirror connects.
+/// `body` ends. The fake's quirks are set, and `before` sets the desk's state, before the mirror connects.
 @MainActor
 func withLiveDesk(
-    copiesLinkedEdits: Bool = true, dropsGets: Int = 0,
+    copiesLinkedEdits: Bool = true, dropsGets: Int = 0, auditAddresses: [String] = Catalog.auditAddresses(),
+    before: (FakeM32) -> Void = { _ in },
     _ body: (FakeM32, ConsoleMirror) async throws -> Void
 ) async throws {
     let (fake, port) = try await startFake()
     defer { fake.stop() }
     fake.copiesLinkedEdits = copiesLinkedEdits
     fake.dropNextGets(dropsGets)
-    let mirror = await liveMirror(port: port)
+    before(fake)
+    let mirror = await liveMirror(port: port, auditAddresses: auditAddresses)
     defer { mirror.stop() }
     try await body(fake, mirror)
+}
+
+/// Runs `body` against a fresh fake desk and a link already started on it, and stops both afterwards. `before`
+/// sets the fake's quirks ahead of the first identify.
+@MainActor
+func withLink(
+    model: String = "M32", before: (FakeM32) -> Void = { _ in },
+    _ body: (FakeM32, ConsoleLink) async throws -> Void
+) async throws {
+    let (fake, port) = try await startFake(model: model)
+    defer { fake.stop() }
+    before(fake)
+    let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
+    defer { link.stop() }
+    link.start()
+    try await body(fake, link)
 }
 
 /// Opens `tab` of `strip` as the app's screen does: reads its values (and a linked partner's) and waits for them.
