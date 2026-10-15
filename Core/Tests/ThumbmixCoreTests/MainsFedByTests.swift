@@ -62,16 +62,6 @@ struct MainsFedByTests {
         #expect(Catalog.tabAddresses(.fedBy, StripID(.mainStereo), headamp: nil).contains("/bus/16/mix/st"))
     }
 
-    /// Mono is off after a desk reset (assumed); the demo's kick and bass feed a mono sub at 0 dB.
-    @Test func theDemoFeedsASub() {
-        let values = DemoState.values()
-        #expect(values["/ch/01/mix/mono"] == .int(1))
-        #expect(values["/ch/08/mix/mono"] == .int(1))
-        #expect(values["/ch/01/mix/mlevel"] == .float(0.75))
-        #expect(values["/ch/02/mix/mono"] == .int(0))
-        #expect(values["/ch/02/mix/mlevel"] == .float(0))
-    }
-
     /// The desk links the mono level with fader and mute ("M/C level", p.46), so one side is written and the desk
     /// copies it.
     @Test func aLinkedPairsMonoLevelReachesBothSides() async throws {

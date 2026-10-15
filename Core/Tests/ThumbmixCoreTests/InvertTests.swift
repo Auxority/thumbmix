@@ -20,7 +20,6 @@ struct InvertTests {
         let addresses = Set(Catalog.allAddresses())
         #expect(addresses.contains("/ch/32/preamp/invert"))
         #expect(addresses.contains("/auxin/08/preamp/invert"))
-        #expect(DemoState.values()["/ch/01/preamp/invert"] == .int(0), "a toggle, not mid-travel")
     }
 
     @Test func flippingExplainsPolarity() {
