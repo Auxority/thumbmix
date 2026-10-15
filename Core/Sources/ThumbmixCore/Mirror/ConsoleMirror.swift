@@ -55,12 +55,16 @@ public final class ConsoleMirror {
         for kind in StripKind.allCases {
             for strip in StripID.all(kind) { meterCells[strip] = MeterCell() }
         }
-        // The doc doesn't say preamp routing is pushed, so it is re-read with every renewal.
-        link.renewals =
-            [OSCMessage("/xremote")] + MeterBanks.subscriptions
-            + Catalog.headampIndexAddresses.map { OSCMessage($0) }
+        link.renewals = { [weak self] in self?.renewalMessages ?? [] }
         link.onMessage = { [weak self] in self?.apply($0) }
         link.onState = { [weak self] in self?.linkChanged($0) }
+    }
+
+    /// What the link re-sends every few seconds: the doc doesn't say preamp routing is pushed, so it is re-read here;
+    /// the RTA stream only while the app borrows the RTA.
+    private var renewalMessages: [OSCMessage] {
+        [OSCMessage("/xremote")] + MeterBanks.subscriptions + Catalog.headampIndexAddresses.map { OSCMessage($0) }
+            + (rtaLoan == nil ? [] : [RTA.subscription])
     }
 
     public func start() {

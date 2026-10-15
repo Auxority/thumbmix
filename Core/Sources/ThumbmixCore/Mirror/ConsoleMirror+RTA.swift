@@ -18,7 +18,6 @@ extension ConsoleMirror {
                 case .int(let originalPosition)? = cell(RTA.position).argument
             else { return }
             rtaLoan = RTALoan(originalSource: originalSource, originalPosition: originalPosition, source: source)
-            link.renewals.append(RTA.subscription)
             link.send(RTA.subscription)
         }
         rtaLoan?.source = source
@@ -37,7 +36,6 @@ extension ConsoleMirror {
     public func releaseRTA() {
         guard let loan = rtaLoan else { return }
         rtaLoan = nil
-        link.renewals.removeAll { $0 == RTA.subscription }
         spectrum.decibels = []
         if cell(RTA.source).argument == .int(loan.source) { set(RTA.source, .int(loan.originalSource)) }
         if cell(RTA.position).argument == .int(RTA.afterEQ) { set(RTA.position, .int(loan.originalPosition)) }
