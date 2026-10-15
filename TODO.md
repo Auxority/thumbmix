@@ -34,7 +34,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Small fixes
 
-- [ ] **No "Thumbmix" title on the overview** (`OverviewView`, `.navigationTitle`). Offline mode shows its DEMO pill in that title (`demoTitle`): keep the pill where it moves no control.
 - [ ] **Plain words for the desk's filter terms?** The key filter's types (LC6 … HC12, BP Q 1.0 … 10) and EQ types (LCut, PEQ, BU6 …) show the desk's terms. Revisit both together, like Detector's "Average level" · RMS.
 
 ## Features

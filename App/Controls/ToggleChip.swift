@@ -29,7 +29,7 @@ struct ToggleChip: View {
         // Dimmed like a disabled ParameterRow: an unread chip in full grey would still read as a real "Off".
         .opacity(isEnabled && state != nil ? 1 : 0.38)
         .accessibilityIdentifier("toggle-" + spec.address)
-        .accessibilityValue(state == nil ? "" : isOn ? "On" : "Off")
+        .accessibilityValue(state == nil ? Text(verbatim: "") : Text(isOn ? "On" : "Off"))
     }
 }
 

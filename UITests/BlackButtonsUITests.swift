@@ -6,6 +6,7 @@ final class BlackButtonsUITests: DeskUITestCase {
     func testDisconnectIsBlack() {
         launch()
         saveScreenshot("overview-buttons")
+        XCTAssertFalse(app.navigationBars.staticTexts["Thumbmix"].exists, "the overview has no title")
         assertFillIsBlack(app.buttons["Disconnect"])
         assertNotSqueezed(app.buttons["Disconnect"])
     }
