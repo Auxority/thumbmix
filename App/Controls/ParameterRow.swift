@@ -125,13 +125,12 @@ struct ParameterRow: View {
         if let unity = spec.unityNormalized, RelativeDrag.crossed(unity, from: old, to: new) {
             unityTicks += 1
         }
-        mirror.set(spec.address, spec.scale.argument(fromNormalized: new))
+        mirror.set(spec, normalized: new)
     }
 
     private func reset() {
         guard isEnabled, let value = spec.resetValue else { return }
-        mirror.set(
-            spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
+        mirror.set(spec, value: value)
     }
 }
 
@@ -176,7 +175,7 @@ private struct TypeValueAlert: ViewModifier {
         switch ValueInput.read(typed, for: spec) {
         case .value(let value):
             refused = nil
-            mirror.set(spec.address, spec.scale.argument(fromNormalized: value))
+            mirror.set(spec, normalized: value)
         case .notAValue: refused = Refusal(text: typed, isOutOfRange: false)
         case .outOfRange: refused = Refusal(text: typed, isOutOfRange: true)
         }

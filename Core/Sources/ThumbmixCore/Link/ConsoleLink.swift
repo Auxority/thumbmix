@@ -26,18 +26,6 @@ public struct LinkTiming: Sendable {
     public var lostAfter: Duration
     public var restartAfterLost: Duration
 
-    public init(
-        identifyTimeout: Duration, tick: Duration, renewEvery: Duration, probeWhenQuietFor: Duration,
-        lostAfter: Duration, restartAfterLost: Duration
-    ) {
-        self.identifyTimeout = identifyTimeout
-        self.tick = tick
-        self.renewEvery = renewEvery
-        self.probeWhenQuietFor = probeWhenQuietFor
-        self.lostAfter = lostAfter
-        self.restartAfterLost = restartAfterLost
-    }
-
     /// `/xremote` and `/meters` expire after 10 s (doc p.9, p.16). Renewing every 4 s fits two renewals
     /// in that window, so one lost UDP packet doesn't lapse the subscription.
     public static let console = LinkTiming(

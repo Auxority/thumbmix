@@ -34,7 +34,6 @@ public enum DemoState {
 
     private static let unity = OSCArgument.float(ParamScale.fader.normalized(forValue: 0))
 
-    /// Names a strip, colours it and puts its fader at 0 dB.
     private static func patch(_ strip: StripID, _ name: String, color: Int32, in state: inout [String: OSCArgument]) {
         state[strip.name] = .string(name)
         state[strip.color] = .int(color)
@@ -67,7 +66,6 @@ public enum DemoState {
         state[right] = .float(1)
     }
 
-    /// Monitor mixes 1-4, each fed by both vocals at 0 dB.
     private static func addMonitors(to state: inout [String: OSCArgument]) {
         for bus in 1...4 {
             patch(StripID(.bus, bus), "Mon \(bus)", color: 6, in: &state)
@@ -82,14 +80,12 @@ public enum DemoState {
         patch(StripID(.mainStereo), "LR", color: 0, in: &state)
     }
 
-    /// Matrix 1 feeds a front fill from the main mix at 0 dB.
     private static func addFill(to state: inout [String: OSCArgument]) {
         let fill = StripID(.matrix, 1)
         patch(fill, "Fill", color: 7, in: &state)
         state[Catalog.sendLevel(from: StripID(.mainStereo), to: fill).address] = .float(0.75)
     }
 
-    /// Main M feeds a sub from the kick and the bass at 0 dB.
     private static func addSub(to state: inout [String: OSCArgument]) {
         for source in [StripID(.input, 1), StripID(.input, 8)] {
             state[Catalog.feedOn(from: source, to: StripID(.mainMono)).address] = .int(1)

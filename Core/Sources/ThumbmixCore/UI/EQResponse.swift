@@ -6,15 +6,7 @@ public struct EQBandState: Equatable, Sendable {
     public let gain: Double
     public let q: Double
 
-    /// nil for a number the desk doesn't have.
     public var type: EQFilterType? { EQFilterType(rawValue: typeIndex) }
-
-    public init(typeIndex: Int, frequency: Double, gain: Double, q: Double) {
-        self.typeIndex = typeIndex
-        self.frequency = frequency
-        self.gain = gain
-        self.q = q
-    }
 }
 
 /// RBJ-cookbook biquads at 48 kHz. An approximation of the console's curves: good enough to see
@@ -149,11 +141,6 @@ public struct LowCutState: Equatable, Sendable {
     public let frequency: Double
     public let slopeIndex: Int
 
-    public init(frequency: Double, slopeIndex: Int) {
-        self.frequency = frequency
-        self.slopeIndex = slopeIndex
-    }
-
     public func decibels(at hertz: Double) -> Double {
         let order = Double(slopeIndex + 2)
         return -10 * log10(1 + pow(frequency / hertz, 2 * order))
@@ -178,7 +165,6 @@ public enum EQReading {
         value(Catalog.eqOn(strip).address) == .int(1) ? bandsAsSet(strip, value: value) : []
     }
 
-    /// The bands as set, heard or not.
     public static func bandsAsSet(_ strip: StripID, value: (String) -> OSCArgument?) -> [EQBandState] {
         guard strip.eqBandCount > 0 else { return [] }
         func real(_ spec: ParamSpec, _ fallback: Float) -> Double {
@@ -192,7 +178,6 @@ public enum EQReading {
         }
     }
 
-    /// The curve's level at `hertz`: the bands plus the low cut.
     public static func decibels(at hertz: Double, bands: [EQBandState], lowCut: LowCutState?) -> Double {
         EQResponse.decibels(at: hertz, bands: bands) + (lowCut?.decibels(at: hertz) ?? 0)
     }
@@ -203,7 +188,6 @@ public enum EQReading {
 }
 
 extension ConsoleMirror {
-    /// nil when the strip has no low cut, it is off, or its values were never read: the graph draws no cut.
     public func lowCut(_ strip: StripID) -> LowCutState? {
         EQReading.lowCut(strip) { cell($0).argument }
     }

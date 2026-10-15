@@ -53,6 +53,15 @@ extension ConsoleMirror {
         cell(Catalog.dynamics(strip).auto.address).argument == .int(1)
     }
 
+    public func set(_ spec: ParamSpec, normalized: Float) {
+        set(spec.address, spec.scale.argument(fromNormalized: normalized))
+    }
+
+    /// `value` is in the spec's own unit (dB, Hz, option index).
+    public func set(_ spec: ParamSpec, value: Double) {
+        set(spec, normalized: spec.scale.normalized(forValue: value))
+    }
+
     public func isSoloed(_ strip: StripID) -> Bool {
         cell(strip.solo).argument == .int(1)
     }
@@ -61,8 +70,7 @@ extension ConsoleMirror {
     /// soloed is never wanted. Writing the partner too is harmless if the desk does copy it.
     public func toggleSolo(_ strip: StripID) {
         let soloed: OSCArgument = .int(isSoloed(strip) ? 0 : 1)
-        let partner = isLinked(strip) ? strip.partner : nil
-        for side in [strip, partner].compactMap({ $0 }) { set(side.solo, soloed) }
+        for side in isLinked(strip) ? strip.pairSides : [strip] { set(side.solo, soloed) }
     }
 
     /// Unnamed and pulled all the way down: almost certainly not patched for this show.

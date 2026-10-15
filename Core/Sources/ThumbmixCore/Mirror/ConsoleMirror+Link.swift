@@ -83,7 +83,7 @@ extension ConsoleMirror {
     /// Linking pans the sides apart and may copy the odd side's settings, and the desk may not push any of it:
     /// both strips are read back, spread out so the desk isn't flooded. Only what was read: the rest is read when opened.
     private func rereadPair(_ odd: StripID) {
-        let addresses = [odd, odd.partner].compactMap { $0 }
+        let addresses = odd.pairSides
             .flatMap { Catalog.addresses(of: $0, headamp: headamp(of: $0)) }
             .filter { cell($0).argument != nil }
         for (index, address) in addresses.enumerated() {

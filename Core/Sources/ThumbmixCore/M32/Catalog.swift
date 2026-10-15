@@ -9,8 +9,6 @@ public enum Catalog {
     public static let ratios = [
         "1.1", "1.3", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "7.0", "10", "20", "100",
     ]
-    public static let eqTypes = EQFilterType.ofInputs.map(\.deskName)
-    public static let mainEQTypes = EQFilterType.allCases.map(\.deskName)
 
     private static let hold = ParamScale.log(min: 0.02, max: 2000, steps: 101)
     private static let release = ParamScale.log(min: 5, max: 4000, steps: 101)

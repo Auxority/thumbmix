@@ -88,7 +88,7 @@ private struct SendSettingsButton: View {
 /// switch and level from `Catalog.feedOn` and `feedLevel`.
 /// Unused sources whose send here is at −∞ fold into the last row (`UnusedFoldRow`). A linked source pair is one row
 /// whenever it is on the overview: the desk links sends with the faders (`LinkSection.of`).
-/// A row's tall › opens the send's sheet, as on Sends; the mains have no tap or send pan, so no › (2026-10-14).
+/// Mains have no tap or send pan, so their rows have no ›.
 struct FedByTab: View {
     let target: StripID
     let mirror: ConsoleMirror

@@ -10,10 +10,8 @@ public enum ChannelTab: String, CaseIterable, Identifiable, Sendable {
 
     public var id: Self { self }
 
-    /// The catalog key; also the English title.
-    public var titleKey: String { rawValue }
-
-    public var title: String { CoreStrings.text(String.LocalizationValue(titleKey)) }
+    /// The raw value is the catalog key and the English title.
+    public var title: String { CoreStrings.text(String.LocalizationValue(rawValue)) }
 
     /// The Link Preference that decides whether a linked pair shows this tab once or per side.
     public var linkSection: LinkSection? {

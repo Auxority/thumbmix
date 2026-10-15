@@ -74,6 +74,18 @@ struct ConsoleMirrorTests {
         }
     }
 
+    @Test func editsBySpecGoThroughTheSpecsScale() async throws {
+        try await withLiveDesk { _, mirror in
+            let fader = Catalog.fader(StripID(.input, 1))
+            mirror.set(fader, normalized: 0.6)
+            #expect(mirror.cell(fader.address).argument == fader.scale.argument(fromNormalized: 0.6))
+
+            mirror.set(fader, value: 0)
+            let unity = fader.scale.argument(fromNormalized: fader.scale.normalized(forValue: 0))
+            #expect(mirror.cell(fader.address).argument == unity)
+        }
+    }
+
     @Test func editsIgnoredWhileNotLive() {
         let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: 9, timing: .fast))
         mirror.set("/ch/01/mix/fader", .float(0.6))

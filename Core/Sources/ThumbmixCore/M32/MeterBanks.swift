@@ -2,12 +2,6 @@ public struct MeterReading: Equatable, Sendable {
     public var level: Float
     public var gateGain: Float?
     public var dynamicsGain: Float?
-
-    public init(level: Float, gateGain: Float? = nil, dynamicsGain: Float? = nil) {
-        self.level = level
-        self.gateGain = gateGain
-        self.dynamicsGain = dynamicsGain
-    }
 }
 
 /// The meter banks Thumbmix subscribes to and where each strip sits in them (doc p.17-19).

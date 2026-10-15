@@ -15,6 +15,5 @@ public struct ConsoleColor: Equatable, Sendable {
         self.init(base: Base(rawValue: valid % 8) ?? .off, inverted: valid >= 8)
     }
 
-    /// The `config/color` value the desk expects.
     public var index: Int { base.rawValue + (inverted ? 8 : 0) }
 }
