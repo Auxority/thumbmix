@@ -46,6 +46,8 @@ public struct DynamicsSpecs: Sendable {
     public var all: [ParamSpec] {
         [on, mode, threshold, ratio, knee, attack, hold, release, makeup, detector, envelope, auto]
     }
+    /// What the desk ignores while Auto time is on (the user, on the console, 2026-10-15).
+    public var autoTimed: [ParamSpec] { [attack, release] }
 }
 
 /// What a gate or comp listens to: its key source and the filter on that signal.

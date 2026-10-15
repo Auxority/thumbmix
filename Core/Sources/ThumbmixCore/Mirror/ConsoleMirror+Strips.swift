@@ -48,6 +48,11 @@ extension ConsoleMirror {
         set(address, .int(inMix ? 1 : 0))
     }
 
+    /// false while off or not read yet: the comp's Attack and Release stay usable until the desk says otherwise.
+    public func isAutoTimeOn(_ strip: StripID) -> Bool {
+        cell(Catalog.dynamics(strip).auto.address).argument == .int(1)
+    }
+
     public func isSoloed(_ strip: StripID) -> Bool {
         cell(strip.solo).argument == .int(1)
     }

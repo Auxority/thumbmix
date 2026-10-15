@@ -57,11 +57,13 @@ struct CompTab: View {
                     ToggleChip(spec: dynamics.on, mirror: mirror, onColor: .green)
                     ChoiceMenu(spec: dynamics.mode, mirror: mirror)
                 }
+                // Auto time takes over Attack and Release: dimmed in place, like a cut filter's Gain and Q.
+                let autoTimed = mirror.isAutoTimeOn(strip) ? Set(dynamics.autoTimed.map(\.address)) : []
                 ForEach([
                     dynamics.threshold, dynamics.ratio, dynamics.knee, dynamics.attack, dynamics.hold,
                     dynamics.release, dynamics.makeup,
                 ]) {
-                    ParameterRow(spec: $0, mirror: mirror)
+                    ParameterRow(spec: $0, mirror: mirror).disabled(autoTimed.contains($0.address))
                 }
                 // Set and forget: below the settings an engineer rides.
                 HStack(spacing: 8) {

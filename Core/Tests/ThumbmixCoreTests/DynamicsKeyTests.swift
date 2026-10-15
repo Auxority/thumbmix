@@ -9,6 +9,19 @@ import Testing
 struct DynamicsKeyTests {
     private let vox = StripID(.input, 1)
 
+    /// The desk ignores Attack and Release while Auto time is on (the user, on the console, 2026-10-15), so those
+    /// rows are dimmed then. Unread counts as off, like an unread EQ type: the rows stay usable.
+    @Test func autoTimeTakesOverAttackAndRelease() {
+        let dynamics = Catalog.dynamics(vox)
+        #expect(dynamics.autoTimed.map(\.address) == [dynamics.attack.address, dynamics.release.address])
+        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: 9))
+        #expect(!mirror.isAutoTimeOn(vox), "unread")
+        mirror.apply(OSCMessage(dynamics.auto.address, [.int(1)]))
+        #expect(mirror.isAutoTimeOn(vox))
+        mirror.apply(OSCMessage(dynamics.auto.address, [.int(0)]))
+        #expect(!mirror.isAutoTimeOn(vox))
+    }
+
     @Test func everyCompHasAutoTimeAndAKeyFilter() {
         for strip in StripKind.allCases.flatMap(StripID.all).filter(\.hasDynamics) {
             let key = Catalog.dynamicsKey(strip)
