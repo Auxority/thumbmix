@@ -20,7 +20,7 @@ public final class FakeM32: @unchecked Sendable {
     private var clients: [ObjectIdentifier: Client] = [:]
     private var meterTimer: DispatchSourceTimer?
     private var startContinuation: CheckedContinuation<UInt16, Error>?
-    private var modelStorage: String
+    private let modelStorage: String
     private var isSilent = false
     private var isIgnoringXremote = false
     private var isCopyingLinkedEdits = true
@@ -62,11 +62,6 @@ public final class FakeM32: @unchecked Sendable {
     }
 
     // MARK: Test controls
-
-    public var model: String {
-        get { queue.sync { modelStorage } }
-        set { queue.sync { modelStorage = newValue } }
-    }
 
     /// While silent the fake ignores everything and sends nothing, like an unplugged console.
     public var silent: Bool {

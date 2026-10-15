@@ -75,17 +75,15 @@ struct MainsFedByTests {
     /// The desk links the mono level with fader and mute ("M/C level", p.46), so one side is written and the desk
     /// copies it.
     @Test func aLinkedPairsMonoLevelReachesBothSides() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        let main = StripID(.mainMono)
-        await openTab(.fedBy, of: main, in: mirror)
-        let gtrL = StripID(.input, 9)
+        try await withLiveDesk { fake, mirror in
+            let main = StripID(.mainMono)
+            await openTab(.fedBy, of: main, in: mirror)
+            let gtrL = StripID(.input, 9)
 
-        mirror.set(Catalog.feedLevel(from: gtrL, to: main).address, .float(0.75))
+            mirror.set(Catalog.feedLevel(from: gtrL, to: main).address, .float(0.75))
 
-        #expect(await eventually { fake.value(at: "/ch/10/mix/mlevel") == .float(0.75) })
+            #expect(await eventually { fake.value(at: "/ch/10/mix/mlevel") == .float(0.75) })
+        }
     }
 }
 

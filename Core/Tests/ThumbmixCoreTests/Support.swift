@@ -35,6 +35,22 @@ func liveMirror(port: UInt16, auditAddresses: [String] = Catalog.auditAddresses(
     return mirror
 }
 
+/// Runs `body` against a fresh fake desk and a mirror that is live on it, and stops both afterwards, however
+/// `body` ends. The fake's quirks are set before the mirror connects.
+@MainActor
+func withLiveDesk(
+    copiesLinkedEdits: Bool = true, dropsGets: Int = 0,
+    _ body: (FakeM32, ConsoleMirror) async throws -> Void
+) async throws {
+    let (fake, port) = try await startFake()
+    defer { fake.stop() }
+    fake.copiesLinkedEdits = copiesLinkedEdits
+    fake.dropNextGets(dropsGets)
+    let mirror = await liveMirror(port: port)
+    defer { mirror.stop() }
+    try await body(fake, mirror)
+}
+
 /// Opens `tab` of `strip` as the app's screen does: reads its values (and a linked partner's) and waits for them.
 @MainActor
 func openTab(_ tab: ChannelTab, of strip: StripID, in mirror: ConsoleMirror) async {

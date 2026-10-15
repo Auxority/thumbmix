@@ -64,29 +64,27 @@ struct RTATests {
     /// The offline demo's spectrum is measured "after EQ" like the desk's: a band boosted, then cut, by 15 dB
     /// moves the spectrum there far more than the fake's own wobble (a few dB).
     @Test func theDemoSpectrumFollowsTheEQ() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        let kick = StripID(.input, 1)
-        await openTab(.eq, of: kick, in: mirror)
-        let gain = Catalog.eqBand(kick, 1).gain
-        let bandFrequency = try #require(mirror.eqBands(kick).first?.frequency)
-        let index = (0..<RTA.bandCount).min { abs(RTA.bandFrequency($0) - bandFrequency) < abs(RTA.bandFrequency($1) - bandFrequency) }!
-        mirror.followRTA(kick)
-        #expect(await eventually { mirror.spectrum.decibels.count == RTA.bandCount })
+        try await withLiveDesk { fake, mirror in
+            let kick = StripID(.input, 1)
+            await openTab(.eq, of: kick, in: mirror)
+            let gain = Catalog.eqBand(kick, 1).gain
+            let bandFrequency = try #require(mirror.eqBands(kick).first?.frequency)
+            let index = (0..<RTA.bandCount).min { abs(RTA.bandFrequency($0) - bandFrequency) < abs(RTA.bandFrequency($1) - bandFrequency) }!
+            mirror.followRTA(kick)
+            #expect(await eventually { mirror.spectrum.decibels.count == RTA.bandCount })
 
-        let flat = mirror.spectrum.decibels[index]
+            let flat = mirror.spectrum.decibels[index]
 
-        // Waits for a spectrum each edit shaped: one sampled after a fixed sleep can predate it on a slow runner.
-        mirror.set(gain.address, gain.scale.argument(fromNormalized: 1))
-        #expect(await eventually { mirror.spectrum.decibels[index] - flat > 10 }, "boost at \(Int(bandFrequency)) Hz")
-        let boosted = mirror.spectrum.decibels[index]
-        mirror.set(gain.address, gain.scale.argument(fromNormalized: 0))
+            // Waits for a spectrum each edit shaped: one sampled after a fixed sleep can predate it on a slow runner.
+            mirror.set(gain.address, gain.scale.argument(fromNormalized: 1))
+            #expect(await eventually { mirror.spectrum.decibels[index] - flat > 10 }, "boost at \(Int(bandFrequency)) Hz")
+            let boosted = mirror.spectrum.decibels[index]
+            mirror.set(gain.address, gain.scale.argument(fromNormalized: 0))
 
-        #expect(
-            await eventually { boosted - mirror.spectrum.decibels[index] > 20 },
-            "boosted \(boosted) dB, cut \(mirror.spectrum.decibels[index]) dB at \(Int(bandFrequency)) Hz")
+            #expect(
+                await eventually { boosted - mirror.spectrum.decibels[index] > 20 },
+                "boosted \(boosted) dB, cut \(mirror.spectrum.decibels[index]) dB at \(Int(bandFrequency)) Hz")
+        }
     }
 
     @Test func aChangeMadeOnTheDeskMeanwhileIsKept() async throws {

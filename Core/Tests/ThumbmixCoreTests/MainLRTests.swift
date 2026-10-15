@@ -26,19 +26,17 @@ struct MainLRTests {
 
     /// The desk links `mix/st` with fader and mute, so the app writes one side and the desk copies it.
     @Test func takingALinkedPairOutReachesBothSides() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        let gtrL = StripID(.input, 9)
-        await openTab(.mix, of: gtrL, in: mirror)
-        #expect(mirror.isInMainLR(gtrL) == true)
+        try await withLiveDesk { fake, mirror in
+            let gtrL = StripID(.input, 9)
+            await openTab(.mix, of: gtrL, in: mirror)
+            #expect(mirror.isInMainLR(gtrL) == true)
 
-        mirror.setInMainLR(gtrL, false)
+            mirror.setInMainLR(gtrL, false)
 
-        #expect(await eventually { fake.value(at: "/ch/10/mix/st") == .int(0) })
-        #expect(fake.value(at: "/ch/09/mix/st") == .int(0))
-        #expect(mirror.isInMainLR(gtrL) == false)
+            #expect(await eventually { fake.value(at: "/ch/10/mix/st") == .int(0) })
+            #expect(fake.value(at: "/ch/09/mix/st") == .int(0))
+            #expect(mirror.isInMainLR(gtrL) == false)
+        }
     }
 
     @Test func aMatrixHasNoAnswer() {
