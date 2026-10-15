@@ -37,8 +37,12 @@ struct LinkCopyCheck {
     /// A question asked just before the edit is answered with the old value, and that answer can be handled after
     /// the re-read went out (seen on CI's busy main actor). So a wrong answer is asked again once: the second
     /// re-read goes out after every earlier question was answered, and only its wrong answer means left behind.
-    mutating func received(_ address: String, _ value: OSCArgument, now: ContinuousClock.Instant) -> Verdict {
-        guard let wanted = awaiting.removeValue(forKey: address), now <= wanted.until else { return .none }
+    /// `arrival` is when the datagram came in, not when the main actor got to it: on a busy main actor (CI's parallel
+    /// suite) an answer on time was handled 2 s after the re-read and dropped as late, so the partner was never repaired.
+    mutating func received(_ address: String, _ value: OSCArgument, arrivedAt arrival: ContinuousClock.Instant)
+        -> Verdict
+    {
+        guard let wanted = awaiting.removeValue(forKey: address), arrival <= wanted.until else { return .none }
         if value.isClose(to: wanted.value) {
             doubted.remove(address)
             return .none

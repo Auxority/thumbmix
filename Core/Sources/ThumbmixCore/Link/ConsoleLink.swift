@@ -58,7 +58,7 @@ public final class ConsoleLink {
         }
     }
 
-    public var onMessage: ((OSCMessage) -> Void)?
+    public var onMessage: ((Arrival) -> Void)?
     public var onState: ((LinkState) -> Void)?
     /// Asked for on every renewal, so its owner (the mirror) decides what is subscribed; re-sent every `renewEvery`,
     /// and at once when the console comes back.
@@ -118,7 +118,7 @@ public final class ConsoleLink {
         receiveTask = Task { [weak self] in
             // A replaced socket's stream still hands out what it buffered: replies from before the outage,
             // which would land after the resync forgot those values and show them as live.
-            for await message in messages where !Task.isCancelled { self?.received(message) }
+            for await arrival in messages where !Task.isCancelled { self?.received(arrival) }
         }
     }
 
@@ -135,17 +135,17 @@ public final class ConsoleLink {
         transport.send(OSCMessage("/info"))
     }
 
-    private func received(_ message: OSCMessage) {
+    private func received(_ arrival: Arrival) {
         supervisor.heard(at: .now)
         if state == .lost, let info {
             state = .live(info)
             renew()
         }
-        if message.address == "/info" {
-            recordInfo(message)
+        if arrival.message.address == "/info" {
+            recordInfo(arrival.message)
             return
         }
-        onMessage?(message)
+        onMessage?(arrival)
     }
 
     private func recordInfo(_ message: OSCMessage) {

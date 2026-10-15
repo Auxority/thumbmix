@@ -22,8 +22,8 @@ extension ConsoleMirror {
     }
 
     /// Judges a partner's answer after the app's linked edit (`LinkCopyCheck`).
-    func judgeLinkCopy(_ address: String, _ argument: OSCArgument) {
-        switch linkCopies.received(address, argument, now: .now) {
+    func judgeLinkCopy(_ address: String, _ argument: OSCArgument, arrivedAt arrival: ContinuousClock.Instant) {
+        switch linkCopies.received(address, argument, arrivedAt: arrival) {
         case .none:
             return
         case .askAgain:

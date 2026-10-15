@@ -6,9 +6,9 @@ public final class MessageRecorder {
     private var task: Task<Void, Never>?
     private let limit = 5_000
 
-    public init(_ stream: AsyncStream<OSCMessage>) {
+    public init(_ stream: AsyncStream<Arrival>) {
         task = Task { [weak self] in
-            for await message in stream { self?.record(message) }
+            for await arrival in stream { self?.record(arrival.message) }
         }
     }
 

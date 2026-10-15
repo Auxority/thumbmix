@@ -2,10 +2,17 @@ import Foundation
 import Network
 import os
 
+/// A decoded message and when its datagram came in, timed on the socket's queue: a busy main actor may read it much
+/// later, and a reply's age is judged from its arrival (`LinkCopyCheck`).
+public struct Arrival: Sendable {
+    public let message: OSCMessage
+    public let time: ContinuousClock.Instant
+}
+
 /// A UDP socket to one console. Network.framework calls back on `queue`; decoded messages come out of `messages`.
 public final class UDPTransport: @unchecked Sendable {
-    public let messages: AsyncStream<OSCMessage>
-    private let continuation: AsyncStream<OSCMessage>.Continuation
+    public let messages: AsyncStream<Arrival>
+    private let continuation: AsyncStream<Arrival>.Continuation
     private let connection: NWConnection
     private let queue = DispatchQueue(label: "thumbmix.udp")
     private let log = Logger(subsystem: "thumbmix", category: "udp")
@@ -44,7 +51,7 @@ public final class UDPTransport: @unchecked Sendable {
         connection.receiveMessage { [weak self] data, _, _, error in
             guard let self else { return }
             if let data {
-                do { continuation.yield(try OSCCodec.decode(data)) } catch {
+                do { continuation.yield(Arrival(message: try OSCCodec.decode(data), time: .now)) } catch {
                     log.debug("dropped malformed packet: \(String(describing: error), privacy: .public)")
                 }
             }

@@ -24,6 +24,30 @@ struct TransportTests {
         #expect(reply?.string(at: 2) == "M32")
     }
 
+    /// The link check judges a reply's age (`LinkCopyCheck.answerWindow`): one that came in while the main actor was
+    /// busy must not look as old as the wait to read it.
+    @Test(.timeLimit(.minutes(1))) func aReplyIsTimedWhenItArrivesNotWhenItIsRead() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let transport = UDPTransport(host: "127.0.0.1", port: port)
+        transport.start()
+        defer { transport.cancel() }
+        var arrivals = transport.messages.makeAsyncIterator()
+
+        // A few asks, so a dropped datagram can't leave the wait below hanging.
+        for _ in 1...3 { transport.send(OSCMessage("/info")) }
+        let asked = ContinuousClock.now
+        blockTheMainActor(for: 0.5)  // busy while the replies come in
+
+        let arrival = try #require(await arrivals.next())
+        #expect(arrival.time - asked < .milliseconds(250))
+    }
+
+    /// Blocks, rather than suspends, so nothing else runs on the main actor meanwhile.
+    private func blockTheMainActor(for seconds: TimeInterval) {
+        Thread.sleep(forTimeInterval: seconds)
+    }
+
     @Test func xremotePushesChangesFromOtherClients() async throws {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
