@@ -217,7 +217,7 @@ public enum Catalog {
         guard hasSendSettings(target) else { return nil }
         return ParamSpec(
             sendPrefix(strip, target) + "/type", CoreStrings.text("Tap point"),
-            .choice(["IN/LC", "<-EQ", "EQ->", "PRE", "POST", "GRP"]), .plain)
+            .choice(SendTap.allCases.map(\.deskAbbreviation)), .plain)
     }
 
     /// Whether the strip's comp sits before (0) or after (1) its EQ (doc p.25): the tap chain follows it.

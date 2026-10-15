@@ -1,34 +1,5 @@
 import Foundation
 
-/// Where a send is taken from its strip: the odd send's `mix/NN/type`, numbered as on the desk (doc p.26).
-public enum SendTap: Int, CaseIterable, Sendable {
-    case input, preEQ, postEQ, preFader, postFader, subgroup
-
-    /// What the app calls it: plain words for what the send hears.
-    public var name: String {
-        switch self {
-        case .input: CoreStrings.text("Input")
-        case .preEQ: CoreStrings.text("Before EQ")
-        case .postEQ: CoreStrings.text("After EQ")
-        case .preFader: CoreStrings.text("Before fader")
-        case .postFader: CoreStrings.text("After fader")
-        case .subgroup: CoreStrings.text("Subgroup")
-        }
-    }
-
-    /// The desk's own term, spelled out (its screen shows IN/LC, <-EQ, EQ->, PRE, POST, GRP).
-    public var deskTerm: String {
-        switch self {
-        case .input: CoreStrings.text("Input")
-        case .preEQ: CoreStrings.text("Pre-EQ")
-        case .postEQ: CoreStrings.text("Post-EQ")
-        case .preFader: CoreStrings.text("Pre-fader")
-        case .postFader: CoreStrings.text("Post-fader")
-        case .subgroup: CoreStrings.text("Subgroup")
-        }
-    }
-}
-
 /// The parts of a strip a send can be taken after.
 public enum TapBlock: Hashable, Sendable {
     /// `pan` and `group` both stand for Subgroup: a stereo mix's follows the channel's pan, a mono one's can't.
