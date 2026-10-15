@@ -49,6 +49,7 @@ struct CompTab: View {
         let dynamics = Catalog.dynamics(strip)
         ScrollView {
             VStack(spacing: 8) {
+                // Graph first, like the EQ tab (2026-10-15).
                 TransferGraph(
                     curve: curve(dynamics), meter: mirror.meter(strip), reduction: \.dynamicsGain,
                     identifier: "comp-graph", label: "Compressor curve",
@@ -133,32 +134,16 @@ struct CompPositionMenu: View {
             if mixes?.isEmpty == false { pending = argument } else { mirror.set(spec.address, argument) }
         }
         .disabled(mixes == nil)
-        .alert(title, isPresented: isAsking, presenting: pending) { argument in
+        .alert(prompt.title, isPresented: isAsking, presenting: pending) { argument in
             Button("Move") { mirror.set(spec.address, argument) }
             Button("Cancel", role: .cancel) {}
         } message: { _ in
-            Text(message(mixes ?? []))
+            Text(prompt.message)
         }
     }
 
-    /// PRE (0) puts the comp before the EQ (doc p.25).
-    private var movesBeforeEQ: Bool { pending == .int(0) }
-
-    private var title: String {
-        movesBeforeEQ ? String(localized: "Move the comp before the EQ?") : String(localized: "Move the comp after the EQ?")
-    }
-
-    /// Every mix named changes the same way: all start hearing the comp, or all stop.
-    private func message(_ mixes: [String]) -> String {
-        let names = mixes.joined(separator: " · ")
-        if mixes.count == 1 {
-            return movesBeforeEQ
-                ? String(localized: "\(names) will start hearing the compressor.")
-                : String(localized: "\(names) will stop hearing the compressor.")
-        }
-        return movesBeforeEQ
-            ? String(localized: "These \(mixes.count) mixes will start hearing the compressor:\n\n\(names)")
-            : String(localized: "These \(mixes.count) mixes will stop hearing the compressor:\n\n\(names)")
+    private var prompt: CompMovePrompt {
+        CompMovePrompt(movesBeforeEQ: pending == .int(0), mixes: mirror.mixesChangedByMovingComp(of: strip) ?? [])
     }
 
     private var isAsking: Binding<Bool> {

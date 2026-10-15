@@ -9,6 +9,7 @@ enum Theme {
     static let selected = Color(white: 0.3)
     static let secondaryText = Color(white: 0.6)
     static let muteRed = Color(red: 0.95, green: 0.2, blue: 0.2)
+    /// Picked for flipped polarity (DECISIONS.md: amber, not red), apart from `soloYellow`; they only happen to match today.
     static let polarityAmber = Color(red: 1, green: 0.84, blue: 0.04)
     /// The desk's solo buttons light yellow.
     static let soloYellow = Color(red: 1, green: 0.84, blue: 0.04)
@@ -33,4 +34,26 @@ enum Theme {
         case .white: Color(white: 0.95)
         }
     }
+}
+
+extension Theme {
+    /// A disabled control's opacity.
+    static let dimmedOpacity = 0.38
+}
+
+/// Disables a control until the console sent its value and dims it like a disabled `ParameterRow`: an unread
+/// control in full grey would still read as a real "Off".
+private struct DimmedUntilRead: ViewModifier {
+    let isRead: Bool
+    @Environment(\.isEnabled) private var isEnabled
+
+    func body(content: Content) -> some View {
+        content
+            .disabled(!isRead)
+            .opacity(isEnabled && isRead ? 1 : Theme.dimmedOpacity)
+    }
+}
+
+extension View {
+    func dimmedUntilRead(_ isRead: Bool) -> some View { modifier(DimmedUntilRead(isRead: isRead)) }
 }

@@ -40,7 +40,7 @@ struct ChannelHeader: View {
 
     private var isPair: Bool { mirror.isLinked(strip) }
 
-    private var name: String { isPair ? mirror.pairName(strip) : mirror.name(strip) }
+    private var name: String { mirror.displayName(strip) }
 
     /// A pair's stripe is cut like its overview row: top for the left side, bottom for the right.
     @ViewBuilder private var stripe: some View {

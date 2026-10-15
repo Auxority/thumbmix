@@ -51,6 +51,26 @@
         }
       }
     },
+    "%@ will start hearing the compressor." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ will start hearing the compressor."
+          }
+        }
+      }
+    },
+    "%@ will stop hearing the compressor." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ will stop hearing the compressor."
+          }
+        }
+      }
+    },
     "48V" : {
       "localizations" : {
         "en" : {
@@ -1077,6 +1097,26 @@
         }
       }
     },
+    "Move the comp after the EQ?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move the comp after the EQ?"
+          }
+        }
+      }
+    },
+    "Move the comp before the EQ?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move the comp before the EQ?"
+          }
+        }
+      }
+    },
     "None" : {
       "localizations" : {
         "en" : {
@@ -1434,6 +1474,26 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "The %1$@ reaches this mix; your %2$@ don’t."
+          }
+        }
+      }
+    },
+    "These %lld mixes will start hearing the compressor:\n\n%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "These %1$lld mixes will start hearing the compressor:\n\n%2$@"
+          }
+        }
+      }
+    },
+    "These %lld mixes will stop hearing the compressor:\n\n%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "These %1$lld mixes will stop hearing the compressor:\n\n%2$@"
           }
         }
       }

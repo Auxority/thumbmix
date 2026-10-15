@@ -66,7 +66,7 @@ struct ParameterRow: View {
         }
         .frame(height: height * sizeScale)
         .clipShape(RoundedRectangle(cornerRadius: 10))
-        .opacity(isEnabled ? 1 : 0.38)
+        .opacity(isEnabled ? 1 : Theme.dimmedOpacity)
         .sensoryFeedback(.selection, trigger: unityTicks)
         .sensoryFeedback(.impact(weight: .light), trigger: isTyping) { _, opened in opened }
         .modifier(TypeValueAlert(spec: spec, title: alertTitle, mirror: mirror, isPresented: $isTyping))

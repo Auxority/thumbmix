@@ -94,7 +94,7 @@ struct EQGraph: View {
 
     /// The "L" point sits at the cutoff on the -3 dB line, where the filter starts to bite.
     private func lowCutPosition(in size: CGSize) -> CGPoint {
-        let x = CGFloat(Self.graphX(hertz: lowCutHertz ?? 100)) * size.width
+        let x = CGFloat(EQAxis.position(hertz: lowCutHertz ?? 100)) * size.width
         return CGPoint(x: x, y: Self.graphY(decibels: -3) * size.height)
     }
 
@@ -105,9 +105,6 @@ struct EQGraph: View {
         return frequency.scale.value(fromNormalized: position)
     }
 
-    /// The graph's x axis is log 20 Hz-20 kHz, the same law as the band frequency parameter.
-    static func graphX(hertz: Double) -> Double { log(hertz / 20) / log(1000) }
-
     /// The y axis, from the top: +15 dB at 0, -15 dB at 1.
     private static func graphY(decibels: Double) -> Double { 1 - (min(max(decibels, -15), 15) + 15) / 30 }
 
@@ -115,10 +112,10 @@ struct EQGraph: View {
         -> Path
     {
         var path = Path()
-        let lastX = min(Self.graphX(hertz: maxHertz), 1)
+        let lastX = min(EQAxis.position(hertz: maxHertz), 1)
         for step in 0...120 {
             let x = Double(step) / 120 * lastX
-            let hertz = 20 * pow(1000, x)
+            let hertz = EQAxis.hertz(at: x)
             let decibels = EQResponse.decibels(at: hertz, bands: bands) + (lowCut?.decibels(at: hertz) ?? 0)
             let point = CGPoint(
                 x: x * size.width, y: Self.graphY(decibels: decibels) * size.height)
@@ -135,7 +132,7 @@ struct EQGraph: View {
             grid.addLine(to: CGPoint(x: size.width, y: y))
         }
         for hertz in [100.0, 1000, 10_000] {
-            let x = Self.graphX(hertz: hertz) * size.width
+            let x = EQAxis.position(hertz: hertz) * size.width
             grid.move(to: CGPoint(x: x, y: 0))
             grid.addLine(to: CGPoint(x: x, y: size.height))
         }
@@ -172,7 +169,7 @@ struct EQGraph: View {
 
     /// Where a point is on the graph (0...1), from values the desk sent; nil if any was never read.
     private func graphPosition(of band: Int) -> (x: Float, y: Float)? {
-        if band == Self.lowCutBand { return lowCutHertz.map { (Float(Self.graphX(hertz: $0)), 0) } }
+        if band == Self.lowCutBand { return lowCutHertz.map { (Float(EQAxis.position(hertz: $0)), 0) } }
         let specs = Catalog.eqBand(strip, band)
         guard let frequency = mirror.normalized(specs.frequency), let gain = mirror.normalized(specs.gain) else {
             return nil
@@ -246,7 +243,7 @@ struct EQGraph: View {
     /// The low cut only moves sideways; its 20-400 Hz scale clamps a drag past either end.
     private func moveLowCut(toGraphX x: Float) {
         guard let frequency = Catalog.lowCut(strip)?.frequency else { return }
-        let hertz = 20 * pow(1000, Double(x))
+        let hertz = EQAxis.hertz(at: Double(x))
         mirror.set(frequency.address, frequency.scale.argument(fromNormalized: frequency.scale.normalized(forValue: hertz)))
     }
 }

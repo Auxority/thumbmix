@@ -71,7 +71,7 @@ extension View {
     /// The pill's and the chip's shared behaviour: unread, nothing can be switched from a guess; read, a tap asks.
     fileprivate func mainLRSwitch(_ strip: StripID, mirror: ConsoleMirror, isAsking: Binding<Bool>) -> some View {
         let inMix = mirror.isInMainLR(strip)
-        let name = mirror.isLinked(strip) ? mirror.pairName(strip) : mirror.name(strip)
+        let name = mirror.displayName(strip)
         return
             self
             .disabled(inMix == nil)

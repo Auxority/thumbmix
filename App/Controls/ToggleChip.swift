@@ -7,7 +7,6 @@ struct ToggleChip: View {
     var title: String?
     var onColor: Color = .white
     var onText: Color = .black
-    @Environment(\.isEnabled) private var isEnabled
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
@@ -25,9 +24,7 @@ struct ToggleChip: View {
                 .background(isOn ? onColor : Theme.track, in: RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
-        .disabled(state == nil)
-        // Dimmed like a disabled ParameterRow: an unread chip in full grey would still read as a real "Off".
-        .opacity(isEnabled && state != nil ? 1 : 0.38)
+        .dimmedUntilRead(state != nil)
         .accessibilityIdentifier("toggle-" + spec.address)
         .accessibilityValue(state == nil ? Text(verbatim: "") : Text(isOn ? "On" : "Off"))
     }
@@ -45,7 +42,7 @@ struct MuteButton: View {
 
     var body: some View {
         let muted = mirror.isMuted(strip)
-        let name = mirror.isLinked(strip) ? mirror.pairName(strip) : mirror.name(strip)
+        let name = mirror.displayName(strip)
         Button {
             mirror.set(strip.on, .int(muted ? 1 : 0))
         } label: {
@@ -77,7 +74,7 @@ struct SoloButton: View {
 
     var body: some View {
         let soloed = mirror.isSoloed(strip)
-        let name = mirror.isLinked(strip) ? mirror.pairName(strip) : mirror.name(strip)
+        let name = mirror.displayName(strip)
         Button {
             mirror.toggleSolo(strip)
         } label: {
