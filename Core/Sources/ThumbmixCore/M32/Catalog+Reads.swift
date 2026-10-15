@@ -25,7 +25,7 @@ extension Catalog {
 
     /// Every pair's link switch and the four Link Preferences: they decide how the overview and tabs look.
     public static let linkAddresses =
-        StripKind.allCases.flatMap(StripID.all).filter { $0 == $0.oddSide }.compactMap(\.linkAddress)
+        StripKind.allCases.flatMap(StripID.all).filter(\.isOddSide).compactMap(\.linkAddress)
         + LinkSection.allCases.map(\.preferenceAddress)
 
     /// Read on connect so the desk's own RTA setting is known before the app borrows it.
@@ -57,7 +57,7 @@ extension Catalog {
     private static func sendSheetAddresses(from source: StripID, to target: StripID) -> [String] {
         let odd = target.oddSide
         guard sendTap(from: source, to: odd) != nil else { return [] }
-        return [odd, odd.partner].compactMap { $0 }.flatMap { levelAndOn(from: source, to: $0) }
+        return odd.pairSides.flatMap { levelAndOn(from: source, to: $0) }
             + settings(from: source, to: odd) + [dynamicsPosition(source)?.address].compactMap { $0 }
     }
 

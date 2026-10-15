@@ -19,13 +19,14 @@ extension ConsoleMirror {
 
     /// Strips in use, plus their linked partners: a pair is read as a whole.
     private func stripsInUse() -> [StripID] {
-        let used = StripKind.allCases.flatMap(StripID.all).filter(isInUse)
+        let used = StripKind.allCases.flatMap(StripID.all).filter(isWorthPrefetching)
         var seen = Set<StripID>()
         return (used + used.flatMap { linkedPartner(of: $0) }).filter { seen.insert($0).inserted }
     }
 
-    /// Named and fader up (the user, 2026-10-12): a named spare with its fader down waits until it's opened.
-    private func isInUse(_ strip: StripID) -> Bool {
+    /// The background fill's policy, not the overview's fold (`isUnused`): named and fader up (the user, 2026-10-12).
+    /// A named spare with its fader down waits until it's opened.
+    private func isWorthPrefetching(_ strip: StripID) -> Bool {
         !rawName(strip).isEmpty && (normalized(Catalog.fader(strip)) ?? 0) > 0
     }
 

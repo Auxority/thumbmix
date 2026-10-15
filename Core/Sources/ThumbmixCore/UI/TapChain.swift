@@ -170,14 +170,14 @@ extension ConsoleMirror {
     /// on and tapped just before or after the EQ, a linked pair once. A fader tap hears the comp either way. nil until
     /// every tap and switch has been read: an unread one mustn't pass for "no mix changes".
     public func mixesChangedByMovingComp(of source: StripID) -> [String]? {
-        let pairs = (source.kind.sendTarget.map(StripID.all) ?? []).filter { $0 == $0.oddSide }
+        let pairs = (source.kind.sendTarget.map(StripID.all) ?? []).filter(\.isOddSide)
         let changed = pairs.map { mixesChanged(from: source, pair: $0) }
         return changed.contains(nil) ? nil : changed.flatMap { $0 ?? [] }
     }
 
     /// The desk keeps one tap point per pair of mixes, on the odd send (p.26); each side has its own switch.
     private func mixesChanged(from source: StripID, pair odd: StripID) -> [String]? {
-        let sides = [odd, StripID(odd.kind, odd.number + 1)]
+        let sides = odd.pairSides
         let switches = sides.map { cell(Catalog.sendOn(from: source, to: $0).address).argument }
         guard let tap = sendTap(from: source, to: odd), !switches.contains(nil) else { return nil }
         let heard = zip(sides, switches).filter { $0.1 == .int(1) }.map(\.0)

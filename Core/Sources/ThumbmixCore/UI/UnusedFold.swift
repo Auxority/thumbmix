@@ -27,7 +27,7 @@ extension ConsoleMirror {
         let silent = Set(
             StripID.all(kind).filter { isUnused($0) && isSilent(Catalog.sendLevel(from: strip, to: $0)) })
         return StripID.all(kind).filter { target in
-            [target.oddSide, target.oddSide.partner ?? target].allSatisfy(silent.contains)
+            target.pairSides.allSatisfy(silent.contains)
         }
     }
 

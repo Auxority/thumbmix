@@ -18,6 +18,11 @@ extension StripID {
         number.isMultiple(of: 2) ? StripID(kind, number - 1) : self
     }
 
+    public var isOddSide: Bool { self == oddSide }
+
+    /// Both sides of the pair, odd first; just the strip where the desk can't link.
+    public var pairSides: [StripID] { [oddSide, oddSide.partner].compactMap { $0 } }
+
     public var pairDefaultName: String {
         let odd = oddSide.number
         let even = odd + 1

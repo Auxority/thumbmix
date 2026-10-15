@@ -94,7 +94,7 @@ extension ConsoleMirror {
     }
 
     private func pairItem(for strip: StripID) -> OverviewItem? {
-        let isOdd = strip == strip.oddSide
+        let isOdd = strip.isOddSide
         guard !isShared(.faderMute) else { return isOdd ? .pair(strip) : nil }
         return .strip(strip, isOdd ? .top : .bottom)
     }

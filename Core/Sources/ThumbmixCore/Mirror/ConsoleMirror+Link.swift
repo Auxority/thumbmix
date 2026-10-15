@@ -92,7 +92,7 @@ extension ConsoleMirror {
     }
 
     private static let pairsByLinkAddress = Dictionary(
-        uniqueKeysWithValues: StripKind.allCases.flatMap(StripID.all).filter { $0 == $0.oddSide }
+        uniqueKeysWithValues: StripKind.allCases.flatMap(StripID.all).filter(\.isOddSide)
             .compactMap { odd in odd.linkAddress.map { ($0, odd) } })
 
     /// The partner's copy of `address` when the desk copies this edit to it; nil otherwise.
