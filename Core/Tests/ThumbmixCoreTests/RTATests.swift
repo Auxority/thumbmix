@@ -38,28 +38,30 @@ struct RTATests {
     /// Release judges by what the mirror shows. An audit question asked just before the app's set, answered after
     /// the hold, shows the old value until the re-read answers, so these tests leave the audit out (it has its own).
     private func withRTADesk(
-        before: (FakeM32) -> Void = { _ in }, _ body: (FakeM32, ConsoleMirror) async throws -> Void
+        before: (FakeM32) -> Void = { _ in }, body: (FakeM32, ConsoleMirror) async throws -> Void
     ) async throws {
-        try await withLiveDesk(auditAddresses: [], before: before, body)
+        try await withLiveDesk(auditAddresses: [], before: before, body: body)
     }
 
     @Test func followingPointsTheDeskRTAAndReleasingPutsItBack() async throws {
-        try await withRTADesk(before: { fake in
-            fake.deskChange(RTA.source, .int(50))
-            fake.deskChange(RTA.position, .int(0))
-        }) { fake, mirror in
-            #expect(await eventually { mirror.cell(RTA.source).argument == .int(50) })
+        try await withRTADesk(
+            before: { fake in
+                fake.deskChange(RTA.source, .int(50))
+                fake.deskChange(RTA.position, .int(0))
+            },
+            body: { fake, mirror in
+                #expect(await eventually { mirror.cell(RTA.source).argument == .int(50) })
 
-            mirror.followRTA(StripID(.input, 1))
+                mirror.followRTA(StripID(.input, 1))
 
-            #expect(await eventually { fake.value(at: RTA.source) == .int(2) && fake.value(at: RTA.position) == .int(1) })
-            #expect(await eventually { mirror.spectrum.decibels.count == 100 })
+                #expect(await eventually { fake.value(at: RTA.source) == .int(2) && fake.value(at: RTA.position) == .int(1) })
+                #expect(await eventually { mirror.spectrum.decibels.count == 100 })
 
-            mirror.releaseRTA()
+                mirror.releaseRTA()
 
-            #expect(await eventually { fake.value(at: RTA.source) == .int(50) && fake.value(at: RTA.position) == .int(0) })
-            #expect(mirror.spectrum.decibels.isEmpty)
-        }
+                #expect(await eventually { fake.value(at: RTA.source) == .int(50) && fake.value(at: RTA.position) == .int(0) })
+                #expect(mirror.spectrum.decibels.isEmpty)
+            })
     }
 
     /// The stream expires on the desk after 10 s, so it is renewed exactly while the app borrows the RTA.
@@ -122,18 +124,20 @@ struct RTATests {
     }
 
     @Test func switchingChannelsKeepsTheOriginalToRestore() async throws {
-        try await withRTADesk(before: { fake in
-            fake.deskChange(RTA.source, .int(72))
-        }) { fake, mirror in
-            #expect(await eventually { mirror.cell(RTA.source).argument == .int(72) })
+        try await withRTADesk(
+            before: { fake in
+                fake.deskChange(RTA.source, .int(72))
+            },
+            body: { fake, mirror in
+                #expect(await eventually { mirror.cell(RTA.source).argument == .int(72) })
 
-            mirror.followRTA(StripID(.input, 1))
-            #expect(await eventually { fake.value(at: RTA.source) == .int(2) })
-            mirror.followRTA(StripID(.input, 3))
-            #expect(await eventually { fake.value(at: RTA.source) == .int(4) })
-            mirror.releaseRTA()
+                mirror.followRTA(StripID(.input, 1))
+                #expect(await eventually { fake.value(at: RTA.source) == .int(2) })
+                mirror.followRTA(StripID(.input, 3))
+                #expect(await eventually { fake.value(at: RTA.source) == .int(4) })
+                mirror.releaseRTA()
 
-            #expect(await eventually { fake.value(at: RTA.source) == .int(72) })
-        }
+                #expect(await eventually { fake.value(at: RTA.source) == .int(72) })
+            })
     }
 }

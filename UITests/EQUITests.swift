@@ -6,9 +6,7 @@ final class EQUITests: DeskUITestCase {
     private static let kickBand1 = CGVector(dx: log(91.4 / 20) / log(1000), dy: 0.5)
 
     func testDraggingOnTheGraphMovesTheGrabbedBand() {
-        launch()
-        open("Kick")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Kick", tab: "EQ")
         let frequency = app.descendants(matching: .any)["/ch/01/eq/1/f"]
         let gain = app.descendants(matching: .any)["/ch/01/eq/1/g"]
         XCTAssertTrue(frequency.appears(within: 2))
@@ -28,9 +26,7 @@ final class EQUITests: DeskUITestCase {
     /// A touch near a band point grabs it, but only movement moves it: landing slightly off the point
     /// must not jump the desk to where the finger happens to be.
     func testTouchingNearABandChangesNothing() {
-        launch()
-        open("Tom 2")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Tom 2", tab: "EQ")
         let frequency = app.descendants(matching: .any)["/ch/05/eq/1/f"]
         let gain = app.descendants(matching: .any)["/ch/05/eq/1/g"]
         XCTAssertTrue(frequency.appears(within: 2))
@@ -42,9 +38,7 @@ final class EQUITests: DeskUITestCase {
     }
 
     func testEQTabScrollsAsAWhole() {
-        launch()
-        open("Tom 1")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Tom 1", tab: "EQ")
         let graph = app.descendants(matching: .any)["eq-graph"]
         XCTAssertTrue(graph.appears(within: 2))
         let top = graph.frame.minY
@@ -56,9 +50,7 @@ final class EQUITests: DeskUITestCase {
     }
 
     func testBandTypeIsADropdown() {
-        launch()
-        open("Tom 1")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Tom 1", tab: "EQ")
         let type = app.buttons["/ch/04/eq/1/type"]
         XCTAssertTrue(type.appears(within: 2))
         XCTAssertEqual(type.value as? String, "PEQ")
@@ -72,9 +64,7 @@ final class EQUITests: DeskUITestCase {
     }
 
     func testResetBandsAsksFirst() {
-        launch()
-        open("Snare")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Snare", tab: "EQ")
         let frequency = app.descendants(matching: .any)["/ch/02/eq/1/f"]
         // 5 s: in one full-suite run the EQ rows took over 2 s to appear on a busy simulator.
         XCTAssertTrue(frequency.appears(within: 5))
@@ -97,9 +87,7 @@ final class EQUITests: DeskUITestCase {
     }
 
     func testDoubleTappingABandResetsIt() {
-        launch()
-        open("Hi-hat")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Hi-hat", tab: "EQ")
         let gain = app.descendants(matching: .any)["/ch/03/eq/1/g"]
         XCTAssertTrue(gain.appears(within: 2))
         let graph = app.descendants(matching: .any)["eq-graph"]
@@ -112,9 +100,7 @@ final class EQUITests: DeskUITestCase {
     }
 
     func testLowCutIsTheFirstChoiceInTheBandPicker() {
-        launch()
-        open("OH L")
-        app.buttons["EQ"].tap()
+        launchAndOpen("OH L", tab: "EQ")
         app.buttons["LC"].tap()
         let on = app.descendants(matching: .any)["toggle-/ch/06/preamp/hpon"]
         XCTAssertTrue(on.appears(within: 2))
@@ -131,10 +117,7 @@ final class EQUITests: DeskUITestCase {
     }
 
     func testBusEQHasSixBands() {
-        launch()
-        app.buttons["Buses"].tap()
-        open("Mon 1")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Mon 1", group: "Buses", tab: "EQ")
         XCTAssertTrue(app.buttons["6"].appears(within: 2))
         XCTAssertFalse(app.buttons["LC"].exists, "buses have no low cut")
     }

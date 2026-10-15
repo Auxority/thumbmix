@@ -79,19 +79,21 @@ struct DynamicsKeyTests {
     /// A send tapped just before or after the EQ hears the comp or not depending on where it sits; one tapped at the
     /// fader hears it either way. The desk keeps one tap per pair of buses, on the odd send (p.26).
     @Test func movingTheCompNamesTheMixesThatWouldChange() async throws {
-        try await withLiveDesk(before: { fake in
-            setBus(1, "Wedge 1", tap: .postEQ, on: true, in: fake)
-            setBus(2, "Wedge 2", tap: nil, on: false, in: fake)
-            setBus(3, "IEM L", tap: .preEQ, on: true, in: fake)
-            setBus(4, "IEM R", tap: nil, on: true, in: fake)
-            fake.deskChange("/config/buslink/3-4", .int(1))
-            setBus(5, "Wedge 5", tap: .preFader, on: true, in: fake)
-            setBus(7, "FX", tap: .postEQ, on: false, in: fake)
-            setBus(8, "", tap: nil, on: false, in: fake)
-        }) { _, mirror in
-            await openTab(.comp, of: vox, in: mirror)
-            #expect(mirror.mixesChangedByMovingComp(of: vox) == ["Wedge 1", "IEM"])
-        }
+        try await withLiveDesk(
+            before: { fake in
+                setBus(1, "Wedge 1", tap: .postEQ, on: true, in: fake)
+                setBus(2, "Wedge 2", tap: nil, on: false, in: fake)
+                setBus(3, "IEM L", tap: .preEQ, on: true, in: fake)
+                setBus(4, "IEM R", tap: nil, on: true, in: fake)
+                fake.deskChange("/config/buslink/3-4", .int(1))
+                setBus(5, "Wedge 5", tap: .preFader, on: true, in: fake)
+                setBus(7, "FX", tap: .postEQ, on: false, in: fake)
+                setBus(8, "", tap: nil, on: false, in: fake)
+            },
+            body: { _, mirror in
+                await openTab(.comp, of: vox, in: mirror)
+                #expect(mirror.mixesChangedByMovingComp(of: vox) == ["Wedge 1", "IEM"])
+            })
     }
 
     @Test func nothingIsNamedBeforeTheTapsAreRead() async throws {

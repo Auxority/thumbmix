@@ -4,8 +4,7 @@ import XCTest
 @MainActor
 final class MainLRUITests: DeskUITestCase {
     func testTakingAChannelOutAndBackAsksEachTime() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         let pill = element("mainLR-/ch/01/mix/st")
         XCTAssertTrue(pill.appears(within: 2))
         XCTAssertEqual(pill.label, "Kick in the main mix")
@@ -28,8 +27,7 @@ final class MainLRUITests: DeskUITestCase {
 
     /// The pill is taller than the name; without a fixed header height the fader sat 4 pt lower on Mix than on EQ.
     func testSwitchingTabsDoesNotMoveTheFader() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         XCTAssertTrue(element("mainLR-/ch/01/mix/st").appears(within: 2))
         let onMix = element("/ch/01/mix/fader").frame.minY
         app.buttons["EQ"].tap()
@@ -39,8 +37,7 @@ final class MainLRUITests: DeskUITestCase {
 
     /// Mix tab only; and a matrix has no LR switch on the desk.
     func testThePillShowsOnlyOnTheMixTabOfStripsThatHaveIt() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         XCTAssertTrue(element("mainLR-/ch/01/mix/st").appears(within: 2))
         app.buttons["EQ"].tap()
         XCTAssertTrue(eventually(within: 2) { !self.element("mainLR-/ch/01/mix/st").exists }, "not on other tabs")

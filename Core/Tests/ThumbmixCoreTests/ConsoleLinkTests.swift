@@ -29,11 +29,11 @@ struct ConsoleLinkTests {
     }
 
     @Test func silentConsoleIsNoReply() async throws {
-        try await withLink(before: { fake in
-            fake.silent = true
-        }) { _, link in
-            #expect(await eventually { link.state == .failed(.noReply) })
-        }
+        try await withLink(
+            before: { $0.silent = true },
+            body: { _, link in
+                #expect(await eventually { link.state == .failed(.noReply) })
+            })
     }
 
     @Test func silenceMakesLinkLostThenLiveAgain() async throws {

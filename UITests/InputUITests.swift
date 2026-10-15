@@ -4,9 +4,7 @@ import XCTest
 @MainActor
 final class InputUITests: DeskUITestCase {
     private func openKicksInput() {
-        launch()
-        open("Kick")
-        app.buttons["Input"].tap()
+        launchAndOpen("Kick", tab: "Input")
     }
 
     /// The demo desk starts with delay off at 0.3 ms; the UI tests run in en_US, so the distance reads in feet.

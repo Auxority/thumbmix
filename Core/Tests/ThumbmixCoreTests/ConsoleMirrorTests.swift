@@ -152,11 +152,13 @@ struct ConsoleMirrorTests {
     }
 
     @Test func auditCorrectsChangesThatWereNeverPushed() async throws {
-        try await withLiveDesk(auditAddresses: ["/ch/02/mix/fader"], before: { $0.ignoresXremote = true }) { fake, mirror in
-            fake.deskChange("/ch/02/mix/fader", .float(0.5))
+        try await withLiveDesk(
+            auditAddresses: ["/ch/02/mix/fader"], before: { $0.ignoresXremote = true },
+            body: { fake, mirror in
+                fake.deskChange("/ch/02/mix/fader", .float(0.5))
 
-            #expect(await eventually { mirror.cell("/ch/02/mix/fader").argument == .float(0.5) })
-        }
+                #expect(await eventually { mirror.cell("/ch/02/mix/fader").argument == .float(0.5) })
+            })
     }
 
     @Test func wakeResyncs() async throws {

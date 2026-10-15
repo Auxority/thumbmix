@@ -41,7 +41,7 @@ func liveMirror(port: UInt16, auditAddresses: [String] = Catalog.auditAddresses(
 func withLiveDesk(
     copiesLinkedEdits: Bool = true, dropsGets: Int = 0, auditAddresses: [String] = Catalog.auditAddresses(),
     before: (FakeM32) -> Void = { _ in },
-    _ body: (FakeM32, ConsoleMirror) async throws -> Void
+    body: (FakeM32, ConsoleMirror) async throws -> Void
 ) async throws {
     let (fake, port) = try await startFake()
     defer { fake.stop() }
@@ -58,7 +58,7 @@ func withLiveDesk(
 @MainActor
 func withLink(
     model: String = "M32", before: (FakeM32) -> Void = { _ in },
-    _ body: (FakeM32, ConsoleLink) async throws -> Void
+    body: (FakeM32, ConsoleLink) async throws -> Void
 ) async throws {
     let (fake, port) = try await startFake(model: model)
     defer { fake.stop() }

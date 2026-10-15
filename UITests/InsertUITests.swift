@@ -6,8 +6,7 @@ import XCTest
 final class InsertUITests: DeskUITestCase {
     func testAnFXInsertSwitchesOnAtOnce() {
         desk.change("/ch/13/insert/on", 0)
-        launch()
-        open("Vox 1")
+        launchAndOpen("Vox 1")
         let slot = element("/ch/13/insert/sel")
         let insert = app.buttons["toggle-/ch/13/insert/on"]
         XCTAssertTrue(slot.appears(within: 2))
@@ -21,8 +20,7 @@ final class InsertUITests: DeskUITestCase {
     }
 
     func testAnAuxInsertAsksFirst() {
-        launch()
-        open("Bass")
+        launchAndOpen("Bass")
         let insert = app.buttons["toggle-/ch/08/insert/on"]
         XCTAssertTrue(insert.appears(within: 2))
         insert.tap()
@@ -42,8 +40,7 @@ final class InsertUITests: DeskUITestCase {
     }
 
     func testNoSlotDisablesTheInsert() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         let slot = element("/ch/01/insert/sel")
         XCTAssertTrue(slot.appears(within: 2))
         XCTAssertEqual(slot.value as? String, "None")
@@ -52,8 +49,7 @@ final class InsertUITests: DeskUITestCase {
     }
 
     func testPositionPicksBeforeTheEQ() {
-        launch()
-        open("Vox 1")
+        launchAndOpen("Vox 1")
         let position = app.buttons["/ch/13/insert/pos"]
         XCTAssertTrue(position.appears(within: 2))
         position.tap()
