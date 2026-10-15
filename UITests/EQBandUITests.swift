@@ -5,9 +5,7 @@ import XCTest
 final class EQBandUITests: DeskUITestCase {
     /// Like a double-tap on the band's point in the graph: at once, no question.
     func testDoubleTappingFrequencyRestoresTheDefaultAtOnce() {
-        launch()
-        open("Kick")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Kick", tab: "EQ")
         let frequency = app.descendants(matching: .any)["/ch/01/eq/1/f"]
         XCTAssertTrue(frequency.appears(within: 2))
         frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.5))
@@ -25,9 +23,7 @@ final class EQBandUITests: DeskUITestCase {
         // A band 1 boost under the live low cut: the yellow piece must not take its shape.
         desk.change("/ch/01/eq/1/g", float: 0.75)
         desk.change("/ch/01/preamp/hpon", 1)
-        launch()
-        open("Kick")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Kick", tab: "EQ")
         let graph = element("eq-graph")
         XCTAssertTrue(eventually(within: 2) { graph.value as? String == "EQ off" })
         saveScreenshot("eq-off-dashed")
@@ -37,10 +33,7 @@ final class EQBandUITests: DeskUITestCase {
 
     /// Offline mode opens a bus on its Reset bands frequencies, then Reset bands brings a moved band back.
     func testBusResetsAllSixBands() {
-        launch()
-        app.buttons["Buses"].tap()
-        open("Mon 1")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Mon 1", group: "Buses", tab: "EQ")
         let type = app.buttons["/bus/01/eq/1/type"]
         let frequency = app.descendants(matching: .any)["/bus/01/eq/1/f"]
         XCTAssertTrue(frequency.appears(within: 2))
@@ -60,9 +53,7 @@ final class EQBandUITests: DeskUITestCase {
 
     /// A cut filter has no level to shape: its Gain and Q rows stay in place but take no edits.
     func testCutFilterDisablesGainAndQ() {
-        launch()
-        open("Tom 2")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Tom 2", tab: "EQ")
         let type = app.buttons["/ch/05/eq/1/type"]
         let gain = app.descendants(matching: .any)["/ch/05/eq/1/g"]
         let q = app.descendants(matching: .any)["/ch/05/eq/1/q"]

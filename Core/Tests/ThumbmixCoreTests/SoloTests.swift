@@ -18,10 +18,6 @@ struct SoloTests {
         #expect(StripID(.dca, 8).solo == "/-stat/solosw/80")
     }
 
-    @Test func theDemoStartsUnsoloed() {
-        #expect(DemoState.values()["/-stat/solosw/01"] == .int(0))
-    }
-
     /// S sits beside the slim fader on every tab, so solo is read on connect, like mute: read only with the Mix tab,
     /// a strip opened on Fed by, or a resync while on EQ, left S unread, and an unread switch ignores taps.
     @Test func soloWorksWithoutOpeningTheMixTab() async throws {

@@ -38,9 +38,7 @@ final class UnusedFoldUITests: DeskUITestCase {
     /// Ch 21 is unnamed with its fader down, but its send to Mon 1 is up: Fed by keeps it in reach (#67).
     func testFedByKeepsAnUnusedSourceWhoseSendIsUp() {
         desk.change("/ch/21/mix/01/level", float: 0.6)
-        launch()
-        app.buttons["Buses"].tap()
-        open("Mon 1")
+        launchAndOpen("Mon 1", group: "Buses")
         app.buttons["Fed by"].tap()
         XCTAssertTrue(element("/ch/21/mix/01/level").appears(within: 2))
         XCTAssertFalse(element("/ch/22/mix/01/level").exists)
@@ -48,9 +46,7 @@ final class UnusedFoldUITests: DeskUITestCase {
     }
 
     func testSendsFoldUnusedBuses() {
-        launch()
-        open("Kick")
-        app.buttons["Sends"].tap()
+        launchAndOpen("Kick", tab: "Sends")
         XCTAssertTrue(element("/ch/01/mix/01/level").appears(within: 2))
         XCTAssertFalse(element("/ch/01/mix/09/level").exists)
         let fold = element(UnusedFoldID.id)

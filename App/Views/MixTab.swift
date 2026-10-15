@@ -52,7 +52,7 @@ struct MixTab: View {
         let fader = Catalog.fader(strip)
         guard let current = mirror.normalized(fader) else { return }
         let next = RelativeDrag.nudged(current, byDecibels: decibels, scale: fader.scale)
-        mirror.set(fader.address, fader.scale.argument(fromNormalized: next))
+        mirror.set(fader, normalized: next)
     }
 }
 

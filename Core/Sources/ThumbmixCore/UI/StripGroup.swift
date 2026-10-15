@@ -11,10 +11,8 @@ public enum StripGroup: String, CaseIterable, Identifiable, Sendable {
 
     public var id: Self { self }
 
-    /// The catalog key; also the English title.
-    public var titleKey: String { rawValue }
-
-    public var title: String { CoreStrings.text(String.LocalizationValue(titleKey)) }
+    /// The raw value is the catalog key and the English title.
+    public var title: String { CoreStrings.text(String.LocalizationValue(rawValue)) }
 
     public var strips: [StripID] {
         switch self {

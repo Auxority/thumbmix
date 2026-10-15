@@ -12,8 +12,7 @@ final class BlackButtonsUITests: DeskUITestCase {
     }
 
     func testEditStripCancelAndDoneAreBlack() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         app.buttons["edit-strip"].tap()
         XCTAssertTrue(app.buttons["Done"].appears(within: 3))
         XCTAssertTrue(app.buttons["Done"].settles(within: 3))

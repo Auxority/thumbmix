@@ -116,7 +116,7 @@ struct EQGraph: View {
         for step in 0...120 {
             let x = Double(step) / 120 * lastX
             let hertz = EQAxis.hertz(at: x)
-            let decibels = EQResponse.decibels(at: hertz, bands: bands) + (lowCut?.decibels(at: hertz) ?? 0)
+            let decibels = EQReading.decibels(at: hertz, bands: bands, lowCut: lowCut)
             let point = CGPoint(
                 x: x * size.width, y: Self.graphY(decibels: decibels) * size.height)
             if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
@@ -192,7 +192,7 @@ struct EQGraph: View {
                 }
                 // Spreading the fingers widens the band; on the M32's Q scale, wider is a higher position.
                 let next = (pinchStartQ ?? 0.5) + Float(log2(value.magnification)) * 0.25
-                mirror.set(q.address, q.scale.argument(fromNormalized: next))
+                mirror.set(q, normalized: next)
             }
             .onEnded { _ in endPinch() }
     }
@@ -233,18 +233,18 @@ struct EQGraph: View {
         let x = grab.x + Float(translation.width / size.width)
         guard grab.band != Self.lowCutBand else { return moveLowCut(toGraphX: x) }
         let specs = Catalog.eqBand(strip, grab.band)
-        mirror.set(specs.frequency.address, specs.frequency.scale.argument(fromNormalized: x))
+        mirror.set(specs.frequency, normalized: x)
         // Cut filters and the main-bus crossover types have no gain, so vertical movement is ignored.
         guard mirror.eqBandShapesLevel(strip, grab.band) == true else { return }
         let y = grab.y - Float(translation.height / size.height)
-        mirror.set(specs.gain.address, specs.gain.scale.argument(fromNormalized: y))
+        mirror.set(specs.gain, normalized: y)
     }
 
     /// The low cut only moves sideways; its 20-400 Hz scale clamps a drag past either end.
     private func moveLowCut(toGraphX x: Float) {
         guard let frequency = Catalog.lowCut(strip)?.frequency else { return }
         let hertz = EQAxis.hertz(at: Double(x))
-        mirror.set(frequency.address, frequency.scale.argument(fromNormalized: frequency.scale.normalized(forValue: hertz)))
+        mirror.set(frequency, value: hertz)
     }
 }
 

@@ -13,6 +13,44 @@ struct DemoStateTests {
         #expect(specs.count > 4000, "the specs gathered here cover what the app reads")
     }
 
+    /// Values the app's screens and tests lean on, each with why it is that value (typed as the address needs).
+    struct Expected: Sendable, CustomTestStringConvertible {
+        let address: String
+        let value: OSCArgument
+        let why: String
+        var testDescription: String { "\(address) \(why)" }
+        init(_ address: String, _ value: OSCArgument, _ why: String = "") {
+            (self.address, self.value, self.why) = (address, value, why)
+        }
+    }
+
+    static let expected = [
+        Expected("/ch/01/delay/on", .int(0), "delay starts off"),
+        Expected("/ch/01/preamp/hpon", .int(0), "low cut off, an int"),
+        Expected("/ch/01/preamp/hpslope", .int(2), "low cut slope, an int"),
+        Expected("/ch/01/preamp/invert", .int(0), "a toggle, not mid-travel"),
+        Expected("/-stat/solosw/01", .int(0), "unsoloed"),
+        Expected("/ch/01/mix/st", .int(1), "channel starts in the main mix"),
+        Expected("/bus/01/mix/st", .int(1), "bus starts in the main mix"),
+        Expected("/ch/01/insert/on", .int(0), "an int toggle, off; not the generic /on"),
+        Expected("/ch/01/insert/pos", .int(1)),
+        Expected("/ch/01/insert/sel", .int(0)),
+        Expected("/fx/5/type", .int(4), "Dual DeEsser"),
+        Expected("/ch/13/insert/sel", .int(9), "Vox 1 on FX5 L"),
+        Expected("/ch/13/insert/on", .int(1)),
+        Expected("/ch/08/insert/sel", .int(19), "Bass on Aux out 3"),
+        // Mono is off after a desk reset (assumed); the demo's kick and bass feed a mono sub at 0 dB.
+        Expected("/ch/01/mix/mono", .int(1)),
+        Expected("/ch/08/mix/mono", .int(1)),
+        Expected("/ch/01/mix/mlevel", .float(0.75)),
+        Expected("/ch/02/mix/mono", .int(0)),
+        Expected("/ch/02/mix/mlevel", .float(0)),
+    ]
+
+    @Test(arguments: expected) func theDemoStartsWith(_ entry: Expected) {
+        #expect(DemoState.values()[entry.address] == entry.value, "\(entry.why)")
+    }
+
     /// The right type, and inside the scale: a choice's index in its list, a float within 0...1.
     private static func fits(_ value: OSCArgument, _ scale: ParamScale) -> Bool {
         guard let position = scale.normalized(from: value) else { return false }

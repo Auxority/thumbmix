@@ -26,7 +26,7 @@ struct EQResponseTests {
     }
 
     private func crossover(_ type: String, at frequency: Double) -> EQBandState {
-        EQBandState(typeIndex: Catalog.mainEQTypes.firstIndex(of: type)!, frequency: frequency, gain: 6, q: 2)
+        EQBandState(typeIndex: EQFilterType.allCases.first { $0.deskName == type }!.rawValue, frequency: frequency, gain: 6, q: 2)
     }
 
     @Test func crossoverOnBandOneIsAHighPass() {

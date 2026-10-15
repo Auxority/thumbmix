@@ -4,9 +4,7 @@ import XCTest
 @MainActor
 final class FXReturnUITests: DeskUITestCase {
     func testFXReturnGetsEQAndSendsTabs() {
-        launch()
-        app.buttons["FX"].tap()
-        open("Rev L")
+        launchAndOpen("Rev L", group: "FX")
         for tab in ["Mix", "EQ", "Sends"] { XCTAssertTrue(app.buttons[tab].exists, tab) }
         for tab in ["Input", "Gate", "Comp"] { XCTAssertFalse(app.buttons[tab].exists, tab) }
 

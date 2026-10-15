@@ -17,69 +17,49 @@ extension LinkTiming {
 @MainActor
 struct ConsoleLinkTests {
     @Test func identifiesAnM32() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
-        defer { link.stop() }
-
-        link.start()
-
-        #expect(await eventually { link.state == .live(ConsoleInfo(model: "M32", firmware: "4.06")) })
+        try await withLink { _, link in
+            #expect(await eventually { link.state == .live(ConsoleInfo(model: "M32", firmware: "4.06")) })
+        }
     }
 
     @Test func rejectsAnX32() async throws {
-        let (fake, port) = try await startFake(model: "X32")
-        defer { fake.stop() }
-        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
-        defer { link.stop() }
-
-        link.start()
-
-        #expect(await eventually { link.state == .failed(.notAnM32(model: "X32")) })
+        try await withLink(model: "X32") { _, link in
+            #expect(await eventually { link.state == .failed(.notAnM32(model: "X32")) })
+        }
     }
 
     @Test func silentConsoleIsNoReply() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        fake.silent = true
-        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
-        defer { link.stop() }
-
-        link.start()
-
-        #expect(await eventually { link.state == .failed(.noReply) })
+        try await withLink(
+            before: { $0.silent = true },
+            body: { _, link in
+                #expect(await eventually { link.state == .failed(.noReply) })
+            })
     }
 
     @Test func silenceMakesLinkLostThenLiveAgain() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
-        defer { link.stop() }
-        link.start()
-        #expect(await eventually { if case .live = link.state { true } else { false } })
+        try await withLink { fake, link in
+            #expect(await eventually { if case .live = link.state { true } else { false } })
 
-        fake.silent = true
-        #expect(await eventually { link.state == .lost })
+            fake.silent = true
+            #expect(await eventually { link.state == .lost })
 
-        fake.silent = false
-        #expect(await eventually { if case .live = link.state { true } else { false } })
+            fake.silent = false
+            #expect(await eventually { if case .live = link.state { true } else { false } })
+        }
     }
 
     @Test func pushedChangesReachOnMessage() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
-        defer { link.stop() }
-        var received: [OSCMessage] = []
-        link.onMessage = { received.append($0.message) }
-        link.start()
-        #expect(await eventually { if case .live = link.state { true } else { false } })
-        try await Task.sleep(for: .milliseconds(100))
+        try await withLink { fake, link in
+            var received: [OSCMessage] = []
+            link.onMessage = { received.append($0.message) }
+            #expect(await eventually { if case .live = link.state { true } else { false } })
+            try await Task.sleep(for: .milliseconds(100))
 
-        fake.deskChange("/ch/03/mix/on", .int(0))
+            fake.deskChange("/ch/03/mix/on", .int(0))
 
-        #expect(await eventually { received.contains(OSCMessage("/ch/03/mix/on", [.int(0)])) })
-        #expect(!received.contains { $0.address == "/info" })
+            #expect(await eventually { received.contains(OSCMessage("/ch/03/mix/on", [.int(0)])) })
+            #expect(!received.contains { $0.address == "/info" })
+        }
     }
 
     @Test func twoRenewalsFitInsideTheConsoleExpiry() {
@@ -88,57 +68,48 @@ struct ConsoleLinkTests {
     }
 
     @Test func stayingLostRebuildsTheSocket() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
-        defer { link.stop() }
-        link.start()
-        #expect(await eventually { if case .live = link.state { true } else { false } })
+        try await withLink { fake, link in
+            #expect(await eventually { if case .live = link.state { true } else { false } })
 
-        fake.silent = true
-        #expect(await eventually { link.state == .lost })
-        #expect(await eventually { link.transportGeneration > 0 })
+            fake.silent = true
+            #expect(await eventually { link.state == .lost })
+            #expect(await eventually { link.transportGeneration > 0 })
 
-        fake.silent = false
-        #expect(await eventually { if case .live = link.state { true } else { false } })
+            fake.silent = false
+            #expect(await eventually { if case .live = link.state { true } else { false } })
+        }
     }
 
     @Test func wakeMarksLostUntilTheConsoleAnswersAgain() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
-        defer { link.stop() }
-        link.start()
-        #expect(await eventually { if case .live = link.state { true } else { false } })
-        let generation = link.transportGeneration
+        try await withLink { _, link in
+            #expect(await eventually { if case .live = link.state { true } else { false } })
+            let generation = link.transportGeneration
 
-        link.wake()
+            link.wake()
 
-        #expect(link.state == .lost)
-        #expect(link.transportGeneration == generation + 1)
-        #expect(await eventually { if case .live = link.state { true } else { false } })
+            #expect(link.state == .lost)
+            #expect(link.transportGeneration == generation + 1)
+            #expect(await eventually { if case .live = link.state { true } else { false } })
+        }
     }
 
     /// Replies the old socket still held when the app woke answer questions from before the outage; arriving
     /// after the resync forgot the tab values, they would show those values as live.
     @Test func wakeDropsWhatTheOldSocketStillHeld() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: .fast)
-        defer { link.stop() }
-        var heard: [String] = []
-        link.onMessage = { heard.append($0.message.address) }
-        link.start()
-        #expect(await eventually { if case .live = link.state { true } else { false } })
-        let stale = "/ch/20/eq/1/q"
+        try await withLink { _, link in
+            var heard: [String] = []
+            link.onMessage = { heard.append($0.message.address) }
+            #expect(await eventually { if case .live = link.state { true } else { false } })
+            let stale = "/ch/20/eq/1/q"
 
-        for _ in 0..<5 { link.send(OSCMessage(stale)) }
-        // Blocking the main actor leaves the replies waiting in the old socket's stream, as a suspended app does.
-        blockMainActor(seconds: 0.2)
-        link.wake()
-        try await Task.sleep(for: .milliseconds(300))
+            for _ in 0..<5 { link.send(OSCMessage(stale)) }
+            // Blocking the main actor leaves the replies waiting in the old socket's stream, as a suspended app does.
+            blockMainActor(seconds: 0.2)
+            link.wake()
+            try await Task.sleep(for: .milliseconds(300))
 
-        #expect(!heard.contains(stale))
+            #expect(!heard.contains(stale))
+        }
     }
 
     /// The mirror stops a link that found no M32; coming back from the background must not revive it.

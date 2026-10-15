@@ -15,9 +15,7 @@ final class TapPointUITests: DeskUITestCase {
     /// demo's wedges are fed before the fader. Tapping a block takes the send right after it, Input too, and a second
     /// tap on the current tap point changes nothing.
     func testTappingTheChainSetsThePairsTapPoint() {
-        launch()
-        open("Vox 1")
-        app.buttons["Sends"].tap()
+        launchAndOpen("Vox 1", tab: "Sends")
         XCTAssertTrue(element("settings-/ch/13/mix/03/level").appears(within: 2), "every pair has a ›")
         XCTAssertFalse(element("settings-/ch/13/mix/02/level").exists, "Mon 2 shares Mon 1's")
         element("settings-/ch/13/mix/01/level").tap()

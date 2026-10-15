@@ -25,7 +25,6 @@ public enum OverviewItem: Hashable, Identifiable, Sendable {
         }
     }
 
-    /// Whether `strip` is this row's: a pair's row stands for both its sides.
     public func holds(_ strip: StripID) -> Bool {
         switch self {
         case .strip(let own, _): own == strip
@@ -33,7 +32,6 @@ public enum OverviewItem: Hashable, Identifiable, Sendable {
         }
     }
 
-    /// The strip screen the row opens: a pair's screen belongs to its odd side.
     public var opens: StripID {
         switch self {
         case .strip(let strip, .full): strip
@@ -80,8 +78,7 @@ extension ConsoleMirror {
         case .strip(let strip, _):
             return rawName(strip).isEmpty ? nil : strip.defaultName
         case .pair(let odd):
-            let sides = [odd, odd.partner ?? odd]
-            return sides.allSatisfy { rawName($0).isEmpty } ? nil : odd.pairDefaultName
+            return odd.pairSides.allSatisfy { rawName($0).isEmpty } ? nil : odd.pairDefaultName
         }
     }
 

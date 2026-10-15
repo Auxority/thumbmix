@@ -71,25 +71,20 @@ struct MirrorRobustnessTests {
     }
 
     @Test func resyncDropsHoldsFromBeforeTheOutage() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = ConsoleMirror(
-            link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast), auditAddresses: [])
-        mirror.start()
-        defer { mirror.stop() }
-        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
-        let fader = "/ch/01/mix/fader"
-        let consoleValue = fake.value(at: fader)
+        try await withLiveDesk(auditAddresses: []) { fake, mirror in
+            let fader = "/ch/01/mix/fader"
+            let consoleValue = fake.value(at: fader)
 
-        fake.silent = true
-        mirror.set(fader, .float(0.6))
-        // Stay silent past the 20 ms send tick so the set is really lost, as in a Wi-Fi dropout.
-        try await Task.sleep(for: .milliseconds(100))
-        mirror.wake()
-        fake.silent = false
+            fake.silent = true
+            mirror.set(fader, .float(0.6))
+            // Stay silent past the 20 ms send tick so the set is really lost, as in a Wi-Fi dropout.
+            try await Task.sleep(for: .milliseconds(100))
+            mirror.wake()
+            fake.silent = false
 
-        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
-        #expect(mirror.cell(fader).argument == consoleValue)
+            #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
+            #expect(mirror.cell(fader).argument == consoleValue)
+        }
     }
 }
 

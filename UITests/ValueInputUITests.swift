@@ -4,8 +4,7 @@ import XCTest
 @MainActor
 final class ValueInputUITests: DeskUITestCase {
     private func holdKicksFader() -> (fader: XCUIElement, alert: XCUIElement) {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         let fader = element("/ch/01/mix/fader")
         XCTAssertTrue(fader.appears(within: 2))
         fader.press(forDuration: 0.8)
@@ -46,9 +45,7 @@ final class ValueInputUITests: DeskUITestCase {
 
     /// The desk keeps 201 frequency steps: 1 kHz lands on the nearest, 991 Hz, and the row shows that.
     func testAFrequencySnapsToTheDesksStep() {
-        launch()
-        open("Kick")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Kick", tab: "EQ")
         let frequency = element("/ch/01/eq/1/f")
         XCTAssertTrue(frequency.appears(within: 2))
         frequency.press(forDuration: 0.8)
@@ -63,9 +60,7 @@ final class ValueInputUITests: DeskUITestCase {
     /// values are typed instead (2026-10-12). The row only claims a mostly sideways drag, and XCUITest drags in a
     /// straight line, so the finger leaves the row on a shallow slant.
     func testDraggingAwayFromTheRowKeepsItsSpeed() {
-        launch()
-        open("Kick")
-        app.buttons["Input"].tap()
+        launchAndOpen("Kick", tab: "Input")
         let trim = element("/ch/01/preamp/trim")
         XCTAssertTrue(trim.appears(within: 2))
         let start = trim.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5))

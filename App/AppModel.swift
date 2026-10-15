@@ -31,11 +31,7 @@ final class AppModel {
         return 10023
     }
 
-    func connect(to host: String) {
-        connect(to: host, port: Self.consolePort)
-    }
-
-    private func connect(to host: String, port: UInt16) {
+    func connect(to host: String, port: UInt16 = AppModel.consolePort) {
         guard Discovery.isUsableIPv4(host) else { return }
         disconnect()
         let mirror = ConsoleMirror(link: ConsoleLink(host: host, port: port))
