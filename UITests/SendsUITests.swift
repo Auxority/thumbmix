@@ -5,9 +5,7 @@ import XCTest
 final class SendsUITests: DeskUITestCase {
     /// A bus's Sends sit before Fed by, which keeps the far right: mix buses use it more.
     func testABusSendsToTheMatricesBeforeItsFedByTab() {
-        launch()
-        app.buttons["Buses"].tap()
-        open("Mon 1")
+        launchAndOpen("Mon 1", group: "Buses")
         let sends = app.buttons["Sends"]
         XCTAssertTrue(sends.exists)
         XCTAssertLessThan(sends.frame.minX, app.buttons["Fed by"].frame.minX, "Sends before Fed by")
@@ -35,9 +33,7 @@ final class SendsUITests: DeskUITestCase {
     }
 
     func testSendsListBusesByName() {
-        launch()
-        open("Vox 1")
-        app.buttons["Sends"].tap()
+        launchAndOpen("Vox 1", tab: "Sends")
         let toMon1 = app.descendants(matching: .any)["/ch/13/mix/01/level"]
         XCTAssertTrue(toMon1.appears(within: 2))
         XCTAssertEqual(toMon1.label, "Mon 1, Bus 1")
@@ -48,9 +44,7 @@ final class SendsUITests: DeskUITestCase {
     /// desk, and while the send follows the LR pan its own pan can't be dragged.
     func testALinkedBusPairIsOneSendWithPanSettings() {
         desk.change("/config/buslink/5-6", 1)
-        launch()
-        open("Vox 1")
-        app.buttons["Sends"].tap()
+        launchAndOpen("Vox 1", tab: "Sends")
         let toPair = element("/ch/13/mix/05/level")
         XCTAssertTrue(toPair.appears(within: 2))
         XCTAssertEqual(toPair.label, "Bus 5-6")
@@ -95,9 +89,7 @@ final class SendsUITests: DeskUITestCase {
     }
 
     func testFedByShowsWhoFeedsTheBus() {
-        launch()
-        app.buttons["Buses"].tap()
-        open("Mon 1")
+        launchAndOpen("Mon 1", group: "Buses")
         app.buttons["Fed by"].tap()
         XCTAssertTrue(
             app.descendants(matching: .any)["/ch/13/mix/01/level"].appears(within: 2))
@@ -111,9 +103,7 @@ final class SendsUITests: DeskUITestCase {
 
     /// Like the overview, the demo's linked Gtr L/R (9-10) is one row, held by its odd side.
     func testFedByShowsALinkedPairAsOneRow() {
-        launch()
-        app.buttons["Buses"].tap()
-        open("Mon 1")
+        launchAndOpen("Mon 1", group: "Buses")
         app.buttons["Fed by"].tap()
         let pair = element("/ch/09/mix/01/level")
         XCTAssertTrue(pair.appears(within: 2))
@@ -124,9 +114,7 @@ final class SendsUITests: DeskUITestCase {
     /// Unlinked on the desk while a finger holds the pair's send: the rows hold still under the finger (`SteadyRows`;
     /// XCUITest can't look during a hold) and split once it lifts, never stuck as they were.
     func testFedByRegroupsOnceTheFingerLifts() {
-        launch()
-        app.buttons["Buses"].tap()
-        open("Mon 1")
+        launchAndOpen("Mon 1", group: "Buses")
         app.buttons["Fed by"].tap()
         let pair = element("/ch/09/mix/01/level")
         XCTAssertTrue(pair.appears(within: 2))
@@ -164,9 +152,7 @@ final class SendsUITests: DeskUITestCase {
     /// A named source carries its desk number like the overview (2026-10-13), an unnamed one's title already is it. Its On chip
     /// is tinted, not filled: a send is on almost all show, and fills mean "look here".
     func testFedByRowsShowTheNumberAndATintedOn() {
-        launch()
-        app.buttons["Buses"].tap()
-        open("Mon 1")
+        launchAndOpen("Mon 1", group: "Buses")
         app.buttons["Fed by"].tap()
         let vox = element("/ch/13/mix/01/level")
         XCTAssertTrue(vox.appears(within: 2))

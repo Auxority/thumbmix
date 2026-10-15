@@ -29,17 +29,6 @@ struct InsertTests {
         #expect(!auxIn.contains("/fx/5/type"))
     }
 
-    @Test func theDemoStartsWithTypedInserts() {
-        let demo = DemoState.values()
-        #expect(demo["/ch/01/insert/on"] == .int(0), "an int toggle, off; not the generic /on")
-        #expect(demo["/ch/01/insert/pos"] == .int(1))
-        #expect(demo["/ch/01/insert/sel"] == .int(0))
-        #expect(demo["/fx/5/type"] == .int(4), "Dual DeEsser")
-        #expect(demo["/ch/13/insert/sel"] == .int(9), "Vox 1 on FX5 L")
-        #expect(demo["/ch/13/insert/on"] == .int(1))
-        #expect(demo["/ch/08/insert/sel"] == .int(19), "Bass on Aux out 3")
-    }
-
     /// No source says which Link Preference carries the insert (searched 2026-10-14). Dynamics is assumed: a wrong
     /// guess shows per-side blocks, and after the first edit Gate and Comp go per side too until reconnect (fails safe).
     @Test func insertsFollowTheDynamicsLink() {

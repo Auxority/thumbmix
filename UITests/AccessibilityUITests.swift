@@ -25,8 +25,7 @@ final class AccessibilityUITests: DeskUITestCase {
     }
 
     func testColourSwatchesSayTheirNameAndWhichIsSelected() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         app.buttons["edit-strip"].tap()
         let red = app.buttons["color-red"]
         XCTAssertTrue(red.appears(within: 2))

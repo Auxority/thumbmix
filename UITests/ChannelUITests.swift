@@ -3,8 +3,7 @@ import XCTest
 @MainActor
 final class ChannelUITests: DeskUITestCase {
     func testNudgeButtonsMoveOneDecibel() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
         XCTAssertEqual(fader.value as? String, "0.0 dB")
         app.buttons["+1 dB"].tap()
@@ -18,8 +17,7 @@ final class ChannelUITests: DeskUITestCase {
 
     /// Mix tab, top to bottom (notes 2026-10-13): fader, −1 | +1, SOLO | MUTE. SOLO reaches the desk's solo switch.
     func testSoloSitsBesideMuteBelowTheNudges() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         let solo = element("solo-/-stat/solosw/01")
         XCTAssertTrue(solo.appears(within: 2))
         let mute = element("mute-/ch/01/mix/on")
@@ -36,8 +34,7 @@ final class ChannelUITests: DeskUITestCase {
 
     /// Held, a nudge keeps stepping 1 dB (mock A): a one-second hold moves several dB, still on whole steps.
     func testHoldingANudgeRepeats() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         let fader = element("/ch/01/mix/fader")
         XCTAssertEqual(fader.value as? String, "0.0 dB")
         app.buttons["+1 dB"].press(forDuration: 1.2)
@@ -49,8 +46,7 @@ final class ChannelUITests: DeskUITestCase {
 
     /// A finger that slides off a held nudge stops it, like any button: the fader must not keep climbing.
     func testSlidingOffAHeldNudgeStopsIt() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         let fader = element("/ch/01/mix/fader")
         app.buttons["+1 dB"].press(
             forDuration: 0.1, thenDragTo: app.staticTexts["Kick"], withVelocity: .fast, thenHoldForDuration: 1.5)
@@ -60,9 +56,7 @@ final class ChannelUITests: DeskUITestCase {
     /// Mix holds the full controls; every other tab keeps a slim fader with S and M (mock T2), to pull or solo a
     /// channel mid-EQ.
     func testOtherTabsKeepTheFaderSoloAndMuteInReach() {
-        launch()
-        open("Kick")
-        app.buttons["EQ"].tap()
+        launchAndOpen("Kick", tab: "EQ")
         let fader = element("/ch/01/mix/fader")
         XCTAssertTrue(fader.exists)
         let solo = app.buttons["solo-/-stat/solosw/01"]
@@ -80,8 +74,7 @@ final class ChannelUITests: DeskUITestCase {
 
     /// The tabs sit under the thumb, each at least Apple's 44 pt touch target.
     func testTabsSitAtTheBottomWithFullSizeTargets() {
-        launch()
-        open("Kick")
+        launchAndOpen("Kick")
         let screenHeight = app.windows.firstMatch.frame.height
         for title in ["Mix", "Input", "Gate", "EQ", "Comp", "Sends"] {
             let tab = app.buttons[title].frame
@@ -93,9 +86,7 @@ final class ChannelUITests: DeskUITestCase {
 
     /// The engineer sets both on a preamp channel: Gain and 48V for the preamp, Trim for the channel.
     func testPreampChannelShowsGainAndTrim() {
-        launch()
-        open("Vox 2")
-        app.buttons["Input"].tap()
+        launchAndOpen("Vox 2", tab: "Input")
         XCTAssertTrue(app.descendants(matching: .any)["/headamp/044/gain"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["toggle-/headamp/044/phantom"].exists)
         XCTAssertTrue(app.staticTexts["Shares an input with Vox 1"].exists)
@@ -106,9 +97,7 @@ final class ChannelUITests: DeskUITestCase {
     /// 48V sits beside Gain like MUTE beside a fader, and every switch asks first: phantom power can harm a mic.
     /// Ends switched off again, as the demo desk started.
     func testPhantomPowerAsksBeforeSwitching() {
-        launch()
-        open("Vox 2")
-        app.buttons["Input"].tap()
+        launchAndOpen("Vox 2", tab: "Input")
         let phantom = app.buttons["toggle-/headamp/044/phantom"]
         let gain = app.descendants(matching: .any)["/headamp/044/gain"]
         XCTAssertTrue(phantom.appears(within: 2))

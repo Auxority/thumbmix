@@ -164,19 +164,13 @@ struct ConsoleMirrorTests {
     }
 
     @Test func auditCorrectsChangesThatWereNeverPushed() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        fake.ignoresXremote = true
-        let mirror = ConsoleMirror(
-            link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast),
-            auditAddresses: ["/ch/02/mix/fader"])
-        mirror.start()
-        defer { mirror.stop() }
-        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
+        try await withLiveDesk(
+            auditAddresses: ["/ch/02/mix/fader"], before: { $0.ignoresXremote = true },
+            body: { fake, mirror in
+                fake.deskChange("/ch/02/mix/fader", .float(0.5))
 
-        fake.deskChange("/ch/02/mix/fader", .float(0.5))
-
-        #expect(await eventually { mirror.cell("/ch/02/mix/fader").argument == .float(0.5) })
+                #expect(await eventually { mirror.cell("/ch/02/mix/fader").argument == .float(0.5) })
+            })
     }
 
     @Test func wakeResyncs() async throws {

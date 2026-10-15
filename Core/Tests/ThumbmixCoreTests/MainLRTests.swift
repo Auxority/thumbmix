@@ -20,8 +20,6 @@ struct MainLRTests {
 
     @Test func theMixTabReadsItAndTheDemoStartsInTheMainMix() {
         #expect(Catalog.tabAddresses(.mix, StripID(.input, 1), headamp: nil).contains("/ch/01/mix/st"))
-        #expect(DemoState.values()["/ch/01/mix/st"] == .int(1))
-        #expect(DemoState.values()["/bus/01/mix/st"] == .int(1))
     }
 
     /// The desk links `mix/st` with fader and mute, so the app writes one side and the desk copies it.

@@ -4,9 +4,7 @@ import XCTest
 @MainActor
 final class DCAUITests: DeskUITestCase {
     func testRenamingADCAReachesTheOverview() {
-        launch()
-        app.buttons["DCA"].tap()
-        open("Band")
+        launchAndOpen("Band", group: "DCA")
         app.buttons["edit-strip"].tap()
         let field = app.textFields["strip-name"]
         XCTAssertTrue(field.appears(within: 3))
@@ -26,9 +24,7 @@ final class DCAUITests: DeskUITestCase {
     }
 
     func testCancelLeavesTheDeskUnchanged() {
-        launch()
-        app.buttons["DCA"].tap()
-        open("Vox")
+        launchAndOpen("Vox", group: "DCA")
         app.buttons["edit-strip"].tap()
         let field = app.textFields["strip-name"]
         XCTAssertTrue(field.appears(within: 3))
@@ -40,9 +36,7 @@ final class DCAUITests: DeskUITestCase {
     }
 
     func testDCAMembers() {
-        launch()
-        app.buttons["DCA"].tap()
-        open("Drums")
+        launchAndOpen("Drums", group: "DCA")
         app.buttons["Members"].tap()
         XCTAssertTrue(element("member-/ch/02").exists, "Snare")
         XCTAssertFalse(element("member-/ch/08").exists, "Bass")

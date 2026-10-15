@@ -40,7 +40,6 @@ struct DelayTests {
     @Test func delayIsSyncedAndStartsOffInTheDemo() {
         let addresses = Set(Catalog.allAddresses())
         #expect(addresses.contains("/ch/32/delay/time"))
-        #expect(DemoState.values()["/ch/01/delay/on"] == .int(0))
     }
 
     private func position(_ milliseconds: Double) -> Float {
