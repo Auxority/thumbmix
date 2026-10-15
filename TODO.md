@@ -59,7 +59,7 @@ None open.
 
 ## Code and docs
 
-- [ ] **Review the code** for simplification, duplication, single responsibility, maintainability and architecture. One PR per concern found.
+None open.
 
 ## Maybe later
 

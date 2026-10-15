@@ -55,7 +55,6 @@ struct SendSheet: View {
         return [source, partner]
     }
 
-    private var sourceName: String { mirror.isLinked(source) ? mirror.pairName(source) : mirror.name(source) }
     /// A linked pair is one send; an unlinked pair two, which share the tap point.
     private var levelTargets: [StripID] {
         guard !mirror.isLinked(target), let even = target.partner else { return [target] }
@@ -66,11 +65,11 @@ struct SendSheet: View {
     /// iOS's own links. The strip already on screen only closes the sheet (`ChannelTab.opened`).
     private var title: some View {
         HStack(spacing: 0) {
-            link(source, sourceName)
+            link(source, mirror.displayName(source))
             Text(" → ")
             ForEach(Array(levelTargets.enumerated()), id: \.element) { index, bus in
                 if index > 0 { Text(" & ") }
-                link(bus, busName(bus))
+                link(bus, mirror.displayName(bus))
             }
         }
         .font(.headline)
@@ -85,10 +84,6 @@ struct SendSheet: View {
         }
         .foregroundStyle(.blue)
         .accessibilityLabel("Open \(name)")
-    }
-
-    private func busName(_ bus: StripID) -> String {
-        mirror.isLinked(bus) ? mirror.pairName(bus) : mirror.name(bus)
     }
 
     private func panTitle(_ side: StripID) -> String? { sides.count > 1 ? "Pan · \(mirror.name(side))" : nil }
@@ -117,7 +112,6 @@ private struct FollowLRPanToggle: View {
     let sides: [StripID]
     let target: StripID
     let mirror: ConsoleMirror
-    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         // The desk's value, never a guess: the switch waits until it has been read.
@@ -127,9 +121,8 @@ private struct FollowLRPanToggle: View {
             .padding(.horizontal, 14)
             .frame(minHeight: 48)
             .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
-            .disabled(!isRead)
-            // The whole row dims like a disabled ParameterRow: a dimmed switch beside a bright label reads as on.
-            .opacity(isEnabled && isRead ? 1 : 0.38)
+            // The whole row dims: a dimmed switch beside a bright label reads as on.
+            .dimmedUntilRead(isRead)
             .accessibilityIdentifier("follow-" + address(sides[0]))
     }
 

@@ -36,7 +36,7 @@ struct SendsTab: View {
             VStack(spacing: 6) {
                 ForEach(pair) { target in
                     SendRow(
-                        source: strip, target: target, title: title(target), caption: caption(target),
+                        source: strip, target: target, title: mirror.displayName(target), caption: caption(target),
                         accent: Theme.color(mirror.color(target)), mirror: mirror)
                 }
             }
@@ -57,10 +57,6 @@ struct SendsTab: View {
         guard let chosen = stripToOpen else { return }
         stripToOpen = nil
         open(chosen)
-    }
-
-    private func title(_ target: StripID) -> String {
-        mirror.isLinked(target) ? mirror.pairName(target) : mirror.name(target)
     }
 
     private func caption(_ target: StripID) -> String? {

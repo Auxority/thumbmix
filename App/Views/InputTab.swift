@@ -59,7 +59,6 @@ private struct PhantomButton: View {
     let strip: StripID
     let mirror: ConsoleMirror
     @State private var isConfirming = false
-    @Environment(\.isEnabled) private var isEnabled
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
@@ -75,8 +74,7 @@ private struct PhantomButton: View {
                 .background(isOn ? Theme.muteRed : Theme.track, in: RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
-        .disabled(state == nil)
-        .opacity(isEnabled && state != nil ? 1 : 0.38)
+        .dimmedUntilRead(state != nil)
         .accessibilityIdentifier("toggle-" + spec.address)
         .accessibilityValue(state == nil ? Text(verbatim: "") : Text(isOn ? "On" : "Off"))
         .alert(title(isOn), isPresented: $isConfirming) {
@@ -91,7 +89,6 @@ private struct PhantomButton: View {
         let name = mirror.name(strip)
         return isOn ? Text("Turn off 48V for \(name)?") : Text("Turn on 48V for \(name)?")
     }
-
 }
 
 /// Who else switching 48V reaches, named in its alert: channels on the same input (one

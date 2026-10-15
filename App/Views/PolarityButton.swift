@@ -8,7 +8,6 @@ struct PolarityButton: View {
     let strip: StripID
     let mirror: ConsoleMirror
     @State private var isConfirming = false
-    @Environment(\.isEnabled) private var isEnabled
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
@@ -27,8 +26,7 @@ struct PolarityButton: View {
                 .background(isFlipped ? Theme.polarityAmber : Theme.track, in: RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
-        .disabled(state == nil)
-        .opacity(isEnabled && state != nil ? 1 : 0.38)
+        .dimmedUntilRead(state != nil)
         .accessibilityIdentifier("toggle-" + spec.address)
         .accessibilityLabel(Text("Polarity"))
         .accessibilityValue(state == nil ? Text(verbatim: "") : isFlipped ? Text("Flipped") : Text("Normal"))
