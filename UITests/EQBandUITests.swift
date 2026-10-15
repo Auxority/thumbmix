@@ -69,7 +69,8 @@ final class EQBandUITests: DeskUITestCase {
         XCTAssertTrue(type.appears(within: 2))
         XCTAssertTrue(gain.isEnabled)
         type.tap()
-        app.buttons["LCut"].tap()
+        // Not the "Low cut" chip behind the menu: the list's item carries the desk's term too.
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Low cut' AND label CONTAINS 'LCut'")).firstMatch.tap()
         XCTAssertTrue(eventually(within: 2) { !gain.isEnabled && !q.isEnabled })
         XCTAssertEqual(gain.value as? String, "—", "a number would suggest the row still does something")
         XCTAssertEqual(q.value as? String, "—")

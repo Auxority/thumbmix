@@ -13,6 +13,21 @@ public enum Catalog {
     public static let mainEQTypes =
         eqTypes + ["BU6", "BU12", "BS12", "LR12", "BU18", "BU24", "BS24", "LR24"]
 
+    /// The M32 manual's own names for the modes ("Equaliser"): VEQ is "a bell filter that provides a more
+    /// 'Vintage EQ' sound". The manual doesn't list the crossovers; their names follow `Crossover`.
+    /// In `mainEQTypes` order, which starts with `eqTypes`: an input's list is the first six.
+    static func eqTypeNames(_ types: [String]) -> [String] {
+        let names = [
+            CoreStrings.text("Low cut"), CoreStrings.text("Low shelf"), CoreStrings.text("Parametric EQ"),
+            CoreStrings.text("Vintage EQ"), CoreStrings.text("High shelf"), CoreStrings.text("High cut"),
+            CoreStrings.text("Butterworth 6 dB/oct"), CoreStrings.text("Butterworth 12 dB/oct"),
+            CoreStrings.text("Bessel 12 dB/oct"), CoreStrings.text("Linkwitz-Riley 12 dB/oct"),
+            CoreStrings.text("Butterworth 18 dB/oct"), CoreStrings.text("Butterworth 24 dB/oct"),
+            CoreStrings.text("Bessel 24 dB/oct"), CoreStrings.text("Linkwitz-Riley 24 dB/oct"),
+        ]
+        return Array(names.prefix(types.count))
+    }
+
     private static let hold = ParamScale.log(min: 0.02, max: 2000, steps: 101)
     private static let release = ParamScale.log(min: 5, max: 4000, steps: 101)
     private static let attack = ParamScale.linear(min: 0, max: 120, step: 1)
@@ -124,7 +139,8 @@ public enum Catalog {
         let types = [.matrix, .mainStereo, .mainMono].contains(strip.kind) ? mainEQTypes : eqTypes
         let target = eqDefaults(strip).flatMap { $0.indices.contains(band - 1) ? $0[band - 1] : nil }
         return EQBandSpecs(
-            type: ParamSpec(p + "type", CoreStrings.text("Type"), .choice(types), .plain),
+            type: ParamSpec(
+                p + "type", CoreStrings.text("Type"), .choice(types), .plain, optionNames: eqTypeNames(types)),
             frequency: ParamSpec(
                 p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz,
                 reset: target?.frequency),

@@ -121,7 +121,24 @@ struct CatalogTests {
             Catalog.gate(StripID(.input, 1)).mode.optionNames == [
                 "Expander 1:2", "Expander 1:3", "Expander 1:4", "Gate", "Ducker",
             ])
-        #expect(Catalog.eqBand(StripID(.input, 1), 1).type.optionNames == nil, "EQ types keep the desk's names")
+    }
+
+    /// The M32 manual's own names for the EQ modes (2026-10-15, mock B); crossovers spelled out, key filter cuts and
+    /// band-passes in words. The desk's term stays under each, and in the closed row.
+    @Test func filterTypesHaveWordsForTheList() {
+        let inputTypes = [
+            "Low cut", "Low shelf", "Parametric EQ", "Vintage EQ", "High shelf", "High cut",
+        ]
+        #expect(Catalog.eqBand(StripID(.input, 1), 1).type.optionNames == inputTypes)
+        let main = Catalog.eqBand(StripID(.mainStereo, 1), 1).type
+        #expect(main.optionNames?.prefix(6).elementsEqual(inputTypes) == true)
+        #expect(main.optionNames?[6] == "Butterworth 6 dB/oct")
+        #expect(main.optionNames?[8] == "Bessel 12 dB/oct")
+        #expect(main.optionNames?[13] == "Linkwitz-Riley 24 dB/oct")
+        let key = Catalog.gateKey(StripID(.input, 1)).filterType
+        #expect(key.optionNames?[1] == "Low cut, 12 dB/oct")
+        #expect(key.optionNames?[4] == "Band-pass, Q 1")
+        #expect(key.optionNames?.count == Catalog.keyFilterTypes.count)
     }
 
     @Test func makeupGainAndRatioResetValues() {

@@ -20,9 +20,9 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - Mono mode (not in the probe yet). The doc only names `/config/mono/mode` (LR+M or LCR) and `/config/mono/link` ("M/C depends on Main L/R", p.21). Set LCR on the desk: what does a channel's M/C level do then? Tick the link: does a strip with its LR switch off still reach Main M? Main M's Fed by shows the same rows either way; if the link gates it, say so on that tab.
   - Section 8: fader text. Does the desk's own dB text match the app's for every input fader? The app follows the doc's table (p.145), incl. a 0 dB detent and two odd steps (−8.7, −23.2). Set faders near 0, −8.6 and −23.2 with the desk's encoder first; each DIFFERS line goes in `FaderLaw.deskExceptions`. Untested: the fake desk doesn't answer `/node`. Then check whether a formula reproduces the desk's steps, and drop the list if it does; the same goes for any other list of steps that look inconsistent.
   - Inserts (not in the probe yet): does Pre/Post mean before/after EQ on an input channel too (the X32 quick start says so for buses, mains and matrices)? With an aux slot and nothing patched, does the strip go silent, and does that aux in become the return? Does a linked pair's insert follow the link, and under which Link Preference (assumed Dynamics)? What does picking a slot another strip holds do?
-- [ ] **Key source and Auto time.** Does the desk's key source list call 0 "Self" (the X32 manual) or "Off" (the doc)? The app says Self. With Auto time on, does the desk ignore Attack and Release? If it does, dim them like a cut filter's Gain and Q.
 - [ ] **EQ cut filters.** Set a band to LCut, HCut and (on a main) BU12: do Gain and Q really do nothing? The app disables both rows there (`Catalog.eqTypeShapesLevel`); the doc lists gain and Q for every type without saying.
   - Crossovers (`Crossover`, guessed): on a matrix or main, set band 1 and band 6 to LR24 at 1 kHz. Does band 1 cut the lows and band 6 the highs? Is it −6 dB at 1 kHz, and BS24 −3 dB? Is band 2 (or 5) really off meanwhile? Can bands 2-5 be set to BU6 … LR24 at all? The app draws those flat.
+- [ ] **How VEQ differs from PEQ.** The M32 manual only says VEQ is "a bell filter that provides a more 'Vintage EQ' sound"; the app draws it exactly like PEQ. Set two bands to PEQ and VEQ with the same frequency, gain and Q, and compare the desk's EQ screen (or the RTA on pink noise): skirts that dip past flat (a forum claim), a wider or narrower Q? Then give `EQResponse` its own VEQ curve.
 - [ ] **Compressor knee width per step.** The app draws 6 dB per knee step (knee 5 = 30 dB), a guess: no source gives the unit, and `m32-probe` can't read it. Set knee 0 and 5 on the desk and compare its dynamics screen with the app's curve, or measure: a test tone at the threshold, 4:1, and the gain reduction meter at each knee step. Then set `TransferCurve.kneeDecibelsPerStep`.
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
 - [ ] Walk the acceptance checklist in `README.md`. On the same device, check that VoiceOver's swipe up/down adjusts parameter rows: XCUITest can't drive it.
@@ -34,7 +34,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Small fixes
 
-- [ ] **Plain words for the desk's filter terms?** The key filter's types (LC6 … HC12, BP Q 1.0 … 10) and EQ types (LCut, PEQ, BU6 …) show the desk's terms. Revisit both together, like Detector's "Average level" · RMS.
+- [ ] **Auto time dims Attack and Release.** With Auto time on the desk ignores both (the user, from the console, 2026-10-15): dim them like a cut filter's Gain and Q.
 
 ## Features
 
@@ -81,4 +81,5 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - Offline mode's meters are a time-based animation (`FakeState.meterBlob`): gain, trim, gate and compressor don't move them. Simulating the signal wasn't worth the complexity (decided 2026-10-09).
 - The compressor knee is drawn at 6 dB per step: the doc gives the 0–5 knee setting no unit (see "Compressor knee width per step").
 - Gate curves (EXPn 1:n, GATE, DUCK) follow the engineer's confirmation; the doc only lists the modes.
+- VEQ is drawn as PEQ: no source gives its shape (see "How VEQ differs from PEQ").
 - The EQ and low-cut curves are RBJ and Butterworth approximations, not measurements of the desk.

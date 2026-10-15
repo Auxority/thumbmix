@@ -171,6 +171,56 @@
         }
       }
     },
+    "Band-pass, Q 1" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Band-pass, Q 1"
+          }
+        }
+      }
+    },
+    "Band-pass, Q 2" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Band-pass, Q 2"
+          }
+        }
+      }
+    },
+    "Band-pass, Q 3" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Band-pass, Q 3"
+          }
+        }
+      }
+    },
+    "Band-pass, Q 5" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Band-pass, Q 5"
+          }
+        }
+      }
+    },
+    "Band-pass, Q 10" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Band-pass, Q 10"
+          }
+        }
+      }
+    },
     "Bass & guitar" : {
       "localizations" : {
         "en" : {
@@ -197,6 +247,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Before fader"
+          }
+        }
+      }
+    },
+    "Bessel 12 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bessel 12 dB/oct"
+          }
+        }
+      }
+    },
+    "Bessel 24 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bessel 24 dB/oct"
           }
         }
       }
@@ -248,6 +318,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buses"
+          }
+        }
+      }
+    },
+    "Butterworth 6 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Butterworth 6 dB/oct"
+          }
+        }
+      }
+    },
+    "Butterworth 12 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Butterworth 12 dB/oct"
+          }
+        }
+      }
+    },
+    "Butterworth 18 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Butterworth 18 dB/oct"
+          }
+        }
+      }
+    },
+    "Butterworth 24 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Butterworth 24 dB/oct"
           }
         }
       }
@@ -673,6 +783,46 @@
         }
       }
     },
+    "High cut" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High cut"
+          }
+        }
+      }
+    },
+    "High cut, 6 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High cut, 6 dB/oct"
+          }
+        }
+      }
+    },
+    "High cut, 12 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High cut, 12 dB/oct"
+          }
+        }
+      }
+    },
+    "High shelf" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High shelf"
+          }
+        }
+      }
+    },
     "Hold" : {
       "localizations" : {
         "en" : {
@@ -754,6 +904,26 @@
         }
       }
     },
+    "Linkwitz-Riley 12 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linkwitz-Riley 12 dB/oct"
+          }
+        }
+      }
+    },
+    "Linkwitz-Riley 24 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linkwitz-Riley 24 dB/oct"
+          }
+        }
+      }
+    },
     "Logarithmic" : {
       "localizations" : {
         "en" : {
@@ -770,6 +940,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Low cut"
+          }
+        }
+      }
+    },
+    "Low cut, 6 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low cut, 6 dB/oct"
+          }
+        }
+      }
+    },
+    "Low cut, 12 dB/oct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low cut, 12 dB/oct"
+          }
+        }
+      }
+    },
+    "Low shelf" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low shelf"
           }
         }
       }
@@ -963,6 +1163,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pan"
+          }
+        }
+      }
+    },
+    "Parametric EQ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parametric EQ"
           }
         }
       }
@@ -1294,6 +1504,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Type"
+          }
+        }
+      }
+    },
+    "Vintage EQ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vintage EQ"
           }
         }
       }
