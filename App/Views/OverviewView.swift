@@ -39,8 +39,8 @@ struct OverviewView: View {
             .safeAreaInset(edge: .bottom, spacing: 0) { GroupChips(selection: $group) }
             .background(Theme.background)
             .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
-            .navigationTitle("Thumbmix")
-            .demoTitle("Thumbmix")
+            // No title (2026-10-15): the bar holds Disconnect, and in Offline mode the DEMO pill, nothing more.
+            .demoTitle(nil)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

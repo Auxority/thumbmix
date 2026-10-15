@@ -7,13 +7,14 @@ extension EnvironmentValues {
 
 extension View {
     /// Shows the title with a DEMO pill in Offline mode. It sits in the title, not a banner, so no control moves.
-    func demoTitle(_ title: String) -> some View {
+    /// nil shows the pill alone, for a screen without a title (the overview).
+    func demoTitle(_ title: String?) -> some View {
         modifier(DemoTitle(title: title))
     }
 }
 
 private struct DemoTitle: ViewModifier {
-    let title: String
+    let title: String?
     @Environment(\.isDemoConsole) private var isDemoConsole
 
     func body(content: Content) -> some View {
@@ -21,7 +22,7 @@ private struct DemoTitle: ViewModifier {
             if isDemoConsole {
                 ToolbarItem(placement: .principal) {
                     HStack(spacing: 6) {
-                        Text(title).font(.headline)
+                        if let title { Text(title).font(.headline) }
                         Text("DEMO")
                             .font(.caption.bold())
                             .padding(.horizontal, 8)

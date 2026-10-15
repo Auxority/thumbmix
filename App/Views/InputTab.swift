@@ -78,7 +78,7 @@ private struct PhantomButton: View {
         .disabled(state == nil)
         .opacity(isEnabled && state != nil ? 1 : 0.38)
         .accessibilityIdentifier("toggle-" + spec.address)
-        .accessibilityValue(state == nil ? "" : isOn ? "On" : "Off")
+        .accessibilityValue(state == nil ? Text(verbatim: "") : Text(isOn ? "On" : "Off"))
         .alert(title(isOn), isPresented: $isConfirming) {
             Button("Cancel", role: .cancel) {}
             Button(isOn ? "Turn Off" : "Turn On") { mirror.set(spec.address, .int(isOn ? 0 : 1)) }
