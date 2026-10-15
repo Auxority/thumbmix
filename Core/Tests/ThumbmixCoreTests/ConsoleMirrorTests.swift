@@ -14,14 +14,12 @@ struct ConsoleMirrorTests {
     }
 
     @Test func syncFillsTheOverview() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(fake, port)
-        defer { mirror.stop() }
+        try await withLiveDesk { fake, mirror in
 
-        #expect(mirror.isLive)
-        #expect(mirror.cell("/ch/01/config/name").argument == .string("Kick"))
-        #expect(Catalog.overviewAddresses().allSatisfy { mirror.cell($0).argument != nil })
+            #expect(mirror.isLive)
+            #expect(mirror.cell("/ch/01/config/name").argument == .string("Kick"))
+            #expect(Catalog.overviewAddresses().allSatisfy { mirror.cell($0).argument != nil })
+        }
     }
 
     /// "Live" must mean every overview value is in: the overview builds its rows when the status turns live, and a
@@ -54,37 +52,30 @@ struct ConsoleMirrorTests {
     }
 
     @Test func syncSurvivesLostReplies() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        fake.dropNextGets(40)
-        let mirror = await liveMirror(fake, port)
-        defer { mirror.stop() }
+        try await withLiveDesk(dropsGets: 40) { fake, mirror in
 
-        #expect(mirror.isLive)
-        #expect(Catalog.overviewAddresses().allSatisfy { mirror.cell($0).argument != nil })
+            #expect(mirror.isLive)
+            #expect(Catalog.overviewAddresses().allSatisfy { mirror.cell($0).argument != nil })
+        }
     }
 
     @Test func deskChangesArriveAfterSync() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(fake, port)
-        defer { mirror.stop() }
+        try await withLiveDesk { fake, mirror in
 
-        fake.deskChange("/ch/02/mix/fader", .float(0.5))
+            fake.deskChange("/ch/02/mix/fader", .float(0.5))
 
-        #expect(await eventually { mirror.cell("/ch/02/mix/fader").argument == .float(0.5) })
+            #expect(await eventually { mirror.cell("/ch/02/mix/fader").argument == .float(0.5) })
+        }
     }
 
     @Test func editsReachTheConsole() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(fake, port)
-        defer { mirror.stop() }
+        try await withLiveDesk { fake, mirror in
 
-        mirror.set("/ch/01/mix/fader", .float(0.6))
+            mirror.set("/ch/01/mix/fader", .float(0.6))
 
-        #expect(mirror.cell("/ch/01/mix/fader").argument == .float(0.6))
-        #expect(await eventually { fake.value(at: "/ch/01/mix/fader") == .float(0.6) })
+            #expect(mirror.cell("/ch/01/mix/fader").argument == .float(0.6))
+            #expect(await eventually { fake.value(at: "/ch/01/mix/fader") == .float(0.6) })
+        }
     }
 
     @Test func editsIgnoredWhileNotLive() {
@@ -102,13 +93,11 @@ struct ConsoleMirrorTests {
     }
 
     @Test func metersFillCells() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(fake, port)
-        defer { mirror.stop() }
+        try await withLiveDesk { fake, mirror in
 
-        #expect(await eventually { mirror.meter(StripID(.input, 1)).level > 0 })
-        #expect(await eventually { mirror.meter(StripID(.input, 1)).gateGain < 1 })
+            #expect(await eventually { mirror.meter(StripID(.input, 1)).level > 0 })
+            #expect(await eventually { mirror.meter(StripID(.input, 1)).gateGain < 1 })
+        }
     }
 
     @Test func badFloatsAreDroppedOrClamped() {
@@ -138,37 +127,33 @@ struct ConsoleMirrorTests {
     }
 
     @Test func holdLastsForTheWholeGesture() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(fake, port)
-        defer { mirror.stop() }
-        let fader = "/ch/01/mix/fader"
+        try await withLiveDesk { fake, mirror in
+            let fader = "/ch/01/mix/fader"
 
-        mirror.beginEdit(fader)
-        mirror.set(fader, .float(0.6))
-        try await Task.sleep(for: .milliseconds(450))
-        fake.deskChange(fader, .float(0.1))
-        try await Task.sleep(for: .milliseconds(100))
+            mirror.beginEdit(fader)
+            mirror.set(fader, .float(0.6))
+            try await Task.sleep(for: .milliseconds(450))
+            fake.deskChange(fader, .float(0.1))
+            try await Task.sleep(for: .milliseconds(100))
 
-        #expect(mirror.cell(fader).argument == .float(0.6))
-        mirror.endEdit(fader)
+            #expect(mirror.cell(fader).argument == .float(0.6))
+            mirror.endEdit(fader)
+        }
     }
 
     @Test func consoleValueShowsAfterRelease() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(fake, port)
-        defer { mirror.stop() }
-        let fader = "/ch/01/mix/fader"
+        try await withLiveDesk { fake, mirror in
+            let fader = "/ch/01/mix/fader"
 
-        mirror.beginEdit(fader)
-        mirror.set(fader, .float(0.6))
-        try await Task.sleep(for: .milliseconds(100))
-        fake.deskChange(fader, .float(0.1))
-        try await Task.sleep(for: .milliseconds(50))
-        mirror.endEdit(fader)
+            mirror.beginEdit(fader)
+            mirror.set(fader, .float(0.6))
+            try await Task.sleep(for: .milliseconds(100))
+            fake.deskChange(fader, .float(0.1))
+            try await Task.sleep(for: .milliseconds(50))
+            mirror.endEdit(fader)
 
-        #expect(await eventually { mirror.cell(fader).argument == .float(0.1) })
+            #expect(await eventually { mirror.cell(fader).argument == .float(0.1) })
+        }
     }
 
     @Test func auditCorrectsChangesThatWereNeverPushed() async throws {
@@ -188,29 +173,25 @@ struct ConsoleMirrorTests {
     }
 
     @Test func wakeResyncs() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(fake, port)
-        defer { mirror.stop() }
+        try await withLiveDesk { fake, mirror in
 
-        mirror.wake()
+            mirror.wake()
 
-        #expect(mirror.status == .lost)
-        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
+            #expect(mirror.status == .lost)
+            #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
+        }
     }
 
     @Test func lostThenResyncs() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(fake, port)
-        defer { mirror.stop() }
+        try await withLiveDesk { fake, mirror in
 
-        fake.silent = true
-        #expect(await eventually { mirror.status == .lost })
-        #expect(!mirror.isLive)
+            fake.silent = true
+            #expect(await eventually { mirror.status == .lost })
+            #expect(!mirror.isLive)
 
-        fake.silent = false
-        #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
+            fake.silent = false
+            #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
+        }
     }
 }
 

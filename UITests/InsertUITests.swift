@@ -34,7 +34,7 @@ final class InsertUITests: DeskUITestCase {
         XCTAssertEqual(desk.value("/ch/08/insert/on"), .int(0))
 
         // An alert ignores a reopen while it still animates out.
-        Thread.sleep(forTimeInterval: 0.6)
+        XCTAssertTrue(eventually(within: 2) { !alert.exists })
         insert.tap()
         XCTAssertTrue(alert.appears(within: 2))
         alert.buttons["Turn On"].tap()

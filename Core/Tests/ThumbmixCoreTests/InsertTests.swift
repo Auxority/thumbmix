@@ -127,21 +127,18 @@ extension InsertTests {
 @MainActor
 struct InsertLinkSyncTests {
     @Test func aPartnerThatDoesNotFollowAnInsertEditIsShownPerSideNotWritten() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        fake.copiesLinkedEdits = false
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        let gtr = StripID(.input, 9)
-        await openTab(.mix, of: gtr, in: mirror)
-        let onR = "/ch/10/insert/on"
-        let before = fake.value(at: onR)
-        #expect(mirror.insertBlocks(gtr, partner: gtr.partner).count == 1)
+        try await withLiveDesk(copiesLinkedEdits: false) { fake, mirror in
+            let gtr = StripID(.input, 9)
+            await openTab(.mix, of: gtr, in: mirror)
+            let onR = "/ch/10/insert/on"
+            let before = fake.value(at: onR)
+            #expect(mirror.insertBlocks(gtr, partner: gtr.partner).count == 1)
 
-        mirror.set("/ch/09/insert/on", .int(1))
+            mirror.set("/ch/09/insert/on", .int(1))
 
-        #expect(await eventually { mirror.insertBlocks(gtr, partner: gtr.partner).count == 2 }, "per side now")
-        #expect(fake.value(at: onR) == before)
-        #expect(!fake.receivedSets.contains { $0.address == onR })
+            #expect(await eventually { mirror.insertBlocks(gtr, partner: gtr.partner).count == 2 }, "per side now")
+            #expect(fake.value(at: onR) == before)
+            #expect(!fake.receivedSets.contains { $0.address == onR })
+        }
     }
 }

@@ -64,19 +64,17 @@ struct EQResetTests {
 
     /// Matrices and mains offer 14 types; the defaults use only PEQ, which sits at the same index for all.
     @Test func resetBandsOnAMainWritesPEQ() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        let main = StripID(.mainStereo)
-        fake.deskChange("/main/st/eq/6/type", .int(13))
-        #expect(await eventually { mirror.cell("/main/st/eq/6/type").argument == .int(13) })
+        try await withLiveDesk { fake, mirror in
+            let main = StripID(.mainStereo)
+            fake.deskChange("/main/st/eq/6/type", .int(13))
+            #expect(await eventually { mirror.cell("/main/st/eq/6/type").argument == .int(13) })
 
-        mirror.resetEQBands(main)
+            mirror.resetEQBands(main)
 
-        let specs = Catalog.eqBand(main, 6)
-        #expect(await eventually { fake.value(at: specs.type.address) == .int(2) })
-        #expect(await eventually { abs((deskValue(fake, specs.frequency) ?? 0) - 8730) < 1 })
+            let specs = Catalog.eqBand(main, 6)
+            #expect(await eventually { fake.value(at: specs.type.address) == .int(2) })
+            #expect(await eventually { abs((deskValue(fake, specs.frequency) ?? 0) - 8730) < 1 })
+        }
     }
 
     /// The doc doesn't say which types ignore gain and Q; cut filters have no level to shape (assumed, see TODO).
@@ -89,57 +87,51 @@ struct EQResetTests {
 
     /// Main LR's type 7 is BU12, a type inputs don't have: the band's own type list decides.
     @Test func mirrorTellsWhetherABandShapesLevel() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        await openTab(.eq, of: kick, in: mirror)
-        await openTab(.eq, of: StripID(.mainStereo), in: mirror)
-        #expect(mirror.eqBandShapesLevel(kick, 1) == true, "the demo's bands are PEQs")
+        try await withLiveDesk { fake, mirror in
+            await openTab(.eq, of: kick, in: mirror)
+            await openTab(.eq, of: StripID(.mainStereo), in: mirror)
+            #expect(mirror.eqBandShapesLevel(kick, 1) == true, "the demo's bands are PEQs")
 
-        fake.deskChange("/ch/01/eq/1/type", .int(0))
-        fake.deskChange("/main/st/eq/2/type", .int(7))
+            fake.deskChange("/ch/01/eq/1/type", .int(0))
+            fake.deskChange("/main/st/eq/2/type", .int(7))
 
-        #expect(await eventually { mirror.eqBandShapesLevel(kick, 1) == false })
-        #expect(await eventually { mirror.eqBandShapesLevel(StripID(.mainStereo), 2) == false })
-        #expect(mirror.eqBandShapesLevel(StripID(.mainStereo), 3) == true)
+            #expect(await eventually { mirror.eqBandShapesLevel(kick, 1) == false })
+            #expect(await eventually { mirror.eqBandShapesLevel(StripID(.mainStereo), 2) == false })
+            #expect(mirror.eqBandShapesLevel(StripID(.mainStereo), 3) == true)
+        }
     }
 
     @Test func resetBandsPutsEveryBandBackToItsDefault() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        fake.deskChange("/ch/01/eq/1/type", .int(0))
-        fake.deskChange("/ch/01/eq/3/g", .float(0.9))
-        #expect(await eventually { mirror.cell("/ch/01/eq/3/g").argument == .float(0.9) })
+        try await withLiveDesk { fake, mirror in
+            fake.deskChange("/ch/01/eq/1/type", .int(0))
+            fake.deskChange("/ch/01/eq/3/g", .float(0.9))
+            #expect(await eventually { mirror.cell("/ch/01/eq/3/g").argument == .float(0.9) })
 
-        mirror.resetEQBands(kick)
+            mirror.resetEQBands(kick)
 
-        let expected: [(hertz: Double, band: Int)] = [(91.4, 1), (418, 2), (1910, 3), (8730, 4)]
-        for (hertz, band) in expected {
-            let specs = Catalog.eqBand(kick, band)
-            #expect(
-                await eventually {
-                    deskValue(fake, specs.type) == 2 && deskValue(fake, specs.gain) == 0
-                        && abs((deskValue(fake, specs.frequency) ?? 0) - hertz) < hertz * 0.01
-                        && abs((deskValue(fake, specs.q) ?? 0) - 1.7) < 0.05
-                }, "band \(band)")
+            let expected: [(hertz: Double, band: Int)] = [(91.4, 1), (418, 2), (1910, 3), (8730, 4)]
+            for (hertz, band) in expected {
+                let specs = Catalog.eqBand(kick, band)
+                #expect(
+                    await eventually {
+                        deskValue(fake, specs.type) == 2 && deskValue(fake, specs.gain) == 0
+                            && abs((deskValue(fake, specs.frequency) ?? 0) - hertz) < hertz * 0.01
+                            && abs((deskValue(fake, specs.q) ?? 0) - 1.7) < 0.05
+                    }, "band \(band)")
+            }
         }
     }
 
     @Test func resetOneBandLeavesTheOthers() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        fake.deskChange("/ch/01/eq/2/g", .float(0.9))
-        fake.deskChange("/ch/01/eq/3/g", .float(0.9))
-        #expect(await eventually { mirror.cell("/ch/01/eq/3/g").argument == .float(0.9) })
+        try await withLiveDesk { fake, mirror in
+            fake.deskChange("/ch/01/eq/2/g", .float(0.9))
+            fake.deskChange("/ch/01/eq/3/g", .float(0.9))
+            #expect(await eventually { mirror.cell("/ch/01/eq/3/g").argument == .float(0.9) })
 
-        mirror.resetEQBand(kick, 2)
+            mirror.resetEQBand(kick, 2)
 
-        #expect(await eventually { fake.value(at: "/ch/01/eq/2/g") == .float(0.5) })
-        #expect(fake.value(at: "/ch/01/eq/3/g") == .float(0.9))
+            #expect(await eventually { fake.value(at: "/ch/01/eq/2/g") == .float(0.5) })
+            #expect(fake.value(at: "/ch/01/eq/3/g") == .float(0.9))
+        }
     }
 }

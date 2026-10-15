@@ -106,7 +106,7 @@ final class OverviewUITests: DeskUITestCase {
         let main = app.buttons["Main"]
         main.tap()
         XCTAssertTrue(app.buttons["LR"].appears(within: 2))
-        sleep(1)  // let a jump back play out before judging where the bar rests
+        XCTAssertTrue(main.settles(within: 3))  // a jump back must play out before we judge where the bar rests
         XCTAssertLessThanOrEqual(main.frame.maxX, app.frame.maxX, "the Main chip is still on screen")
         saveScreenshot("chips-main-tapped")
         XCTAssertTrue(main.isHittable)

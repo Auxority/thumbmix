@@ -25,47 +25,41 @@ struct SoloTests {
     /// S sits beside the slim fader on every tab, so solo is read on connect, like mute: read only with the Mix tab,
     /// a strip opened on Fed by, or a resync while on EQ, left S unread, and an unread switch ignores taps.
     @Test func soloWorksWithoutOpeningTheMixTab() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        let bus = StripID(.bus, 1)
-        #expect(mirror.cell(bus.solo).argument == .int(0), "read before going live")
+        try await withLiveDesk { fake, mirror in
+            let bus = StripID(.bus, 1)
+            #expect(mirror.cell(bus.solo).argument == .int(0), "read before going live")
 
-        mirror.toggleSolo(bus)
+            mirror.toggleSolo(bus)
 
-        #expect(await eventually { fake.value(at: bus.solo) == .int(1) })
+            #expect(await eventually { fake.value(at: bus.solo) == .int(1) })
+        }
     }
 
     @Test func soloTogglesTheStrip() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        let kick = StripID(.input, 1)
-        await openTab(.mix, of: kick, in: mirror)
-        #expect(!mirror.isSoloed(kick))
+        try await withLiveDesk { fake, mirror in
+            let kick = StripID(.input, 1)
+            await openTab(.mix, of: kick, in: mirror)
+            #expect(!mirror.isSoloed(kick))
 
-        mirror.toggleSolo(kick)
+            mirror.toggleSolo(kick)
 
-        #expect(await eventually { fake.value(at: kick.solo) == .int(1) })
-        #expect(mirror.isSoloed(kick))
+            #expect(await eventually { fake.value(at: kick.solo) == .int(1) })
+            #expect(mirror.isSoloed(kick))
+        }
     }
 
     /// The doc doesn't say whether the desk links solo; half a stereo source soloed is never wanted, and writing the
     /// partner too is harmless if the desk does copy it.
     @Test func aLinkedPairSolosBothSides() async throws {
-        let (fake, port) = try await startFake()
-        defer { fake.stop() }
-        let mirror = await liveMirror(port: port)
-        defer { mirror.stop() }
-        let gtrL = StripID(.input, 9)
-        await openTab(.mix, of: gtrL, in: mirror)
+        try await withLiveDesk { fake, mirror in
+            let gtrL = StripID(.input, 9)
+            await openTab(.mix, of: gtrL, in: mirror)
 
-        mirror.toggleSolo(gtrL)
+            mirror.toggleSolo(gtrL)
 
-        // Both sides go out in one tick, in no set order.
-        #expect(await eventually { fake.value(at: StripID(.input, 10).solo) == .int(1) })
-        #expect(await eventually { fake.value(at: gtrL.solo) == .int(1) })
+            // Both sides go out in one tick, in no set order.
+            #expect(await eventually { fake.value(at: StripID(.input, 10).solo) == .int(1) })
+            #expect(await eventually { fake.value(at: gtrL.solo) == .int(1) })
+        }
     }
 }
