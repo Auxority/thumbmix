@@ -9,16 +9,16 @@ extension ConsoleMirror {
         pumpReads()
     }
 
-    /// The tabs of every strip in use, one tab across all of them before the next, in `ChannelTab.fillOrder`.
+    /// The tabs of every strip worth prefetching, one tab across all of them before the next, in `ChannelTab.fillOrder`.
     func startBackgroundFill() {
-        let strips = stripsInUse()
+        let strips = stripsWorthPrefetching()
         for tab in ChannelTab.fillOrder {
             reads.add(unread(tab, strips.filter { ChannelTab.tabs(for: $0.kind).contains(tab) }), urgent: false)
         }
     }
 
-    /// Strips in use, plus their linked partners: a pair is read as a whole.
-    private func stripsInUse() -> [StripID] {
+    /// Strips worth prefetching, plus their linked partners: a pair is read as a whole.
+    private func stripsWorthPrefetching() -> [StripID] {
         let used = StripKind.allCases.flatMap(StripID.all).filter(isWorthPrefetching)
         var seen = Set<StripID>()
         return (used + used.flatMap { linkedPartner(of: $0) }).filter { seen.insert($0).inserted }

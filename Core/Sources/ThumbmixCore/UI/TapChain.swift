@@ -84,7 +84,7 @@ public struct TapChain: Equatable, Sendable {
         case .postEQ: .eq
         case .preFader: block(before: .fader)
         case .postFader: .fader
-        case .subgroup: blocks.last == .fader ? .fader : blocks[blocks.count - 1]
+        case .subgroup: blocks[blocks.count - 1]
         }
     }
 

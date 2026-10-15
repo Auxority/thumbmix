@@ -9,24 +9,8 @@ public enum Catalog {
     public static let ratios = [
         "1.1", "1.3", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "7.0", "10", "20", "100",
     ]
-    public static let eqTypes = ["LCut", "LShv", "PEQ", "VEQ", "HShv", "HCut"]
-    public static let mainEQTypes =
-        eqTypes + ["BU6", "BU12", "BS12", "LR12", "BU18", "BU24", "BS24", "LR24"]
-
-    /// The M32 manual's own names for the modes ("Equaliser"): VEQ is "a bell filter that provides a more
-    /// 'Vintage EQ' sound". The manual doesn't list the crossovers; their names follow `Crossover`.
-    /// In `mainEQTypes` order, which starts with `eqTypes`: an input's list is the first six.
-    static func eqTypeNames(_ types: [String]) -> [String] {
-        let names = [
-            CoreStrings.text("Low cut"), CoreStrings.text("Low shelf"), CoreStrings.text("Parametric EQ"),
-            CoreStrings.text("Vintage EQ"), CoreStrings.text("High shelf"), CoreStrings.text("High cut"),
-            CoreStrings.text("Butterworth 6 dB/oct"), CoreStrings.text("Butterworth 12 dB/oct"),
-            CoreStrings.text("Bessel 12 dB/oct"), CoreStrings.text("Linkwitz-Riley 12 dB/oct"),
-            CoreStrings.text("Butterworth 18 dB/oct"), CoreStrings.text("Butterworth 24 dB/oct"),
-            CoreStrings.text("Bessel 24 dB/oct"), CoreStrings.text("Linkwitz-Riley 24 dB/oct"),
-        ]
-        return Array(names.prefix(types.count))
-    }
+    public static let eqTypes = EQFilterType.ofInputs.map(\.deskName)
+    public static let mainEQTypes = EQFilterType.allCases.map(\.deskName)
 
     private static let hold = ParamScale.log(min: 0.02, max: 2000, steps: 101)
     private static let release = ParamScale.log(min: 5, max: 4000, steps: 101)
@@ -136,11 +120,12 @@ public enum Catalog {
     /// A band row's double-tap restores what Reset bands writes, at once like a double-tap on the graph's point.
     public static func eqBand(_ strip: StripID, _ band: Int) -> EQBandSpecs {
         let p = strip.prefix + "/eq/\(band)/"
-        let types = [.matrix, .mainStereo, .mainMono].contains(strip.kind) ? mainEQTypes : eqTypes
+        let types = [.matrix, .mainStereo, .mainMono].contains(strip.kind) ? EQFilterType.allCases : EQFilterType.ofInputs
         let target = eqDefaults(strip).flatMap { $0.indices.contains(band - 1) ? $0[band - 1] : nil }
         return EQBandSpecs(
             type: ParamSpec(
-                p + "type", CoreStrings.text("Type"), .choice(types), .plain, optionNames: eqTypeNames(types)),
+                p + "type", CoreStrings.text("Type"), .choice(types.map(\.deskName)), .plain,
+                optionNames: types.map(\.name)),
             frequency: ParamSpec(
                 p + "f", CoreStrings.text("Freq"), .log(min: 20, max: 20_000, steps: 201), .hertz,
                 reset: target?.frequency),
@@ -154,7 +139,7 @@ public enum Catalog {
 
     /// The engineer's EQ starting points, restored by Reset bands and a row's double-tap: PEQs at Q 1.7, 0 dB.
     /// Six-band strips use the desk's steps nearest the engineer's 55.1, 152, 418, 1150, 3170 and 8730 Hz;
-    /// compare them with the real desk (TODO). PEQ is type 2 in both type lists.
+    /// compare them with the real desk (TODO).
     public static func eqDefaults(_ strip: StripID) -> [EQBandState]? {
         let frequencies: [Double] =
             switch strip.eqBandCount {
@@ -163,7 +148,7 @@ public enum Catalog {
             default: []
             }
         guard !frequencies.isEmpty else { return nil }
-        return frequencies.map { EQBandState(typeIndex: 2, frequency: $0, gain: 0, q: 1.7) }
+        return frequencies.map { EQBandState(typeIndex: EQFilterType.parametric.rawValue, frequency: $0, gain: 0, q: 1.7) }
     }
 
     /// `eqDefaults` for one band as the desk's arguments, each snapped to the nearest step its scale has.
@@ -179,10 +164,6 @@ public enum Catalog {
             (spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
         }
     }
-
-    /// Cut filters (LCut, HCut, the mains' BU6…LR24) have no level to shape, so Gain and Q do nothing there.
-    /// The doc lists gain and Q for every type without saying so: assumed, to check on the desk (TODO).
-    public static func eqTypeShapesLevel(_ name: String) -> Bool { ["LShv", "PEQ", "VEQ", "HShv"].contains(name) }
 
     /// `target` is a bus for inputs, aux ins and FX returns, a matrix for buses and mains (`StripKind.sendTarget`).
     public static func sendLevel(from strip: StripID, to target: StripID) -> ParamSpec {
