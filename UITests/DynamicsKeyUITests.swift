@@ -15,6 +15,22 @@ final class DynamicsKeyUITests: DeskUITestCase {
         saveScreenshot("comp-key")
     }
 
+    /// The desk ignores Attack and Release under Auto time: dimmed in place, back when Auto time goes off.
+    func testAutoTimeDimsAttackAndRelease() {
+        desk.change("/ch/01/dyn/auto", 1)
+        launch()
+        open("Kick")
+        app.buttons["Comp"].tap()
+        let attack = element("/ch/01/dyn/attack")
+        let release = element("/ch/01/dyn/release")
+        XCTAssertTrue(eventually(within: 2) { attack.exists && !attack.isEnabled && !release.isEnabled })
+        XCTAssertTrue(element("/ch/01/dyn/hold").isEnabled, "Hold stays the engineer's")
+        scrollDown(from: "/ch/01/dyn/mode")
+        saveScreenshot("comp-auto-time")
+        desk.change("/ch/01/dyn/auto", 0)
+        XCTAssertTrue(eventually(within: 2) { attack.isEnabled && release.isEnabled })
+    }
+
     func testTheGateListensToAnotherChannel() {
         launch()
         open("Kick")

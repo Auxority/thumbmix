@@ -34,7 +34,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Small fixes
 
-- [ ] **Auto time dims Attack and Release.** With Auto time on the desk ignores both (the user, from the console, 2026-10-15): dim them like a cut filter's Gain and Q.
+None open.
 
 ## Features
 
