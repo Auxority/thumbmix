@@ -7,8 +7,13 @@ import ThumbmixCore
 struct TransferGraph: View {
     static let floor = -80.0
 
-    let output: (Double) -> Double
-    let threshold: Double
+    struct Curve {
+        let output: (Double) -> Double
+        let threshold: Double
+    }
+
+    /// nil until the desk sent every value the curve needs: the card keeps its place, so nothing below it moves.
+    let curve: Curve?
     let meter: MeterCell
     let reduction: KeyPath<MeterCell, Float>
     let identifier: String
@@ -20,13 +25,15 @@ struct TransferGraph: View {
         VStack(spacing: 8) {
             ZStack {
                 Canvas { context, size in
-                    drawReference(in: context, size: size)
+                    drawUnity(in: context, size: size)
+                    guard let curve else { return }
+                    drawThreshold(curve.threshold, in: context, size: size)
                     if let ghostOutput {
-                        context.stroke(curve(ghostOutput, in: size), with: .color(.white.opacity(0.3)), lineWidth: 2)
+                        context.stroke(path(ghostOutput, in: size), with: .color(.white.opacity(0.3)), lineWidth: 2)
                     }
-                    context.stroke(curve(output, in: size), with: .color(.white), lineWidth: 2)
+                    context.stroke(path(curve.output, in: size), with: .color(.white), lineWidth: 2)
                 }
-                LevelDot(meter: meter, output: output)
+                if let curve { LevelDot(meter: meter, output: curve.output) }
             }
             .frame(height: 140)
             .accessibilityElement(children: .ignore)
@@ -38,7 +45,7 @@ struct TransferGraph: View {
         .background(Theme.track, in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func curve(_ output: (Double) -> Double, in size: CGSize) -> Path {
+    private func path(_ output: (Double) -> Double, in size: CGSize) -> Path {
         var path = Path()
         for step in 0...160 {
             let input = Self.floor * (1 - Double(step) / 160)
@@ -48,11 +55,14 @@ struct TransferGraph: View {
         return path
     }
 
-    private func drawReference(in context: GraphicsContext, size: CGSize) {
+    private func drawUnity(in context: GraphicsContext, size: CGSize) {
         var unity = Path()
         unity.move(to: Self.point(input: Self.floor, output: Self.floor, in: size))
         unity.addLine(to: Self.point(input: 0, output: 0, in: size))
         context.stroke(unity, with: .color(Theme.raised), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+    }
+
+    private func drawThreshold(_ threshold: Double, in context: GraphicsContext, size: CGSize) {
         var thresholdLine = Path()
         let x = Self.point(input: threshold, output: 0, in: size).x
         thresholdLine.move(to: CGPoint(x: x, y: 0))

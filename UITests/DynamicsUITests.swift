@@ -18,6 +18,32 @@ final class DynamicsUITests: DeskUITestCase {
         saveScreenshot("task-14-gate")
     }
 
+    /// Graph first, like the EQ tab. Its space is kept until the curve's values arrive, so On never jumps.
+    func testGateGraphSitsAboveItsSwitchesWhichNeverMove() {
+        graphSitsAboveItsSwitches(tab: "Gate", prefix: "/ch/01/gate/", graph: "gate-graph")
+    }
+
+    func testCompGraphSitsAboveItsSwitchesWhichNeverMove() {
+        graphSitsAboveItsSwitches(tab: "Comp", prefix: "/ch/01/dyn/", graph: "comp-graph")
+    }
+
+    private func graphSitsAboveItsSwitches(tab: String, prefix: String, graph identifier: String) {
+        desk.forget(prefix + "thr")
+        launch()
+        open("Kick")
+        app.buttons[tab].tap()
+        let on = element("toggle-" + prefix + "on")
+        XCTAssertTrue(eventually(within: 2) { on.isEnabled }, "the tab was read")
+        let before = on.frame.minY
+        desk.change(prefix + "thr", float: 0.5)
+        let graph = element(identifier)
+        XCTAssertTrue(graph.appears(within: 2))
+        XCTAssertLessThan(graph.frame.maxY, on.frame.minY)
+        XCTAssertEqual(on.frame.minY, before, "the switches stayed put")
+        XCTAssertTrue(element(prefix + "thr").isHittable, "Threshold on the first screen")
+        saveScreenshot(identifier + "-first")
+    }
+
     func testCompTabShowsRatioAndMakeupGain() {
         launch()
         open("Kick")

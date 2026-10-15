@@ -11,15 +11,14 @@ struct GateTab: View {
         let gate = Catalog.gate(strip)
         ScrollView {
             VStack(spacing: 8) {
+                // Graph first, like the EQ tab (2026-10-15).
+                TransferGraph(
+                    curve: curve(gate), meter: mirror.meter(strip), reduction: \.gateGain,
+                    identifier: "gate-graph", label: "Gate curve",
+                    ghostOutput: ghost.flatMap { self.curve(Catalog.gate($0)) }?.output)
                 HStack(spacing: 8) {
                     ToggleChip(spec: gate.on, mirror: mirror, onColor: .green)
                     ChoiceMenu(spec: gate.mode, mirror: mirror)
-                }
-                if let curve = curve(gate) {
-                    TransferGraph(
-                        output: curve.output, threshold: curve.threshold, meter: mirror.meter(strip),
-                        reduction: \.gateGain, identifier: "gate-graph", label: "Gate curve",
-                        ghostOutput: ghost.flatMap { self.curve(Catalog.gate($0)) }?.output)
                 }
                 ForEach([gate.threshold, gate.range, gate.attack, gate.hold, gate.release]) {
                     ParameterRow(spec: $0, mirror: mirror)
@@ -30,11 +29,13 @@ struct GateTab: View {
     }
 
     /// nil until the desk has sent every value the curve needs: the graph never draws a guess.
-    private func curve(_ gate: GateSpecs) -> (output: (Double) -> Double, threshold: Double)? {
+    private func curve(_ gate: GateSpecs) -> TransferGraph.Curve? {
         guard let modeIndex = mirror.value(gate.mode), let mode = TransferCurve.GateMode(rawValue: Int(modeIndex)),
             let threshold = mirror.value(gate.threshold), let range = mirror.value(gate.range)
         else { return nil }
-        return ({ TransferCurve.gateOutput($0, mode: mode, threshold: threshold, range: range) }, threshold)
+        return TransferGraph.Curve(
+            output: { TransferCurve.gateOutput($0, mode: mode, threshold: threshold, range: range) },
+            threshold: threshold)
     }
 }
 
@@ -48,15 +49,13 @@ struct CompTab: View {
         let dynamics = Catalog.dynamics(strip)
         ScrollView {
             VStack(spacing: 8) {
+                TransferGraph(
+                    curve: curve(dynamics), meter: mirror.meter(strip), reduction: \.dynamicsGain,
+                    identifier: "comp-graph", label: "Compressor curve",
+                    ghostOutput: ghost.flatMap { self.curve(Catalog.dynamics($0)) }?.output)
                 HStack(spacing: 8) {
                     ToggleChip(spec: dynamics.on, mirror: mirror, onColor: .green)
                     ChoiceMenu(spec: dynamics.mode, mirror: mirror)
-                }
-                if let curve = curve(dynamics) {
-                    TransferGraph(
-                        output: curve.output, threshold: curve.threshold, meter: mirror.meter(strip),
-                        reduction: \.dynamicsGain, identifier: "comp-graph", label: "Compressor curve",
-                        ghostOutput: ghost.flatMap { self.curve(Catalog.dynamics($0)) }?.output)
                 }
                 ForEach([
                     dynamics.threshold, dynamics.ratio, dynamics.knee, dynamics.attack, dynamics.hold,
@@ -81,7 +80,7 @@ struct CompTab: View {
     }
 
     /// nil until the desk has sent every value the curve needs: the graph never draws a guess.
-    private func curve(_ dynamics: DynamicsSpecs) -> (output: (Double) -> Double, threshold: Double)? {
+    private func curve(_ dynamics: DynamicsSpecs) -> TransferGraph.Curve? {
         guard let mode = mirror.value(dynamics.mode), let threshold = mirror.value(dynamics.threshold),
             let ratioIndex = mirror.value(dynamics.ratio), let ratio = Double(Catalog.ratios[Int(ratioIndex)]),
             let knee = mirror.value(dynamics.knee), let makeup = mirror.value(dynamics.makeup)
@@ -91,7 +90,7 @@ struct CompTab: View {
             TransferCurve.dynamicsOutput(
                 input, isExpander: isExpander, threshold: threshold, ratio: ratio, knee: knee, makeup: makeup)
         }
-        return (output, threshold)
+        return TransferGraph.Curve(output: output, threshold: threshold)
     }
 }
 
