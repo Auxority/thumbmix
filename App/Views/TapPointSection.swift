@@ -38,8 +38,7 @@ struct TapPointSection: View {
     private func header(_ tap: SendTap?) -> some View {
         let deskTerm = tap.flatMap { $0.deskTerm == $0.name ? nil : $0.deskTerm }
         return HStack(alignment: .firstTextBaseline) {
-            Text(deskTerm.map { "Tap point · \($0)" } ?? "Tap point")
-                .font(.footnote).textCase(.uppercase).foregroundStyle(Theme.secondaryText)
+            Text(deskTerm.map { "Tap point · \($0)" } ?? "Tap point").sectionLabel()
             Spacer(minLength: 8)
             Text(tap?.name ?? "—").font(.headline)
         }

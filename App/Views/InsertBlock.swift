@@ -17,8 +17,7 @@ struct InsertBlock: View {
             let isRead = mirror.isInsertRead(sides)
             let isEmpty = isRead && slots.allSatisfy { $0 == .none }
             VStack(alignment: .leading, spacing: 8) {
-                Text(title ?? String(localized: "Insert"))
-                    .font(.footnote).textCase(.uppercase).foregroundStyle(Theme.secondaryText)
+                Text(title ?? String(localized: "Insert")).sectionLabel()
                 SlotRow(spec: spec.slot, text: mirror.insertLabel(sides))
                 HStack(spacing: 8) {
                     InsertChip(spec: spec.on, sides: sides, slots: slots, mirror: mirror)

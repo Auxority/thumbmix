@@ -56,4 +56,9 @@ private struct DimmedUntilRead: ViewModifier {
 
 extension View {
     func dimmedUntilRead(_ isRead: Bool) -> some View { modifier(DimmedUntilRead(isRead: isRead)) }
+
+    /// A section's small grey caps title on a strip tab ("KEY", "INSERT", "TAP POINT").
+    func sectionLabel() -> some View {
+        font(.footnote).textCase(.uppercase).foregroundStyle(Theme.secondaryText)
+    }
 }

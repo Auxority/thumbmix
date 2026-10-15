@@ -15,7 +15,6 @@ struct ConsoleMirrorTests {
 
     @Test func syncFillsTheOverview() async throws {
         try await withLiveDesk { fake, mirror in
-
             #expect(mirror.isLive)
             #expect(mirror.cell("/ch/01/config/name").argument == .string("Kick"))
             #expect(Catalog.overviewAddresses().allSatisfy { mirror.cell($0).argument != nil })
@@ -53,7 +52,6 @@ struct ConsoleMirrorTests {
 
     @Test func syncSurvivesLostReplies() async throws {
         try await withLiveDesk(dropsGets: 40) { fake, mirror in
-
             #expect(mirror.isLive)
             #expect(Catalog.overviewAddresses().allSatisfy { mirror.cell($0).argument != nil })
         }
@@ -61,7 +59,6 @@ struct ConsoleMirrorTests {
 
     @Test func deskChangesArriveAfterSync() async throws {
         try await withLiveDesk { fake, mirror in
-
             fake.deskChange("/ch/02/mix/fader", .float(0.5))
 
             #expect(await eventually { mirror.cell("/ch/02/mix/fader").argument == .float(0.5) })
@@ -70,7 +67,6 @@ struct ConsoleMirrorTests {
 
     @Test func editsReachTheConsole() async throws {
         try await withLiveDesk { fake, mirror in
-
             mirror.set("/ch/01/mix/fader", .float(0.6))
 
             #expect(mirror.cell("/ch/01/mix/fader").argument == .float(0.6))
@@ -94,7 +90,6 @@ struct ConsoleMirrorTests {
 
     @Test func metersFillCells() async throws {
         try await withLiveDesk { fake, mirror in
-
             #expect(await eventually { mirror.meter(StripID(.input, 1)).level > 0 })
             #expect(await eventually { mirror.meter(StripID(.input, 1)).gateGain < 1 })
         }
@@ -174,7 +169,6 @@ struct ConsoleMirrorTests {
 
     @Test func wakeResyncs() async throws {
         try await withLiveDesk { fake, mirror in
-
             mirror.wake()
 
             #expect(mirror.status == .lost)
@@ -184,7 +178,6 @@ struct ConsoleMirrorTests {
 
     @Test func lostThenResyncs() async throws {
         try await withLiveDesk { fake, mirror in
-
             fake.silent = true
             #expect(await eventually { mirror.status == .lost })
             #expect(!mirror.isLive)

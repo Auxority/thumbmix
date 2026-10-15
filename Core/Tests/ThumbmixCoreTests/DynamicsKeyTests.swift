@@ -90,6 +90,7 @@ struct DynamicsKeyTests {
         setBus(7, "FX", tap: .postEQ, on: false, in: fake)
         setBus(8, "", tap: nil, on: false, in: fake)
         let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
         await openTab(.comp, of: vox, in: mirror)
         #expect(mirror.mixesChangedByMovingComp(of: vox) == ["Wedge 1", "IEM"])
     }
@@ -98,6 +99,7 @@ struct DynamicsKeyTests {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
         #expect(mirror.mixesChangedByMovingComp(of: vox) == nil, "unknown, not 'no mixes'")
         await openTab(.comp, of: vox, in: mirror)
         #expect(mirror.mixesChangedByMovingComp(of: vox) != nil)
@@ -107,6 +109,7 @@ struct DynamicsKeyTests {
         let (fake, port) = try await startFake()
         defer { fake.stop() }
         let mirror = await liveMirror(port: port)
+        defer { mirror.stop() }
         #expect(mirror.mixesChangedByMovingComp(of: StripID(.matrix, 1)) == [])
     }
 
