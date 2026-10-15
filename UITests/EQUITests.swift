@@ -63,7 +63,11 @@ final class EQUITests: DeskUITestCase {
         XCTAssertTrue(type.appears(within: 2))
         XCTAssertEqual(type.value as? String, "PEQ")
         type.tap()
-        app.buttons["LShv"].tap()
+        // The list says it in words, the desk's term under it; the closed row keeps the desk's term.
+        let lowShelf = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Low shelf")).firstMatch
+        XCTAssertTrue(lowShelf.appears(within: 2))
+        saveScreenshot("eq-type-list")
+        lowShelf.tap()
         XCTAssertEqual(type.value as? String, "LShv")
     }
 

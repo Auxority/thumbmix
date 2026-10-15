@@ -7,6 +7,17 @@ extension Catalog {
         "LC6", "LC12", "HC6", "HC12", "BP Q 1.0", "BP Q 2.0", "BP Q 3.0", "BP Q 5.0", "BP Q 10",
     ]
 
+    /// In words for the open list. Read from the abbreviations: neither the doc nor the M32 manual spells them
+    /// out (the manual only calls the setting "the steepness of the EQ slope used in the key filter").
+    static var keyFilterTypeNames: [String] {
+        [
+            CoreStrings.text("Low cut, 6 dB/oct"), CoreStrings.text("Low cut, 12 dB/oct"),
+            CoreStrings.text("High cut, 6 dB/oct"), CoreStrings.text("High cut, 12 dB/oct"),
+            CoreStrings.text("Band-pass, Q 1"), CoreStrings.text("Band-pass, Q 2"), CoreStrings.text("Band-pass, Q 3"),
+            CoreStrings.text("Band-pass, Q 5"), CoreStrings.text("Band-pass, Q 10"),
+        ]
+    }
+
     /// The strips `keysrc` 1-64 name, in order: In 1-32, Aux 1-6 and USB L/R (aux ins 7-8), FX 1L-4R (the eight FX
     /// returns), Bus 1-16. 0 is the strip itself.
     public static let keySources: [StripID] = [StripKind.input, .auxIn, .fxReturn, .bus].flatMap(StripID.all)
@@ -43,7 +54,9 @@ extension Catalog {
         KeySpecs(
             sourceAddress: hasSource ? prefix + "keysrc" : nil,
             filterOn: ParamSpec(prefix + "filter/on", CoreStrings.text("Filter"), .toggle, .plain),
-            filterType: ParamSpec(prefix + "filter/type", CoreStrings.text("Type"), .choice(keyFilterTypes), .plain),
+            filterType: ParamSpec(
+                prefix + "filter/type", CoreStrings.text("Type"), .choice(keyFilterTypes), .plain,
+                optionNames: keyFilterTypeNames),
             filterFrequency: ParamSpec(
                 prefix + "filter/f", CoreStrings.text("Filter freq"), .log(min: 20, max: 20_000, steps: 201), .hertz)
         )
