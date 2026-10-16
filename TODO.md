@@ -18,6 +18,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - Section 7f: Invert on a matrix. The doc lists `/mtx/NN/config/preamp/invert` (p.32), odd for a matrix, and Mixing Station shows no such control. The probe reads `/mtx/01/config/preamp/invert` once; show Invert on a matrix only if the desk answers.
   - Section 7g: an FX return's send to bus 1. The doc lists a return's send pan, tap point and pan follow from bus 3 on (p.30); the app assumes bus 1 has them too. The probe reads `/fxrtn/01/mix/01/type` once; if the desk doesn't answer, drop them for buses 1-2 of returns.
   - Mono mode (not in the probe yet). The doc only names `/config/mono/mode` (LR+M or LCR) and `/config/mono/link` ("M/C depends on Main L/R", p.21). Set LCR on the desk: what does a channel's M/C level do then? Tick the link: does a strip with its LR switch off still reach Main M? Main M's Fed by shows the same rows either way; if the link gates it, say so on that tab.
+  - Comp mix (not in the probe yet). What does the desk's dyn screen call `dyn/mix`? The app says "Comp mix"; the M32 manual predates the control. And does Makeup gain lift only the compressed signal, or the blend? Set Threshold 0 dB, Makeup +6 dB and Comp mix 50 %, and play a steady tone below 0 dBFS: the strip's meter rises ~3.5 dB if makeup is on the compressed side only (what `TransferCurve.dynamicsOutput` assumes), 6 dB if it comes after the blend. Fix the curve if it's the latter.
   - Section 8: fader text. Does the desk's own dB text match the app's for every input fader? The app follows the doc's table (p.145), incl. a 0 dB detent and two odd steps (−8.7, −23.2). Set faders near 0, −8.6 and −23.2 with the desk's encoder first; each DIFFERS line goes in `FaderLaw.deskExceptions`. Untested: the fake desk doesn't answer `/node`. Then check whether a formula reproduces the desk's steps, and drop the list if it does; the same goes for any other list of steps that look inconsistent.
   - Inserts (not in the probe yet): does Pre/Post mean before/after EQ on an input channel too (the X32 quick start says so for buses, mains and matrices)? With an aux slot and nothing patched, does the strip go silent, and does that aux in become the return? Does a linked pair's insert follow the link, and under which Link Preference (assumed Dynamics)? What does picking a slot another strip holds do?
 - [ ] **EQ cut filters.** Set a band to LCut, HCut and (on a main) BU12: do Gain and Q really do nothing? The app disables both rows there (`Catalog.eqTypeShapesLevel`); the doc lists gain and Q for every type without saying.
@@ -52,7 +53,6 @@ None open.
   - From a strip: pick its mute groups and DCAs on its strip screen, in a quick multi-select.
   - From a DCA: add and remove strips on its Members tab (`MembersTab`), which today only lists them. Wanted (2026-10-14); start here, then consider whether the strip side is worth having too.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
-- [ ] Maybe later: **the compressor mix** (`dyn/mix`, p.25; the app doesn't read it yet).
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
 
 ## Code and docs
@@ -79,4 +79,5 @@ None open.
 - The compressor knee is drawn at 6 dB per step: the doc gives the 0–5 knee setting no unit (see "Compressor knee width per step").
 - Gate curves (EXPn 1:n, GATE, DUCK) follow the engineer's confirmation; the doc only lists the modes.
 - VEQ is drawn as PEQ: no source gives its shape (see "How VEQ differs from PEQ").
+- The comp curve blends Comp mix with Makeup gain on the compressed side only: no source says where makeup sits (see m32-probe "Comp mix").
 - The EQ and low-cut curves are RBJ and Butterworth approximations, not measurements of the desk.

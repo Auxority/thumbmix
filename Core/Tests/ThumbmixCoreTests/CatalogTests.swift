@@ -148,6 +148,19 @@ struct CatalogTests {
         #expect(dynamics.ratio.resetValue == Catalog.ratios.firstIndex(of: "3.0").map(Double.init))
     }
 
+    /// Parallel compression on every comp (doc p.26, 31, 33, 35, 37): 0-100 % in steps of 5, a double-tap back to
+    /// all compressed.
+    @Test func compMixIsAPercentThatResetsToFullyCompressed() {
+        let mix = Catalog.dynamics(StripID(.input, 1)).mix
+        #expect(mix.address == "/ch/01/dyn/mix")
+        #expect(mix.label == "Comp mix")
+        #expect(mix.scale == .linear(min: 0, max: 100, step: 5))
+        #expect(mix.resetValue == 100)
+        #expect(Catalog.dynamics(StripID(.mainMono)).mix.address == "/main/m/dyn/mix")
+        #expect(ValueText.format(0.5, mix, locale: .testEnglish) == "50%")
+        #expect(DemoState.values()["/bus/01/dyn/mix"] == .float(1), "the demo's comps start fully compressed")
+    }
+
     @Test func syncListIsUnique() {
         let addresses = Catalog.allAddresses()
         #expect(Set(addresses).count == addresses.count)

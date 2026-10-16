@@ -1,7 +1,7 @@
 public enum ParamUnit: Sendable {
     /// `decibels` is a signed level or gain; `decibelAmount` is a size (gate range, makeup) and reads without a sign.
     /// `delayTime` is milliseconds plus the distance sound travels in that time.
-    case decibels, decibelAmount, hertz, milliseconds, delayTime, ratio, pan, plain
+    case decibels, decibelAmount, hertz, milliseconds, delayTime, ratio, pan, percent, plain
 }
 
 public struct ParamSpec: Sendable, Identifiable, Equatable {
@@ -42,9 +42,9 @@ public struct GateSpecs: Sendable {
 }
 
 public struct DynamicsSpecs: Sendable {
-    public let on, mode, threshold, ratio, knee, attack, hold, release, makeup, detector, envelope, auto: ParamSpec
+    public let on, mode, threshold, ratio, knee, attack, hold, release, makeup, mix, detector, envelope, auto: ParamSpec
     public var all: [ParamSpec] {
-        [on, mode, threshold, ratio, knee, attack, hold, release, makeup, detector, envelope, auto]
+        [on, mode, threshold, ratio, knee, attack, hold, release, makeup, mix, detector, envelope, auto]
     }
     /// What the desk ignores while Auto time is on (the user, on the console, 2026-10-15).
     public var autoTimed: [ParamSpec] { [attack, release] }
