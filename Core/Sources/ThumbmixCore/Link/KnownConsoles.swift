@@ -1,30 +1,10 @@
 import Foundation
 
-/// A console as the Connect screen lists it: remembered, or found by a scan.
-public struct KnownConsole: Equatable, Sendable, Identifiable {
-    public let host: String
-    public let name: String
-    public let model: String
-
-    public init(host: String, name: String, model: String) {
-        self.host = host
-        self.name = name
-        self.model = model
-    }
-
-    public init(_ found: DiscoveredConsole) {
-        self.init(host: found.host, name: found.name, model: found.model)
-    }
-
-    /// The address and the desk's name together: two venues' desks can share an address like 192.168.1.50.
-    public var id: String { "\(name)@\(host)" }
-}
-
 /// Every console the app connected to, the last one first.
 public struct KnownConsoles: Equatable, Sendable {
-    public private(set) var all: [KnownConsole]
+    public private(set) var all: [NetworkConsole]
 
-    public init(_ all: [KnownConsole] = []) {
+    public init(_ all: [NetworkConsole] = []) {
         self.all = all
     }
 
@@ -35,7 +15,7 @@ public struct KnownConsoles: Equatable, Sendable {
             guard let fields = entry as? [String: String], let host = fields["host"], let name = fields["name"],
                 let model = fields["model"]
             else { return nil }
-            return KnownConsole(host: host, name: name, model: model)
+            return NetworkConsole(host: host, name: name, model: model)
         }
     }
 
@@ -43,15 +23,15 @@ public struct KnownConsoles: Equatable, Sendable {
         all.map { ["host": $0.host, "name": $0.name, "model": $0.model] }
     }
 
-    public var lastUsed: KnownConsole? { all.first }
-    public var others: [KnownConsole] { Array(all.dropFirst()) }
+    public var lastUsed: NetworkConsole? { all.first }
+    public var others: [NetworkConsole] { Array(all.dropFirst()) }
 
-    public mutating func remember(_ console: KnownConsole) {
+    public mutating func remember(_ console: NetworkConsole) {
         forget(console)
         all.insert(console, at: 0)
     }
 
-    public mutating func forget(_ console: KnownConsole) {
+    public mutating func forget(_ console: NetworkConsole) {
         all.removeAll { $0.id == console.id }
     }
 }
@@ -67,25 +47,24 @@ public enum Presence: Equatable, Sendable {
 /// What one visit to the Connect screen has seen. A console found for the first time goes after the rows
 /// already shown, so a late answer never moves the row under a thumb.
 public struct ConsoleSightings: Equatable, Sendable {
-    private var newcomers: [KnownConsole] = []
-    /// The latest scan's answers by `KnownConsole.id`; nil until a scan ends.
-    private var answered: [String: KnownConsole]?
+    private var newcomers: [NetworkConsole] = []
+    /// The latest scan's answers by `NetworkConsole.id`; nil until a scan ends.
+    private var answered: [String: NetworkConsole]?
 
     public init() {}
 
-    public mutating func scanned(_ found: [DiscoveredConsole], known: KnownConsoles) {
-        let consoles = found.map(KnownConsole.init)
+    public mutating func scanned(_ consoles: [NetworkConsole], known: KnownConsoles) {
         answered = Dictionary(consoles.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         let shown = Set((known.all + newcomers).map(\.id))
         newcomers += consoles.filter { !shown.contains($0.id) }
     }
 
-    public func rows(known: KnownConsoles) -> [KnownConsole] {
+    public func rows(known: KnownConsoles) -> [NetworkConsole] {
         let remembered = Set(known.all.map(\.id))
         return known.others + newcomers.filter { !remembered.contains($0.id) }
     }
 
-    public func presence(of console: KnownConsole) -> Presence {
+    public func presence(of console: NetworkConsole) -> Presence {
         guard let answered else { return .unknown }
         guard let answer = answered[console.id] else { return .notFound }
         return answer.model.hasPrefix("M32") ? .online : .notAnM32

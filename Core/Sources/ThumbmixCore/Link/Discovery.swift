@@ -1,11 +1,20 @@
 import Foundation
 import os
 
-public struct DiscoveredConsole: Equatable, Sendable, Identifiable {
+/// A console at an address, as `/xinfo` names it. Whether the app remembers it is up to `KnownConsoles`.
+public struct NetworkConsole: Equatable, Sendable, Identifiable {
     public let host: String
     public let name: String
     public let model: String
-    public var id: String { host }
+
+    public init(host: String, name: String, model: String) {
+        self.host = host
+        self.name = name
+        self.model = model
+    }
+
+    /// The address and the desk's name together: two venues' desks can share an address like 192.168.1.50.
+    public var id: String { "\(name)@\(host)" }
 }
 
 /// Finds consoles by asking every address on the phone's /24 for `/xinfo`. Broadcast would need
@@ -46,7 +55,7 @@ public enum Discovery {
     }
 
     public static func scan(hosts: [String], port: UInt16 = 10023, timeout: TimeInterval = 1.5) async
-        -> [DiscoveredConsole]
+        -> [NetworkConsole]
     {
         // A GCD thread, not the Swift concurrency pool: the scan blocks in poll() for the whole timeout.
         await withCheckedContinuation { continuation in
@@ -57,7 +66,7 @@ public enum Discovery {
     }
 
     private static func blockingScan(hosts: [String], port: UInt16, timeout: TimeInterval)
-        -> [DiscoveredConsole]
+        -> [NetworkConsole]
     {
         let socketHandle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
         guard socketHandle >= 0 else {
@@ -73,12 +82,12 @@ public enum Discovery {
             log.warning("discovery: \(failedSends) of \(hosts.count) requests could not be sent")
         }
 
-        var found: [String: DiscoveredConsole] = [:]
+        var found: [String: NetworkConsole] = [:]
         let deadline = Date().addingTimeInterval(timeout)
         while deadline.timeIntervalSinceNow > 0 {
             guard let (host, reply) = receiveReply(on: socketHandle, until: deadline) else { break }
             guard reply.address == "/xinfo" else { continue }
-            found[host] = DiscoveredConsole(
+            found[host] = NetworkConsole(
                 host: host, name: reply.string(at: 1) ?? host, model: reply.string(at: 2) ?? "?")
         }
         log.info("discovery: \(found.count) consoles from \(hosts.count) hosts")

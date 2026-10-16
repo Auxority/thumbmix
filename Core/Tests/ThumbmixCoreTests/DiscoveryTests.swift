@@ -32,6 +32,6 @@ struct DiscoveryTests {
 
         let found = await Discovery.scan(hosts: ["127.0.0.1"], port: port, timeout: 1)
 
-        #expect(found == [DiscoveredConsole(host: "127.0.0.1", name: "Fake M32", model: "M32")])
+        #expect(found == [NetworkConsole(host: "127.0.0.1", name: "Fake M32", model: "M32")])
     }
 }

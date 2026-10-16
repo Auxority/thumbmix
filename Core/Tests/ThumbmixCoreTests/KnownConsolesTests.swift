@@ -2,14 +2,10 @@ import Testing
 
 @testable import ThumbmixCore
 
-private let fontein = KnownConsole(host: "192.168.1.62", name: "De Fontein FOH", model: "M32")
-private let zaal = KnownConsole(host: "10.10.0.20", name: "Zaal 2", model: "M32")
-private let guest = KnownConsole(host: "192.168.1.80", name: "M32-02-4A-53", model: "M32")
-private let x32 = KnownConsole(host: "192.168.1.90", name: "X32-RACK", model: "X32")
-
-private func found(_ consoles: KnownConsole...) -> [DiscoveredConsole] {
-    consoles.map { DiscoveredConsole(host: $0.host, name: $0.name, model: $0.model) }
-}
+private let fontein = NetworkConsole(host: "192.168.1.62", name: "De Fontein FOH", model: "M32")
+private let zaal = NetworkConsole(host: "10.10.0.20", name: "Zaal 2", model: "M32")
+private let guest = NetworkConsole(host: "192.168.1.80", name: "M32-02-4A-53", model: "M32")
+private let x32 = NetworkConsole(host: "192.168.1.90", name: "X32-RACK", model: "X32")
 
 struct KnownConsolesTests {
     @Test func theLastConsoleConnectedToComesFirst() {
@@ -25,8 +21,8 @@ struct KnownConsolesTests {
     /// Two venues' desks can share a common address like 192.168.1.50; each keeps its own row.
     @Test func consolesSharingAnAddressStayApart() {
         var known = KnownConsoles()
-        known.remember(KnownConsole(host: "192.168.1.50", name: "Venue A", model: "M32"))
-        known.remember(KnownConsole(host: "192.168.1.50", name: "Venue B", model: "M32"))
+        known.remember(NetworkConsole(host: "192.168.1.50", name: "Venue A", model: "M32"))
+        known.remember(NetworkConsole(host: "192.168.1.50", name: "Venue B", model: "M32"))
 
         #expect(known.all.map(\.name) == ["Venue B", "Venue A"])
     }
@@ -63,7 +59,7 @@ struct ConsoleSightingsTests {
     @Test func aConsoleIsOnlineOnlyWhenItAnsweredTheLatestScan() {
         var sightings = ConsoleSightings()
         let known = KnownConsoles([fontein, zaal])
-        sightings.scanned(found(fontein), known: known)
+        sightings.scanned([fontein], known: known)
         #expect(sightings.presence(of: fontein) == .online)
         #expect(sightings.presence(of: zaal) == .notFound)
 
@@ -75,8 +71,8 @@ struct ConsoleSightingsTests {
     @Test func aDifferentDeskOnARememberedAddressIsNew() {
         var sightings = ConsoleSightings()
         let known = KnownConsoles([fontein])
-        let other = KnownConsole(host: fontein.host, name: "Other venue", model: "M32")
-        sightings.scanned(found(other), known: known)
+        let other = NetworkConsole(host: fontein.host, name: "Other venue", model: "M32")
+        sightings.scanned([other], known: known)
 
         #expect(sightings.presence(of: fontein) == .notFound)
         #expect(sightings.rows(known: known) == [other])
@@ -84,7 +80,7 @@ struct ConsoleSightingsTests {
 
     @Test func anotherConsoleModelIsNotAnM32() {
         var sightings = ConsoleSightings()
-        sightings.scanned(found(x32), known: KnownConsoles())
+        sightings.scanned([x32], known: KnownConsoles())
 
         #expect(sightings.presence(of: x32) == .notAnM32)
     }
@@ -93,8 +89,8 @@ struct ConsoleSightingsTests {
     @Test func rowsKeepTheirPlaceAcrossScans() {
         var sightings = ConsoleSightings()
         let known = KnownConsoles([fontein, zaal])
-        sightings.scanned(found(x32, fontein), known: known)
-        sightings.scanned(found(guest, x32), known: known)
+        sightings.scanned([x32, fontein], known: known)
+        sightings.scanned([guest, x32], known: known)
 
         #expect(sightings.rows(known: known) == [zaal, x32, guest])
     }
@@ -102,7 +98,7 @@ struct ConsoleSightingsTests {
     @Test func theLastUsedConsoleIsTheCardNotARow() {
         var sightings = ConsoleSightings()
         let known = KnownConsoles([fontein, zaal])
-        sightings.scanned(found(fontein, zaal), known: known)
+        sightings.scanned([fontein, zaal], known: known)
 
         #expect(sightings.rows(known: known) == [zaal])
     }

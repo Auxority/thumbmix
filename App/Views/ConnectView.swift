@@ -76,7 +76,7 @@ private struct ConsoleList: View {
     }
 
     /// Only a remembered console can be forgotten; one the scan just found isn't kept anyway.
-    private func row(_ console: KnownConsole) -> some View {
+    private func row(_ console: NetworkConsole) -> some View {
         let presence = sightings.presence(of: console)
         let isRemembered = model.known.all.contains(console)
         return Button {
@@ -95,7 +95,7 @@ private struct ConsoleList: View {
 }
 
 private struct ConsoleRow: View {
-    let console: KnownConsole
+    let console: NetworkConsole
     let presence: Presence
 
     var body: some View {
@@ -139,7 +139,7 @@ private struct PresenceLabel: View {
 /// No swipe here, so the console used last can't be forgotten by accident; it moves into the list once
 /// another console is used.
 private struct LastUsedCard: View {
-    let console: KnownConsole
+    let console: NetworkConsole
     let presence: Presence
     let connect: () -> Void
 
