@@ -12,8 +12,12 @@ struct PillBar<Item: Identifiable & Hashable>: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(items) { item in
-                Pill(title: item[keyPath: title], isSelected: item == selection) { selection = item }
-                    .accessibilityLabel(item[keyPath: label])
+                // A Button's action runs animated: the new pill faded in over ~0.3 s or not, depending on the tap.
+                // A switch is instant, like opening a screen.
+                Pill(title: item[keyPath: title], isSelected: item == selection) {
+                    withTransaction(\.disablesAnimations, true) { selection = item }
+                }
+                .accessibilityLabel(item[keyPath: label])
             }
         }
         .padding(.horizontal, 4)
@@ -46,7 +50,13 @@ private struct Pill: View {
                 .padding(.horizontal, 2)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(NoPressDim())
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
+}
+
+/// `.plain` dims a pressed pill and fades it back after release, so how grey the new pill showed depended on how
+/// long the finger stayed down. The switch itself is the feedback, as in iOS's own tab bar.
+private struct NoPressDim: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View { configuration.label }
 }
