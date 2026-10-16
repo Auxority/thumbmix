@@ -56,16 +56,6 @@
     "%@ in the main mix" : {
 
     },
-    "%@ is a %@. Thumbmix supports the Midas M32 only." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ is a %2$@. Thumbmix supports the Midas M32 only."
-          }
-        }
-      }
-    },
     "%@ out of the main mix" : {
 
     },
@@ -97,7 +87,7 @@
     "−1 dB" : {
 
     },
-    "192.168.1.50" : {
+    "192.168.1.62" : {
 
     },
     "Also powers %@ (linked)." : {
@@ -112,6 +102,9 @@
     "Blue" : {
 
     },
+    "Can't reach %@" : {
+
+    },
     "Cancel" : {
 
     },
@@ -124,10 +117,13 @@
     "Connect" : {
 
     },
+    "Connect to an IP address" : {
+
+    },
     "Connecting…" : {
 
     },
-    "Console IP" : {
+    "Consoles" : {
 
     },
     "Cyan" : {
@@ -154,6 +150,9 @@
     "Edit name, colour and icon" : {
 
     },
+    "Enter IP" : {
+
+    },
     "Enter value" : {
 
     },
@@ -173,6 +172,9 @@
 
     },
     "Follow LR pan" : {
+
+    },
+    "Forget" : {
 
     },
     "Gain and delay aren't linked on the desk." : {
@@ -208,6 +210,9 @@
     "Inverted" : {
 
     },
+    "Is this iPhone on the desk's Wi-Fi, with Local Network on for Thumbmix?" : {
+
+    },
     "It follows %@’s fader and pan at a fixed 0 dB, whatever its level is now." : {
 
     },
@@ -217,10 +222,16 @@
     "Key" : {
 
     },
+    "Last used" : {
+
+    },
     "LC" : {
 
     },
     "Levels here are each strip's own fader." : {
+
+    },
+    "Like 192.168.1.62" : {
 
     },
     "Link" : {
@@ -266,19 +277,28 @@
     "No colour" : {
 
     },
-    "No console answered. Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix." : {
+    "No console found. Is this iPhone on the desk's Wi-Fi?" : {
 
     },
     "No preamp: this channel reads from an internal source." : {
 
     },
-    "No reply from %@. Check that the phone is on the console's Wi-Fi, and Settings → Privacy & Security → Local Network → Thumbmix." : {
-
-    },
     "No slot picked on the desk" : {
 
     },
+    "No Wi-Fi. Join the desk's Wi-Fi, then scan again." : {
+
+    },
     "Normal" : {
+
+    },
+    "Not an IP address" : {
+
+    },
+    "Not an M32" : {
+
+    },
+    "Not found" : {
 
     },
     "Not in this mix" : {
@@ -287,10 +307,19 @@
     "Off" : {
 
     },
+    "OK" : {
+
+    },
     "On" : {
 
     },
+    "Online" : {
+
+    },
     "Open %@" : {
+
+    },
+    "Other consoles" : {
 
     },
     "Polarity" : {
@@ -321,7 +350,7 @@
     "RTA: waiting for the desk…" : {
 
     },
-    "Scan this network" : {
+    "Scan again" : {
 
     },
     "Scanning…" : {
@@ -346,6 +375,9 @@
 
     },
     "Set on the desk" : {
+
+    },
+    "Settings" : {
 
     },
     "Shares an input with %@" : {
@@ -381,22 +413,28 @@
     "Tap point · %@" : {
 
     },
-    "the console" : {
+    "That's an %@" : {
 
     },
-    "The demo console couldn't start. Try again, or restart Thumbmix." : {
+    "The console's IP, shown on the desk under Setup → Network." : {
+
+    },
+    "The demo didn't start" : {
 
     },
     "They'll work as one stereo channel." : {
 
     },
-    "This phone has no Wi-Fi address. Join the console's Wi-Fi network, then scan again." : {
-
-    },
     "Thumbmix" : {
 
     },
-    "Try offline (demo console)" : {
+    "Thumbmix only works with the Midas M32." : {
+
+    },
+    "Try a demo console" : {
+
+    },
+    "Try again, or restart Thumbmix." : {
 
     },
     "Turn Off" : {

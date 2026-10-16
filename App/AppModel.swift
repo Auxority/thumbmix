@@ -6,12 +6,14 @@ import ThumbmixCore
 @MainActor @Observable
 final class AppModel {
     private(set) var mirror: ConsoleMirror?
-    private(set) var host: String?
+    /// What the failure alert calls the console being connected to: its name when known, else its address.
+    private(set) var target: String?
     /// The demo console Offline mode runs inside the app; nil when connected to a real desk.
     private var demoConsole: FakeM32?
     private(set) var offlineFailed = false
     private(set) var isStartingOffline = false
-    private static let lastHostKey = "lastConsoleHost"
+    private(set) var known = KnownConsoles(stored: UserDefaults.standard.array(forKey: AppModel.knownKey))
+    private static let knownKey = "knownConsoles"
 
     var isOffline: Bool { demoConsole != nil }
 
@@ -20,10 +22,8 @@ final class AppModel {
         return failure
     }
 
-    var lastHost: String? { UserDefaults.standard.string(forKey: Self.lastHostKey) }
-
     /// A real M32 always listens on 10023. UI tests pass `-consolePort` to reach the fake desk each test starts.
-    private static var consolePort: UInt16 {
+    static var consolePort: UInt16 {
         #if DEBUG
             let port = UserDefaults.standard.integer(forKey: "consolePort")
             if (1...65535).contains(port) { return UInt16(port) }
@@ -31,18 +31,31 @@ final class AppModel {
         return 10023
     }
 
-    func connect(to host: String, port: UInt16 = AppModel.consolePort) {
+    /// A console that answers as an M32 is remembered under the name set on the desk; the demo never is.
+    func connect(to host: String, name: String? = nil, port: UInt16 = AppModel.consolePort) {
         guard Discovery.isUsableIPv4(host) else { return }
         disconnect()
         let mirror = ConsoleMirror(link: ConsoleLink(host: host, port: port))
+        mirror.onIdentified = { [weak self] info in
+            self?.remember(KnownConsole(host: host, name: info.name, model: info.model))
+        }
         mirror.start()
         self.mirror = mirror
-        self.host = host
-        UserDefaults.standard.set(host, forKey: Self.lastHostKey)
+        target = name ?? host
     }
 
-    /// Every visit gets a fresh demo desk. It never becomes the last console, so a relaunch can't land on it.
-    /// A second tap while the first demo desk starts would replace it without stopping it.
+    func forget(_ console: KnownConsole) {
+        known.forget(console)
+        UserDefaults.standard.set(known.stored, forKey: Self.knownKey)
+    }
+
+    private func remember(_ console: KnownConsole) {
+        known.remember(console)
+        UserDefaults.standard.set(known.stored, forKey: Self.knownKey)
+    }
+
+    /// Every visit gets a fresh demo desk. A second tap while the first demo desk starts would replace it without
+    /// stopping it.
     func startOffline() async {
         guard !isStartingOffline else { return }
         isStartingOffline = true
@@ -61,12 +74,17 @@ final class AppModel {
         }
     }
 
-    func connectToLastConsole() {
-        guard mirror == nil, let lastHost else { return }
-        connect(to: lastHost)
+    func dismissOfflineFailure() {
+        offlineFailed = false
     }
 
     #if DEBUG
+        /// The app opens on the Connect screen; UI tests that need a desk at once pass `-connectOnLaunch YES`.
+        func connectOnLaunch() {
+            guard mirror == nil, UserDefaults.standard.bool(forKey: "connectOnLaunch") else { return }
+            connect(to: "127.0.0.1")
+        }
+
         /// UI tests launch the app once per test class (a launch is most of a test's time) and send each next
         /// test's fresh fake desk as `thumbmix-test://connect?port=N`. Always this Mac's loopback, never another host.
         func openTestURL(_ url: URL) {
@@ -87,7 +105,7 @@ final class AppModel {
     func disconnect() {
         mirror?.stop()
         mirror = nil
-        host = nil
+        target = nil
         demoConsole?.stop()
         demoConsole = nil
     }

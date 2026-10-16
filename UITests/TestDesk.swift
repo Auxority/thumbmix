@@ -14,8 +14,8 @@ final class TestDesk: Sendable {
     }
 
     /// Stopped when the test ends. Nil after a failure, which ends the test (`continueAfterFailure` is false).
-    static func start(for test: XCTestCase) -> TestDesk? {
-        guard let fake = try? FakeM32() else {
+    static func start(for test: XCTestCase, model: String = "M32") -> TestDesk? {
+        guard let fake = try? FakeM32(model: model) else {
             XCTFail("could not create the fake desk")
             return nil
         }
@@ -35,7 +35,10 @@ final class TestDesk: Sendable {
     }
 
     /// Launch arguments that connect the app straight to this desk.
-    var connect: [String] { ["-lastConsoleHost", "127.0.0.1", "-consolePort", String(port)] }
+    var connect: [String] { ["-connectOnLaunch", "YES"] + reachable }
+
+    /// Launch arguments that point the app's connects and scans at this desk, which listens on loopback.
+    var reachable: [String] { ["-consolePort", String(port)] }
 
     /// The app swaps its screens to a new desk before it sends anything, so once the desk heard from it, the
     /// screen is this desk's, not the previous test's.

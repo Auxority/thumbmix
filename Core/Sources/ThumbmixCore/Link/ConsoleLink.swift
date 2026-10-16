@@ -2,6 +2,8 @@ import Foundation
 import os
 
 public struct ConsoleInfo: Equatable, Sendable {
+    /// The network name set on the desk under Setup → Network.
+    public let name: String
     public let model: String
     public let firmware: String
 }
@@ -120,7 +122,7 @@ public final class ConsoleLink {
         transportGeneration += 1
         supervisor.restarted(at: .now)
         startTransport()
-        transport.send(OSCMessage("/info"))
+        transport.send(OSCMessage(Self.identity))
     }
 
     private func received(_ arrival: Arrival) {
@@ -129,22 +131,27 @@ public final class ConsoleLink {
             state = .live(info)
             renew()
         }
-        if arrival.message.address == "/info" {
+        if arrival.message.address == Self.identity {
             recordInfo(arrival.message)
             return
         }
         onMessage?(arrival)
     }
 
+    /// `/xinfo`, not `/info`: both carry the model and firmware in the same slots, and only `/xinfo` carries
+    /// the desk's own name (p.10), which the Connect screen remembers a console by.
+    private static let identity = "/xinfo"
+
     private func recordInfo(_ message: OSCMessage) {
         guard info == nil, let model = message.string(at: 2) else { return }
-        info = ConsoleInfo(model: model, firmware: message.string(at: 3) ?? "unknown")
+        info = ConsoleInfo(
+            name: message.string(at: 1) ?? host, model: model, firmware: message.string(at: 3) ?? "unknown")
     }
 
     private func identify() async {
         let deadline = ContinuousClock.now + timing.identifyTimeout
         while info == nil, ContinuousClock.now < deadline, !Task.isCancelled {
-            transport.send(OSCMessage("/info"))
+            transport.send(OSCMessage(Self.identity))
             try? await Task.sleep(for: timing.tick)
         }
         // stop() may have landed mid-identify; going live now would start a supervise loop nobody owns.
@@ -170,7 +177,7 @@ public final class ConsoleLink {
             let actions = supervisor.tick(now: .now, isLive: isLive, isLost: state == .lost)
             if actions.markLost { state = .lost }
             if actions.restartSocket { restartTransport() }
-            if actions.probe { transport.send(OSCMessage("/info")) }
+            if actions.probe { transport.send(OSCMessage(Self.identity)) }
             if actions.renew { renew() }
         }
     }

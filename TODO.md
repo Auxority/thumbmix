@@ -53,7 +53,6 @@ None open.
   - From a DCA: add and remove strips on its Members tab (`MembersTab`), which today only lists them. Wanted (2026-10-14); start here, then consider whether the strip side is worth having too.
 - [ ] **The group pill design everywhere?** Consider using the pills (Inputs, Aux, FX…) more consistently: on the channel, aux, FX and bus screens too.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
-- [ ] **Redesign the Connect screen** (start with mocks). It now offers Connect, Scan and Try offline as a plain list; Offline mode's entry was placed there for now.
 - [ ] Maybe later: **the compressor mix** (`dyn/mix`, p.25; the app doesn't read it yet).
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
 
