@@ -6,6 +6,7 @@ Rules every drawing keeps (checked by measuring each icon's bounding box when it
 - everything stays inside 1.5-22.5 and is centred on 12; whatever stands on the floor ends on y = 21.6;
 - stands are one tripod (legs spread 5 from a hub at 17.4); mic bases are 6.4 wide;
 - no two desk icons share a drawing: a shared glyph tells neither apart.
+To change a drawing, compute its new endpoints with geom.py, then run generate.py --sheet to review it large.
 
 Keys: body (closed shapes, tinted and outlined), cuts (detail lines on the body), parts (thin parts around it),
 tint/outline (when the outline differs from the tinted shape), rotate (degrees about the centre for all of the

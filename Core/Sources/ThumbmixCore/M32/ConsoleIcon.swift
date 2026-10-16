@@ -10,7 +10,7 @@ public struct ConsoleIcon: Identifiable, Equatable, Sendable {
     public var id: Int { number }
 
     /// The drawing's image set in the app's asset catalog.
-    public var imageName: String { "strip-icon-" + (number < 10 ? "0" : "") + String(number) }
+    public var imageName: String { String(format: "strip-icon-%02d", number) }
 
     public struct Group: Identifiable, Sendable {
         public let title: String
