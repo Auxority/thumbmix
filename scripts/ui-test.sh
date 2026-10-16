@@ -5,7 +5,8 @@
 #   scripts/ui-test.sh EQUITests/testX ...     only those tests (or classes), one at a time on the SE itself
 #   scripts/ui-test.sh --serial                the whole suite on the SE itself, when cloning fails
 # Other arguments starting with - go to xcodebuild. Screenshots land in build/screens. A run whose first test
-# hasn't started after 2 minutes has hung (CLAUDE.md, "A hung UI run") and is stopped.
+# hasn't started after 2 minutes has hung (CLAUDE.md, "A hung UI run") and is stopped (exit 2); a failed run
+# during which the Mac slept exits 3.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 log=build/ui-test.log
@@ -44,6 +45,7 @@ rm -rf "$results"
 export TEST_RUNNER_SCREENSHOT_DIR="$PWD/build/screens"
 xcodegen generate --quiet
 echo "Running the UI tests on: $destination (full log: $log)"
+started=$(date '+%Y-%m-%d %H:%M:%S')
 xcodebuild test -project Thumbmix.xcodeproj -scheme Thumbmix -destination "$destination" "${parallel[@]}" \
   -collect-test-diagnostics never -resultBundlePath "$results" ${only[@]+"${only[@]}"} ${passthrough[@]+"${passthrough[@]}"} > "$log" 2>&1 &
 run=$!
@@ -69,4 +71,14 @@ summary=$(xcrun xcresulttool get test-results summary --path "$results" 2>/dev/n
 count() { printf '%s\n' "$summary" | sed -nE "s/^  \"$1\" : ([0-9]+),?$/\1/p"; }
 if [ -n "$summary" ]; then echo "$(count passedTests) passed, $(count failedTests) failed, $(count skippedTests) skipped"; fi
 grep -E "\*\* TEST " "$log" || true
+
+# A Mac that sleeps mid-run (lid closed on battery) stalls every running test for 15+ minutes, which then fail
+# with "Timed out while synthesizing event": no app failure, so say so instead of leaving it to be guessed.
+if [ "$status" -ne 0 ]; then
+  slept=$(pmset -g log | awk -v since="$started" '$1 " " $2 >= since && /Entering Sleep state/ { print $2; exit }')
+  if [ -n "$slept" ]; then
+    echo "The Mac slept at $slept during the run (lid closed?), so these failures say nothing about the app. Keep it awake and run again." >&2
+    exit 3
+  fi
+fi
 exit "$status"
