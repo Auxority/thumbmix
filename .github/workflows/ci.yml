@@ -18,7 +18,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # A PR that changes only Markdown skips `check`: skipped by `if` counts as success for the required check, where
+  # a paths filter would leave it pending. Main always runs in full (DECISIONS: Release builds main's newest green
+  # commit). A diff that fails counts as code: a failed job here would skip `check` too.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: diff
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          code=true
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            files=$(git fetch -q --depth=1 origin "$BASE" && git diff --name-only "$BASE" HEAD) || files="(diff failed)"
+            echo "Changed files: $files"
+            grep -qv '\.md$' <<< "$files" || code=false
+          fi
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+
   check:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: xcode-27
     timeout-minutes: 30
     env:
