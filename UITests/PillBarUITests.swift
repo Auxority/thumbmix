@@ -37,6 +37,20 @@ final class PillBarUITests: DeskUITestCase {
         saveScreenshot("pills-channel")
     }
 
+    /// A tapped pill is white at once, every time: a Button's action ran animated, so the new pill faded in over
+    /// ~0.3 s or not, depending on the tap.
+    func testTappedPillTurnsWhiteAtOnce() {
+        launchAndOpen("Kick")
+        for label in ["EQ", "Comp", "Mix", "Sends"] {
+            // The lowest button so named: the EQ and Comp tabs have an on/off chip of the same name.
+            let pill = app.buttons.matching(identifier: label).allElementsBoundByIndex.max { $0.frame.minY < $1.frame.minY }!
+            pill.tap()
+            // Inside the pill's capsule, above its text.
+            let inside = CGPoint(x: pill.frame.midX, y: pill.frame.minY + 6)
+            XCTAssertGreaterThan(screenBrightness(at: inside), 0.9, "\(label) is white right after the tap")
+        }
+    }
+
     /// All on screen, equally wide and at least 44 pt tall (Apple's smallest touch target): 36 pt pills got missed.
     private func assertEqualPills(_ labels: [String], file: StaticString = #filePath, line: UInt = #line) {
         let frames = labels.map { app.buttons[$0].frame }
