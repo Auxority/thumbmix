@@ -46,6 +46,17 @@ final class DynamicsUITests: DeskUITestCase {
         XCTAssertEqual(app.descendants(matching: .any)["/ch/01/dyn/mgain"].label, "Makeup gain")
     }
 
+    /// Mock A (2026-10-16): the last row an engineer rides, so nothing above it moves.
+    func testCompMixSitsUnderMakeupGain() {
+        launchAndOpen("Kick", tab: "Comp")
+        let mix = element("/ch/01/dyn/mix")
+        XCTAssertTrue(mix.appears(within: 2))
+        XCTAssertEqual(mix.label, "Comp mix")
+        XCTAssertEqual(mix.value as? String, "100%")
+        let makeup = element("/ch/01/dyn/mgain")
+        XCTAssertEqual(mix.frame.minY, makeup.frame.maxY + 8, accuracy: 1, "right under Makeup gain")
+    }
+
     /// Dragging past half the row to flip a two-way choice was easy to miss; a list shows both.
     func testCompModeIsADropdown() {
         launchAndOpen("Kick", tab: "Comp")

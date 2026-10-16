@@ -22,15 +22,26 @@ public enum TransferCurve {
     }
 
     /// `knee` is the desk's 0-5 setting. The doc gives it no unit, so it is drawn as `kneeDecibelsPerStep` of
-    /// soft-knee width per step: an approximation for seeing the shape, like `EQResponse`.
+    /// soft-knee width per step: an approximation for seeing the shape, like `EQResponse`. `mix` is the desk's
+    /// 0-100 %: what you hear is that share of the processed signal summed with the rest of the dry one.
     public static func dynamicsOutput(
-        _ input: Double, isExpander: Bool, threshold: Double, ratio: Double, knee: Double, makeup: Double
+        _ input: Double, isExpander: Bool, threshold: Double, ratio: Double, knee: Double, makeup: Double,
+        mix: Double
     ) -> Double {
         let curve =
             isExpander
             ? expanded(input, threshold: threshold, ratio: ratio)
             : compressed(input, threshold: threshold, ratio: ratio, kneeWidth: knee * kneeDecibelsPerStep)
-        return curve + makeup
+        return blended(dry: input, wet: curve + makeup, mix: mix)
+    }
+
+    /// Makeup gain lifts the processed signal only, before the blend: an assumption until the desk answers (TODO.md,
+    /// m32-probe "Comp mix"). The ends return exactly, so 100 % draws the plain compressor curve.
+    private static func blended(dry: Double, wet: Double, mix: Double) -> Double {
+        if mix >= 100 { return wet }
+        if mix <= 0 { return dry }
+        let share = mix / 100
+        return 20 * log10(share * pow(10, wet / 20) + (1 - share) * pow(10, dry / 20))
     }
 
     /// Knee 5 spans 30 dB, the widest common soft knee (Pro Tools' Dynamics III): 2 dB per step bent the curve

@@ -100,6 +100,9 @@ public enum Catalog {
             makeup: ParamSpec(
                 p + "mgain", CoreStrings.text("Makeup gain"), .linear(min: 0, max: 24, step: 0.5),
                 .decibelAmount, reset: 0),
+            // Parallel compression: 100 % is all compressed, 0 % all dry (doc p.26, 31, 33, 35, 37).
+            mix: ParamSpec(
+                p + "mix", CoreStrings.text("Comp mix"), .linear(min: 0, max: 100, step: 5), .percent, reset: 100),
             // RMS follows the signal's average level, PEAK its peaks: "average level" says that without the maths.
             detector: ParamSpec(
                 p + "det", CoreStrings.text("Detector"), .choice(dynamicsDetectors), .plain,

@@ -62,7 +62,7 @@ struct CompTab: View {
                 let autoTimed = mirror.isAutoTimeOn(strip) ? Set(dynamics.autoTimed.map(\.address)) : []
                 ForEach([
                     dynamics.threshold, dynamics.ratio, dynamics.knee, dynamics.attack, dynamics.hold,
-                    dynamics.release, dynamics.makeup,
+                    dynamics.release, dynamics.makeup, dynamics.mix,
                 ]) {
                     ParameterRow(spec: $0, mirror: mirror).disabled(autoTimed.contains($0.address))
                 }
@@ -86,12 +86,14 @@ struct CompTab: View {
     private func curve(_ dynamics: DynamicsSpecs) -> TransferGraph.Curve? {
         guard let mode = mirror.value(dynamics.mode), let threshold = mirror.value(dynamics.threshold),
             let ratioIndex = mirror.value(dynamics.ratio), let ratio = Double(Catalog.ratios[Int(ratioIndex)]),
-            let knee = mirror.value(dynamics.knee), let makeup = mirror.value(dynamics.makeup)
+            let knee = mirror.value(dynamics.knee), let makeup = mirror.value(dynamics.makeup),
+            let mix = mirror.value(dynamics.mix)
         else { return nil }
         let isExpander = mode == 1
         let output = { (input: Double) in
             TransferCurve.dynamicsOutput(
-                input, isExpander: isExpander, threshold: threshold, ratio: ratio, knee: knee, makeup: makeup)
+                input, isExpander: isExpander, threshold: threshold, ratio: ratio, knee: knee, makeup: makeup,
+                mix: mix)
         }
         return TransferGraph.Curve(output: output, threshold: threshold)
     }

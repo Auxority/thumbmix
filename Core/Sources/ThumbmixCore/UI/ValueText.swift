@@ -28,6 +28,7 @@ public enum ValueText {
         case .milliseconds: return milliseconds(value, locale)
         case .delayTime: return milliseconds(value, locale) + " · " + distance(milliseconds: value, locale)
         case .pan: return pan(value)
+        case .percent: return (value / 100).formatted(.percent.precision(.fractionLength(0)).locale(locale))
         case .ratio, .plain: return number(value, digits: 1, locale)
         }
     }

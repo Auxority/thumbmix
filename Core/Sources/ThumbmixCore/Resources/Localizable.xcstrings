@@ -442,6 +442,16 @@
         }
       }
     },
+    "Comp mix" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comp mix"
+          }
+        }
+      }
+    },
     "Comp position" : {
       "localizations" : {
         "en" : {

@@ -29,8 +29,11 @@ struct TransferCurveTests {
         #expect(Catalog.gateModes.indices.map { TransferCurve.GateMode(rawValue: $0) } == [.exp2, .exp3, .exp4, .gate, .duck])
     }
 
-    private func compressor(_ input: Double, knee: Double = 0, makeup: Double = 0, expander: Bool = false) -> Double {
-        TransferCurve.dynamicsOutput(input, isExpander: expander, threshold: -20, ratio: 4, knee: knee, makeup: makeup)
+    private func compressor(
+        _ input: Double, knee: Double = 0, makeup: Double = 0, mix: Double = 100, expander: Bool = false
+    ) -> Double {
+        TransferCurve.dynamicsOutput(
+            input, isExpander: expander, threshold: -20, ratio: 4, knee: knee, makeup: makeup, mix: mix)
     }
 
     @Test func hardKneeCompressorDividesTheOvershootByTheRatio() {
@@ -64,5 +67,19 @@ struct TransferCurveTests {
     @Test func expanderModeSteepensBelowTheThreshold() {
         #expect(compressor(-25, expander: true) == -40)
         #expect(compressor(-10, expander: true) == -10)
+    }
+
+    @Test func noMixLeavesTheSignalDry() {
+        #expect(compressor(0, makeup: 6, mix: 0) == 0)
+        #expect(compressor(-30, makeup: 6, mix: 0) == -30)
+    }
+
+    /// Parallel compression: the two signals add as amplitudes, Makeup on the compressed one only (assumed).
+    @Test func halfMixSumsTheCompressedAndDrySignals() {
+        // Below the threshold: half of −24 dB plus half of −30 dB.
+        #expect(abs(compressor(-30, makeup: 6, mix: 50) - -26.49) < 0.01)
+        // Above it: less squashed than the compressor alone, still under the dry signal.
+        let blended = compressor(0, mix: 50)
+        #expect(blended > -15 && blended < 0)
     }
 }
