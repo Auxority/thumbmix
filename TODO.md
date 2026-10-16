@@ -51,7 +51,6 @@ None open.
 - [ ] **Membership: mute groups and DCAs.**
   - From a strip: pick its mute groups and DCAs on its strip screen, in a quick multi-select.
   - From a DCA: add and remove strips on its Members tab (`MembersTab`), which today only lists them. Wanted (2026-10-14); start here, then consider whether the strip side is worth having too.
-- [ ] **The group pill design everywhere?** Consider using the pills (Inputs, Aux, FX…) more consistently: on the channel, aux, FX and bus screens too.
 - [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 - [ ] Maybe later: **the compressor mix** (`dyn/mix`, p.25; the app doesn't read it yet).
 - [ ] **SVG icons instead of emoji** in Edit strip. Lucide (ISC licence) fits best but has no trumpet, sax, violin or cello. Emoji were chosen for now.
@@ -70,7 +69,7 @@ None open.
 - [ ] **Long term: effect controls** (reverb and the other FX).
 - [ ] Fold rarely used settings into one line that opens on tap, like "Delay · Off · 12.5 ms ›" (delay mock B). Worth it once the Input tab holds more than gain, trim and delay.
 - [ ] A linked pair's pan as one track with an L and an R handle (mock "B"): a picture of the stereo image. Today it's two rows, "Pan · Gtr L" and "Pan · Gtr R"; revisit if those feel clunky.
-- [ ] A 7th strip tab: switch the bottom tabs (`StripTabBar`) to scrolling chips (mock "T5"). Six chips are ≈ 55 pt wide on the iPhone SE; seven would be too narrow for "Sends".
+- [ ] A 7th strip tab: six of the bottom pills (`PillBar`) are ≈ 53 pt wide on the iPhone SE; seven would be too narrow for "Sends". Short tab names, as the overview's groups have, or a scrolling bar (mock "T5"), which DECISIONS turned down for the overview.
 - [ ] Spectrum: also show what comes in (pre-EQ) as a faint second glow (mock "V2"). Only if the single post-EQ glow proves too little.
 - [ ] **Roles, far future:** a first-run choice between musician/vocalist and mixing engineer. An engineer gets the whole desk; a musician gets only their own mix bus (an in-ear or wedge mix).
 

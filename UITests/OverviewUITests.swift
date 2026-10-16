@@ -60,8 +60,6 @@ final class OverviewUITests: DeskUITestCase {
         XCTAssertEqual(app.buttons["Kick"].value as? String, "1")
         XCTAssertEqual(app.buttons["Vox 2"].value as? String, "14")
         saveScreenshot("channel-numbers")
-        // The Main chip sits past the edge of a 375 pt screen: the engineer swipes the chip row first.
-        app.buttons["Buses"].swipeLeft()
         app.buttons["Main"].tap()
         XCTAssertTrue(app.buttons["LR"].appears(within: 2))
         XCTAssertEqual(app.buttons["LR"].value as? String, "", "a main bus has no number")

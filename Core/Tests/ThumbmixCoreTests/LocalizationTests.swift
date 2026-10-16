@@ -41,7 +41,7 @@ struct LocalizationTests {
             ["Bus %lld", "Ch %lld", "Aux %lld", "FX %lld", "Matrix %lld", "DCA %lld", "Main LR", "Main M", "On", "Off"]
             + ["Ch %lld-%lld", "Aux %lld-%lld", "FX %lld-%lld", "Bus %lld-%lld", "Matrix %lld-%lld"]
             + ["%@ stay separate.", "%@ stays separate.", "gain and delay", "EQ", "dynamics", "fader and mute"]
-            + ChannelTab.allCases.map(\.rawValue) + StripGroup.allCases.map(\.rawValue)
+            + ChannelTab.allCases.map(\.rawValue) + StripGroup.allCases.map(\.rawValue) + ["In", "Bus", "Mtx"]
         for key in keys {
             #expect(isInCatalog(key), "missing \(key)")
         }
@@ -51,6 +51,7 @@ struct LocalizationTests {
         #expect(Catalog.sendLevel(from: StripID(.input, 1), to: StripID(.bus, 3)).label == "Bus 3")
         #expect(StripID(.input, 7).defaultName == "Ch 7")
         #expect(ChannelTab.fedBy.title == "Fed by")
+        #expect(StripGroup.allCases.map(\.shortTitle) == ["In", "Aux", "FX", "Bus", "DCA", "Main", "Mtx"])
     }
 }
 

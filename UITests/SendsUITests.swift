@@ -21,8 +21,6 @@ final class SendsUITests: DeskUITestCase {
     /// The demo's Fill (Matrix 1) takes the main mix at 0 dB.
     func testTheMainSendsToTheMatrices() {
         launch()
-        // The Main chip sits at the edge of a 375 pt screen: the engineer swipes the chip row first.
-        app.buttons["Buses"].swipeLeft()
         app.buttons["Main"].tap()
         open("LR")
         app.buttons["Sends"].tap()
@@ -135,8 +133,6 @@ final class SendsUITests: DeskUITestCase {
     /// A matrix is fed by the buses and the mains; the demo's Fill takes the main mix at 0 dB.
     func testMatrixIsFedByTheMains() {
         launch()
-        // The last chip sits past the edge of a 375 pt screen: the engineer swipes the chip row first.
-        app.buttons["Buses"].swipeLeft()
         app.buttons["Matrix"].tap()
         open("Fill")
         app.buttons["Fed by"].tap()
