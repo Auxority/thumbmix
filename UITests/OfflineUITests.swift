@@ -10,7 +10,7 @@ final class OfflineUITests: XCTestCase {
     /// mistaken for the desk, and every visit starts from the same fresh desk.
     func testOfflineModeRunsAFreshDemoConsole() {
         let app = XCUIApplication()
-        app.launchArguments = ["-lastConsoleHost", ""] + fixedLocale
+        app.launchArguments = ["-knownConsoles", "()"] + fixedLocale
         app.launch()
 
         startOffline(app)
@@ -33,7 +33,7 @@ final class OfflineUITests: XCTestCase {
     }
 
     private func startOffline(_ app: XCUIApplication) {
-        let offline = app.buttons["Try offline (demo console)"]
+        let offline = app.buttons["Try a demo console"]
         XCTAssertTrue(offline.appears(within: 5))
         offline.tap()
         // Names show while the sync still runs and the rows are disabled; a tap then does nothing.

@@ -18,8 +18,24 @@ extension LinkTiming {
 struct ConsoleLinkTests {
     @Test func identifiesAnM32() async throws {
         try await withLink { _, link in
-            #expect(await eventually { link.state == .live(ConsoleInfo(model: "M32", firmware: "4.06")) })
+            #expect(
+                await eventually {
+                    link.state == .live(ConsoleInfo(name: "Fake M32", model: "M32", firmware: "4.06"))
+                })
         }
+    }
+
+    /// The Connect screen remembers a console by the name set on the desk, which only `/xinfo` carries.
+    @Test func aMirrorReportsTheConsoleItIdentified() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast))
+        var identified: [ConsoleInfo] = []
+        mirror.onIdentified = { identified.append($0) }
+        mirror.start()
+        defer { mirror.stop() }
+
+        #expect(await eventually { identified.first?.name == "Fake M32" })
     }
 
     @Test func rejectsAnX32() async throws {
@@ -58,7 +74,7 @@ struct ConsoleLinkTests {
             fake.deskChange("/ch/03/mix/on", .int(0))
 
             #expect(await eventually { received.contains(OSCMessage("/ch/03/mix/on", [.int(0)])) })
-            #expect(!received.contains { $0.address == "/info" })
+            #expect(!received.contains { $0.address == "/xinfo" })
         }
     }
 

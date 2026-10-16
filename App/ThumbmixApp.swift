@@ -43,8 +43,8 @@ struct RootView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .task { model.connectToLastConsole() }
         #if DEBUG
+            .task { model.connectOnLaunch() }
             .onOpenURL(perform: model.openTestURL)
         #endif
         .onChange(of: scenePhase) { old, new in

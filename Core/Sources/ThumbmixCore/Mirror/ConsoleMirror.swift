@@ -36,6 +36,8 @@ public final class ConsoleMirror {
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
     @ObservationIgnored let log = Logger(subsystem: "thumbmix", category: "mirror")
+    /// Called each time the console answers as an M32: on connect, and again after an outage.
+    @ObservationIgnored public var onIdentified: ((ConsoleInfo) -> Void)?
 
     /// While the user drags, pushes for that control are ignored so it doesn't jump under the finger.
     static let editHold: Duration = .milliseconds(300)
@@ -229,7 +231,8 @@ public final class ConsoleMirror {
         switch state {
         case .connecting:
             status = .connecting
-        case .live:
+        case .live(let info):
+            onIdentified?(info)
             startSync()
         case .lost:
             reads = ReadQueue()

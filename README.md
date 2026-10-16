@@ -30,9 +30,9 @@ SideStore re-signs apps every 7 days. A free Apple ID allows 3 active sideloaded
 
 ## Connect
 
-Join the console's Wi-Fi. Then tap **Scan this network**, or type the M32's IP address and tap **Connect**. Thumbmix reconnects to the last console automatically at launch, and after a dropout it keeps retrying by itself ("Disconnected — retrying").
+Join the console's Wi-Fi and open Thumbmix. It scans the network and lists every M32 it finds; tap one to connect. Not listed, say on another VLAN? Tap **Enter IP** and type the address the desk shows under Setup → Network. Thumbmix remembers each console it connected to: the last one is the card with the big **Connect**, marked Online when it answered the scan. Swipe a console in the list to forget it. After a dropout Thumbmix keeps retrying by itself ("Disconnected — retrying").
 
-No console nearby? **Try offline (demo console)** runs a demo M32 inside the app, so every screen works without a mixer. A DEMO pill at the top of the screen shows it isn't a real desk, and each visit starts from a fresh demo desk.
+No console nearby? **Try a demo console** runs a demo M32 inside the app, so every screen works without a mixer. A DEMO pill at the top of the screen shows it isn't a real desk, and each visit starts from a fresh demo desk.
 
 ## Develop
 
@@ -72,7 +72,7 @@ The fake M32 keeps every set it receives, so restart it for a clean desk. CI als
 
 ## Acceptance checklist (real M32)
 
-1. Scan finds the M32, and entering the IP manually works.
+1. Scan finds the M32 and marks it Online, and Enter IP works: it starts from the phone's network, shows the number keypad (on a Dutch phone its comma key works too), and "192.168.1" is refused. With Local Network switched off, Connect says "Can't reach …", and its Settings button opens Thumbmix's page with the Local Network switch.
 2. Names and colours match the desk for all strip kinds, and a name, colour or icon edited in the app shows up on the desk.
 3. A fader moved on the desk moves in the app, and vice versa, with Mixing Station also connected.
 4. Meters move and roughly match the desk. The EQ tab's spectrum follows the signal, and the desk's RTA source is back as it was after leaving the tab.
