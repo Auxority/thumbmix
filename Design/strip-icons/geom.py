@@ -4,7 +4,7 @@
     >>> vline(9, ellipse_y(12, 6, 7, 2.2, 9) + GAP, 14.6 - GAP)   # a lug from a drum's head down to its base
     'M9 8.79V13.8'
 
-Paste the resulting path into icons.py; generate.py only reads icons.py.
+Paste the resulting path into icons.py; scripts/render-strip-icons.sh only reads icons.py.
 """
 import math
 

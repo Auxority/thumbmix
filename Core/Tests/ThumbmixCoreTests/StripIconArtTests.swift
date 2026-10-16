@@ -3,7 +3,8 @@ import Testing
 
 @testable import ThumbmixCore
 
-/// Guards the app's own strip-icon drawings (`App/Assets.xcassets/StripIcons`, made by `Design/strip-icons`):
+/// Guards the app's own strip-icon drawings (`App/Assets.xcassets/StripIcons`, rendered from `Design/strip-icons` by
+/// `scripts/render-strip-icons.sh`):
 /// every desk icon has one, and no two share a drawing, since a shared glyph tells neither icon apart.
 struct StripIconArtTests {
     private static let folder = URL(fileURLWithPath: #filePath)

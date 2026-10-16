@@ -44,6 +44,7 @@ swift test --package-path Core              # protocol, state and UI maths
 scripts/ui-test.sh                          # the UI suite, each test against its own fake desk
 scripts/strings.sh                          # refresh both String Catalogs (App and Core) after changing text
 scripts/render-icon.sh                      # render Design/AppIcon.svg into the app icon (brew install librsvg imagemagick)
+scripts/render-strip-icons.sh               # render Design/strip-icons into the picker's icons (--sheet out.html to review)
 swift run --package-path Core fake-m32      # a fake M32 on 127.0.0.1:10023 (or the port you pass) for the simulator
 xcodegen generate && open Thumbmix.xcodeproj
 ```
