@@ -198,6 +198,10 @@ private struct EnterAddressAlert: ViewModifier {
             .alert(refused ? "Not an IP address" : "Connect to an IP address", isPresented: $isPresented) {
                 TextField("192.168.1.62", text: $typed)
                     .keyboardType(.decimalPad)
+                    // The decimal pad types the region's separator, a comma in the Netherlands; show the dot it means.
+                    .onChange(of: typed) { _, text in
+                        if text.contains(",") { typed = text.replacingOccurrences(of: ",", with: ".") }
+                    }
                 Button("Cancel", role: .cancel) { refused = false }
                 // Never .disabled: a disabled state that changes while typing makes Connect lose its action (iOS 27).
                 Button("Connect", action: submit)
