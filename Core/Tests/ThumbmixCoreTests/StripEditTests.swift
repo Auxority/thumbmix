@@ -15,7 +15,8 @@ struct StripEditTests {
 
     @Test func iconsAreTheDesksSeventyFourInOrder() {
         #expect(ConsoleIcon.all.map(\.number) == Array(1...74))
-        #expect(ConsoleIcon.all.allSatisfy { !$0.emoji.isEmpty && !$0.name.isEmpty })
+        #expect(ConsoleIcon.all.allSatisfy { !$0.name.isEmpty })
+        #expect(ConsoleIcon.icon(2).imageName == "strip-icon-02")
         // Spot checks against the doc's appendix (p.138).
         #expect(ConsoleIcon.icon(1).name == "None")
         #expect(ConsoleIcon.icon(2).name == "Kick Back")
