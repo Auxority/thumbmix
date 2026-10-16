@@ -37,17 +37,22 @@ final class PillBarUITests: DeskUITestCase {
         saveScreenshot("pills-channel")
     }
 
-    /// A tapped pill is white at once, every time: a Button's action ran animated, so the new pill faded in over
-    /// ~0.3 s or not, depending on the tap.
-    func testTappedPillTurnsWhiteAtOnce() {
+    /// The white pill slides over solid, the same on every tap, quick or held: it is never grey on the way. Grey
+    /// came from a fade on some taps only (the Button's own animation), the press dim, and two crossfading pills.
+    func testTappedPillIsNeverGrey() {
         launchAndOpen("Kick")
-        for label in ["EQ", "Comp", "Mix", "Sends"] {
+        for (label, held) in [("EQ", false), ("Comp", true), ("Mix", false), ("Sends", true)] {
             // The lowest button so named: the EQ and Comp tabs have an on/off chip of the same name.
             let pill = app.buttons.matching(identifier: label).allElementsBoundByIndex.max { $0.frame.minY < $1.frame.minY }!
-            pill.tap()
             // Inside the pill's capsule, above its text.
             let inside = CGPoint(x: pill.frame.midX, y: pill.frame.minY + 6)
-            XCTAssertGreaterThan(screenBrightness(at: inside), 0.9, "\(label) is white right after the tap")
+            if held { pill.press(forDuration: 0.3) } else { pill.tap() }
+            var samples: [CGFloat] = []
+            let end = Date.now + 0.6
+            while Date.now < end { samples.append(screenBrightness(at: inside)) }
+            let grey = samples.filter { (0.25...0.95).contains($0) }
+            XCTAssertTrue(grey.isEmpty, "\(label) went grey: \(samples.map { String(format: "%.2f", $0) })")
+            XCTAssertGreaterThan(samples.last ?? 0, 0.95, "\(label) ends white")
         }
     }
 
