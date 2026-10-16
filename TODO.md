@@ -58,7 +58,7 @@ None open.
 
 ## Code and docs
 
-None open.
+- [ ] **At 1.0.0: serve the SideStore source as a release asset** (2026-10-16, the user's pick as the cleanest). Each release attaches `source.json` and users add `https://github.com/Auxority/thumbmix/releases/latest/download/source.json`; the `sidestore` branch, its force-push and the "157 behind" in GitHub's branch list go. Waits on 1.0.0, because `latest` skips pre-releases and every 0.x is one. The URL changes, so users must re-add the source once: keep the branch published for a while with a note telling them to, then delete it. Update the DECISIONS line on the `sidestore` branch, README's install step and `scripts/publish-sidestore-source.sh`.
 
 ## Maybe later
 
