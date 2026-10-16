@@ -8,18 +8,21 @@ struct PillBar<Item: Identifiable & Hashable>: View {
     /// What the pill shows; `label` is what VoiceOver reads, the full name behind a short one ("Bus" → "Buses").
     let title: KeyPath<Item, String>
     let label: KeyPath<Item, String>
+    @Namespace private var bar
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(items) { item in
-                // A Button's action runs animated: the new pill faded in over ~0.3 s or not, depending on the tap.
-                // A switch is instant, like opening a screen.
-                Pill(title: item[keyPath: title], isSelected: item == selection) {
-                    withTransaction(\.disablesAnimations, true) { selection = item }
+                // Explicit, so every tap slides alike: a Button's own release animation faded the pill in on some
+                // taps only.
+                Pill(title: item[keyPath: title], isSelected: item == selection, id: item, bar: bar) {
+                    withAnimation(.snappy(duration: 0.2)) { selection = item }
                 }
                 .accessibilityLabel(item[keyPath: label])
             }
         }
+        // One white capsule that follows the open pill, so it slides over solid instead of two crossfading.
+        .background { Capsule().fill(.white).matchedGeometryEffect(id: AnyHashable(selection), in: bar, isSource: false) }
         .padding(.horizontal, 4)
         .padding(.vertical, 6)
         .glassEffect(.regular.tint(.black), in: Capsule())
@@ -34,6 +37,8 @@ struct PillBar<Item: Identifiable & Hashable>: View {
 private struct Pill: View {
     let title: String
     let isSelected: Bool
+    let id: AnyHashable
+    let bar: Namespace.ID
     let select: () -> Void
     @ScaledMetric private var height: CGFloat = 44
 
@@ -45,7 +50,7 @@ private struct Pill: View {
                 .minimumScaleFactor(0.7)
                 .foregroundStyle(isSelected ? .black : .white)
                 .frame(maxWidth: .infinity, minHeight: height)
-                .background(isSelected ? Color.white : .clear, in: Capsule())
+                .matchedGeometryEffect(id: id, in: bar)  // where the bar's white capsule goes when this pill opens
                 // The 4 pt gap between pills is split between them, so a thumb landing there still picks one.
                 .padding(.horizontal, 2)
                 .contentShape(Rectangle())
