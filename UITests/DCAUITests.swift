@@ -23,6 +23,19 @@ final class DCAUITests: DeskUITestCase {
         XCTAssertTrue(app.buttons["Rhythm secti"].appears(within: 3))
     }
 
+    /// Every page of the picker is saved to build/screens, so the drawings can be checked as iOS renders them.
+    func testIconPickerScrollsToTheLastIcon() {
+        launchAndOpen("Vox", group: "DCA")
+        app.buttons["edit-strip"].tap()
+        XCTAssertTrue(app.buttons["icon-2"].appears(within: 3))
+        for page in 1...2 {
+            saveScreenshot("icon-picker-\(page)")
+            app.swipeUp()
+        }
+        saveScreenshot("icon-picker-3")
+        XCTAssertTrue(app.buttons["icon-74"].isHittable, "the last icon, Smiley, scrolls into reach")
+    }
+
     func testCancelLeavesTheDeskUnchanged() {
         launchAndOpen("Vox", group: "DCA")
         app.buttons["edit-strip"].tap()

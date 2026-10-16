@@ -146,7 +146,7 @@ private struct StripColorPicker: View {
     }
 }
 
-/// Emoji stand in for the desk's icon artwork; the desk's own name under each tells shared emoji apart.
+/// The app's own drawing of each desk icon (`Design/strip-icons`), with the desk's name under it.
 private struct IconPicker: View {
     @Binding var selection: Int
     @Binding var search: String
@@ -183,7 +183,8 @@ private struct IconPicker: View {
             selection = icon.number
         } label: {
             VStack(spacing: 2) {
-                Text(icon.emoji).font(.title2)
+                Image(icon.imageName).resizable().frame(width: 24, height: 24).foregroundStyle(.white)
+                    .accessibilityHidden(true)
                 Text(icon.name).font(.system(size: 9)).foregroundStyle(Theme.secondaryText).lineLimit(2)
                     .multilineTextAlignment(.center)
             }
