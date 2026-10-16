@@ -40,7 +40,7 @@ struct ChannelView: View {
         .background(Theme.background)
         .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if tabs.count > 1 { StripTabBar(tabs: tabs, selection: $tab) }
+            if tabs.count > 1 { PillBar(items: tabs, selection: $tab, title: \.title, label: \.title) }
         }
         // A tab's values are read when it opens (and after a resync forgot them), ahead of the background fill.
         .onAppear { mirror.read(tab, of: main) }

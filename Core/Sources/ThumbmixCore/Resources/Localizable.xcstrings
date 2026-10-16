@@ -853,6 +853,16 @@
         }
       }
     },
+    "In" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In"
+          }
+        }
+      }
+    },
     "input" : {
       "localizations" : {
         "en" : {
@@ -1113,6 +1123,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Move the comp before the EQ?"
+          }
+        }
+      }
+    },
+    "Mtx" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mtx"
           }
         }
       }

@@ -46,8 +46,6 @@ final class MainsFedByUITests: DeskUITestCase {
     }
 
     private func openMain(_ name: String) {
-        // The Main chip sits at the edge of a 375 pt screen: the engineer swipes the chip row first.
-        app.buttons["Buses"].swipeLeft()
         app.buttons["Main"].tap()
         open(name)
         app.buttons["Fed by"].tap()

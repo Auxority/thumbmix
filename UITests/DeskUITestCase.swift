@@ -50,7 +50,7 @@ class DeskUITestCase: XCTestCase {
         XCTAssertTrue(app.buttons["+1 dB"].appears(within: 3))
     }
 
-    /// Launches, then opens one strip as the tests do by hand: through its group chip (Buses, DCA, FX) when it isn't on the
+    /// Launches, then opens one strip as the tests do by hand: through its group pill (Buses, DCA, FX) when it isn't on the
     /// first page, and on `tab` when the test starts there.
     func launchAndOpen(_ name: String, group: String? = nil, tab: String? = nil) {
         launch()

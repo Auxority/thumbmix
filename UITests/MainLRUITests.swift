@@ -42,8 +42,6 @@ final class MainLRUITests: DeskUITestCase {
         app.buttons["EQ"].tap()
         XCTAssertTrue(eventually(within: 2) { !self.element("mainLR-/ch/01/mix/st").exists }, "not on other tabs")
         app.navigationBars.buttons.firstMatch.tap()
-        // The Matrix chip sits past the edge of a 375 pt screen: the engineer swipes the chip row first.
-        app.buttons["Buses"].swipeLeft()
         app.buttons["Matrix"].tap()
         open("Fill")
         XCTAssertTrue(element("solo-/-stat/solosw/65").appears(within: 2))

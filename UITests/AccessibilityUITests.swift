@@ -3,7 +3,7 @@ import XCTest
 /// What VoiceOver and larger text get: which choice is selected, which strip a control belongs to, rows that grow.
 @MainActor
 final class AccessibilityUITests: DeskUITestCase {
-    func testGroupChipsSayWhichIsSelected() {
+    func testGroupPillsSayWhichIsSelected() {
         launch()
         XCTAssertTrue(app.buttons["Inputs"].appears(within: 5))
         XCTAssertTrue(app.buttons["Inputs"].isSelected)
@@ -37,8 +37,6 @@ final class AccessibilityUITests: DeskUITestCase {
 
     func testDCAMemberRowsGrowWithLargerText() {
         launch(["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
-        // At this size the chip row runs past the screen's edge, as a thumb would scroll it.
-        app.buttons["Inputs"].swipeLeft()
         app.buttons["DCA"].tap()
         open("Drums")
         app.buttons["Members"].tap()

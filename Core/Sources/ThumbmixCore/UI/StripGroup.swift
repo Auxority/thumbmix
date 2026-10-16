@@ -1,5 +1,4 @@
-/// The overview's filter chips. Matrix comes last, after the buses and mains that feed it: on a 375 pt screen the
-/// last chip needs a swipe, and Main is used far more during a show.
+/// The overview's group pills. Matrix comes last, after the buses and mains that feed it.
 public enum StripGroup: String, CaseIterable, Identifiable, Sendable {
     case inputs = "Inputs"
     case aux = "Aux"
@@ -13,6 +12,17 @@ public enum StripGroup: String, CaseIterable, Identifiable, Sendable {
 
     /// The raw value is the catalog key and the English title.
     public var title: String { CoreStrings.text(String.LocalizationValue(rawValue)) }
+
+    /// The name on the overview's pill: short, so all seven share a 375 pt screen without scrolling. The desk
+    /// prints BUS and MTX on its own buttons.
+    public var shortTitle: String {
+        switch self {
+        case .inputs: CoreStrings.text("In")
+        case .buses: CoreStrings.text("Bus")
+        case .matrix: CoreStrings.text("Mtx")
+        case .aux, .fx, .dca, .main: title
+        }
+    }
 
     public var strips: [StripID] {
         switch self {
