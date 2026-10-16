@@ -4,6 +4,7 @@ Settled choices about how Thumbmix behaves, with the reason, so nobody proposes 
 
 ## Platform
 
+- **The app is called Thumbmix** (2026-10-16): it says what the app is for, mixing with one thumb on a phone, and fits under the home-screen icon. A web search found no app or product by that name (ThumbJam, a music app, is the nearest); no trademark search was done. The name leaves out "Midas" and "M32", Music Tribe's marks, which the description may still name. Settled before 1.0 because the bundle ID, repo, SideStore source and URL scheme all carry it.
 - **Latest M32 firmware only** (2026-10-12). No fallbacks for older firmware; X32 and X Air are out of scope.
 - **As few permissions as possible, and no data collected** (2026-10-12, the user is privacy aware): Thumbmix asks only for Local Network, to reach the desk. No analytics, tracking or accounts; anything new that needs a permission has to justify it. The SideStore source copies only that one permission (`scripts/sidestore-source.sh`), so a new one also goes there, or SideStore refuses the install.
 - **iOS 26 and newer, iPhone only** (2026-10-12): the first iOS with glass, on the same devices as iOS 27 (iPhone 11 and SE 2nd gen onward).

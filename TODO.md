@@ -52,7 +52,6 @@ None open.
 - [ ] **Membership: mute groups and DCAs.**
   - From a strip: pick its mute groups and DCAs on its strip screen, in a quick multi-select.
   - From a DCA: add and remove strips on its Members tab (`MembersTab`), which today only lists them. Wanted (2026-10-14); start here, then consider whether the strip side is worth having too.
-- [ ] **Name of the app.** Settle the name shown on the home screen and in releases.
 
 ## Code and docs
 
