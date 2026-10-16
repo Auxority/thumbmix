@@ -32,6 +32,7 @@ final class ConnectUITests: XCTestCase {
         clear(field)
         // One key at a time: XCUITest's fast typing dropped keys in this field.
         for key in "127,0,0,1" { field.typeText(String(key)) }
+        XCTAssertEqual(field.value as? String, "127.0.0.1", "each comma shows as the dot it means")
         app.alerts.buttons["Connect"].tap()
 
         XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
