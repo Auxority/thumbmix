@@ -37,19 +37,19 @@ final class AppModel {
         disconnect()
         let mirror = ConsoleMirror(link: ConsoleLink(host: host, port: port))
         mirror.onIdentified = { [weak self] info in
-            self?.remember(KnownConsole(host: host, name: info.name, model: info.model))
+            self?.remember(NetworkConsole(host: host, name: info.name, model: info.model))
         }
         mirror.start()
         self.mirror = mirror
         target = name ?? host
     }
 
-    func forget(_ console: KnownConsole) {
+    func forget(_ console: NetworkConsole) {
         known.forget(console)
         UserDefaults.standard.set(known.stored, forKey: Self.knownKey)
     }
 
-    private func remember(_ console: KnownConsole) {
+    private func remember(_ console: NetworkConsole) {
         known.remember(console)
         UserDefaults.standard.set(known.stored, forKey: Self.knownKey)
     }
