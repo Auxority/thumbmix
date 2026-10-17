@@ -128,10 +128,19 @@ final class DynamicsUITests: DeskUITestCase {
         let wasOff = graph.value as? String == "Off"
         on.tap()
         XCTAssertTrue(eventually(within: 2) { (graph.value as? String == "Off") != wasOff })
+        if !wasOff { assertNoReduction() }
         saveScreenshot(wasOff ? "comp-on-fork" : "comp-off-fork")
         on.tap()
         XCTAssertTrue(eventually(within: 2) { (graph.value as? String == "Off") == wasOff })
+        if wasOff { assertNoReduction() }
         saveScreenshot(wasOff ? "comp-off-fork" : "comp-on-fork")
+    }
+
+    /// Off reduces nothing, whatever the meter says (the demo's meters animate regardless).
+    private func assertNoReduction() {
+        let none = app.staticTexts["GR 0.0 dB"]
+        XCTAssertTrue(none.appears(within: 2))
+        XCTAssertFalse(eventually(within: 1) { !none.exists }, "stays at 0 while the meter moves")
     }
 
     func testGateAndCompDrawTheirCurves() {

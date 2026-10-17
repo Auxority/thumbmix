@@ -46,7 +46,8 @@ struct TransferGraph: View {
         .accessibilityValue(curve?.isOn == false ? Text("Off") : Text(verbatim: ""))
         // Over the plot's bottom edge, where the curve only runs at the quietest levels (layout A, 2026-10-17).
         .overlay(alignment: .bottom) {
-            Reduction(meter: meter, reduction: reduction).padding(.horizontal, 12).padding(.bottom, 10)
+            Reduction(meter: meter, reduction: reduction, isOn: curve?.isOn ?? true)
+                .padding(.horizontal, 12).padding(.bottom, 10)
         }
         .background(Theme.track, in: RoundedRectangle(cornerRadius: 12))
         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -101,9 +102,12 @@ struct TransferGraph: View {
 private struct Reduction: View {
     let meter: MeterCell
     let reduction: KeyPath<MeterCell, Float>
+    /// Off reduces nothing, whatever the meter reports: the offline demo's meters animate regardless, and whether the
+    /// desk's own meter rests at 0 while off is unverified.
+    let isOn: Bool
 
     var body: some View {
-        ReductionBar(gain: meter[keyPath: reduction])
+        ReductionBar(gain: isOn ? meter[keyPath: reduction] : 1)
     }
 }
 
