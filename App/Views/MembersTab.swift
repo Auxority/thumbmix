@@ -67,7 +67,7 @@ private struct AssignChip: View {
                 .frame(minHeight: 48 * sizeScale, maxHeight: .infinity)
                 .background(assignment == .assigned ? Theme.usualOnTint : Theme.track, in: RoundedRectangle(cornerRadius: 10))
                 .overlay {
-                    if isHalf(assignment) {
+                    if [.leftOnly, .rightOnly].contains(assignment) {
                         RoundedRectangle(cornerRadius: 10).strokeBorder(Theme.usualOnGreen.opacity(0.6), lineWidth: 1.5)
                     }
                 }
@@ -83,16 +83,17 @@ private struct AssignChip: View {
         switch assignment {
         case .assigned:
             Image(systemName: "checkmark.circle.fill").font(.title3).foregroundStyle(.black, Theme.usualOnGreen)
-        case .leftOnly, .rightOnly:
-            Text(assignment == .leftOnly ? "L only" : "R only")
-                .font(.subheadline.weight(.semibold)).foregroundStyle(Theme.usualOnGreen)
+        case .leftOnly:
+            halfMark("L only")
+        case .rightOnly:
+            halfMark("R only")
         case .unassigned, .unread:
             Image(systemName: "circle").font(.title3).foregroundStyle(Theme.secondaryText)
         }
     }
 
-    private func isHalf(_ assignment: DCAAssignment) -> Bool {
-        assignment == .leftOnly || assignment == .rightOnly
+    private func halfMark(_ side: LocalizedStringKey) -> some View {
+        Text(side).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.usualOnGreen)
     }
 
     private func value(_ assignment: DCAAssignment) -> Text {
@@ -124,7 +125,7 @@ private struct StripNameBlock: View {
         .padding(.horizontal, 12)
         .frame(minHeight: 48)
         // Tinted over the track, as a Fed by row's fill is: on black the same tint reads darker.
-        .background(accent.opacity(0.28), in: RoundedRectangle(cornerRadius: 10))
+        .background(accent.opacity(Theme.accentTintOpacity), in: RoundedRectangle(cornerRadius: 10))
         .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
         .contentShape(Rectangle())
     }
