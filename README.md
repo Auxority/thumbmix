@@ -1,5 +1,7 @@
 # Thumbmix
 
+![Thumbmix: an open-source iPhone remote for the Midas M32, built for thumbs. The overview shows channel faders with meters and mute buttons.](Design/social-preview/social-preview.png)
+
 An open-source (MIT) iPhone remote for the Midas M32, built for thumbs. Its controls are horizontal fader rows that you drag anywhere. Every common action is at most two taps deep. Channels use the desk's own names and colours everywhere, and the screen is OLED black.
 
 It covers inputs, aux ins, FX returns, buses, matrices, Main LR, Main M and DCAs. Where the desk has them, it controls:

@@ -1,0 +1,27 @@
+<!doctype html><meta charset="utf-8">
+<!-- The repo's social preview (Settings › General, 1280 x 640) and README banner: name and tagline left, the
+     overview on a phone right, cut off by the bottom edge.
+     overview.png is OfflineUITests' "offline-overview" on an iPhone 17 simulator set to en_US, with
+     `xcrun simctl status_bar <sim> override --time 9:41 --wifiBars 3 --cellularBars 4 --batteryState discharging
+     --batteryLevel 100`. Screenshots leave out the Dynamic Island, so it's drawn at its place (125 x 37 pt, 11 pt
+     from the top of a 402 pt wide screen).
+     Render: Chrome --headless=new --hide-scrollbars --window-size=1280,800 --screenshot, then crop to 1280 x 640
+     (headless Chrome's viewport is shorter than its window). -->
+<style>
+  html,body{margin:0;width:1280px;height:640px;background:#000;overflow:hidden;font-family:-apple-system,system-ui,sans-serif;color:#fff}
+  .text{position:absolute;left:96px;top:0;bottom:0;width:640px;display:flex;flex-direction:column;justify-content:center;gap:24px}
+  .row{display:flex;align-items:center;gap:28px}
+  img.icon{width:120px;height:120px;border-radius:27px}
+  h1{margin:0;font-size:88px;font-weight:700;letter-spacing:-2px}
+  p{margin:0;font-size:34px;line-height:1.3;color:#9a9aa0}
+  /* Screen 320 px wide = 402 pt, so 1 pt = 0.796 px. */
+  .phone{position:absolute;right:110px;top:56px;width:320px;height:700px;border-radius:54px;border:10px solid #2c2c31;overflow:hidden;background:#000;
+    box-shadow:0 0 120px rgba(255,77,94,.25)}
+  .phone img{width:100%;display:block}
+  .island{position:absolute;left:50%;top:8.8px;width:99.5px;height:29.5px;margin-left:-49.75px;border-radius:15px;background:#111;border:1px solid #1c1c1e;box-sizing:border-box}
+</style>
+<div class="text">
+  <div class="row"><img class="icon" src="../AppIcon.svg"><h1>Thumbmix</h1></div>
+  <p>Open-source iPhone remote for the Midas M32, built for thumbs.</p>
+</div>
+<div class="phone"><img src="overview.png"><div class="island"></div></div>
