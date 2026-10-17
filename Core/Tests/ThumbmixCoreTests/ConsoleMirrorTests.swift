@@ -6,7 +6,7 @@ import Testing
 
 @MainActor
 struct ConsoleMirrorTests {
-    private func liveMirror(_ fake: FakeM32, _ port: UInt16) async -> ConsoleMirror {
+    private func liveMirror(_ port: UInt16) async -> ConsoleMirror {
         let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast))
         mirror.start()
         _ = await eventually(timeout: syncTimeout) { mirror.isLive }
@@ -122,7 +122,7 @@ struct ConsoleMirrorTests {
         let fake = try FakeM32(state: state)
         let port = try await fake.start()
         defer { fake.stop() }
-        let mirror = await liveMirror(fake, port)
+        let mirror = await liveMirror(port)
         defer { mirror.stop() }
 
         #expect(mirror.isLive)

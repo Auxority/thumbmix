@@ -3,11 +3,10 @@
 @MainActor
 public final class MessageRecorder {
     public private(set) var messages: [OSCMessage] = []
-    private var task: Task<Void, Never>?
     private let limit = 5_000
 
     public init(_ stream: AsyncStream<Arrival>) {
-        task = Task { [weak self] in
+        Task { [weak self] in
             for await arrival in stream { self?.record(arrival.message) }
         }
     }
@@ -26,8 +25,6 @@ public final class MessageRecorder {
     }
 
     public func clear() { messages.removeAll() }
-
-    public func stop() { task?.cancel() }
 
     private func record(_ message: OSCMessage) {
         messages.append(message)

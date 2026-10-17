@@ -60,8 +60,8 @@ jobs:
           key: core-build-${{ runner.os }}-xcode27.0-${{ github.sha }}
           restore-keys: core-build-${{ runner.os }}-xcode27.0-
 
-      - name: Install SwiftLint and XcodeGen
-        run: brew install swiftlint xcodegen
+      - name: Install SwiftLint, XcodeGen and Periphery
+        run: brew install swiftlint xcodegen periphery
 
       - name: Lint
         run: scripts/lint.sh
@@ -83,3 +83,6 @@ jobs:
           xcodebuild build -project Thumbmix.xcodeproj -scheme Thumbmix -configuration Release \
             -destination 'generic/platform=iOS' \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
+      - name: Find unused code
+        run: scripts/unused.sh

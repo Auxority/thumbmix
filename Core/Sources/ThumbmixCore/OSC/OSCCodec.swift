@@ -1,6 +1,6 @@
 import Foundation
 
-public enum OSCDecodeError: Error, Equatable {
+enum OSCDecodeError: Error, Equatable {
     case truncated
     case unterminatedString
     case unsupportedType(Character)

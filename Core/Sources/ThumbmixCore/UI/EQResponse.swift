@@ -11,11 +11,11 @@ public struct EQBandState: Equatable, Sendable {
 
 /// RBJ-cookbook biquads at 48 kHz. An approximation of the console's curves: good enough to see
 /// what a band does, not a measurement.
-public enum EQResponse {
+enum EQResponse {
     private static let sampleRate = 48_000.0
 
     /// `bands` in band order: on a main or matrix, band 1 and 6 can be crossovers (`Crossover`).
-    public static func decibels(at frequency: Double, bands: [EQBandState]) -> Double {
+    static func decibels(at frequency: Double, bands: [EQBandState]) -> Double {
         bands.indices.reduce(0) { $0 + decibels(ofBand: $1 + 1, in: bands, at: frequency) }
     }
 
