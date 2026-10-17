@@ -39,6 +39,8 @@ enum Theme {
 extension Theme {
     /// A disabled control's opacity.
     static let dimmedOpacity = 0.38
+    /// A strip's colour behind its row, over `track`: a slider row's fill at rest, a Members name block.
+    static let accentTintOpacity = 0.28
 }
 
 /// Disables a control until the console sent its value and dims it like a disabled `ParameterRow`: an unread

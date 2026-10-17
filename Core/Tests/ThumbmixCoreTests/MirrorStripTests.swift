@@ -81,6 +81,5 @@ struct MirrorStripTests {
         #expect(mirror.isMember(StripID(.input, 1), ofDCA: 1))
         #expect(!mirror.isMember(StripID(.input, 1), ofDCA: 2))
         #expect(mirror.isMember(StripID(.input, 1), ofDCA: 3))
-        #expect(mirror.dcaMembers(3).contains(StripID(.input, 1)))
     }
 }

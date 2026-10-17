@@ -106,12 +106,6 @@ extension ConsoleMirror {
         return mask & (1 << (dca - 1)) != 0
     }
 
-    public func dcaMembers(_ dca: Int) -> [StripID] {
-        [StripKind.input, .auxIn, .fxReturn, .bus].flatMap(StripID.all).filter {
-            isMember($0, ofDCA: dca)
-        }
-    }
-
     /// The name exactly as the desk holds it, empty when unnamed: what the edit sheet starts from.
     public func rawName(_ strip: StripID) -> String {
         guard case .string(let name)? = cell(strip.name).argument else { return "" }

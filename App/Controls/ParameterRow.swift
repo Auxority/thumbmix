@@ -32,7 +32,7 @@ struct ParameterRow: View {
             GeometryReader { geometry in
                 ZStack(alignment: .bottomLeading) {
                     Rectangle()
-                        .fill(accent.opacity(dragPosition == nil ? 0.28 : 0.45))
+                        .fill(accent.opacity(dragPosition == nil ? Theme.accentTintOpacity : 0.45))
                         .frame(width: geometry.size.width * CGFloat(position ?? 0))
                     if let meter { MeterLine(cell: meter, width: geometry.size.width) }
                     if let upperMeter { MeterLine(cell: upperMeter, width: geometry.size.width).padding(.bottom, 5) }
