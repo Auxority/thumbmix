@@ -96,11 +96,6 @@ public struct TapChain: Equatable, Sendable {
         }
     }
 
-    /// Every sentence this chain can show: the view keeps room for the longest, so nothing below it moves.
-    public func explanations(locale: Locale = .current) -> [String] {
-        SendTap.allCases.map { explanation($0, locale: locale) }
-    }
-
     private func partial(_ tap: SendTap, locale: Locale) -> String {
         let heard = blocks.filter { $0 != .input && reaches($0, at: tap) }.map(\.partName)
         let missed = blocks.filter { $0 != .pan && $0 != .group && !reaches($0, at: tap) }.map(\.partName)
