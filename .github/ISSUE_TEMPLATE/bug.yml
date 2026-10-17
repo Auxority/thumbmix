@@ -1,0 +1,47 @@
+name: Bug
+description: Something in the app doesn't work as it should.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open channel 1
+        2. Go to the EQ tab
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: Thumbmix version
+      description: In SideStore, or the release you installed.
+      placeholder: 0.45.0
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: iPhone model and iOS version
+      placeholder: iPhone 13, iOS 26.1
+    validations:
+      required: true
+  - type: input
+    id: desk
+    attributes:
+      label: Console and firmware
+      description: Or "offline demo" if no console was connected.
+      placeholder: Midas M32, firmware 4.x
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or a screen recording
