@@ -35,10 +35,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Small fixes
 
-- [ ] **EQ, Gate and Comp graphs the same size** (2026-10-17). Moving between those tabs, the graph shouldn't change height.
-- [ ] **Low cut drawn with dashes like the EQ bands** (2026-10-17). Match how the EQ graph draws its bands.
-- [ ] **Comp and Gate off = dashed curve** (2026-10-17), as the EQ graph does when the EQ is off (#111: grey dashes, points at 50 %).
-- [ ] **Strip colour "Inverted" toggle** (2026-10-17, `EditStripSheet`): switched on it shows plain white, and the colour swatches don't change. Inverted colours should look inverted (lit background, dark text, as on the desk's strip), and the toggle needs another design. Mock first.
+None open.
 
 ## Features
 
@@ -62,12 +59,8 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 ## Code and docs
 
 - [ ] **The user rewrites README by hand** (2026-10-17); developer details (build, tests, gates) move to a separate Markdown file.
-- [ ] **Add a code quality tool** (2026-10-17), e.g. a linter or static analysis that runs in CI. Sigrid guardrails return nothing for Swift.
-- [ ] **Set up GitHub rulesets** (2026-10-17) for `main`.
-- [ ] **GitHub community standards** (2026-10-17): add a code of conduct, contributing guide, security policy, issue templates and a pull request template (Insights › Community Standards; description, README and licence are done).
-- [ ] **A social preview image for the repo** (2026-10-17).
-- [ ] **Turn on GitHub Discussions** (2026-10-17).
-
+- [ ] **Add a local code quality tool** (2026-10-17). SonarQube's free local edition has no Swift, and Sigrid guardrails return nothing for Swift. SwiftLint already guards complexity and size, and CodeQL (GitHub's default setup) already scans Swift on every PR. Candidates: Periphery (unused code) and PMD CPD (duplication), then decide whether CI runs them.
+- [ ] **A pull request template** (2026-10-17): What and why, How I tested it (lint + Core tests; full UI suite if the change shows in the app), Screenshots. A Maxxton hook on the Mac blocks agents from writing `.github/pull_request_template.md`, so the user adds it.
 - [ ] **At 1.0.0: serve the SideStore source as a release asset** (2026-10-16, the user's pick as the cleanest). Each release attaches `source.json` and users add `https://github.com/Auxority/thumbmix/releases/latest/download/source.json`; the `sidestore` branch, its force-push and the "157 behind" in GitHub's branch list go. Waits on 1.0.0, because `latest` skips pre-releases and every 0.x is one. The URL changes, so users must re-add the source once: keep the branch published for a while with a note telling them to, then delete it. Update the DECISIONS line on the `sidestore` branch, README's install step and `scripts/publish-sidestore-source.sh`.
 
 ## Maybe later
