@@ -58,20 +58,7 @@ struct StripRow: View {
         .accessibilityValue(number)
     }
 
-    /// A pair's stripe is cut in two: top for the odd (left) side, bottom for the even (right) side, each in its own colour.
-    @ViewBuilder private var stripe: some View {
-        switch item {
-        case .strip(_, .full):
-            Stripe(mirror.color(strip)).frame(width: 6, height: 40)
-        case .strip(_, let half):
-            let console = mirror.color(strip)
-            StackedStripe(
-                top: Stripe(console, opacity: half == .top ? 1 : 0.25),
-                bottom: Stripe(console, opacity: half == .bottom ? 1 : 0.25))
-        case .pair(let odd):
-            StackedStripe(top: Stripe(mirror.color(strip)), bottom: Stripe(mirror.color(odd.partner ?? odd)))
-        }
-    }
+    private var stripe: some View { ItemStripe(item: item, mirror: mirror) }
 
     @ViewBuilder private var faderAndMute: some View {
         ParameterRow(
@@ -86,6 +73,27 @@ struct StripRow: View {
     private var rightSide: StripID? {
         if case .pair(let odd) = item { return odd.partner }
         return nil
+    }
+}
+
+/// An overview item's stripe, wherever the item is listed (overview, DCA Members). A pair's stripe is cut in two: top
+/// for the odd (left) side, bottom for the even (right) side, each in its own colour.
+struct ItemStripe: View {
+    let item: OverviewItem
+    let mirror: ConsoleMirror
+
+    var body: some View {
+        switch item {
+        case .strip(let strip, .full):
+            Stripe(mirror.color(strip)).frame(width: 6, height: 40)
+        case .strip(let strip, let half):
+            let console = mirror.color(strip)
+            StackedStripe(
+                top: Stripe(console, opacity: half == .top ? 1 : 0.25),
+                bottom: Stripe(console, opacity: half == .bottom ? 1 : 0.25))
+        case .pair(let odd):
+            StackedStripe(top: Stripe(mirror.color(odd)), bottom: Stripe(mirror.color(odd.partner ?? odd)))
+        }
     }
 }
 

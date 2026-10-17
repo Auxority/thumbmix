@@ -2,7 +2,7 @@ import SwiftUI
 import ThumbmixCore
 
 /// Every strip a DCA can hold, under its group's heading in desk order (mock 2026-10-17-dca-members, D with I3
-/// marks). The chip assigns at once, the name opens the strip, as on Fed by. No row moves on a tap; unused strips
+/// marks; rows S4 in 2026-10-17-dca-member-stripes). The chip assigns at once, the name opens the strip, as on Fed by. No row moves on a tap; unused strips
 /// that aren't assigned fold into the last row.
 struct MembersTab: View {
     let dca: Int
@@ -32,18 +32,20 @@ struct MembersTab: View {
         .keepsFoldInPlace()
     }
 
+    /// Like an overview row (S4, 2026-10-17): the name with the overview's stripe, then the chip where the overview's
+    /// mute sits, nearest the thumb.
     private func memberRow(_ row: OverviewItem) -> some View {
         HStack(spacing: 8) {
-            AssignChip(strip: row.held, dca: dca, mirror: mirror)
             Button {
                 open(row.opens)
             } label: {
                 StripNameBlock(
                     title: mirror.title(of: row), caption: mirror.numberCaption(of: row),
-                    accent: Theme.color(mirror.color(row.held)))
+                    stripe: ItemStripe(item: row, mirror: mirror))
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("member-" + row.held.id)
+            AssignChip(strip: row.held, dca: dca, mirror: mirror)
         }
         .fixedSize(horizontal: false, vertical: true)
     }
@@ -107,14 +109,15 @@ private struct AssignChip: View {
     }
 }
 
-/// The strip's name in its colour, with the desk number under it and a › to its screen.
+/// The strip's stripe and name, with the desk number under it and a › to its screen.
 private struct StripNameBlock: View {
     let title: String
     let caption: String?
-    let accent: Color
+    let stripe: ItemStripe
 
     var body: some View {
-        HStack {
+        HStack(spacing: 10) {
+            stripe
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.body)
                 if let caption { Text(caption).font(.caption).foregroundStyle(.white.opacity(0.6)) }
@@ -124,8 +127,6 @@ private struct StripNameBlock: View {
         }
         .padding(.horizontal, 12)
         .frame(minHeight: 48)
-        // Tinted over the track, as a Fed by row's fill is: on black the same tint reads darker.
-        .background(accent.opacity(Theme.accentTintOpacity), in: RoundedRectangle(cornerRadius: 10))
         .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
         .contentShape(Rectangle())
     }

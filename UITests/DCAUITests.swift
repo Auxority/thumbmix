@@ -83,6 +83,18 @@ final class DCAUITests: DeskUITestCase {
         XCTAssertEqual(desk.value("/ch/09/grp/dca"), .int(0b011))
     }
 
+    /// Laid out like an overview row: the name block with its stripe, then the chip on the right, where the overview's
+    /// mute sits, nearest the thumb (S4, 2026-10-17).
+    func testTheChipSitsRightOfTheName() {
+        launchAndOpen("Drums", group: "DCA")
+        app.buttons["Members"].tap()
+        let name = element("member-/ch/02")
+        let chip = element("assign-/ch/02")
+        XCTAssertTrue(chip.appears(within: 3))
+        XCTAssertLessThan(name.frame.maxX, chip.frame.minX)
+        saveScreenshot("dca-member-stripes")
+    }
+
     func testAMembersNameOpensItsStrip() {
         launchAndOpen("Drums", group: "DCA")
         app.buttons["Members"].tap()
