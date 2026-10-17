@@ -56,13 +56,23 @@ struct TransferGraph: View {
     private func drawFork(_ curve: Curve, in context: GraphicsContext, size: CGSize) {
         let unheard = curve.isOn ? { $0 } : curve.output
         for run in TransferCurve.forkRuns(from: Self.floor, output: curve.output) {
-            if run.splits {
-                context.stroke(
-                    path(unheard, over: run.inputs, in: size), with: .color(Theme.secondaryText),
-                    style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
-            }
+            if run.splits { drawDashed(unheard, over: run.inputs, in: context, size: size) }
             context.stroke(path(curve.heard, over: run.inputs, in: size), with: .color(.white), lineWidth: 2)
         }
+    }
+
+    /// Drawn from the floor and clipped to the run: a dash pattern restarts where its path starts, and the run starts
+    /// at the threshold, so starting there slid the dashes along at every threshold step.
+    private func drawDashed(
+        _ output: @escaping (Double) -> Double, over inputs: ClosedRange<Double>, in context: GraphicsContext,
+        size: CGSize
+    ) {
+        var clipped = context
+        let start = Self.point(input: inputs.lowerBound, output: 0, in: size).x
+        clipped.clip(to: Path(CGRect(x: start, y: 0, width: size.width - start, height: size.height)))
+        clipped.stroke(
+            path(output, over: Self.floor...inputs.upperBound, in: size), with: .color(Theme.secondaryText),
+            style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
     }
 
     private func path(_ output: (Double) -> Double, over inputs: ClosedRange<Double> = floor...0, in size: CGSize)
