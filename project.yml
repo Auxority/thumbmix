@@ -16,6 +16,9 @@ settings:
     CODE_SIGN_STYLE: Manual
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     SWIFT_EMIT_LOC_STRINGS: YES
+    # No target has App Intents, so the extraction step only warned "Metadata extraction skipped, no
+    # AppIntents.framework dependency found". Drop this once the app adds an intent.
+    LM_SKIP_METADATA_EXTRACTION: YES
 targets:
   Thumbmix:
     type: application

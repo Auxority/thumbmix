@@ -28,6 +28,13 @@ concurrency:
   group: release
   cancel-in-progress: false
 
+# Silences git's "Using 'master' as the name for the initial branch" hint: actions/checkout runs `git init`
+# before any step could set it.
+env:
+  GIT_CONFIG_COUNT: 1
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+
 jobs:
   release:
     # Lint and tests are not repeated here: only a commit whose CI passed on main's push is built. A manual run

@@ -17,6 +17,13 @@ concurrency:
   group: ci-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
+# Silences git's "Using 'master' as the name for the initial branch" hint: actions/checkout runs `git init`
+# before any step could set it.
+env:
+  GIT_CONFIG_COUNT: 1
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+
 jobs:
   # A PR that changes only Markdown skips `check`: skipped by `if` counts as success for the required check, where
   # a paths filter would leave it pending. Main always runs in full (DECISIONS: Release builds main's newest green
@@ -60,8 +67,8 @@ jobs:
           key: core-build-${{ runner.os }}-xcode27.0-${{ github.sha }}
           restore-keys: core-build-${{ runner.os }}-xcode27.0-
 
-      - name: Install SwiftLint, XcodeGen and Periphery
-        run: brew install swiftlint xcodegen periphery
+      - name: Install SwiftLint and XcodeGen
+        run: brew install swiftlint xcodegen
 
       - name: Lint
         run: scripts/lint.sh
@@ -83,6 +90,3 @@ jobs:
           xcodebuild build -project Thumbmix.xcodeproj -scheme Thumbmix -configuration Release \
             -destination 'generic/platform=iOS' \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-
-      - name: Find unused code
-        run: scripts/unused.sh

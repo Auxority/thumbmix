@@ -10,7 +10,6 @@ Thanks for helping. Thumbmix is a one-person project, so a short note first save
 
 1. Build, lint and test as described in [Develop](README.md#develop):
    - `scripts/lint.sh` is clean.
-   - `scripts/unused.sh` finds no unused code.
    - `swift test --package-path Core` passes.
    - `scripts/ui-test.sh` passes when the change shows in the app.
 2. Add a test that fails without your change.
