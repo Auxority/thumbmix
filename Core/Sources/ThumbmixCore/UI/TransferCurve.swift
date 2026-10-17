@@ -44,6 +44,29 @@ public enum TransferCurve {
         return 20 * log10(share * pow(10, wet / 20) + (1 - share) * pow(10, dry / 20))
     }
 
+    /// A stretch of input levels where the curve either is the straight 1:1 line or leaves it.
+    public struct ForkRun: Equatable, Sendable {
+        public let inputs: ClosedRange<Double>
+        public let splits: Bool
+    }
+
+    /// Splits `floor...0` dB into runs where `output` stays on or leaves the straight line, so the graph draws a
+    /// shared stretch once and forks only where Gate or Comp changes the level (F1, 2026-10-17).
+    public static func forkRuns(from floor: Double, steps: Int = 160, output: (Double) -> Double) -> [ForkRun] {
+        let inputs = (0...steps).map { floor * (1 - Double($0) / Double(steps)) }
+        let leaves = inputs.map { abs(output($0) - $0) > 0.01 }
+        var runs: [ForkRun] = []
+        for step in 0..<steps {
+            let splits = leaves[step] || leaves[step + 1]
+            if let last = runs.last, last.splits == splits {
+                runs[runs.count - 1] = ForkRun(inputs: last.inputs.lowerBound...inputs[step + 1], splits: splits)
+            } else {
+                runs.append(ForkRun(inputs: inputs[step]...inputs[step + 1], splits: splits))
+            }
+        }
+        return runs
+    }
+
     /// Knee 5 spans 30 dB, the widest common soft knee (Pro Tools' Dynamics III): 2 dB per step bent the curve
     /// under 1 dB, invisible on the graph. Replace with the desk's width once measured (TODO.md, "On the real M32").
     static let kneeDecibelsPerStep = 6.0

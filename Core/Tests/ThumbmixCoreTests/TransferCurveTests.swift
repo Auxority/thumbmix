@@ -82,4 +82,14 @@ struct TransferCurveTests {
         let blended = compressor(0, mix: 50)
         #expect(blended > -15 && blended < 0)
     }
+
+    /// The graph draws a stretch once where the curve is the straight line, and forks it where they differ (F1).
+    @Test func forkSplitsOnlyWhereTheCurveLeavesTheStraightLine() {
+        let comp = TransferCurve.forkRuns(from: -80) { compressor($0) }
+        #expect(comp == [.init(inputs: -80 ... -20, splits: false), .init(inputs: -20...0, splits: true)])
+        let gate = TransferCurve.forkRuns(from: -80) { gate($0, .gate) }
+        #expect(gate == [.init(inputs: -80 ... -40, splits: true), .init(inputs: -40...0, splits: false)])
+        // Makeup lifts every level, so the two lines never meet.
+        #expect(TransferCurve.forkRuns(from: -80) { compressor($0, makeup: 6) } == [.init(inputs: -80...0, splits: true)])
+    }
 }

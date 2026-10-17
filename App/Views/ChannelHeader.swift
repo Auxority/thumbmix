@@ -44,11 +44,10 @@ struct ChannelHeader: View {
 
     /// A pair's stripe is cut like its overview row: top for the left side, bottom for the right.
     @ViewBuilder private var stripe: some View {
-        let color = Theme.color(mirror.color(strip))
         if isPair, let partner = strip.partner {
-            StackedStripe(top: color, bottom: Theme.color(mirror.color(partner)), width: 8, height: 28)
+            StackedStripe(top: Stripe(mirror.color(strip)), bottom: Stripe(mirror.color(partner)), width: 8, height: 28)
         } else {
-            RoundedRectangle(cornerRadius: 3).fill(color).frame(width: 8, height: 28)
+            Stripe(mirror.color(strip)).frame(width: 8, height: 28)
         }
     }
 }

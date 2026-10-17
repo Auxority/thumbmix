@@ -1,15 +1,21 @@
 import SwiftUI
 import ThumbmixCore
 
-/// Output level against input level, both -80...0 dB, with the 1:1 line for reference, the threshold,
-/// and a dot riding the curve at the channel's current input level; gain reduction sits underneath.
-/// One card instead of a separate meter keeps the threshold row on the first screen of a 375 pt phone.
+/// Output level against input level, both -80...0 dB, with the threshold and a dot riding what you hear at the
+/// channel's current input level; gain reduction sits over the bottom edge. One card instead of a separate meter
+/// keeps the threshold row on the first screen of a 375 pt phone.
+/// Where the curve leaves the straight 1:1 line it forks (F1, 2026-10-17): what you hear is solid white, the
+/// other state grey and dashed, so switching Gate or Comp swaps the two and nothing else moves.
 struct TransferGraph: View {
     static let floor = -80.0
 
     struct Curve {
         let output: (Double) -> Double
         let threshold: Double
+        let isOn: Bool
+
+        /// Off, the signal passes untouched: out = in.
+        var heard: (Double) -> Double { isOn ? output : { $0 } }
     }
 
     /// nil until the desk sent every value the curve needs: the card keeps its place, so nothing below it moves.
@@ -22,44 +28,58 @@ struct TransferGraph: View {
     var ghostOutput: ((Double) -> Double)?
 
     var body: some View {
-        VStack(spacing: 8) {
-            ZStack {
-                Canvas { context, size in
-                    drawUnity(in: context, size: size)
-                    guard let curve else { return }
-                    drawThreshold(curve.threshold, in: context, size: size)
-                    if let ghostOutput {
-                        context.stroke(path(ghostOutput, in: size), with: .color(.white.opacity(0.3)), lineWidth: 2)
-                    }
-                    context.stroke(path(curve.output, in: size), with: .color(.white), lineWidth: 2)
+        ZStack {
+            Canvas { context, size in
+                guard let curve else { return drawUnity(in: context, size: size) }
+                drawThreshold(curve.threshold, in: context, size: size)
+                if let ghostOutput {
+                    context.stroke(path(ghostOutput, in: size), with: .color(.white.opacity(0.3)), lineWidth: 2)
                 }
-                if let curve { LevelDot(meter: meter, output: curve.output) }
+                drawFork(curve, in: context, size: size)
             }
-            .frame(height: 140)
-            .accessibilityElement(children: .ignore)
-            .accessibilityIdentifier(identifier)
-            .accessibilityLabel(label)
-            Reduction(meter: meter, reduction: reduction)
+            if let curve { LevelDot(meter: meter, output: curve.heard) }
         }
-        .padding(12)
+        .frame(height: Theme.graphHeight)
+        .accessibilityElement(children: .ignore)
+        .accessibilityIdentifier(identifier)
+        .accessibilityLabel(label)
+        .accessibilityValue(curve?.isOn == false ? Text("Off") : Text(verbatim: ""))
+        // Over the plot's bottom edge, where the curve only runs at the quietest levels (layout A, 2026-10-17).
+        .overlay(alignment: .bottom) {
+            Reduction(meter: meter, reduction: reduction).padding(.horizontal, 12).padding(.bottom, 10)
+        }
         .background(Theme.track, in: RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    private func path(_ output: (Double) -> Double, in size: CGSize) -> Path {
+    private func drawFork(_ curve: Curve, in context: GraphicsContext, size: CGSize) {
+        let unheard = curve.isOn ? { $0 } : curve.output
+        for run in TransferCurve.forkRuns(from: Self.floor, output: curve.output) {
+            if run.splits {
+                context.stroke(
+                    path(unheard, over: run.inputs, in: size), with: .color(Theme.secondaryText),
+                    style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
+            }
+            context.stroke(path(curve.heard, over: run.inputs, in: size), with: .color(.white), lineWidth: 2)
+        }
+    }
+
+    private func path(_ output: (Double) -> Double, over inputs: ClosedRange<Double> = floor...0, in size: CGSize)
+        -> Path
+    {
+        let steps = max(Int((inputs.upperBound - inputs.lowerBound) * 2), 1)
         var path = Path()
-        for step in 0...160 {
-            let input = Self.floor * (1 - Double(step) / 160)
+        for step in 0...steps {
+            let input = inputs.lowerBound + (inputs.upperBound - inputs.lowerBound) * Double(step) / Double(steps)
             let point = Self.point(input: input, output: output(input), in: size)
             if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
         }
         return path
     }
 
+    /// Only the 1:1 line until the curve's values are read, so On never jumps (2026-10-15).
     private func drawUnity(in context: GraphicsContext, size: CGSize) {
-        var unity = Path()
-        unity.move(to: Self.point(input: Self.floor, output: Self.floor, in: size))
-        unity.addLine(to: Self.point(input: 0, output: 0, in: size))
-        context.stroke(unity, with: .color(Theme.raised), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+        context.stroke(path({ $0 }, in: size), with: .color(Theme.raised), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
     }
 
     private func drawThreshold(_ threshold: Double, in context: GraphicsContext, size: CGSize) {

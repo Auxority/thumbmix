@@ -35,6 +35,21 @@ final class AccessibilityUITests: DeskUITestCase {
         XCTAssertEqual(app.buttons["color-off"].label, "No colour")
     }
 
+    /// The inverted colours are a second row of swatches, not a switch (B, 2026-10-17).
+    func testInvertedColoursAreTheirOwnSwatches() {
+        launchAndOpen("Kick")
+        app.buttons["edit-strip"].tap()
+        let invertedRed = app.buttons["color-red-inverted"]
+        XCTAssertTrue(invertedRed.appears(within: 2))
+        XCTAssertEqual(invertedRed.label, "Red")
+        XCTAssertEqual(invertedRed.value as? String, "Inverted")
+        XCTAssertFalse(app.switches["Inverted"].exists)
+        invertedRed.tap()
+        XCTAssertTrue(eventually(within: 2) { invertedRed.isSelected })
+        XCTAssertFalse(app.buttons["color-red"].isSelected)
+        saveScreenshot("colour-swatches")
+    }
+
     func testDCAMemberRowsGrowWithLargerText() {
         launch(["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
         app.buttons["DCA"].tap()

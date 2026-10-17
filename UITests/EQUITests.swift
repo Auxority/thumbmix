@@ -111,8 +111,13 @@ final class EQUITests: DeskUITestCase {
         slope.tap()
         app.buttons["12 dB/oct"].tap()
         XCTAssertEqual(slope.value as? String, "12 dB/oct")
+        // Off, the cut as set is drawn dashed, like unheard bands (2026-10-17).
+        let graph = element("eq-graph")
+        XCTAssertTrue((graph.value as? String)?.contains("Low cut off") == true)
+        saveScreenshot("low-cut-off")
         on.tap()
         XCTAssertEqual(on.value as? String, "On")
+        XCTAssertTrue(eventually(within: 2) { (graph.value as? String)?.contains("Low cut off") == false })
         saveScreenshot("low-cut")
     }
 

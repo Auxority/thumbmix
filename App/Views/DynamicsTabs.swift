@@ -31,11 +31,12 @@ struct GateTab: View {
     /// nil until the desk has sent every value the curve needs: the graph never draws a guess.
     private func curve(_ gate: GateSpecs) -> TransferGraph.Curve? {
         guard let modeIndex = mirror.value(gate.mode), let mode = TransferCurve.GateMode(rawValue: Int(modeIndex)),
-            let threshold = mirror.value(gate.threshold), let range = mirror.value(gate.range)
+            let threshold = mirror.value(gate.threshold), let range = mirror.value(gate.range),
+            let on = mirror.value(gate.on)
         else { return nil }
         return TransferGraph.Curve(
             output: { TransferCurve.gateOutput($0, mode: mode, threshold: threshold, range: range) },
-            threshold: threshold)
+            threshold: threshold, isOn: on == 1)
     }
 }
 
@@ -87,7 +88,7 @@ struct CompTab: View {
         guard let mode = mirror.value(dynamics.mode), let threshold = mirror.value(dynamics.threshold),
             let ratioIndex = mirror.value(dynamics.ratio), let ratio = Double(Catalog.ratios[Int(ratioIndex)]),
             let knee = mirror.value(dynamics.knee), let makeup = mirror.value(dynamics.makeup),
-            let mix = mirror.value(dynamics.mix)
+            let mix = mirror.value(dynamics.mix), let on = mirror.value(dynamics.on)
         else { return nil }
         let isExpander = mode == 1
         let output = { (input: Double) in
@@ -95,7 +96,7 @@ struct CompTab: View {
                 input, isExpander: isExpander, threshold: threshold, ratio: ratio, knee: knee, makeup: makeup,
                 mix: mix)
         }
-        return TransferGraph.Curve(output: output, threshold: threshold)
+        return TransferGraph.Curve(output: output, threshold: threshold, isOn: on == 1)
     }
 }
 
