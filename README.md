@@ -42,6 +42,7 @@ Install the tools with `brew install xcodegen swiftlint`; `swift format` ships w
 
 ```bash
 scripts/lint.sh                             # style (swift-format) and complexity/size limits (SwiftLint)
+scripts/unused.sh                           # unused code (swiftlint analyze, ~1.5 min: two clean builds)
 swift test --package-path Core              # protocol, state and UI maths
 scripts/ui-test.sh                          # the UI suite, each test against its own fake desk
 scripts/strings.sh                          # refresh both String Catalogs (App and Core) after changing text

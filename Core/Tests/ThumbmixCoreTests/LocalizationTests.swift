@@ -57,12 +57,14 @@ struct LocalizationTests {
 
 /// The parts of an Xcode String Catalog (.xcstrings) the empty-entry check reads.
 private struct StringCatalog: Decodable {
-    struct Entry: Decodable {
-        struct Localization: Decodable {
-            struct Unit: Decodable { let value: String }
-            let stringUnit: Unit
-        }
-        let localizations: [String: Localization]?
-    }
-    let strings: [String: Entry]
+    let strings: [String: CatalogEntry]
+}
+
+private struct CatalogEntry: Decodable {
+    let localizations: [String: CatalogLocalization]?
+}
+
+private struct CatalogLocalization: Decodable {
+    struct Unit: Decodable { let value: String }
+    let stringUnit: Unit
 }

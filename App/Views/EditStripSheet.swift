@@ -12,7 +12,6 @@ struct EditStripSheet: View {
     @State private var partnerName: String
     @State private var color: ConsoleColor
     @State private var icon: Int
-    @State private var search = ""
     private let partner: StripID?
 
     init(strip: StripID, mirror: ConsoleMirror) {
@@ -38,7 +37,7 @@ struct EditStripSheet: View {
                         NameField(title: "Name", placeholder: strip.defaultName, name: $name)
                     }
                     StripColorPicker(color: $color)
-                    IconPicker(selection: $icon, search: $search)
+                    IconPicker(selection: $icon)
                 }
                 .padding(16)
             }
@@ -157,7 +156,7 @@ private struct StripColorPicker: View {
 /// The app's own drawing of each desk icon (`Design/strip-icons`), with the desk's name under it.
 private struct IconPicker: View {
     @Binding var selection: Int
-    @Binding var search: String
+    @State private var search = ""
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
 
     var body: some View {
