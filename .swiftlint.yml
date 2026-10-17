@@ -1,8 +1,11 @@
 # Keeps the code simple: CI (strict mode) fails when a function gets too branchy or anything gets too long.
-# Style is swift-format's job (.swift-format); SwiftLint only guards size and complexity.
+# Style is swift-format's job (.swift-format); SwiftLint only guards size and complexity, and (`swiftlint analyze`,
+# scripts/unused.sh) unused code. The tests are included, so code only a test uses still counts as used.
 included:
   - Core/Sources
+  - Core/Tests
   - App
+  - UITests
 
 only_rules:
   - cyclomatic_complexity
@@ -10,6 +13,14 @@ only_rules:
   - type_body_length
   - file_length
   - nesting
+
+# unused_import isn't on: it flagged UITests/Waiting.swift's `import XCTest`, which that file needs for XCUIElement.
+analyzer_rules:
+  - unused_declaration
+
+# Core is its own package, so nearly everything the app calls there is public: without this, unused Core code hides.
+unused_declaration:
+  include_public_and_open: true
 
 cyclomatic_complexity:
   warning: 6
