@@ -1,7 +1,7 @@
 /// The effect names the desk shows for `/fx/N/type` (doc appendix p.166). FX1-4 hold any of 61 effects; FX5-8 only
 /// the 34 insert effects, in another order, so the same index names a different effect.
-public enum FXEffects {
-    public static func name(fx: Int, type: Int) -> String? {
+enum FXEffects {
+    static func name(fx: Int, type: Int) -> String? {
         let names = fx <= 4 ? anySlot : insertSlots
         return names.indices.contains(type) ? names[type] : nil
     }

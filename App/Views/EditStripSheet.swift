@@ -12,6 +12,7 @@ struct EditStripSheet: View {
     @State private var partnerName: String
     @State private var color: ConsoleColor
     @State private var icon: Int
+    // periphery:ignore - used only as `$search`, which Periphery 3.8 doesn't count as a read.
     @State private var search = ""
     private let partner: StripID?
 

@@ -1,8 +1,8 @@
 import Foundation
 
 /// The one name a linked pair shows: what both desk names start with, so neither side looks more important.
-public enum PairName {
-    public static func make(odd: String, even: String, fallback: String) -> String {
+enum PairName {
+    static func make(odd: String, even: String, fallback: String) -> String {
         switch (odd.isEmpty, even.isEmpty) {
         case (true, true): fallback
         case (false, true): odd

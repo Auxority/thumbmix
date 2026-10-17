@@ -23,7 +23,6 @@ struct DarkCapsuleStyle: ButtonStyle {
 
 extension ButtonStyle where Self == DarkCapsuleStyle {
     static var darkCapsule: DarkCapsuleStyle { DarkCapsuleStyle() }
-    static var prominentDarkCapsule: DarkCapsuleStyle { DarkCapsuleStyle(prominent: true) }
     /// The Connect screen's buttons span the width, so a thumb finds them without aiming.
     static var wideDarkCapsule: DarkCapsuleStyle { DarkCapsuleStyle(fillsWidth: true) }
     static var wideProminentDarkCapsule: DarkCapsuleStyle { DarkCapsuleStyle(prominent: true, fillsWidth: true) }
