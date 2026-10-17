@@ -5,7 +5,6 @@ public struct ConsoleInfo: Equatable, Sendable {
     /// The network name set on the desk under Setup → Network.
     public let name: String
     public let model: String
-    // periphery:ignore - read only by the link's state log, which prints the whole struct.
     public let firmware: String
 }
 

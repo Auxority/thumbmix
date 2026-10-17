@@ -132,7 +132,7 @@ private struct TapChainBar: View {
 
     private func isLit(_ block: TapBlock) -> Bool { tap.map { chain.reaches(block, at: $0) } ?? false }
 
-    private static let space = "tapChain"
+    nonisolated private static let space = "tapChain"
     private static let slide = Animation.snappy(duration: 0.28)
     private static let lit = Theme.track.mix(with: .green, by: 0.22)
 }

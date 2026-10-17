@@ -38,11 +38,10 @@ No console nearby? **Try a demo console** runs a demo M32 inside the app, so eve
 
 ## Develop
 
-Install the tools with `brew install xcodegen swiftlint periphery`; `swift format` ships with Xcode.
+Install the tools with `brew install xcodegen swiftlint`; `swift format` ships with Xcode.
 
 ```bash
 scripts/lint.sh                             # style (swift-format) and complexity/size limits (SwiftLint)
-scripts/unused.sh                           # unused code and needless `public` (Periphery)
 swift test --package-path Core              # protocol, state and UI maths
 scripts/ui-test.sh                          # the UI suite, each test against its own fake desk
 scripts/strings.sh                          # refresh both String Catalogs (App and Core) after changing text
