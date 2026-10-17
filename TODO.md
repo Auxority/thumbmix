@@ -35,14 +35,22 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Small fixes
 
-None open.
+- [ ] **EQ, Gate and Comp graphs the same size** (2026-10-17). Moving between those tabs, the graph shouldn't change height.
+- [ ] **Low cut drawn with dashes like the EQ bands** (2026-10-17). Match how the EQ graph draws its bands.
+- [ ] **Comp and Gate off = dashed curve** (2026-10-17), as the EQ graph does when the EQ is off (#111: grey dashes, points at 50 %).
+- [ ] **Strip colour "Inverted" toggle** (2026-10-17, `EditStripSheet`): switched on it shows plain white, and the colour swatches don't change. Inverted colours should look inverted (lit background, dark text, as on the desk's strip), and the toggle needs another design. Mock first.
 
 ## Features
+
+- [ ] **Show the key in Gate and Comp** (2026-10-17): the key source and key filter, in the graph or near it. Mock first.
+- [ ] **Too many options at once on Comp, Gate and the Mix tab's Insert block** (2026-10-17). Each needs a redesign that shows less at a time. Mock first.
+- [ ] **More reset options** (2026-10-17). Which values get a reset, and where? Ask the user before mocking.
+- [ ] **Should picking a view in the app pick it on the desk, or the other way round, or neither?** (2026-10-17) Decide first (e.g. selected channel, the desk's screen page).
 
 - [ ] **Make the insert slot editable** once m32-probe answers what picking a held slot does. The Slot row becomes a menu in place (mock `insert-slot-future-v2.html`): each slot names its effect and the strip holding it; a held slot asks first, naming the strip that loses it.
 - [ ] **Remove the ±1 dB buttons on the Mix tab?** Holding a parameter row now types a value (`ParameterRow`, `onHold`), and the buttons repeat while held (`NudgeButton`). Removing them moves Solo, Mute and the pan up: mid-show, the thumb finds them in a new place.
 - [ ] **A gain helper:** listen to an input for a few seconds (the engineer picks how long) and suggest the gain that puts its peaks at a target level. Ties in with the input meter marks under "More meters". Mock first.
-- [ ] **Solo on the overview?** A row there is mostly fader, and a solo target competes with it for the thumb. Find a place that keeps the faders easy to drag (mock first).
+- [ ] **Solo on the overview?** A row there is mostly fader, and a solo target competes with it for the thumb. Find a place that keeps the faders easy to drag (mock first). At least show which strips are soloed there (2026-10-17).
 - [ ] **Presets from the channel name**, based on James Attaway's *Live Mixing Field Guide*: a channel called "Kick" offers kick presets first (EQ, gate, compressor, low cut). Find a good spot to pick them from (mock first).
 - [ ] **More meters**, each weighed by its usefulness and its performance cost (see "Meters only for the strips in view?"):
   - Fed by: a meter per source row showing what it puts into the bus: its signal at the send's tap point (with the fader when post-fader) plus the send level, so a +10 dB fader and a +10 dB send show clipping (2026-10-14, mocks in `notes/mocks/2026-10-14-fed-by-inputs/`). Waits on `m32-probe` section 13: the doc names no per-send meter, only "16 bus send meters" (`/meters/7`, p.18) without saying whose. If they are the selected channel's sends, they cover one strip at a time; computing it from the strip's own meters misses the EQ on Pre/Post EQ taps (only post gain and post-fade are metered, `/meters/6`), a guess the safety rule forbids.
@@ -52,6 +60,13 @@ None open.
 - [ ] **Membership from a strip: mute groups and DCAs.** Pick a strip's mute groups and DCAs on its strip screen, in a quick multi-select. A DCA's Members tab assigns strips since 2026-10-17; consider whether the strip side is worth having too.
 
 ## Code and docs
+
+- [ ] **The user rewrites README by hand** (2026-10-17); developer details (build, tests, gates) move to a separate Markdown file.
+- [ ] **Add a code quality tool** (2026-10-17), e.g. a linter or static analysis that runs in CI. Sigrid guardrails return nothing for Swift.
+- [ ] **Set up GitHub rulesets** (2026-10-17) for `main`.
+- [ ] **GitHub community standards** (2026-10-17): add a code of conduct, contributing guide, security policy, issue templates and a pull request template (Insights › Community Standards; description, README and licence are done).
+- [ ] **A social preview image for the repo** (2026-10-17).
+- [ ] **Turn on GitHub Discussions** (2026-10-17).
 
 - [ ] **At 1.0.0: serve the SideStore source as a release asset** (2026-10-16, the user's pick as the cleanest). Each release attaches `source.json` and users add `https://github.com/Auxority/thumbmix/releases/latest/download/source.json`; the `sidestore` branch, its force-push and the "157 behind" in GitHub's branch list go. Waits on 1.0.0, because `latest` skips pre-releases and every 0.x is one. The URL changes, so users must re-add the source once: keep the branch published for a while with a note telling them to, then delete it. Update the DECISIONS line on the `sidestore` branch, README's install step and `scripts/publish-sidestore-source.sh`.
 
