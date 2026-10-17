@@ -39,6 +39,12 @@ None open.
 
 ## Features
 
+- [ ] **Shortcuts** (2026-10-17): App Intents for the Shortcuts app, the Action button and Control Center, e.g. "Mute Vox 1", "Solo Kick", "Fader of Vox 1 to −5 dB". Not Siri voice (the user: unreliable next to a PA). Ask before mocking:
+  - Which actions? Each one changes the desk without the engineer looking at the app.
+  - The safety rule: an intent connects, reads the current value, then sets; it fails out loud when the desk doesn't answer, never acting on a guess. A relative change ("+3 dB") needs that read; an absolute one ("mute") still needs the desk to answer.
+  - Running in the background, often while the app isn't connected: the intent makes its own connection (~0.6 s).
+  - Naming strips: the desk's names ("Vox 1") as `AppEntity` values the engineer picks in Shortcuts.
+  - Adding the first intent: delete `LM_SKIP_METADATA_EXTRACTION` from `project.yml`, or the system never sees it.
 - [ ] **Show the key in Gate and Comp** (2026-10-17): the key source and key filter, in the graph or near it. Mock first.
 - [ ] **Too many options at once on Comp, Gate and the Mix tab's Insert block** (2026-10-17). Each needs a redesign that shows less at a time. Mock first.
 - [ ] **More reset options** (2026-10-17). Which values get a reset, and where? Ask the user before mocking.
