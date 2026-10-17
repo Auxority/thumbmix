@@ -35,7 +35,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Small fixes
 
-- [ ] **Dashed lines glitch while dragging the threshold** (2026-10-17, the user): on the Gate and Comp graphs the dashed lines jump or flicker as the Threshold moves. Reproduce on the simulator first and say which line does it (likely the curve as set, dashed while Gate/Comp is off since #140, or the threshold mark), then fix.
+None open.
 
 ## Features
 

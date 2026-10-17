@@ -42,11 +42,22 @@ private func brightnessValues(inMiddleOf image: UIImage) -> [Int] {
 }
 
 private func rgbValues(inMiddleOf image: UIImage) -> [Pixel] {
+    let pixels = rgbaBytes(of: image, in: CGRect(x: 0.25, y: 0.25, width: 0.5, height: 0.5))
+    return stride(from: 0, to: pixels.count, by: 4).map { offset in
+        Pixel(red: Int(pixels[offset]), green: Int(pixels[offset + 1]), blue: Int(pixels[offset + 2]))
+    }
+}
+
+/// RGBA bytes of a part of the image, `region` in fractions of its size (0...1, origin top left); empty if unreadable.
+func rgbaBytes(of image: UIImage, in region: CGRect) -> [UInt8] {
     guard let full = image.cgImage else { return [] }
-    let crop = CGRect(x: full.width / 4, y: full.height / 4, width: full.width / 2, height: full.height / 2)
-    guard let middle = full.cropping(to: crop) else { return [] }
-    let width = middle.width
-    let height = middle.height
+    let crop = CGRect(
+        x: region.minX * CGFloat(full.width), y: region.minY * CGFloat(full.height),
+        width: region.width * CGFloat(full.width), height: region.height * CGFloat(full.height)
+    ).integral
+    guard let part = full.cropping(to: crop) else { return [] }
+    let width = part.width
+    let height = part.height
     var pixels = [UInt8](repeating: 0, count: width * height * 4)
     let drawn = pixels.withUnsafeMutableBytes { buffer in
         guard
@@ -55,11 +66,8 @@ private func rgbValues(inMiddleOf image: UIImage) -> [Pixel] {
                 bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         else { return false }
-        context.draw(middle, in: CGRect(x: 0, y: 0, width: width, height: height))
+        context.draw(part, in: CGRect(x: 0, y: 0, width: width, height: height))
         return true
     }
-    guard drawn else { return [] }
-    return stride(from: 0, to: pixels.count, by: 4).map { offset in
-        Pixel(red: Int(pixels[offset]), green: Int(pixels[offset + 1]), blue: Int(pixels[offset + 2]))
-    }
+    return drawn ? pixels : []
 }
