@@ -35,7 +35,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Small fixes
 
-None open.
+- [ ] **DCA Members rows look like overview rows** (2026-10-17): today a member row is tinted with its strip's colour (`MembersTab`). Give it the overview's stripe beside the name instead, and a pair's stacked stripe (`Stripe`, `StackedStripe`, outlined when inverted), so a strip looks the same wherever it's listed. Mock first.
 
 ## Features
 
