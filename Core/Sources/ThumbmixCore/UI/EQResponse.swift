@@ -142,9 +142,15 @@ public struct LowCutState: Equatable, Sendable {
     public let slopeIndex: Int
 
     public func decibels(at hertz: Double) -> Double {
-        let order = Double(slopeIndex + 2)
-        return -10 * log10(1 + pow(frequency / hertz, 2 * order))
+        -10 * log10(1 + pow(frequency / hertz, 2 * order))
     }
+
+    /// Above the cutoff, where the cut has faded to `decibels` (negative): `decibels(at:)` solved for hertz.
+    public func hertz(whereCutIs decibels: Double) -> Double {
+        frequency / pow(pow(10, -decibels / 10) - 1, 1 / (2 * order))
+    }
+
+    private var order: Double { Double(slopeIndex + 2) }
 }
 
 /// A strip's EQ and low cut from raw desk values, wherever they are kept: the mirror's cells for the graph, the
@@ -152,7 +158,13 @@ public struct LowCutState: Equatable, Sendable {
 public enum EQReading {
     /// nil when the strip has no low cut, it is off, or its values were never read: no cut is drawn.
     public static func lowCut(_ strip: StripID, value: (String) -> OSCArgument?) -> LowCutState? {
-        guard let specs = Catalog.lowCut(strip), value(specs.on.address) == .int(1),
+        guard let specs = Catalog.lowCut(strip), value(specs.on.address) == .int(1) else { return nil }
+        return lowCutAsSet(strip, value: value)
+    }
+
+    /// The cut as set, heard or not; nil when the strip has none or its switch, frequency or slope were never read.
+    public static func lowCutAsSet(_ strip: StripID, value: (String) -> OSCArgument?) -> LowCutState? {
+        guard let specs = Catalog.lowCut(strip), value(specs.on.address) != nil,
             let frequency = normalized(specs.frequency, value), let slope = normalized(specs.slope, value)
         else { return nil }
         return LowCutState(
@@ -190,6 +202,16 @@ public enum EQReading {
 extension ConsoleMirror {
     public func lowCut(_ strip: StripID) -> LowCutState? {
         EQReading.lowCut(strip) { cell($0).argument }
+    }
+
+    /// The cut as set, heard or not: the graph draws it dashed while it is off.
+    public func lowCutAsSet(_ strip: StripID) -> LowCutState? {
+        EQReading.lowCutAsSet(strip) { cell($0).argument }
+    }
+
+    /// false while the low cut is off, not read yet, or the strip has none.
+    public func isLowCutOn(_ strip: StripID) -> Bool {
+        Catalog.lowCut(strip).map { cell($0.on.address).argument == .int(1) } ?? false
     }
 
     /// What is heard: empty when the strip's EQ is off, as for an unlinked partner's faint curve.

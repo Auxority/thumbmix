@@ -42,4 +42,28 @@ struct LowCutTests {
         #expect(mirror.lowCut(kick)?.slopeIndex == 2)
         #expect(abs((mirror.lowCut(kick)?.frequency ?? 0) - 89.4) < 0.5)
     }
+
+    /// Off, the graph still draws the cut as set, dashed: what switching it on brings back.
+    @Test func mirrorKeepsTheCutAsSetWhileItIsOff() {
+        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: 9))
+        let specs = Catalog.lowCut(kick)!
+        mirror.apply(OSCMessage(specs.frequency.address, [.float(0.5)]))
+        mirror.apply(OSCMessage(specs.slope.address, [.int(2)]))
+        #expect(mirror.lowCutAsSet(kick) == nil)
+        mirror.apply(OSCMessage(specs.on.address, [.int(0)]))
+        #expect(mirror.lowCutAsSet(kick)?.slopeIndex == 2)
+        #expect(mirror.isLowCutOn(kick) == false)
+        mirror.apply(OSCMessage(specs.on.address, [.int(1)]))
+        #expect(mirror.isLowCutOn(kick))
+    }
+
+    /// The dashed slope ends where the cut stops showing, so it never runs on top of the curve.
+    @Test func cutFadesOutAboveItsCutoff() {
+        for slope in 0...2 {
+            let state = LowCutState(frequency: 100, slopeIndex: slope)
+            let hertz = state.hertz(whereCutIs: -0.5)
+            #expect(hertz > 100)
+            #expect(abs(state.decibels(at: hertz) + 0.5) < 0.001)
+        }
+    }
 }

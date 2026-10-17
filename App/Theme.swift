@@ -9,6 +9,8 @@ enum Theme {
     static let selected = Color(white: 0.3)
     static let secondaryText = Color(white: 0.6)
     static let muteRed = Color(red: 0.95, green: 0.2, blue: 0.2)
+    /// EQ, Gate and Comp graphs share one size, so switching tabs never resizes the plot (layout A, 2026-10-17).
+    static let graphHeight: CGFloat = 190
     /// Picked for flipped polarity (DECISIONS.md: amber, not red), apart from `soloYellow`; they only happen to match today.
     static let polarityAmber = Color(red: 1, green: 0.84, blue: 0.04)
     /// The desk's solo buttons light yellow.
@@ -21,7 +23,8 @@ enum Theme {
     static let offText = Color(white: 0.69)
     static let demoPurple = Color(red: 0.6, green: 0.3, blue: 0.85)
 
-    /// Inverted scribble strips get their base colour: the inversion is an LCD effect, not a different colour.
+    /// Inverted scribble strips get their base colour: the inversion is an LCD effect, not a different colour. `Stripe`
+    /// draws it as an outline.
     static func color(_ console: ConsoleColor) -> Color {
         switch console.base {
         case .off: Color(white: 0.35)

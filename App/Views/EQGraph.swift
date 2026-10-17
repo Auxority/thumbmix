@@ -35,6 +35,8 @@ struct EQGraph: View {
         let isEQOn = mirror.isEQOn(strip)
         let bands = mirror.eqBandsAsSet(strip)
         let lowCut = mirror.lowCut(strip)
+        let lowCutAsSet = mirror.lowCutAsSet(strip)
+        let isLowCutOff = lowCutAsSet != nil && !mirror.isLowCutOn(strip)
         let ghostCurve = ghost.map { (bands: mirror.eqBands($0), lowCut: mirror.lowCut($0)) }
         GeometryReader { geometry in
             let size = geometry.size
@@ -54,14 +56,22 @@ struct EQGraph: View {
                         let heard = isEQOn ? bands : []
                         let cutPart = curve(heard, lowCut, in: canvasSize, upTo: lowCut.frequency * 2)
                         context.stroke(cutPart, with: .color(Self.lowCutColor), lineWidth: 3)
+                    } else if isLowCutOff, let lowCutAsSet {
+                        // Off, the cut as set is dashed like unheard bands, and ends where it would barely show, so it
+                        // never runs on top of the curve (2026-10-17).
+                        let end = lowCutAsSet.hertz(whereCutIs: -0.5)
+                        context.stroke(
+                            curve(bands, lowCutAsSet, in: canvasSize, upTo: end), with: .color(Theme.secondaryText),
+                            style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
                     }
                 }
                 ForEach(points, id: \.self) { band in
+                    let isLowCut = band == Self.lowCutBand
                     BandPoint(
-                        label: band == Self.lowCutBand ? "L" : "\(band)", isSelected: band == selectedBand,
-                        tint: band == Self.lowCutBand && lowCut != nil ? Self.lowCutColor : nil
+                        label: isLowCut ? "L" : "\(band)", isSelected: band == selectedBand,
+                        tint: isLowCut && lowCutAsSet != nil ? Self.lowCutColor : nil
                     )
-                    .opacity(band == Self.lowCutBand || isEQOn ? 1 : 0.5)
+                    .opacity((isLowCut ? !isLowCutOff : isEQOn) ? 1 : 0.5)
                     .position(position(of: band, in: size))
                 }
             }
@@ -77,7 +87,13 @@ struct EQGraph: View {
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier("eq-graph")
         .accessibilityLabel("EQ curve")
-        .accessibilityValue(isEQOn ? Text(verbatim: "") : Text("EQ off"))
+        .accessibilityValue(Text(verbatim: Self.offParts(isEQOn: isEQOn, isLowCutOff: isLowCutOff)))
+    }
+
+    /// What VoiceOver hears for the parts drawn dashed: nothing while everything is on.
+    private static func offParts(isEQOn: Bool, isLowCutOff: Bool) -> String {
+        let parts = [isEQOn ? nil : String(localized: "EQ off"), isLowCutOff ? String(localized: "Low cut off") : nil]
+        return parts.compactMap { $0 }.joined(separator: ", ")
     }
 
     private var points: [Int] {

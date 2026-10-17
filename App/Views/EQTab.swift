@@ -16,7 +16,7 @@ struct EQTab: View {
         ScrollView {
             VStack(spacing: 8) {
                 EQGraph(strip: strip, mirror: mirror, selectedBand: $band, ghost: ghost)
-                    .frame(height: 190)
+                    .frame(height: Theme.graphHeight)
                 RTAStatus(spectrum: mirror.spectrum, name: mirror.name(strip))
                 HStack(spacing: 8) {
                     ToggleChip(spec: Catalog.eqOn(strip), mirror: mirror, onColor: .green)

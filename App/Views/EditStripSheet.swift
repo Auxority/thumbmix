@@ -102,34 +102,42 @@ private struct SectionLabel: View {
     }
 }
 
-/// The desk's eight colours, each also available inverted (lit background, dark text on the strip).
+/// The desk's 16 colours as on the desk: the eight filled, then the eight inverted (dark, outlined in the colour).
+/// Two rows instead of eight and an Inverted switch: one tap picks both, and each swatch looks like what you get
+/// (B, 2026-10-17).
 private struct StripColorPicker: View {
     @Binding var color: ConsoleColor
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             SectionLabel("Colour")
-            HStack(spacing: 6) {
-                ForEach(ConsoleColor.Base.allCases, id: \.self) { base in
-                    Button {
-                        color = ConsoleColor(base: base, inverted: color.inverted)
-                    } label: {
-                        RoundedRectangle(cornerRadius: 7)
-                            .fill(Theme.color(ConsoleColor(base: base, inverted: false)))
-                            .frame(width: 30, height: 30)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 7).stroke(.white, lineWidth: color.base == base ? 3 : 0))
+            ForEach([false, true], id: \.self) { inverted in
+                HStack(spacing: 6) {
+                    ForEach(ConsoleColor.Base.allCases, id: \.self) { base in
+                        swatch(ConsoleColor(base: base, inverted: inverted))
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("color-\(base)")
-                    .accessibilityLabel(Self.name(of: base))
-                    .accessibilityAddTraits(color.base == base ? .isSelected : [])
+                    Spacer(minLength: 0)
                 }
-                Spacer(minLength: 0)
             }
-            Toggle("Inverted", isOn: Binding(get: { color.inverted }, set: { color = ConsoleColor(base: color.base, inverted: $0) }))
-                .font(.subheadline)
         }
+    }
+
+    private func swatch(_ choice: ConsoleColor) -> some View {
+        let isSelected = choice == color
+        return Button {
+            color = choice
+        } label: {
+            Stripe(choice, cornerRadius: 7)
+                .frame(width: 36, height: 36)
+                .padding(4)
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(.white, lineWidth: isSelected ? 3 : 0))
+        }
+        .buttonStyle(.plain)
+        .padding(-4)
+        .accessibilityIdentifier("color-\(choice.base)" + (choice.inverted ? "-inverted" : ""))
+        .accessibilityLabel(Self.name(of: choice.base))
+        .accessibilityValue(choice.inverted ? Text("Inverted") : Text(verbatim: ""))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     private static func name(of base: ConsoleColor.Base) -> LocalizedStringKey {

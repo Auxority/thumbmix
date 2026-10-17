@@ -62,11 +62,14 @@ struct StripRow: View {
     @ViewBuilder private var stripe: some View {
         switch item {
         case .strip(_, .full):
-            RoundedRectangle(cornerRadius: 3).fill(color).frame(width: 6, height: 40)
+            Stripe(mirror.color(strip)).frame(width: 6, height: 40)
         case .strip(_, let half):
-            StackedStripe(top: color.opacity(half == .top ? 1 : 0.25), bottom: color.opacity(half == .bottom ? 1 : 0.25))
+            let console = mirror.color(strip)
+            StackedStripe(
+                top: Stripe(console, opacity: half == .top ? 1 : 0.25),
+                bottom: Stripe(console, opacity: half == .bottom ? 1 : 0.25))
         case .pair(let odd):
-            StackedStripe(top: color, bottom: Theme.color(mirror.color(odd.partner ?? odd)))
+            StackedStripe(top: Stripe(mirror.color(strip)), bottom: Stripe(mirror.color(odd.partner ?? odd)))
         }
     }
 
@@ -87,17 +90,39 @@ struct StripRow: View {
 }
 
 struct StackedStripe: View {
-    let top: Color
-    let bottom: Color
+    let top: Stripe
+    let bottom: Stripe
     var width: CGFloat = 6
     var height: CGFloat = 40
 
     var body: some View {
         VStack(spacing: 3) {
-            RoundedRectangle(cornerRadius: 3).fill(top)
-            RoundedRectangle(cornerRadius: 3).fill(bottom)
+            top
+            bottom
         }
         .frame(width: width, height: height)
+    }
+}
+
+/// A strip's colour as the desk shows it: filled, or outlined in the colour when inverted (II, 2026-10-17).
+struct Stripe: View {
+    let color: Color
+    let inverted: Bool
+    let cornerRadius: CGFloat
+
+    init(_ console: ConsoleColor, opacity: Double = 1, cornerRadius: CGFloat = 3) {
+        color = Theme.color(console).opacity(opacity)
+        inverted = console.inverted
+        self.cornerRadius = cornerRadius
+    }
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius)
+        if inverted {
+            shape.strokeBorder(color, lineWidth: 2)
+        } else {
+            shape.fill(color)
+        }
     }
 }
 

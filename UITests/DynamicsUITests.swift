@@ -103,6 +103,46 @@ final class DynamicsUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { menu.value as? String == deskName }, address)
     }
 
+    /// Switching EQ, Gate and Comp never resizes the plot (layout A, 2026-10-17).
+    func testEQGateAndCompGraphsShareOneSize() {
+        launchAndOpen("Kick", tab: "EQ")
+        let eq = element("eq-graph")
+        XCTAssertTrue(eq.appears(within: 2))
+        let size = eq.frame.size
+        app.buttons["Gate"].tap()
+        let gate = element("gate-graph")
+        XCTAssertTrue(gate.appears(within: 2))
+        XCTAssertEqual(gate.frame.size, size)
+        app.buttons["Comp"].tap()
+        let comp = element("comp-graph")
+        XCTAssertTrue(comp.appears(within: 2))
+        XCTAssertEqual(comp.frame.size, size)
+    }
+
+    /// Off, the curve forks: the straight line is heard, the bend waits dashed (F1, 2026-10-17).
+    func testSwitchingCompOffSaysSoOnItsGraph() {
+        launchAndOpen("Kick", tab: "Comp")
+        let graph = element("comp-graph")
+        let on = element("toggle-/ch/01/dyn/on")
+        XCTAssertTrue(eventually(within: 2) { on.isEnabled }, "the tab was read")
+        let wasOff = graph.value as? String == "Off"
+        on.tap()
+        XCTAssertTrue(eventually(within: 2) { (graph.value as? String == "Off") != wasOff })
+        if !wasOff { assertNoReduction() }
+        saveScreenshot(wasOff ? "comp-on-fork" : "comp-off-fork")
+        on.tap()
+        XCTAssertTrue(eventually(within: 2) { (graph.value as? String == "Off") == wasOff })
+        if wasOff { assertNoReduction() }
+        saveScreenshot(wasOff ? "comp-off-fork" : "comp-on-fork")
+    }
+
+    /// Off reduces nothing, whatever the meter says (the demo's meters animate regardless).
+    private func assertNoReduction() {
+        let none = app.staticTexts["GR 0.0 dB"]
+        XCTAssertTrue(none.appears(within: 2))
+        XCTAssertFalse(eventually(within: 1) { !none.exists }, "stays at 0 while the meter moves")
+    }
+
     func testGateAndCompDrawTheirCurves() {
         launchAndOpen("Kick", tab: "Gate")
         XCTAssertTrue(app.descendants(matching: .any)["gate-graph"].appears(within: 2))
