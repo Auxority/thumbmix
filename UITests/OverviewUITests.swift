@@ -76,7 +76,7 @@ final class OverviewUITests: DeskUITestCase {
         XCTAssertFalse(app.buttons["Gtr R"].exists)
         saveScreenshot("pair-row")
         pair.tap()
-        XCTAssertTrue(app.buttons["+1 dB"].appears(within: 3))
+        XCTAssertTrue(app.buttons["Mix"].appears(within: 3))
         XCTAssertTrue(app.descendants(matching: .any)["/ch/09/mix/fader"].exists, "the pair opens on its odd side")
     }
 

@@ -64,7 +64,7 @@ final class InsertUITests: DeskUITestCase {
         launch()
         app.swipeUp()
         app.buttons["Gtr"].tap()
-        XCTAssertTrue(app.buttons["+1 dB"].appears(within: 3))
+        XCTAssertTrue(app.buttons["Mix"].appears(within: 3))
         let fader = element("/ch/09/mix/fader")
         XCTAssertTrue(fader.appears(within: 2))
         let before = fader.value as? String

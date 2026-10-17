@@ -44,10 +44,10 @@ class DeskUITestCase: XCTestCase {
         XCTAssertTrue(eventually(within: 15) { kick.exists && kick.isEnabled })
     }
 
-    /// Waits for the nudge buttons: only the channel screen has them, the overview rows don't.
+    /// Waits for the Mix tab's pill: only a strip screen has it, the overview's pills name groups.
     func open(_ name: String) {
         app.buttons[name].tap()
-        XCTAssertTrue(app.buttons["+1 dB"].appears(within: 3))
+        XCTAssertTrue(app.buttons["Mix"].appears(within: 3))
     }
 
     /// Launches, then opens one strip as the tests do by hand: through its group pill (Buses, DCA, FX) when it isn't on the
