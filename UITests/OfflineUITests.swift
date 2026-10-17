@@ -20,8 +20,12 @@ final class OfflineUITests: XCTestCase {
         app.buttons["Kick"].tap()
         XCTAssertTrue(app.staticTexts["DEMO"].appears(within: 3), "so does a strip screen")
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
-        app.buttons["+1 dB"].tap()
-        XCTAssertEqual(fader.value as? String, "+1.0 dB")
+        fader.press(forDuration: 0.8)
+        let alert = app.alerts["Fader"]
+        XCTAssertTrue(alert.appears(within: 2))
+        alert.textFields.firstMatch.typeText("1")
+        alert.buttons["Set"].tap()
+        XCTAssertTrue(eventually(within: 2) { fader.value as? String == "+1.0 dB" })
         saveScreenshot("offline-strip")
 
         app.navigationBars.buttons.element(boundBy: 0).tap()

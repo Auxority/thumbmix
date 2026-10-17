@@ -28,7 +28,7 @@ public enum ChannelTab: String, CaseIterable, Identifiable, Sendable {
     /// comes first. Mix and Members show only what connect already read.
     public static let fillOrder: [ChannelTab] = [.input, .eq, .comp, .sends, .gate, .fedBy]
 
-    /// Every strip opens on Mix: its full fader, nudges, mute and pan. The other tabs keep a slim fader and mute.
+    /// Every strip opens on Mix: its full fader, solo, mute and pan. The other tabs keep a slim fader and mute.
     /// The Sends (to the matrices) of a bus or main sit before Fed by, used more, which keeps the far right.
     public static func tabs(for kind: StripKind) -> [ChannelTab] {
         switch kind {

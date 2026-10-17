@@ -8,7 +8,7 @@ final class PairUITests: DeskUITestCase {
         launch()
         app.swipeUp()
         app.buttons["Gtr"].tap()
-        XCTAssertTrue(app.buttons["+1 dB"].appears(within: 3))
+        XCTAssertTrue(app.buttons["Mix"].appears(within: 3))
     }
 
     /// With Gain/Delay linked, the desk switches 48V on both sides: the alert says so before it happens.

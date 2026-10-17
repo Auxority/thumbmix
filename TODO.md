@@ -45,7 +45,6 @@ None open.
 - [ ] **Should picking a view in the app pick it on the desk, or the other way round, or neither?** (2026-10-17) Decide first (e.g. selected channel, the desk's screen page).
 
 - [ ] **Make the insert slot editable** once m32-probe answers what picking a held slot does. The Slot row becomes a menu in place (mock `insert-slot-future-v2.html`): each slot names its effect and the strip holding it; a held slot asks first, naming the strip that loses it.
-- [ ] **Remove the ±1 dB buttons on the Mix tab?** Holding a parameter row now types a value (`ParameterRow`, `onHold`), and the buttons repeat while held (`NudgeButton`). Removing them moves Solo, Mute and the pan up: mid-show, the thumb finds them in a new place.
 - [ ] **A gain helper:** listen to an input for a few seconds (the engineer picks how long) and suggest the gain that puts its peaks at a target level. Ties in with the input meter marks under "More meters". Mock first.
 - [ ] **Solo on the overview?** A row there is mostly fader, and a solo target competes with it for the thumb. Find a place that keeps the faders easy to drag (mock first). At least show which strips are soloed there (2026-10-17).
 - [ ] **Presets from the channel name**, based on James Attaway's *Live Mixing Field Guide*: a channel called "Kick" offers kick presets first (EQ, gate, compressor, low cut). Find a good spot to pick them from (mock first).
