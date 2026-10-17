@@ -56,6 +56,16 @@
     "%@ in the main mix" : {
 
     },
+    "%@ on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ on %2$@"
+          }
+        }
+      }
+    },
     "%@ out of the main mix" : {
 
     },
@@ -94,6 +104,12 @@
 
     },
     "Also powers %@ (same input)." : {
+
+    },
+    "An assigned strip follows this DCA's fader and mute at once." : {
+
+    },
+    "Assigned" : {
 
     },
     "Band" : {
@@ -222,10 +238,16 @@
     "Key" : {
 
     },
+    "L only" : {
+
+    },
     "Last used" : {
 
     },
     "LC" : {
+
+    },
+    "Left side only" : {
 
     },
     "Levels here are each strip's own fader." : {
@@ -271,9 +293,6 @@
     "Name · %@" : {
 
     },
-    "No channels assigned to this DCA." : {
-
-    },
     "No colour" : {
 
     },
@@ -296,6 +315,9 @@
 
     },
     "Not an M32" : {
+
+    },
+    "Not assigned" : {
 
     },
     "Not found" : {
@@ -325,6 +347,9 @@
     "Polarity" : {
 
     },
+    "R only" : {
+
+    },
     "Red" : {
 
     },
@@ -342,6 +367,9 @@
       }
     },
     "Reset bands" : {
+
+    },
+    "Right side only" : {
 
     },
     "RTA follows %@ (after EQ)" : {

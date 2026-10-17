@@ -48,10 +48,47 @@ final class DCAUITests: DeskUITestCase {
         XCTAssertFalse(app.staticTexts["VoxX"].exists)
     }
 
+    /// Every strip is listed, assigned or not: Bass (Ch 8) is on DCA 2, not Drums.
     func testDCAMembers() {
         launchAndOpen("Drums", group: "DCA")
         app.buttons["Members"].tap()
-        XCTAssertTrue(element("member-/ch/02").exists, "Snare")
-        XCTAssertFalse(element("member-/ch/08").exists, "Bass")
+        XCTAssertTrue(element("assign-/ch/02").appears(within: 3))
+        XCTAssertEqual(element("assign-/ch/02").value as? String, "Assigned", "Snare")
+        XCTAssertEqual(element("assign-/ch/08").value as? String, "Not assigned", "Bass")
+        saveScreenshot("dca-members")
+    }
+
+    /// A tap assigns at once and keeps the strip's other DCAs; a second tap takes it off again.
+    func testTheChipAssignsAndUnassigns() {
+        launchAndOpen("Drums", group: "DCA")
+        app.buttons["Members"].tap()
+        let bass = element("assign-/ch/08")
+        XCTAssertTrue(bass.appears(within: 3))
+        bass.tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/08/grp/dca") == .int(0b011) })
+        XCTAssertTrue(eventually(within: 2) { bass.value as? String == "Assigned" })
+        bass.tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/08/grp/dca") == .int(0b010) })
+    }
+
+    /// The linked guitars (Ch 9-10) are one row, and its chip assigns both sides.
+    func testALinkedPairIsAssignedAsOne() {
+        launchAndOpen("Drums", group: "DCA")
+        app.buttons["Members"].tap()
+        let gtr = element("assign-/ch/09")
+        XCTAssertTrue(gtr.appears(within: 3))
+        XCTAssertFalse(element("assign-/ch/10").exists)
+        gtr.tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/10/grp/dca") == .int(0b011) })
+        XCTAssertEqual(desk.value("/ch/09/grp/dca"), .int(0b011))
+    }
+
+    func testAMembersNameOpensItsStrip() {
+        launchAndOpen("Drums", group: "DCA")
+        app.buttons["Members"].tap()
+        let snare = element("member-/ch/02")
+        XCTAssertTrue(snare.appears(within: 3))
+        snare.tap()
+        XCTAssertTrue(app.navigationBars["Ch 2"].appears(within: 3))
     }
 }

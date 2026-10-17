@@ -98,7 +98,7 @@ private struct ChannelTabContent: View {
         switch tab {
         case .mix: MixTab(strip: strip, mirror: mirror, panPartner: panPartner)
         case .input: InputTab(strip: strip, mirror: mirror)
-        case .members: MembersTab(dca: strip.number, mirror: mirror)
+        case .members: MembersTab(dca: strip.number, mirror: mirror, open: open)
         case .gate: GateTab(strip: strip, mirror: mirror, ghost: ghost)
         case .comp: CompTab(strip: strip, mirror: mirror, ghost: ghost)
         case .eq: EQTab(strip: strip, mirror: mirror, ghost: ghost)

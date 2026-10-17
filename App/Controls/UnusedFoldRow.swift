@@ -10,7 +10,8 @@ struct UnusedFoldRow: View {
     static let overviewKey = "unusedShown.overview"
     static let sendsKey = "unusedShown.sends"
     static let fedByKey = "unusedShown.fedBy"
-    static let storageKeys = [overviewKey, sendsKey, fedByKey]
+    static let membersKey = "unusedShown.members"
+    static let storageKeys = [overviewKey, sendsKey, fedByKey, membersKey]
     let strips: [StripID]
     @Binding var isOpen: Bool
 

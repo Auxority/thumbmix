@@ -42,6 +42,7 @@ final class AccessibilityUITests: DeskUITestCase {
         app.buttons["Members"].tap()
         let snare = element("member-/ch/02")
         XCTAssertTrue(snare.appears(within: 3))
-        XCTAssertGreaterThan(snare.frame.height, 44)
+        // The row is at least 48 pt at any size: only taller shows the text grew.
+        XCTAssertGreaterThan(snare.frame.height, 60)
     }
 }
