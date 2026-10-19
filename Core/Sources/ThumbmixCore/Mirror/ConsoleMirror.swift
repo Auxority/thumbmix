@@ -29,7 +29,7 @@ public final class ConsoleMirror {
     @ObservationIgnored private let overviewSet: Set<String>
     @ObservationIgnored var reads = ReadQueue()
     @ObservationIgnored private var meterCells: [StripID: MeterCell] = [:]
-    @ObservationIgnored private var pendingSends: [String: OSCArgument] = [:]
+    @ObservationIgnored var pendingSends: [String: OSCArgument] = [:]
     @ObservationIgnored var holds = EditHolds(hold: ConsoleMirror.editHold)
     @ObservationIgnored var linkCopies = LinkCopyCheck()
     @ObservationIgnored private let auditAddresses: [String]
@@ -130,12 +130,6 @@ public final class ConsoleMirror {
         }
         linkCopies.expect(partner, argument)
         holds.rereadSoon(partner, now: .now)
-    }
-
-    /// An action the desk performs (CLEAR SOLO), not a value it keeps: no cell, nothing to show or hold.
-    func command(_ address: String, _ argument: OSCArgument) {
-        guard isLive else { return }
-        pendingSends[address] = argument
     }
 
     func write(_ address: String, _ argument: OSCArgument) {

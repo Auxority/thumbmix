@@ -59,10 +59,20 @@ struct SoloTests {
         }
     }
 
+    /// A live desk on which each of `addresses` (a solo switch, Exclusive solo) was switched on before connecting.
+    private func withDesk(
+        setting addresses: [String], body: (FakeM32, ConsoleMirror) async throws -> Void
+    ) async throws {
+        try await withLiveDesk(
+            before: { fake in
+                for address in addresses { fake.deskChange(address, .int(1)) }
+            }, body: body)
+    }
+
     /// A pair the desk holds half soloed still sounds in the headphones: the row counts as soloed, once.
     @Test func aPairWithOneSideSoloedCountsAsSoloed() async throws {
         let gtrL = StripID(.input, 9)
-        try await withLiveDesk(before: { $0.deskChange(gtrL.solo, .int(1)) }) { _, mirror in
+        try await withDesk(setting: [gtrL.solo]) { _, mirror in
             #expect(mirror.isSoloed(.pair(gtrL)) == true)
             #expect(mirror.soloedCount == 1)
         }
@@ -71,10 +81,7 @@ struct SoloTests {
     @Test func settingAPairWritesBothSides() async throws {
         let gtrL = StripID(.input, 9)
         let gtrR = StripID(.input, 10)
-        try await withLiveDesk(before: {
-            $0.deskChange(gtrL.solo, .int(1))
-            $0.deskChange(gtrR.solo, .int(1))
-        }) { fake, mirror in
+        try await withDesk(setting: [gtrL.solo, gtrR.solo]) { fake, mirror in
             mirror.setSolo(.pair(gtrL), false)
 
             #expect(await eventually { fake.value(at: gtrL.solo) == .int(0) })
@@ -85,10 +92,7 @@ struct SoloTests {
     @Test func clearSoloReachesTheDeskAndRereads() async throws {
         let kick = StripID(.input, 1)
         let bus = StripID(.bus, 3)
-        try await withLiveDesk(before: {
-            $0.deskChange(kick.solo, .int(1))
-            $0.deskChange(bus.solo, .int(1))
-        }) { fake, mirror in
+        try await withDesk(setting: [kick.solo, bus.solo]) { fake, mirror in
             #expect(mirror.soloedCount == 2)
 
             mirror.clearSolo()
@@ -99,7 +103,7 @@ struct SoloTests {
     }
 
     @Test func exclusiveSoloIsReadOnConnect() async throws {
-        try await withLiveDesk(before: { $0.deskChange(Catalog.exclusiveSolo, .int(1)) }) { fake, mirror in
+        try await withDesk(setting: [Catalog.exclusiveSolo]) { fake, mirror in
             #expect(mirror.isExclusiveSolo)
 
             mirror.turnOffExclusiveSolo()

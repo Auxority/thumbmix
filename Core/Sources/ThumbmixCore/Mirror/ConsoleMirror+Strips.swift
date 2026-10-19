@@ -102,6 +102,12 @@ extension ConsoleMirror {
         for strip in StripKind.allCases.flatMap(StripID.all) { holds.rereadSoon(strip.solo, now: now) }
     }
 
+    /// An action the desk performs (CLEAR SOLO), not a value it keeps: no cell, nothing to show or hold.
+    func command(_ address: String, _ argument: OSCArgument) {
+        guard isLive else { return }
+        pendingSends[address] = argument
+    }
+
     /// Both sides of a linked pair, as `toggleSolo` writes them; a half row too.
     private func soloSides(_ item: OverviewItem) -> [StripID] {
         isLinked(item.held) ? item.held.oddSide.pairSides : [item.held]

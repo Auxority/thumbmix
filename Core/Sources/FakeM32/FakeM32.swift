@@ -193,11 +193,7 @@ public final class FakeM32: @unchecked Sendable {
     /// client, the sender included, as it lights its own buttons.
     private func clearSolo(_ message: OSCMessage) {
         sets.append(message)
-        guard message.arguments.first == .int(1) else { return }
-        for (address, value) in state where address.hasPrefix("/-stat/solosw/") && value == .int(1) {
-            state[address] = .int(0)
-            push(OSCMessage(address, [.int(0)]), except: nil)
-        }
+        if message.arguments.first == .int(1) { unsoloOthers(than: nil, except: nil) }
     }
 
     /// Exclusive solo (doc p.21): a new solo clears the others. The doc doesn't say whether it applies to OSC sets;
@@ -207,7 +203,7 @@ public final class FakeM32: @unchecked Sendable {
             && state["/config/solo/exclusive"] == .int(1)
     }
 
-    private func unsoloOthers(than address: String, except sender: Client) {
+    private func unsoloOthers(than address: String?, except sender: Client?) {
         for (other, value) in state where other.hasPrefix("/-stat/solosw/") && other != address && value == .int(1) {
             state[other] = .int(0)
             push(OSCMessage(other, [.int(0)]), except: sender)
