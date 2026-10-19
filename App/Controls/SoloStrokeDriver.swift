@@ -1,12 +1,13 @@
 import OSLog
 import SwiftUI
 import ThumbmixCore
+import TipKit
 
 /// Turns a `SoloHold` on the overview into a stroke on the mirror: which row the finger is over, a tick per row
 /// changed, and the list scrolling on while the finger rests near its top or bottom edge, as in Photos.
 @MainActor @Observable
 final class SoloStrokeDriver {
-    static let space = NamedCoordinateSpace.named("overview")
+    nonisolated static var space: NamedCoordinateSpace { .named("overview") }
 
     /// Each row's frame in the overview's visible area (`space`); rows the lazy list hasn't built have none.
     var frames: [OverviewItem: CGRect] = [:]
@@ -46,6 +47,7 @@ final class SoloStrokeDriver {
         held = item
         ticks += 1
         edgeScroll = Task { [weak self] in await self?.scrollAtEdges(mirror, proxy) }
+        Task { await SoloStrokeTip.soloedByHolding.donate() }
     }
 
     private func track(_ mirror: ConsoleMirror) {

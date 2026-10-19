@@ -34,7 +34,9 @@ class DeskUITestCase: XCTestCase {
             XCTAssertTrue(eventually(within: 5) { desk.heardFromApp }, "the app didn't switch to this test's desk")
         } else {
             app = XCUIApplication()
-            app.launchArguments = desk.connect + arguments + fixedLocale + ["-disableAnimations", "YES"]
+            app.launchArguments =
+                desk.connect + arguments + fixedLocale + (arguments.contains("-tips") ? [] : quietTips)
+                + ["-disableAnimations", "YES"]
             app.launch()
             Self.running = (app, arguments)
         }

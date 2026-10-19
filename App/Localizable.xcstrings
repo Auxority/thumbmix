@@ -217,6 +217,9 @@
     "Hide unused" : {
 
     },
+    "Hold a name to solo it. Keep holding and drag to solo more." : {
+
+    },
     "Icon" : {
 
     },
@@ -433,6 +436,9 @@
 
     },
     "Solo %@" : {
+
+    },
+    "Solo several at once" : {
 
     },
     "Stereo link" : {

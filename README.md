@@ -82,7 +82,7 @@ The fake M32 keeps every set it receives, so restart it for a clean desk. CI als
 4. Meters move and roughly match the desk. The EQ tab's spectrum follows the signal, and the desk's RTA source is back as it was after leaving the tab.
 5. Gain on an input changes the matching DL32 preamp. Phantom power toggles after its alert, and trim, polarity and delay work.
 6. Low cut, gate, EQ and compressor edits are audible or visible on the desk, including the key, the comp's position and Auto time.
-7. Solo lights the desk's solo, and the LR pill takes a strip out of Main LR and back.
+7. Solo lights the desk's solo, and the LR pill takes a strip out of Main LR and back. On the overview, hold a name and drag down several names: the desk solos each one, a tick per row; hold near the bottom edge and the list scrolls on. Clear above the tabs clears the desk's solos, and one set on the desk shows up in the app. With Exclusive solo ticked on the desk, a run asks before soloing a second strip.
 8. An insert's slot matches the desk, and its on/off and position change the desk.
 9. Sends and Fed by match the desk's sends-on-fader, also on Main LR and Main M. A send's tap point, send pan and Follow LR pan match the desk.
 10. A pair linked on the desk shows as one row; linking and unlinking from a strip's Mix tab does the same on the desk. Move a pair's fader with Console.app on the Mac filtered on "thumbmix": no "didn't follow a linked edit" line.

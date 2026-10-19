@@ -32,3 +32,6 @@ func screenBrightness(at point: CGPoint) -> CGFloat {
 
 /// Assertions compare English, dot-decimal text, so the app runs in en_US whatever the Mac's region is.
 let fixedLocale = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+
+/// Tips (TipKit) stay hidden, so a popover never covers what a test taps; a tip's own test asks for one.
+let quietTips = ["-tips", "hidden"]

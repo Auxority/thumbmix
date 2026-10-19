@@ -40,6 +40,20 @@ final class SoloUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 3) { !bar.exists })
     }
 
+    /// The app teaches the hold itself (2026-10-19): the tip shows until the first solo by holding a name.
+    func testTipShowsUntilTheFirstHoldSolo() {
+        launch(["-tips", "fresh"])
+        let tip = app.staticTexts["Solo several at once"]
+        XCTAssertTrue(tip.appears(within: 3))
+        saveScreenshot("solo-tip")
+        app.buttons["Kick"].press(forDuration: 0.6)
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/-stat/solosw/01") == .int(1) })
+        XCTAssertTrue(eventually(within: 3) { !tip.exists })
+
+        launch(["-tips", "kept"])
+        XCTAssertFalse(tip.appears(within: 2), "learned once, never shown again")
+    }
+
     /// Nothing moves under the thumb when the bar comes in.
     func testTheBarDoesNotMoveTheRows() {
         launch()

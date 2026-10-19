@@ -1,5 +1,6 @@
 import SwiftUI
 import ThumbmixCore
+import TipKit
 
 struct OverviewView: View {
     let mirror: ConsoleMirror
@@ -56,8 +57,13 @@ struct OverviewView: View {
             // list's `.id(group)`, so switching groups doesn't rebuild the bar under the finger.
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 0) {
-                    // Grows the inset below the list, so the rows on screen stay where they are.
-                    if mirror.soloedCount > 0 { SoloBar(mirror: mirror) }
+                    // Grows the inset below the list, so the rows on screen stay where they are. The tip sits here, not
+                    // as a popover on a name: a popover takes the first touch, so the engineer's first hold did nothing.
+                    if mirror.soloedCount > 0 {
+                        SoloBar(mirror: mirror)
+                    } else {
+                        TipView(SoloStrokeTip()).padding(.horizontal, 12)
+                    }
                     PillBar(items: StripGroup.allCases, selection: $group, title: \.shortTitle, label: \.title)
                 }
             }

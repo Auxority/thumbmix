@@ -1,5 +1,7 @@
+import OSLog
 import SwiftUI
 import ThumbmixCore
+import TipKit
 
 @main
 struct ThumbmixApp: App {
@@ -15,7 +17,18 @@ struct ThumbmixApp: App {
                 let shown = UserDefaults.standard.bool(forKey: "showsUnusedStrips")
                 for key in UnusedFoldRow.storageKeys { UserDefaults.standard.set(shown, forKey: key) }
             }
+            // UI tests hide tips, so a popover never covers what they tap; a tip's own test starts it fresh.
+            switch UserDefaults.standard.string(forKey: "tips") {
+            case "hidden": Tips.hideAllTipsForTesting()
+            case "fresh": try? Tips.resetDatastore()
+            default: break
+            }
         #endif
+        do {
+            try Tips.configure()
+        } catch {
+            Logger(subsystem: "thumbmix", category: "app").error("tips not configured: \(error, privacy: .public)")
+        }
     }
 
     var body: some Scene {
