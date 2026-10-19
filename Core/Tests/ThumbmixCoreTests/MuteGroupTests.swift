@@ -31,10 +31,12 @@ struct MuteGroupTests {
     }
 
     @Test func aStripInAnOnGroupIsMutedByIt() async throws {
-        try await withLiveDesk(before: { $0.deskChange("/config/mute/1", .int(1)) }) { _, mirror in
-            #expect(mirror.isMutedByGroup(kick))
-            #expect(!mirror.isMutedByGroup(bass))
-        }
+        try await withLiveDesk(
+            before: { $0.deskChange("/config/mute/1", .int(1)) },
+            body: { _, mirror in
+                #expect(mirror.isMutedByGroup(kick))
+                #expect(!mirror.isMutedByGroup(bass))
+            })
     }
 
     @Test func anOffGroupMutesNobody() async throws {
@@ -94,11 +96,13 @@ struct MuteGroupTests {
 
     /// Whether the desk pushes a group switched on it is unverified: the Main page asks again each time it opens.
     @Test func reReadingTheGroupsCatchesASwitchTheDeskDidntPush() async throws {
-        try await withLiveDesk(before: { $0.ignoresXremote = true }) { fake, mirror in
-            fake.deskChange("/config/mute/2", .int(1))
-            mirror.readMuteGroups()
-            #expect(await eventually { mirror.isMuteGroupOn(2) == true })
-        }
+        try await withLiveDesk(
+            before: { $0.ignoresXremote = true },
+            body: { fake, mirror in
+                fake.deskChange("/config/mute/2", .int(1))
+                mirror.readMuteGroups()
+                #expect(await eventually { mirror.isMuteGroupOn(2) == true })
+            })
     }
 
     @Test func membershipFlipsOnlyThisGroupsBit() async throws {
