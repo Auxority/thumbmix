@@ -229,35 +229,10 @@ let pairPans = await listen(seconds: 20).filter { $0.address.hasSuffix("/mix/01/
 print("send pans pushed: " + Set(pairPans.map(\.address)).sorted().joined(separator: ", "))
 print("RESULT: one channel = each side keeps its own (the app's guess); both = the desk copies it.")
 
-/// A bus's average level in dB over `seconds`, from the bus meters (/meters/2, doc p.17-19).
-@MainActor
-func busLevel(_ bus: Int, seconds: Int) async -> Float? {
-    recorder.clear()
-    transport.send(OSCMessage("/meters", [.string("/meters/2")]))
-    try? await Task.sleep(for: .seconds(seconds))
-    let levels = recorder.messages.filter { $0.address == "/meters/2" }.compactMap { message -> Float? in
-        guard case .blob(let blob)? = message.arguments.first else { return nil }
-        return MeterBanks.readings(address: "/meters/2", values: MeterBlob.floats(from: blob))[StripID(.bus, bus)]?.level
-    }
-    guard !levels.isEmpty else { return nil }
-    return 20 * log10(max(levels.reduce(0, +) / Float(levels.count), 1e-6))
-}
-
-/// The engineer sets `first` on the desk, then `second`; the probe measures `bus` after each and prints both.
+/// The engineer sets `first` on the desk, then `second`; the probe measures `bus` after each (/meters/2, doc p.17).
 @MainActor
 func compare(bus: Int, _ first: String, _ second: String) async -> Float? {
-    var levels: [Float] = []
-    for step in [first, second] {
-        print("  On the DESK: \(step) (10 seconds), then hands off while it measures...")
-        try? await Task.sleep(for: .seconds(10))
-        guard let level = await busLevel(bus, seconds: 4) else {
-            print("  bus \(bus) meters: NO REPLY")
-            return nil
-        }
-        print(String(format: "  bus %d: %.1f dB", bus, level))
-        levels.append(level)
-    }
-    return levels[1] - levels[0]
+    await compareTaps([MeterTap("bus \(bus)", [.string("/meters/2")], bus - 1)], first, second)?.first
 }
 
 func change(_ difference: Float?) -> String {
@@ -292,5 +267,10 @@ await probeEQDefaults()
 await probeReadTiming()
 await probeSendMeters()
 await probeMuteGroups()
+await probeInputMeters()
+await probeExclusiveSolo()
+await probeMonoMode()
+await probeCompMix()
+await probeInserts()
 
 transport.cancel()
