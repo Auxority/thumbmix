@@ -8,24 +8,39 @@ struct OverviewView: View {
     @State private var openStrip: StripID?
     /// One open fold for every group of the overview.
     @AppStorage(UnusedFoldRow.overviewKey) private var showsUnused = false
+    @State private var stroke = SoloStrokeDriver()
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 10) {
-                ScrollView {
-                    let unused = mirror.unusedStrips(group.strips, where: mirror.isUnused)
-                    SteadyRows(wanted: mirror.overviewItems(group.strips, showUnused: showsUnused), mirror: mirror) { rows in
-                        LazyVStack(spacing: 6) {
-                            ForEach(rows) { item in
-                                StripRow(item: item, mirror: mirror) { openStrip = item.opens }
-                                    .opacity(unused.contains(item.held) ? 0.45 : 1)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        let unused = mirror.unusedStrips(group.strips, where: mirror.isUnused)
+                        SteadyRows(wanted: mirror.overviewItems(group.strips, showUnused: showsUnused), mirror: mirror) {
+                            rows in
+                            LazyVStack(spacing: 6) {
+                                ForEach(rows) { item in
+                                    row(item, of: rows, proxy: proxy).opacity(unused.contains(item.held) ? 0.45 : 1)
+                                }
+                                if !unused.isEmpty { UnusedFoldRow(strips: unused, isOpen: $showsUnused) }
                             }
-                            if !unused.isEmpty { UnusedFoldRow(strips: unused, isOpen: $showsUnused) }
                         }
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 12)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 12)
+                    .coordinateSpace(SoloStrokeDriver.space)
+                    .onGeometryChange(for: CGFloat.self) {
+                        $0.size.height
+                    } action: {
+                        stroke.viewportHeight = $0
+                    }
+                    .onGeometryChange(for: CGFloat.self) {
+                        $0.safeAreaInsets.bottom
+                    } action: {
+                        stroke.bottomInset = $0
+                    }
                 }
+                .sensoryFeedback(.selection, trigger: stroke.ticks)
                 .keepsFoldInPlace()
                 // Each list gets its own scroll view, so it starts where a list naturally starts. Keeping
                 // one left the old offset past a shorter list (only black), and scrolling it to a top
@@ -53,6 +68,22 @@ struct OverviewView: View {
             .navigationDestination(item: $openStrip) { strip in
                 ChannelView(strip: strip, mirror: mirror)
             }
+        }
+    }
+
+    private func row(_ item: OverviewItem, of rows: [OverviewItem], proxy: ScrollViewProxy) -> some View {
+        StripRow(
+            item: item, mirror: mirror, onOpen: { openStrip = item.opens },
+            onSoloHold: { phase, point in
+                stroke.hold(phase, at: point, on: item, rows: rows, mirror: mirror, proxy: proxy)
+            },
+            isHeld: stroke.held == item
+        )
+        .id(item)
+        .onGeometryChange(for: CGRect.self) {
+            $0.frame(in: SoloStrokeDriver.space)
+        } action: {
+            stroke.frames[item] = $0
         }
     }
 }

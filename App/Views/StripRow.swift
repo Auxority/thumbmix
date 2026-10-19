@@ -6,6 +6,11 @@ struct StripRow: View {
     let item: OverviewItem
     let mirror: ConsoleMirror
     let onOpen: () -> Void
+    /// A hold on the name, then a drag up or down the names, solos a run (`SoloStrokeDriver`); nil where rows
+    /// aren't a list to stroke.
+    var onSoloHold: ((SoloHold.Phase, CGPoint) -> Void)?
+    /// The name the finger holds: lifted a little, so the engineer sees the hold took.
+    var isHeld = false
     @Environment(\.dynamicTypeSize) private var typeSize
     @ScaledMetric private var nameWidth: CGFloat = 78
 
@@ -56,10 +61,15 @@ struct StripRow: View {
                 Spacer(minLength: 0)
             }
             .contentShape(Rectangle())
+            .gesture(SoloHold(space: SoloStrokeDriver.space) { onSoloHold?($0, $1) })
         }
         .buttonStyle(.plain)
+        .scaleEffect(isHeld ? 1.06 : 1, anchor: .leading)
+        .animation(.easeOut(duration: 0.12), value: isHeld)
         .accessibilityLabel(name)
         .accessibilityValue(numberLine)
+        // VoiceOver can't hold and drag: one row at a time instead.
+        .accessibilityAction(named: isSoloed ? "Unsolo" : "Solo") { mirror.setSolo(item, !isSoloed) }
     }
 
     private var look: SoloLook { mirror.soloLook(item) }

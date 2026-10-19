@@ -414,6 +414,9 @@
     "Show unused" : {
 
     },
+    "Solo" : {
+
+    },
     "Solo %@" : {
 
     },
@@ -491,6 +494,9 @@
       }
     },
     "Unmute %@" : {
+
+    },
+    "Unsolo" : {
 
     },
     "Unsolo %@" : {
