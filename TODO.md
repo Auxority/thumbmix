@@ -13,6 +13,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - Section 11: EQ defaults. Reset channel 1's, aux 1's and FX 1's EQ on the desk; the probe reads them, and the app's Reset bands gives all three 91.4 Hz, 418 Hz, 1.91 kHz and 8.73 kHz. The probe doesn't cover buses and mains yet: Reset bands on one, then compare the six frequencies with what the desk shows. The app writes the desk steps nearest the engineer's 55.1, 152, 418, 1150, 3170 and 8730 Hz (54.5, 153.5, 418, 1.14k, 3.21k, 8.73k). Fix `Catalog.eqDefaults` where the desk shows other values.
   - Section 3: what feeds each input (local preamp, AES50, card such as Dante, USB; Rec or Playback routing), and the gain/trim question. Since #26 the app shows Trim on every input, but the doc lists trim as "digital sources only". On the desk: does a preamp channel offer Trim, and does it change the level? Does a card channel offer only Trim? Does Playback mode change that? Then decide: keep #26, revert it, or show Trim only for card inputs and in Playback mode.
   - Sections 4 and 5: the DCA bit order and the DCA meter slots. Until section 4 has run, check a DCA's Members ticks against the desk once before assigning strips live: with the bit order wrong, a tap would assign the strip to another DCA.
+  - Section 14: mute groups. Does bit 0 of `grp/mute` mean mute group 1 (the app assumes so, as for DCAs)? Does the desk push a group switched on it (else the app sees it only when the Main page opens)? Does a group mute change the strip's own `mix/on` (the app assumes not)? Until it has run, check a group's ticks and the red-bordered Ms against the desk's mute group screen once before relying on them at a service: with the bit order wrong, they name the wrong group, while switching a group stays right.
   - Section 6: does `/meters/15` follow `/-prefs/rta/source`, and does "after EQ" include the low cut and the compressor?
   - Section 7: stereo links. 7e: does the Gain/Delay link carry polarity (the Ø alert names the partner as if it does)? Which side moves when a linked fader moves in Mixing Station, what linking copies besides the pans, whether an unticked Link Preference keeps the sides apart, which preference governs sends (assumed Mute/Fader) and the low cut (assumed EQ), and the preferences' factory defaults (the demo assumes all ticked). Also: does switching 48V on one side of a pair with Gain/Delay linked switch the partner's too? The 48V alert assumes it does.
   - Section 7f: Invert on a matrix. The doc lists `/mtx/NN/config/preamp/invert` (p.32), odd for a matrix, and Mixing Station shows no such control. The probe reads `/mtx/01/config/preamp/invert` once; show Invert on a matrix only if the desk answers.
@@ -59,7 +60,7 @@ None open.
   - Output meter on the Mix tab: the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too.
   - Input meter marks at −18 dBFS and 0 dBFS? A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
   - Muted strips: check whether muting should grey out the meters, or anything else.
-- [ ] **Membership from a strip: mute groups and DCAs.** Pick a strip's mute groups and DCAs on its strip screen, in a quick multi-select. A DCA's Members tab assigns strips since 2026-10-17; consider whether the strip side is worth having too.
+- [ ] **A strip's DCAs and mute groups in its edit sheet** (2026-10-19, designed: `notes/2026-10-19-mute-groups-design.md` §4, mock `strip-groups-s1-v10.html`). Under Colour, a DCAs and a Mute groups section of chips, sent with the name on Done; the icon becomes a tile with a pencil badge left of the name, and its grid moves to a page of its own. Mute groups on the Main page shipped first.
 
 ## Code and docs
 
@@ -70,6 +71,7 @@ None open.
 ## Maybe later
 
 - [ ] **Headphone correction on a monitor mix:** load a headphone's AutoEQ profile into the EQ of the bus that feeds it. Can 4 bands do it? Fits with "Roles" below (a musician's in-ear mix).
+- [ ] **Swipe up on the pills for the mute groups** (2026-10-19, mock `notes/mocks/2026-10-19-mute-groups/mute-groups-place-v6.html` G2): the user liked the gesture, for the day engineers build their own tabs. Today the groups live on the Main page.
 - [ ] **Long term: a landscape layout.**
 - [ ] **Long term: Low Power Mode** spends less (e.g. slower meters and spectrum), if that's simple.
 - [ ] **Long, long term: iPad.**
