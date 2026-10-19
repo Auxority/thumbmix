@@ -4,6 +4,8 @@ import ThumbmixCore
 struct OverviewView: View {
     let mirror: ConsoleMirror
     let onDisconnect: () -> Void
+    /// The engineer kept the desk's Exclusive solo: the app remembers it per desk.
+    var onKeepExclusive: () -> Void = {}
     @State private var group: StripGroup = .inputs
     @State private var openStrip: StripID?
     /// One open fold for every group of the overview.
@@ -41,6 +43,7 @@ struct OverviewView: View {
                     }
                 }
                 .sensoryFeedback(.selection, trigger: stroke.ticks)
+                .exclusiveSoloAlert(isPresented: $stroke.isAskingExclusive, mirror: mirror, onKeep: onKeepExclusive)
                 .keepsFoldInPlace()
                 // Each list gets its own scroll view, so it starts where a list naturally starts. Keeping
                 // one left the old offset past a shorter list (only black), and scrolling it to a top

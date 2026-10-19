@@ -184,6 +184,9 @@
     "EQ off" : {
 
     },
+    "Exclusive solo is on" : {
+
+    },
     "Fader and mute aren't linked on the desk." : {
 
     },
@@ -236,6 +239,9 @@
 
     },
     "It follows %@’s fader at a fixed 0 dB, whatever its level is now." : {
+
+    },
+    "Keep" : {
 
     },
     "Key" : {
@@ -459,6 +465,9 @@
     "The demo didn't start" : {
 
     },
+    "The desk keeps one solo at a time. Turn it off?" : {
+
+    },
     "They'll work as one stereo channel." : {
 
     },
@@ -472,6 +481,9 @@
 
     },
     "Try again, or restart Thumbmix." : {
+
+    },
+    "Turn off" : {
 
     },
     "Turn Off" : {

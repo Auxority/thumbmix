@@ -61,6 +61,39 @@ final class SoloStrokeUITests: DeskUITestCase {
         XCTAssertTrue(unsoloed(1...16))
     }
 
+    /// Exclusive solo would keep only the last row of a run: the app asks once the finger lifts.
+    func testExclusiveAsksBeforeASecondSolo() {
+        desk.change("/config/solo/exclusive", 1)
+        launch()
+        stroke(from: "Kick", to: "Hi-hat")
+        let alert = app.alerts["Exclusive solo is on"]
+        XCTAssertTrue(alert.appears(within: 3))
+        XCTAssertTrue(soloed(1...1))
+        XCTAssertEqual(desk.value(solo(2)), .int(0), "held back while the question is open")
+        saveScreenshot("solo-exclusive-alert")
+
+        alert.buttons["Turn off"].tap()
+
+        XCTAssertTrue(eventually(within: 3) { self.soloed(1...3) })
+        XCTAssertEqual(desk.value("/config/solo/exclusive"), .int(0))
+    }
+
+    func testKeepLeavesOneSoloAndAsksNoMore() {
+        desk.change("/config/solo/exclusive", 1)
+        launch()
+        stroke(from: "Kick", to: "Hi-hat")
+        app.alerts["Exclusive solo is on"].buttons["Keep"].tap()
+        XCTAssertTrue(eventually(within: 2) { (self.app.buttons["Hi-hat"].value as? String) == "3" })
+        XCTAssertEqual(desk.value(solo(2)), .int(0))
+
+        stroke(from: "Tom 1", to: "Tom 2")
+
+        // Kept: the desk keeps one solo at a time, so the run ends on its last row.
+        XCTAssertTrue(eventually(within: 3) { self.desk.value(solo(5)) == .int(1) })
+        XCTAssertFalse(app.alerts.firstMatch.exists, "asked once per desk")
+        XCTAssertEqual(desk.value("/config/solo/exclusive"), .int(1))
+    }
+
     /// The stroke counts only over the names: a finger that drifts onto the faders leaves them and the mutes alone.
     func testStrokeLeavesFadersAndMutesAlone() {
         launch()

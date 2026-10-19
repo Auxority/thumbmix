@@ -14,6 +14,10 @@ final class AppModel {
     private(set) var isStartingOffline = false
     private(set) var known = KnownConsoles(stored: UserDefaults.standard.array(forKey: AppModel.knownKey))
     private static let knownKey = "knownConsoles"
+    /// Desks ("host:port") whose Exclusive solo the engineer chose to keep. In memory only: the next launch asks again,
+    /// as the next show may want the hunt (2026-10-19).
+    private var keptExclusiveSolo: Set<String> = []
+    private var deskKey: String?
 
     var isOffline: Bool { demoConsole != nil }
 
@@ -39,9 +43,17 @@ final class AppModel {
         mirror.onIdentified = { [weak self] info in
             self?.remember(NetworkConsole(host: host, name: info.name, model: info.model))
         }
+        let key = "\(host):\(port)"
+        mirror.keepsExclusiveSolo = keptExclusiveSolo.contains(key)
         mirror.start()
         self.mirror = mirror
+        deskKey = key
         target = name ?? host
+    }
+
+    /// The engineer answered Keep to the Exclusive solo question: not asked again for this desk until the app quits.
+    func keepExclusiveSolo() {
+        if let deskKey { keptExclusiveSolo.insert(deskKey) }
     }
 
     func forget(_ console: NetworkConsole) {
@@ -106,6 +118,7 @@ final class AppModel {
         mirror?.stop()
         mirror = nil
         target = nil
+        deskKey = nil
         demoConsole?.stop()
         demoConsole = nil
     }

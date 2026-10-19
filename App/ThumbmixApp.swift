@@ -34,7 +34,7 @@ struct RootView: View {
     var body: some View {
         Group {
             if let mirror = model.mirror, model.failure == nil {
-                OverviewView(mirror: mirror, onDisconnect: model.disconnect)
+                OverviewView(mirror: mirror, onDisconnect: model.disconnect, onKeepExclusive: model.keepExclusiveSolo)
                     .environment(\.isDemoConsole, model.isOffline)
                     // A new desk starts from the overview, with no screen, sheet or alert left open.
                     .id(ObjectIdentifier(mirror))
