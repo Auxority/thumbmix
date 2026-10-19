@@ -1,4 +1,3 @@
-import OSLog
 import SwiftUI
 
 /// A finger resting on an overview name, then moving (2026-10-19). UIKit's long press, as Photos uses: a quick flick
@@ -19,7 +18,6 @@ struct SoloHold: UIGestureRecognizerRepresentable {
     }
 
     func handleUIGestureRecognizerAction(_ recognizer: UILongPressGestureRecognizer, context: Context) {
-        Logger(subsystem: "thumbmix", category: "solo").debug("hold state \(recognizer.state.rawValue)")
         let point = context.converter.location(in: space)
         switch recognizer.state {
         case .began: onChange(.began, point)

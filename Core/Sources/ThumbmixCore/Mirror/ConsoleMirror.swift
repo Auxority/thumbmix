@@ -208,8 +208,7 @@ public final class ConsoleMirror {
     }
 
     private func tick() {
-        for (address, argument) in pendingSends { link.send(OSCMessage(address, [argument])) }
-        pendingSends.removeAll()
+        flushSends()
         if isSyncing { pumpReads() }
         guard isLive else { return }
         pumpReads()

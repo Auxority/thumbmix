@@ -64,4 +64,14 @@ class DeskUITestCase: XCTestCase {
     func element(_ identifier: String) -> XCUIElement {
         app.descendants(matching: .any)[identifier]
     }
+
+    /// A strip's solo switch on the desk, numbered in the desk's strip order (inputs 1-32, …, buses 49-64).
+    func soloAddress(_ number: Int) -> String { String(format: "/-stat/solosw/%02d", number) }
+
+    /// Every solo switch in `numbers` reads `value` on the desk.
+    func solos(_ numbers: ClosedRange<Int>, are value: Int32) -> Bool {
+        numbers.allSatisfy { desk.value(soloAddress($0)) == .int(value) }
+    }
+
+    static let exclusiveSolo = "/config/solo/exclusive"
 }

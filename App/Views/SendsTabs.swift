@@ -38,7 +38,7 @@ struct SendsTab: View {
                     SendRow(
                         source: strip, target: target, title: mirror.displayName(target), caption: caption(target),
                         accent: Theme.color(mirror.color(target)), mirror: mirror,
-                        isSoloed: mirror.isSoloed(.strip(target, .full)) == true)
+                        isSoloed: mirror.isSoloed(target))
                 }
             }
             SendSettingsButton(address: Catalog.sendLevel(from: strip, to: pair[0]).address) {

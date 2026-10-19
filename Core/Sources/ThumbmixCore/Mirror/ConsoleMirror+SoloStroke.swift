@@ -21,7 +21,7 @@ extension ConsoleMirror {
         let snapshot = rows.map(isSoloed)
         guard snapshot[start] != nil else { return [] }
         let stroke = SoloStroke(
-            snapshot: snapshot, start: start, otherSoloed: soloedCount - snapshot.filter { $0 == true }.count,
+            snapshot: snapshot, start: start, soloedBefore: soloedCount,
             gatesExclusive: isExclusiveSolo && !keepsExclusiveSolo)
         for address in soloAddresses(rows) { beginEdit(address) }
         soloStroke = ActiveSoloStroke(rows: rows, stroke: stroke)
@@ -33,6 +33,8 @@ extension ConsoleMirror {
     public func moveSoloStroke(to row: Int) -> [Int] {
         guard isLive, var active = soloStroke else { return [] }
         let ticked = active.stroke.move(to: row)
+        // Most touch events stay on the row: storing the stroke would redraw every row for nothing.
+        guard !ticked.isEmpty else { return [] }
         soloStroke = active
         let held = Set(active.stroke.pending)
         for row in ticked where !held.contains(row) {
@@ -59,7 +61,7 @@ extension ConsoleMirror {
         if turnOff {
             turnOffExclusiveSolo()
             // Sends leave in one batch in no set order: Exclusive must reach the desk before the solos it would drop.
-            sendPending()
+            flushSends()
         } else {
             keepsExclusiveSolo = true
         }
@@ -97,11 +99,6 @@ extension ConsoleMirror {
     }
 
     private func soloAddresses(_ rows: [OverviewItem]) -> [String] {
-        rows.flatMap { isLinked($0.held) ? $0.held.oddSide.pairSides : [$0.held] }.map(\.solo)
-    }
-
-    private func sendPending() {
-        for (address, argument) in pendingSends { link.send(OSCMessage(address, [argument])) }
-        pendingSends.removeAll()
+        rows.flatMap { soloSides($0.held) }.map(\.solo)
     }
 }

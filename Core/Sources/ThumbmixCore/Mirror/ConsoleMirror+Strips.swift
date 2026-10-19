@@ -62,33 +62,30 @@ extension ConsoleMirror {
         set(spec, normalized: spec.scale.normalized(forValue: value))
     }
 
-    public func isSoloed(_ strip: StripID) -> Bool {
-        cell(strip.solo).argument == .int(1)
-    }
+    /// Either side of a linked pair counts: half a pair soloed on the desk still sounds (2026-10-19).
+    public func isSoloed(_ strip: StripID) -> Bool { isSoloed(.strip(strip, .full)) == true }
 
     /// A linked pair solos both sides: the doc doesn't say whether the desk links solo, and half a stereo source
     /// soloed is never wanted. Writing the partner too is harmless if the desk does copy it.
     public func toggleSolo(_ strip: StripID) {
         let soloed: OSCArgument = .int(isSoloed(strip) ? 0 : 1)
-        for side in isLinked(strip) ? strip.pairSides : [strip] { set(side.solo, soloed) }
+        for side in soloSides(strip) { set(side.solo, soloed) }
     }
 
-    /// A row is soloed when either side is: half a pair soloed on the desk still sounds. nil while a side is unread.
+    /// nil while a side is unread: the safety rule shows neither on nor off.
     public func isSoloed(_ item: OverviewItem) -> Bool? {
-        let states = soloSides(item).map { cell($0.solo).argument }
+        let states = soloSides(item.held).map { cell($0.solo).argument }
         guard !states.contains(nil) else { return nil }
         return states.contains(.int(1))
     }
 
     public func setSolo(_ item: OverviewItem, _ on: Bool) {
-        for side in soloSides(item) { set(side.solo, .int(on ? 1 : 0)) }
+        for side in soloSides(item.held) { set(side.solo, .int(on ? 1 : 0)) }
     }
 
     /// Soloed rows on the whole desk, a linked pair counted once.
     public var soloedCount: Int {
-        StripKind.allCases.flatMap(StripID.all).filter { strip in
-            !(isLinked(strip) && !strip.isOddSide) && isSoloed(.strip(strip, .full)) == true
-        }.count
+        StripKind.allCases.flatMap(StripID.all).filter { !(isLinked($0) && !$0.isOddSide) && isSoloed($0) }.count
     }
 
     /// The line under a soloed name, a cue beside its yellow that works without colour (option 2, 2026-10-19):
@@ -118,9 +115,16 @@ extension ConsoleMirror {
         pendingSends[address] = argument
     }
 
-    /// Both sides of a linked pair, as `toggleSolo` writes them; a half row too.
-    private func soloSides(_ item: OverviewItem) -> [StripID] {
-        isLinked(item.held) ? item.held.oddSide.pairSides : [item.held]
+    /// Sends now what's waiting for the next tick: a send that must reach the desk before later ones (Exclusive solo
+    /// off before the solos it would drop) can't wait in the batch, which leaves in no set order.
+    func flushSends() {
+        for (address, argument) in pendingSends { link.send(OSCMessage(address, [argument])) }
+        pendingSends.removeAll()
+    }
+
+    /// Both sides of a linked pair, as solo writes them.
+    func soloSides(_ strip: StripID) -> [StripID] {
+        isLinked(strip) ? strip.oddSide.pairSides : [strip]
     }
 
     /// Unnamed and pulled all the way down: almost certainly not patched for this show.

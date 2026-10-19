@@ -20,7 +20,7 @@ struct SendSheet: View {
                         SendRow(
                             source: source, target: send, title: levelTargets.count > 1 ? mirror.name(send) : "Level",
                             accent: Theme.color(mirror.color(send)), mirror: mirror, isLevelFixed: isSubgroup,
-                            isSoloed: levelTargets.count > 1 && mirror.isSoloed(.strip(send, .full)) == true)
+                            isSoloed: levelTargets.count > 1 && mirror.isSoloed(send))
                     }
                     TapPointSection(source: source, target: target, mirror: mirror)
                     if mirror.isLinked(target) { panRows }
@@ -84,7 +84,7 @@ struct SendSheet: View {
             dismiss()
         }
         // A soloed strip's name is yellow wherever it shows (2026-10-19); a link still, by its place in the title.
-        .foregroundStyle(mirror.isSoloed(.strip(strip, .full)) == true ? Theme.soloYellow : .blue)
+        .foregroundStyle(mirror.isSoloed(strip) ? Theme.soloYellow : .blue)
         .accessibilityLabel("Open \(name)")
     }
 

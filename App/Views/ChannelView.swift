@@ -52,7 +52,7 @@ struct ChannelView: View {
             if isLive { mirror.read(tab, of: main) }
         }
         .navigationTitle(title)
-        .demoTitle(title, soloed: mirror.isSoloed(.strip(main, .full)) == true)
+        .demoTitle(title, soloed: mirror.isSoloed(main))
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(item: $openStrip) {
             ChannelView(strip: $0, mirror: mirror, tab: ChannelTab.opened($0, from: main) ?? .mix, focus: main)

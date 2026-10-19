@@ -53,6 +53,15 @@ func withLiveDesk(
     try await body(fake, mirror)
 }
 
+/// A live desk on which each of `addresses` (a solo switch, Exclusive solo) was switched on before connecting.
+@MainActor
+func withLiveDesk(setting addresses: [String], body: (FakeM32, ConsoleMirror) async throws -> Void) async throws {
+    try await withLiveDesk(
+        before: { fake in
+            for address in addresses { fake.deskChange(address, .int(1)) }
+        }, body: body)
+}
+
 /// Runs `body` against a fresh fake desk and a link already started on it, and stops both afterwards. `before`
 /// sets the fake's quirks ahead of the first identify.
 @MainActor

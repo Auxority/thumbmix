@@ -27,7 +27,7 @@ struct ChannelHeader: View {
                 stripe
                 // Yellow when soloed; the title above says "Solo" in words (H2, 2026-10-19).
                 Text(name).font(.title2.bold()).lineLimit(1)
-                    .foregroundStyle(mirror.isSoloed(.strip(strip, .full)) == true ? Theme.soloYellow : .white)
+                    .foregroundStyle(mirror.isSoloed(strip) ? Theme.soloYellow : .white)
                 Image(systemName: "pencil").font(.subheadline).foregroundStyle(Theme.secondaryText)
                 Spacer()
             }

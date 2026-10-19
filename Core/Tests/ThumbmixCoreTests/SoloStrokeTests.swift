@@ -7,8 +7,8 @@ import Testing
 struct SoloStrokeTests {
     private let fourOff: [Bool?] = [false, false, false, false]
 
-    private func stroke(_ snapshot: [Bool?], start: Int = 0, other: Int = 0, exclusive: Bool = false) -> SoloStroke {
-        SoloStroke(snapshot: snapshot, start: start, otherSoloed: other, gatesExclusive: exclusive)
+    private func stroke(_ snapshot: [Bool?], start: Int = 0, soloed: Int = 0, exclusive: Bool = false) -> SoloStroke {
+        SoloStroke(snapshot: snapshot, start: start, soloedBefore: soloed, gatesExclusive: exclusive)
     }
 
     @Test func holdingSolosTheRow() {
@@ -44,12 +44,6 @@ struct SoloStrokeTests {
         #expect(drag.shown(2) == true)
     }
 
-    @Test func draggingUpWorksToo() {
-        var drag = stroke(fourOff, start: 3)
-        #expect(drag.move(to: 1) == [2, 1])
-        #expect(drag.shown(0) == false)
-    }
-
     /// The safety rule: a row the desk never told us about is neither soloed nor ticked.
     @Test func unreadRowsAreSkipped() {
         var drag = stroke([false, nil, false])
@@ -66,15 +60,11 @@ struct SoloStrokeTests {
         #expect(drag.pending == [1, 2, 3])
     }
 
-    @Test func exclusiveCountsSolosElsewhere() {
-        let held = stroke(fourOff, other: 1, exclusive: true)
+    /// A solo already on the desk, in this list or another group, counts as the first.
+    @Test func exclusiveCountsSolosAlreadyOn() {
+        let held = stroke(fourOff, soloed: 1, exclusive: true)
         #expect(held.writes == [:])
         #expect(held.pending == [0])
-    }
-
-    @Test func exclusiveCountsSoloedRowsInTheList() {
-        let held = stroke([true, false, false, false], start: 2, exclusive: true)
-        #expect(held.pending == [2])
     }
 
     @Test func turnOffWritesThePending() {

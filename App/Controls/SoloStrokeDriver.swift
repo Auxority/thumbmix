@@ -10,10 +10,11 @@ final class SoloStrokeDriver {
     nonisolated static var space: NamedCoordinateSpace { .named("overview") }
 
     /// Each row's frame in the overview's visible area (`space`); rows the lazy list hasn't built have none.
-    var frames: [OverviewItem: CGRect] = [:]
-    var viewportHeight: CGFloat = 0
+    /// Ignored by Observation: only the gesture reads them, and every row writes its frame on every scroll frame.
+    @ObservationIgnored var frames: [OverviewItem: CGRect] = [:]
+    @ObservationIgnored var viewportHeight: CGFloat = 0
     /// The rows end in a glass bar the list scrolls under; the bottom edge zone sits above it.
-    var bottomInset: CGFloat = 0
+    @ObservationIgnored var bottomInset: CGFloat = 0
     private(set) var ticks = 0
     private(set) var held: OverviewItem?
     /// The finger lifted on rows held back for the Exclusive solo question.
@@ -40,10 +41,10 @@ final class SoloStrokeDriver {
             log.error("solo hold on a row not in the list: \(item.id, privacy: .public)")
             return
         }
-        rows = listed
         let ticked = mirror.beginSoloStroke(listed, at: start)
         log.info("solo stroke at row \(start) of \(listed.count): \(ticked.isEmpty ? "refused" : "started")")
         guard !ticked.isEmpty else { return }
+        rows = listed
         held = item
         ticks += 1
         edgeScroll = Task { [weak self] in await self?.scrollAtEdges(mirror, proxy) }
@@ -57,8 +58,7 @@ final class SoloStrokeDriver {
 
     private func end(_ mirror: ConsoleMirror) {
         guard held != nil else { return }
-        edgeScroll?.cancel()
-        held = nil
+        strokeEnded()
         isAskingExclusive = mirror.endSoloStroke()
     }
 

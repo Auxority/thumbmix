@@ -17,15 +17,15 @@ public struct SoloStroke: Sendable {
     /// Rows the engineer chose not to solo (Keep), or that were held back when contact was lost.
     private var dropped: Set<Int> = []
 
-    /// `otherSoloed` = soloed rows outside `snapshot` (other groups). `gatesExclusive` = the desk's Exclusive solo is
+    /// `soloedBefore` = soloed rows on the whole desk at touch-down. `gatesExclusive` = the desk's Exclusive solo is
     /// on and the engineer hasn't answered Keep: a second solo waits for the question.
-    public init(snapshot: [Bool?], start: Int, otherSoloed: Int, gatesExclusive: Bool) {
+    public init(snapshot: [Bool?], start: Int, soloedBefore: Int, gatesExclusive: Bool) {
         self.snapshot = snapshot
         self.start = start
         self.gatesExclusive = gatesExclusive
         target = snapshot[start] != true
         reach = start
-        soloedBefore = otherSoloed + snapshot.filter { $0 == true }.count
+        self.soloedBefore = soloedBefore
     }
 
     /// Rows the stroke changes, in the order the finger reached them.
