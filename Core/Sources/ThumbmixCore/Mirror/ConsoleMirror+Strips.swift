@@ -73,6 +73,40 @@ extension ConsoleMirror {
         for side in isLinked(strip) ? strip.pairSides : [strip] { set(side.solo, soloed) }
     }
 
+    /// A row is soloed when either side is: half a pair soloed on the desk still sounds. nil while a side is unread.
+    public func isSoloed(_ item: OverviewItem) -> Bool? {
+        let states = soloSides(item).map { cell($0.solo).argument }
+        guard !states.contains(nil) else { return nil }
+        return states.contains(.int(1))
+    }
+
+    public func setSolo(_ item: OverviewItem, _ on: Bool) {
+        for side in soloSides(item) { set(side.solo, .int(on ? 1 : 0)) }
+    }
+
+    /// Soloed rows on the whole desk, a linked pair counted once.
+    public var soloedCount: Int {
+        StripKind.allCases.flatMap(StripID.all).filter { strip in
+            !(isLinked(strip) && !strip.isOddSide) && isSoloed(.strip(strip, .full)) == true
+        }.count
+    }
+
+    public var isExclusiveSolo: Bool { cell(Catalog.exclusiveSolo).argument == .int(1) }
+
+    public func turnOffExclusiveSolo() { set(Catalog.exclusiveSolo, .int(0)) }
+
+    /// The desk's CLEAR SOLO (doc p.69). Whether it pushes every switch it clears isn't documented, so all are re-read.
+    public func clearSolo() {
+        command("/-action/clearsolo", .int(1))
+        let now = ContinuousClock.now
+        for strip in StripKind.allCases.flatMap(StripID.all) { holds.rereadSoon(strip.solo, now: now) }
+    }
+
+    /// Both sides of a linked pair, as `toggleSolo` writes them; a half row too.
+    private func soloSides(_ item: OverviewItem) -> [StripID] {
+        isLinked(item.held) ? item.held.oddSide.pairSides : [item.held]
+    }
+
     /// Unnamed and pulled all the way down: almost certainly not patched for this show.
     public func isUnused(_ strip: StripID) -> Bool {
         rawName(strip).isEmpty && (normalized(Catalog.fader(strip)) ?? 0) == 0

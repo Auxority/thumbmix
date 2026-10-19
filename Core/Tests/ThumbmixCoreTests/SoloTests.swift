@@ -59,6 +59,65 @@ struct SoloTests {
         }
     }
 
+    /// A pair the desk holds half soloed still sounds in the headphones: the row counts as soloed, once.
+    @Test func aPairWithOneSideSoloedCountsAsSoloed() async throws {
+        let gtrL = StripID(.input, 9)
+        try await withLiveDesk(before: { $0.deskChange(gtrL.solo, .int(1)) }) { _, mirror in
+            #expect(mirror.isSoloed(.pair(gtrL)) == true)
+            #expect(mirror.soloedCount == 1)
+        }
+    }
+
+    @Test func settingAPairWritesBothSides() async throws {
+        let gtrL = StripID(.input, 9)
+        let gtrR = StripID(.input, 10)
+        try await withLiveDesk(before: {
+            $0.deskChange(gtrL.solo, .int(1))
+            $0.deskChange(gtrR.solo, .int(1))
+        }) { fake, mirror in
+            mirror.setSolo(.pair(gtrL), false)
+
+            #expect(await eventually { fake.value(at: gtrL.solo) == .int(0) })
+            #expect(await eventually { fake.value(at: gtrR.solo) == .int(0) })
+        }
+    }
+
+    @Test func clearSoloReachesTheDeskAndRereads() async throws {
+        let kick = StripID(.input, 1)
+        let bus = StripID(.bus, 3)
+        try await withLiveDesk(before: {
+            $0.deskChange(kick.solo, .int(1))
+            $0.deskChange(bus.solo, .int(1))
+        }) { fake, mirror in
+            #expect(mirror.soloedCount == 2)
+
+            mirror.clearSolo()
+
+            #expect(await eventually { fake.value(at: kick.solo) == .int(0) && fake.value(at: bus.solo) == .int(0) })
+            #expect(await eventually { mirror.soloedCount == 0 })
+        }
+    }
+
+    @Test func exclusiveSoloIsReadOnConnect() async throws {
+        try await withLiveDesk(before: { $0.deskChange(Catalog.exclusiveSolo, .int(1)) }) { fake, mirror in
+            #expect(mirror.isExclusiveSolo)
+
+            mirror.turnOffExclusiveSolo()
+
+            #expect(await eventually { fake.value(at: Catalog.exclusiveSolo) == .int(0) })
+        }
+    }
+
+    /// The safety rule: an unread switch is neither on nor off, and a row with one shows nothing.
+    @Test func anUnreadSoloIsNeitherOnNorOff() async throws {
+        try await withLiveDesk { _, mirror in
+            let kick = StripID(.input, 1)
+            mirror.cell(kick.solo).argument = nil
+
+            #expect(mirror.isSoloed(.strip(kick, .full)) == nil)
+        }
+    }
+
     /// The fake desk plays the desk's CLEAR SOLO (doc p.69), so the app's Clear can be tested end to end.
     @Test func clearSoloSilencesEverySwitch() async throws {
         try await withLink { fake, link in

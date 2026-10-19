@@ -36,6 +36,8 @@ public final class ConsoleMirror {
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
     @ObservationIgnored let log = Logger(subsystem: "thumbmix", category: "mirror")
+    /// The engineer answered Keep to the Exclusive solo question for this desk; the App sets it per connection.
+    @ObservationIgnored public var keepsExclusiveSolo = false
     /// Called each time the console answers as an M32: on connect, and again after an outage.
     @ObservationIgnored public var onIdentified: ((ConsoleInfo) -> Void)?
 
@@ -128,6 +130,12 @@ public final class ConsoleMirror {
         }
         linkCopies.expect(partner, argument)
         holds.rereadSoon(partner, now: .now)
+    }
+
+    /// An action the desk performs (CLEAR SOLO), not a value it keeps: no cell, nothing to show or hold.
+    func command(_ address: String, _ argument: OSCArgument) {
+        guard isLive else { return }
+        pendingSends[address] = argument
     }
 
     func write(_ address: String, _ argument: OSCArgument) {
