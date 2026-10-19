@@ -25,6 +25,12 @@ struct CatalogTests {
         #expect(StripID(.mainMono).muteGroupMask == "/main/m/grp/mute")
     }
 
+    /// Whether the desk pushes a group switched on it is unverified (m32-probe section 14): the audit loop re-reads
+    /// the groups while live, so a strip's red-bordered M can't stay wrong.
+    @Test func theAuditReReadsTheMuteGroups() {
+        #expect(Set(Catalog.muteGroupAddresses).isSubset(of: Set(Catalog.auditAddresses())))
+    }
+
     @Test func dcaFaderAndOnHaveNoMixLevel() {
         #expect(StripID(.dca, 3).fader == "/dca/3/fader")
         #expect(StripID(.dca, 3).on == "/dca/3/on")

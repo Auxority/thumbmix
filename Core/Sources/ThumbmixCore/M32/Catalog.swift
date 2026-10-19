@@ -231,9 +231,10 @@ public enum Catalog {
 
     /// The values a stale display would hurt most: what each strip is called and where its fader and mute sit.
     /// The RTA setting is audited too: the doc doesn't say a change on the desk is pushed, and releasing
-    /// the RTA must not overwrite a choice the engineer made on the desk meanwhile.
+    /// the RTA must not overwrite a choice the engineer made on the desk meanwhile. So are the mute groups: whether
+    /// the desk pushes a group switched on it is unverified too (m32-probe section 14), and each strip's M shows it.
     public static func auditAddresses() -> [String] {
-        rtaAddresses + linkAddresses
+        rtaAddresses + muteGroupAddresses + linkAddresses
             + StripKind.allCases.flatMap(StripID.all).flatMap { strip in
                 [strip.name, strip.color, strip.fader, strip.on] + [strip.pan].compactMap { $0 }
             }
