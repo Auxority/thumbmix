@@ -12,7 +12,7 @@ struct MembersTab: View {
 
     var body: some View {
         ScrollView {
-            let unused = mirror.unusedStrips(notAssignedTo: dca)
+            let unused = mirror.unusedStrips(notIn: .dca(dca))
             VStack(spacing: 6) {
                 AssignNote()
                 ForEach(ConsoleMirror.dcaAssignableGroups) { group in
@@ -60,9 +60,9 @@ private struct AssignChip: View {
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
-        let assignment = mirror.dcaAssignment(of: strip, to: dca)
+        let assignment = mirror.assignment(of: strip, to: .dca(dca))
         Button {
-            mirror.toggleDCAAssignment(of: strip, to: dca)
+            mirror.toggleAssignment(of: strip, to: .dca(dca))
         } label: {
             mark(assignment)
                 .frame(width: 72 * sizeScale)
@@ -81,7 +81,7 @@ private struct AssignChip: View {
         .accessibilityValue(value(assignment))
     }
 
-    @ViewBuilder private func mark(_ assignment: DCAAssignment) -> some View {
+    @ViewBuilder private func mark(_ assignment: Assignment) -> some View {
         switch assignment {
         case .assigned:
             Image(systemName: "checkmark.circle.fill").font(.title3).foregroundStyle(.black, Theme.usualOnGreen)
@@ -98,7 +98,7 @@ private struct AssignChip: View {
         Text(side).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.usualOnGreen)
     }
 
-    private func value(_ assignment: DCAAssignment) -> Text {
+    private func value(_ assignment: Assignment) -> Text {
         switch assignment {
         case .assigned: Text("Assigned")
         case .unassigned: Text("Not assigned")

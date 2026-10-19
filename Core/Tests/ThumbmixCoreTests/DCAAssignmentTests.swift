@@ -18,30 +18,30 @@ struct DCAAssignmentTests {
 
     @Test func aStripReadsAssignedOrNot() async throws {
         try await withLiveDesk { _, mirror in
-            #expect(mirror.dcaAssignment(of: kick, to: 1) == .assigned)
-            #expect(mirror.dcaAssignment(of: kick, to: 2) == .unassigned)
+            #expect(mirror.assignment(of: kick, to: .dca(1)) == .assigned)
+            #expect(mirror.assignment(of: kick, to: .dca(2)) == .unassigned)
         }
     }
 
     @Test func aPairTheDeskAssignedOnOneSideNamesThatSide() async throws {
         try await withHalfAssignedGuitars { _, mirror in
-            #expect(mirror.dcaAssignment(of: gtrL, to: 2) == .leftOnly)
-            #expect(mirror.dcaAssignment(of: gtrL, to: 3) == .unassigned)
+            #expect(mirror.assignment(of: gtrL, to: .dca(2)) == .leftOnly)
+            #expect(mirror.assignment(of: gtrL, to: .dca(3)) == .unassigned)
         }
     }
 
     @Test func anUnreadMaskIsUnread() {
         let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: 9))
-        #expect(mirror.dcaAssignment(of: kick, to: 1) == .unread)
+        #expect(mirror.assignment(of: kick, to: .dca(1)) == .unread)
     }
 
     /// The mask holds all 8 DCAs: a tap changes only this DCA's bit.
     @Test func aTapFlipsOnlyThisDCAsBit() async throws {
         try await withLiveDesk { fake, mirror in
-            mirror.toggleDCAAssignment(of: kick, to: 3)
+            mirror.toggleAssignment(of: kick, to: .dca(3))
             #expect(await eventually { fake.value(at: kick.dcaMask!) == .int(0b101) })
 
-            mirror.toggleDCAAssignment(of: kick, to: 1)
+            mirror.toggleAssignment(of: kick, to: .dca(1))
             #expect(await eventually { fake.value(at: kick.dcaMask!) == .int(0b100) })
         }
     }
@@ -49,7 +49,7 @@ struct DCAAssignmentTests {
     /// The doc doesn't say whether the desk links DCA assignment; half a stereo source on a DCA is never wanted.
     @Test func aLinkedPairAssignsBothSides() async throws {
         try await withLiveDesk { fake, mirror in
-            mirror.toggleDCAAssignment(of: gtrL, to: 1)
+            mirror.toggleAssignment(of: gtrL, to: .dca(1))
             #expect(await eventually { fake.value(at: gtrL.dcaMask!) == .int(0b011) })
             #expect(await eventually { fake.value(at: gtrR.dcaMask!) == .int(0b011) })
         }
@@ -57,7 +57,7 @@ struct DCAAssignmentTests {
 
     @Test func aHalfAssignedPairTapsToBothAssigned() async throws {
         try await withHalfAssignedGuitars { fake, mirror in
-            mirror.toggleDCAAssignment(of: gtrL, to: 2)
+            mirror.toggleAssignment(of: gtrL, to: .dca(2))
             #expect(await eventually { fake.value(at: gtrR.dcaMask!) == .int(0b010) })
             #expect(fake.value(at: gtrL.dcaMask!) == .int(0b010))
         }
@@ -74,7 +74,7 @@ struct DCAAssignmentTests {
         mirror.apply(OSCMessage(ch20.dcaMask!, [.int(0b1)]))
         mirror.apply(OSCMessage(ch21.dcaMask!, [.int(0)]))
 
-        let unused = mirror.unusedStrips(notAssignedTo: 1)
+        let unused = mirror.unusedStrips(notIn: .dca(1))
 
         #expect(!unused.contains(ch20))
         #expect(unused.contains(ch21))

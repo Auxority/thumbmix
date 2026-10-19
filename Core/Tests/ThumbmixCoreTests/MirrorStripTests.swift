@@ -78,8 +78,8 @@ struct MirrorStripTests {
 
     @Test func dcaBitZeroIsDCAOne() {
         mirror.apply(OSCMessage("/ch/01/grp/dca", [.int(0b101)]))
-        #expect(mirror.isMember(StripID(.input, 1), ofDCA: 1))
-        #expect(!mirror.isMember(StripID(.input, 1), ofDCA: 2))
-        #expect(mirror.isMember(StripID(.input, 1), ofDCA: 3))
+        #expect(mirror.isMember(StripID(.input, 1), of: .dca(1)))
+        #expect(!mirror.isMember(StripID(.input, 1), of: .dca(2)))
+        #expect(mirror.isMember(StripID(.input, 1), of: .dca(3)))
     }
 }
