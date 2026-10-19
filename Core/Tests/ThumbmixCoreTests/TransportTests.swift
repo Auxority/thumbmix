@@ -43,6 +43,25 @@ struct TransportTests {
         #expect(arrival.time - asked < .milliseconds(250))
     }
 
+    /// m32-probe times meter changes from the recorder (section 15), so it keeps the transport's arrival time.
+    @Test(.timeLimit(.minutes(1))) func theRecorderKeepsWhenEachMessageArrived() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        let transport = UDPTransport(host: "127.0.0.1", port: port)
+        transport.start()
+        defer { transport.cancel() }
+        let recorder = MessageRecorder(transport.messages)
+
+        for _ in 1...3 { transport.send(OSCMessage("/info")) }
+        let asked = ContinuousClock.now
+        blockTheMainActor(for: 0.5)  // the recorder runs on the main actor: it records only after this
+
+        _ = await recorder.wait(for: "/info")
+        let arrival = try #require(recorder.arrivals.first)
+        #expect(arrival.message.address == "/info")
+        #expect(arrival.time - asked < .milliseconds(250))
+    }
+
     /// Blocks, rather than suspends, so nothing else runs on the main actor meanwhile.
     private func blockTheMainActor(for seconds: TimeInterval) {
         Thread.sleep(forTimeInterval: seconds)

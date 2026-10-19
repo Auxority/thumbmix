@@ -2,17 +2,19 @@
 /// Racing a timeout against the stream would cancel its consumer, and that terminates an AsyncStream.
 @MainActor
 public final class MessageRecorder {
-    public private(set) var messages: [OSCMessage] = []
+    /// Each with the transport's arrival time: m32-probe times meter changes from them.
+    public private(set) var arrivals: [Arrival] = []
+    public var messages: [OSCMessage] { arrivals.map(\.message) }
     private let limit = 5_000
 
     public init(_ stream: AsyncStream<Arrival>) {
         Task { [weak self] in
-            for await arrival in stream { self?.record(arrival.message) }
+            for await arrival in stream { self?.record(arrival) }
         }
     }
 
     public func last(address: String) -> OSCMessage? {
-        messages.last { $0.address == address }
+        arrivals.last { $0.message.address == address }?.message
     }
 
     public func wait(for address: String, timeout: Duration = .seconds(2)) async -> OSCMessage? {
@@ -24,10 +26,10 @@ public final class MessageRecorder {
         return last(address: address)
     }
 
-    public func clear() { messages.removeAll() }
+    public func clear() { arrivals.removeAll() }
 
-    private func record(_ message: OSCMessage) {
-        messages.append(message)
-        if messages.count > limit { messages.removeFirst(messages.count - limit) }
+    private func record(_ arrival: Arrival) {
+        arrivals.append(arrival)
+        if arrivals.count > limit { arrivals.removeFirst(arrivals.count - limit) }
     }
 }
