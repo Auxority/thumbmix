@@ -64,7 +64,6 @@ None open.
 ## Code and docs
 
 - [ ] **The user rewrites README by hand** (2026-10-17); developer details (build, tests, gates) move to a separate Markdown file.
-- [ ] **Try PMD CPD for duplication** (2026-10-17). SonarQube's free local edition has no Swift, and Sigrid guardrails return nothing for Swift. SwiftLint guards complexity, size and unused code (`scripts/unused.sh`), and CodeQL (GitHub's default setup) scans Swift on every PR. Decide whether CI runs it.
 - [ ] **A pull request template** (2026-10-17): What and why, How I tested it (lint + Core tests; full UI suite if the change shows in the app), Screenshots. A Maxxton hook on the Mac blocks agents from writing `.github/pull_request_template.md`, so the user adds it.
 - [ ] **At 1.0.0: serve the SideStore source as a release asset** (2026-10-16, the user's pick as the cleanest). Each release attaches `source.json` and users add `https://github.com/Auxority/thumbmix/releases/latest/download/source.json`; the `sidestore` branch, its force-push and the "157 behind" in GitHub's branch list go. Waits on 1.0.0, because `latest` skips pre-releases and every 0.x is one. The URL changes, so users must re-add the source once: keep the branch published for a while with a note telling them to, then delete it. Update the DECISIONS line on the `sidestore` branch, README's install step and `scripts/publish-sidestore-source.sh`.
 
