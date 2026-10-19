@@ -79,6 +79,19 @@ struct MuteGroupTests {
         }
     }
 
+    /// A filled M means the strip's own mute; the red border, a group's. Both at once shows the strip's own.
+    @Test func ownMuteWinsOverAGroup() {
+        let mirror = offline()
+        mirror.apply(OSCMessage(kick.muteGroupMask!, [.int(0b1)]))
+        mirror.apply(OSCMessage("/config/mute/1", [.int(1)]))
+        mirror.apply(OSCMessage(kick.on, [.int(0)]))
+        #expect(mirror.muteLook(kick) == .muted)
+        mirror.apply(OSCMessage(kick.on, [.int(1)]))
+        #expect(mirror.muteLook(kick) == .mutedByGroup)
+        mirror.apply(OSCMessage("/config/mute/1", [.int(0)]))
+        #expect(mirror.muteLook(kick) == .off)
+    }
+
     @Test func membershipFlipsOnlyThisGroupsBit() async throws {
         try await withLiveDesk { fake, mirror in
             mirror.toggleAssignment(of: bass, to: .muteGroup(2))

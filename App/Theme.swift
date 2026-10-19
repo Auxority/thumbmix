@@ -18,6 +18,10 @@ enum Theme {
     /// mute). Green on the tint is 6.1:1.
     static let usualOnTint = Color(red: 18 / 255, green: 61 / 255, blue: 32 / 255)
     static let usualOnGreen = Color(red: 48 / 255, green: 209 / 255, blue: 88 / 255)
+    /// Muted by a mute group, and a group that's on: a `muteRed` border on this tint, not a fill, which is the strip's
+    /// own MUTE (pick "2", 2026-10-19). The text on the tint is 5.9:1.
+    static let groupMuteTint = Color(red: 58 / 255, green: 20 / 255, blue: 20 / 255)
+    static let groupMuteText = Color(red: 1, green: 107 / 255, blue: 107 / 255)
     /// Off text on `raised`, 6.3:1; `secondaryText` there is only 4.3:1, under AA for 15 pt.
     static let offText = Color(white: 0.69)
     static let demoPurple = Color(red: 0.6, green: 0.3, blue: 0.85)

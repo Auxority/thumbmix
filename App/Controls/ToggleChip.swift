@@ -30,7 +30,8 @@ struct ToggleChip: View {
     }
 }
 
-/// Lit red when muted. On the M32 mute is `mix/on` = 0.
+/// Lit red when muted. On the M32 mute is `mix/on` = 0. A red border instead when only a mute group silences the
+/// strip; a tap still switches the strip's own mute.
 struct MuteButton: View {
     let strip: StripID
     let mirror: ConsoleMirror
@@ -41,7 +42,8 @@ struct MuteButton: View {
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
-        let muted = mirror.isMuted(strip)
+        let look = mirror.muteLook(strip)
+        let muted = look == .muted
         let name = mirror.displayName(strip)
         Button {
             mirror.set(strip.on, .int(muted ? 1 : 0))
@@ -52,13 +54,26 @@ struct MuteButton: View {
                 .minimumScaleFactor(0.6)
                 .frame(width: width.map { $0 * sizeScale }, height: height * sizeScale)
                 .frame(maxWidth: width == nil ? .infinity : nil)
-                .foregroundStyle(muted ? .white : Theme.secondaryText)
-                .background(muted ? Theme.muteRed : Theme.track, in: RoundedRectangle(cornerRadius: 10))
+                .groupMuteStyle(look == .mutedByGroup, muted: muted)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("mute-" + strip.on)
         // A list of plain "Mute"s doesn't say which strip each one mutes.
         .accessibilityLabel(muted ? "Unmute \(name)" : "Mute \(name)")
+        .accessibilityValue(look == .mutedByGroup ? Text("Muted by a mute group") : Text(verbatim: ""))
+    }
+}
+
+extension View {
+    /// The look of a mute: filled red for a strip's own, a red border on a dark red tint for a mute group's (a strip
+    /// muted by one, a group that's on); grey when neither.
+    func groupMuteStyle(_ byGroup: Bool, muted: Bool = false) -> some View {
+        let fill = muted ? Theme.muteRed : byGroup ? Theme.groupMuteTint : Theme.track
+        return foregroundStyle(muted ? .white : byGroup ? Theme.groupMuteText : Theme.secondaryText)
+            .background(fill, in: RoundedRectangle(cornerRadius: 10))
+            .overlay {
+                if byGroup { RoundedRectangle(cornerRadius: 10).strokeBorder(Theme.muteRed, lineWidth: 2) }
+            }
     }
 }
 
