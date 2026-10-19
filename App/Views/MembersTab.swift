@@ -41,7 +41,7 @@ struct MembersTab: View {
             } label: {
                 StripNameBlock(
                     title: mirror.title(of: row), caption: mirror.numberCaption(of: row),
-                    stripe: ItemStripe(item: row, mirror: mirror))
+                    stripe: ItemStripe(item: row, mirror: mirror), isSoloed: mirror.isSoloed(row) == true)
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("member-" + row.held.id)
@@ -114,13 +114,17 @@ private struct StripNameBlock: View {
     let title: String
     let caption: String?
     let stripe: ItemStripe
+    /// Yellow, and "Solo" in the caption, as everywhere a soloed strip's name shows (2026-10-19).
+    var isSoloed = false
 
     var body: some View {
         HStack(spacing: 10) {
             stripe
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.body)
-                if let caption { Text(caption).font(.caption).foregroundStyle(.white.opacity(0.6)) }
+                Text(title).font(.body).foregroundStyle(isSoloed ? Theme.soloYellow : .white)
+                if let shown = isSoloed ? ConsoleMirror.soloCaption(caption) : caption {
+                    Text(shown).font(.caption).foregroundStyle(isSoloed ? Theme.soloYellow : .white.opacity(0.6))
+                }
             }
             Spacer(minLength: 8)
             Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.white.opacity(0.5))

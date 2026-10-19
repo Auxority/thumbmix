@@ -1428,6 +1428,16 @@
         }
       }
     },
+    "Solo" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo"
+          }
+        }
+      }
+    },
     "Source" : {
       "localizations" : {
         "en" : {

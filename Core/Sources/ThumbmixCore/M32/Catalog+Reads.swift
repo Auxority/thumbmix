@@ -13,7 +13,7 @@ extension Catalog {
     // starting ~100 of each at once starved the main actor for seconds on CI.
     private static let overview: [String] =
         StripKind.allCases.flatMap(StripID.all).flatMap(overviewAddresses(of:)) + headampIndexAddresses
-        + rtaAddresses + linkAddresses
+        + rtaAddresses + linkAddresses + [exclusiveSolo]
 
     private static let all: [String] = {
         let tabs = StripKind.allCases.flatMap(StripID.all).flatMap { strip in
@@ -27,6 +27,9 @@ extension Catalog {
     public static let linkAddresses =
         StripKind.allCases.flatMap(StripID.all).filter(\.isOddSide).compactMap(\.linkAddress)
         + LinkSection.allCases.map(\.preferenceAddress)
+
+    /// Exclusive solo (doc p.21): each solo replaces the last. Read on connect, so a stroke knows to ask first.
+    public static let exclusiveSolo = "/config/solo/exclusive"
 
     /// Read on connect so the desk's own RTA setting is known before the app borrows it.
     static let rtaAddresses = [RTA.source, RTA.position]

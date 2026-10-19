@@ -10,7 +10,7 @@ final class OfflineUITests: XCTestCase {
     /// mistaken for the desk, and every visit starts from the same fresh desk.
     func testOfflineModeRunsAFreshDemoConsole() {
         let app = XCUIApplication()
-        app.launchArguments = ["-knownConsoles", "()"] + fixedLocale
+        app.launchArguments = ["-knownConsoles", "()"] + fixedLocale + quietTips
         app.launch()
 
         startOffline(app)

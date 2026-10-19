@@ -78,6 +78,9 @@
     "%lld" : {
 
     },
+    "%lld soloed" : {
+
+    },
     "%lld unused" : {
 
     },
@@ -116,6 +119,12 @@
 
     },
     "Cancel" : {
+
+    },
+    "Clear" : {
+
+    },
+    "Clear solo" : {
 
     },
     "Colour" : {
@@ -175,6 +184,9 @@
     "EQ off" : {
 
     },
+    "Exclusive solo is on" : {
+
+    },
     "Fader and mute aren't linked on the desk." : {
 
     },
@@ -205,6 +217,9 @@
     "Hide unused" : {
 
     },
+    "Hold a name to solo it. Keep holding and drag to solo more." : {
+
+    },
     "Icon" : {
 
     },
@@ -227,6 +242,9 @@
 
     },
     "It follows %@’s fader at a fixed 0 dB, whatever its level is now." : {
+
+    },
+    "Keep" : {
 
     },
     "Key" : {
@@ -414,7 +432,13 @@
     "Show unused" : {
 
     },
+    "Solo" : {
+
+    },
     "Solo %@" : {
+
+    },
+    "Solo several at once" : {
 
     },
     "Stereo link" : {
@@ -447,6 +471,9 @@
     "The demo didn't start" : {
 
     },
+    "The desk keeps one solo at a time. Turn it off?" : {
+
+    },
     "They'll work as one stereo channel." : {
 
     },
@@ -460,6 +487,9 @@
 
     },
     "Try again, or restart Thumbmix." : {
+
+    },
+    "Turn off" : {
 
     },
     "Turn Off" : {
@@ -491,6 +521,9 @@
       }
     },
     "Unmute %@" : {
+
+    },
+    "Unsolo" : {
 
     },
     "Unsolo %@" : {

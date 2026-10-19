@@ -37,7 +37,8 @@ struct SendsTab: View {
                 ForEach(pair) { target in
                     SendRow(
                         source: strip, target: target, title: mirror.displayName(target), caption: caption(target),
-                        accent: Theme.color(mirror.color(target)), mirror: mirror)
+                        accent: Theme.color(mirror.color(target)), mirror: mirror,
+                        isSoloed: mirror.isSoloed(target))
                 }
             }
             SendSettingsButton(address: Catalog.sendLevel(from: strip, to: pair[0]).address) {
@@ -131,7 +132,7 @@ struct FedByTab: View {
             SendRow(
                 source: row.held, target: target, title: mirror.title(of: row),
                 caption: mirror.fedByCaption(of: row, on: target), accent: Theme.color(mirror.color(row.held)),
-                mirror: mirror
+                mirror: mirror, isSoloed: mirror.isSoloed(row) == true
             )
             if Catalog.sendTap(from: row.held, to: target.oddSide) != nil {
                 SendSettingsButton(address: Catalog.sendLevel(from: row.held, to: target).address) {
@@ -186,6 +187,8 @@ struct SendRow: View {
     let mirror: ConsoleMirror
     /// A subgroup send's level is fixed at 0 dB; it can still be switched off.
     var isLevelFixed = false
+    /// The strip the row names (the target on Sends, the source on Fed by) is soloed.
+    var isSoloed = false
 
     var body: some View {
         HStack(spacing: 8) {
@@ -201,7 +204,7 @@ struct SendRow: View {
             }
             ParameterRow(
                 spec: Catalog.feedLevel(from: source, to: target), mirror: mirror, title: title, caption: caption,
-                accent: accent
+                accent: accent, isSoloed: isSoloed
             )
             .disabled(isLevelFixed)
         }

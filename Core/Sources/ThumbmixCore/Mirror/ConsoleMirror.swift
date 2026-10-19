@@ -29,13 +29,16 @@ public final class ConsoleMirror {
     @ObservationIgnored private let overviewSet: Set<String>
     @ObservationIgnored var reads = ReadQueue()
     @ObservationIgnored private var meterCells: [StripID: MeterCell] = [:]
-    @ObservationIgnored private var pendingSends: [String: OSCArgument] = [:]
+    @ObservationIgnored var pendingSends: [String: OSCArgument] = [:]
     @ObservationIgnored var holds = EditHolds(hold: ConsoleMirror.editHold)
     @ObservationIgnored var linkCopies = LinkCopyCheck()
     @ObservationIgnored private let auditAddresses: [String]
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
     @ObservationIgnored let log = Logger(subsystem: "thumbmix", category: "mirror")
+    public internal(set) var soloStroke: ActiveSoloStroke?
+    /// The engineer answered Keep to the Exclusive solo question for this desk; the App sets it per connection.
+    @ObservationIgnored public var keepsExclusiveSolo = false
     /// Called each time the console answers as an M32: on connect, and again after an outage.
     @ObservationIgnored public var onIdentified: ((ConsoleInfo) -> Void)?
 
@@ -205,8 +208,7 @@ public final class ConsoleMirror {
     }
 
     private func tick() {
-        for (address, argument) in pendingSends { link.send(OSCMessage(address, [argument])) }
-        pendingSends.removeAll()
+        flushSends()
         if isSyncing { pumpReads() }
         guard isLive else { return }
         pumpReads()
@@ -237,6 +239,7 @@ public final class ConsoleMirror {
         case .lost:
             reads = ReadQueue()
             linkCopies.forget()
+            abandonSoloStroke()
             status = .lost
         case .failed(let failure):
             status = .failed(failure)

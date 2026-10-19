@@ -13,6 +13,10 @@ struct ParameterRow: View {
     var meter: MeterCell?
     /// A linked pair's left side, drawn above `meter` (the right side).
     var upperMeter: MeterCell?
+    /// The strip the title names is soloed: yellow, and "Solo" in the caption (2026-10-19).
+    var isSoloed = false
+
+    private var shownCaption: String? { isSoloed ? ConsoleMirror.soloCaption(caption) : caption }
 
     /// Where the drag has taken the value, unsnapped: slow movements add up even below one desk step.
     @State private var dragPosition: Float?
@@ -42,11 +46,12 @@ struct ParameterRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title ?? spec.label)
                         .font(.subheadline)
-                        .foregroundStyle(Theme.secondaryText)
+                        .foregroundStyle(isSoloed ? Theme.soloYellow : Theme.secondaryText)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
-                    if let caption {
-                        Text(caption).font(.caption2).foregroundStyle(Theme.secondaryText).lineLimit(1)
+                    if let shownCaption {
+                        Text(shownCaption).font(.caption2)
+                            .foregroundStyle(isSoloed ? Theme.soloYellow : Theme.secondaryText).lineLimit(1)
                     }
                 }
                 Spacer(minLength: 8)
@@ -72,7 +77,7 @@ struct ParameterRow: View {
         .modifier(TypeValueAlert(spec: spec, title: alertTitle, mirror: mirror, isPresented: $isTyping))
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier(spec.address)
-        .accessibilityLabel([alertTitle, caption].compactMap { $0 }.joined(separator: ", "))
+        .accessibilityLabel([alertTitle, shownCaption].compactMap { $0 }.joined(separator: ", "))
         .accessibilityValue(text)
         .accessibilityAdjustableAction(adjust)
         .accessibilityAction(named: "Enter value", startTyping)

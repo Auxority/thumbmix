@@ -99,7 +99,7 @@ final class ConnectUITests: XCTestCase {
     ) -> XCUIApplication {
         let entries = names.map { "{host=\"127.0.0.1\";name=\"\($0)\";model=M32;}" }
         let app = XCUIApplication()
-        app.launchArguments = ["-knownConsoles", "(" + entries.joined(separator: ",") + ")"] + arguments + locale
+        app.launchArguments = ["-knownConsoles", "(" + entries.joined(separator: ",") + ")"] + arguments + locale + quietTips
         app.launch()
         return app
     }
