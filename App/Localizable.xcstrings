@@ -78,6 +78,9 @@
     "%lld" : {
 
     },
+    "%lld soloed" : {
+
+    },
     "%lld unused" : {
 
     },
@@ -116,6 +119,12 @@
 
     },
     "Cancel" : {
+
+    },
+    "Clear" : {
+
+    },
+    "Clear solo" : {
 
     },
     "Colour" : {

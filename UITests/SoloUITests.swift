@@ -19,4 +19,34 @@ final class SoloUITests: DeskUITestCase {
         XCTAssertTrue(kick.appears(within: 2))
         XCTAssertEqual(kick.label, "Kick, Ch 1 · Solo")
     }
+
+    /// Solos set anywhere (the desk, another app) bring the bar above the tabs; its Clear is the desk's CLEAR SOLO.
+    func testDeskSolosBringTheBarAndClearRemovesThem() {
+        launch()
+        XCTAssertFalse(element("solo-bar").exists)
+        desk.change("/-stat/solosw/01", 1)
+        desk.change("/-stat/solosw/49", 1)
+        let bar = element("solo-bar")
+        XCTAssertTrue(bar.appears(within: 2))
+        XCTAssertTrue(eventually(within: 2) { bar.label.contains("2 soloed") })
+        saveScreenshot("solo-clear-bar")
+
+        element("clear-solo").tap()
+
+        XCTAssertTrue(
+            eventually(within: 3) {
+                self.desk.value("/-stat/solosw/01") == .int(0) && self.desk.value("/-stat/solosw/49") == .int(0)
+            })
+        XCTAssertTrue(eventually(within: 3) { !bar.exists })
+    }
+
+    /// Nothing moves under the thumb when the bar comes in.
+    func testTheBarDoesNotMoveTheRows() {
+        launch()
+        let kick = app.buttons["Kick"]
+        let before = kick.frame
+        desk.change("/-stat/solosw/02", 1)
+        XCTAssertTrue(element("solo-bar").appears(within: 2))
+        XCTAssertEqual(kick.frame.minY, before.minY, accuracy: 0.5)
+    }
 }

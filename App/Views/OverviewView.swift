@@ -52,7 +52,11 @@ struct OverviewView: View {
             // In thumb reach; the list scrolls on under the glass, and its last row scrolls clear of it. Kept off the
             // list's `.id(group)`, so switching groups doesn't rebuild the bar under the finger.
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                PillBar(items: StripGroup.allCases, selection: $group, title: \.shortTitle, label: \.title)
+                VStack(spacing: 0) {
+                    // Grows the inset below the list, so the rows on screen stay where they are.
+                    if mirror.soloedCount > 0 { SoloBar(mirror: mirror) }
+                    PillBar(items: StripGroup.allCases, selection: $group, title: \.shortTitle, label: \.title)
+                }
             }
             .background(Theme.background)
             .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
