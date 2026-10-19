@@ -65,6 +65,9 @@ struct EQGraph: View {
                             style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
                     }
                 }
+                // Rendered offscreen at the graph's full size: drawn straight, the curve jumped 16 pt up or down for a
+                // frame now and then while a band moved (iPhone 11 Pro, 2026-10-19), the grid and points staying put.
+                .drawingGroup()
                 ForEach(points, id: \.self) { band in
                     let isLowCut = band == Self.lowCutBand
                     BandPoint(
