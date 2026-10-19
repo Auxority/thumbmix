@@ -92,6 +92,15 @@ struct MuteGroupTests {
         #expect(mirror.muteLook(kick) == .off)
     }
 
+    /// Whether the desk pushes a group switched on it is unverified: the Main page asks again each time it opens.
+    @Test func reReadingTheGroupsCatchesASwitchTheDeskDidntPush() async throws {
+        try await withLiveDesk(before: { $0.ignoresXremote = true }) { fake, mirror in
+            fake.deskChange("/config/mute/2", .int(1))
+            mirror.readMuteGroups()
+            #expect(await eventually { mirror.isMuteGroupOn(2) == true })
+        }
+    }
+
     @Test func membershipFlipsOnlyThisGroupsBit() async throws {
         try await withLiveDesk { fake, mirror in
             mirror.toggleAssignment(of: bass, to: .muteGroup(2))

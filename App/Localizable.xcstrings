@@ -81,6 +81,9 @@
     "%lld soloed" : {
 
     },
+    "%lld strips" : {
+
+    },
     "%lld unused" : {
 
     },
@@ -119,6 +122,12 @@
 
     },
     "Cancel" : {
+
+    },
+    "Choose strips" : {
+
+    },
+    "Choose who's in a group" : {
 
     },
     "Clear" : {
@@ -169,6 +178,9 @@
     "Edit name, colour and icon" : {
 
     },
+    "empty" : {
+
+    },
     "Enter IP" : {
 
     },
@@ -211,10 +223,19 @@
     "Green" : {
 
     },
+    "Group %lld · Off" : {
+
+    },
+    "Group %lld · On" : {
+
+    },
     "Hide" : {
 
     },
     "Hide unused" : {
+
+    },
+    "Hold a mute group to choose its strips." : {
 
     },
     "Hold a name to solo it. Keep holding and drag to solo more." : {
@@ -300,6 +321,22 @@
 
     },
     "Mute %@" : {
+
+    },
+    "Mute group %lld, empty" : {
+
+    },
+    "Mute group %lld: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mute group %1$lld: %2$@"
+          }
+        }
+      }
+    },
+    "Mute groups" : {
 
     },
     "Muted by a mute group" : {

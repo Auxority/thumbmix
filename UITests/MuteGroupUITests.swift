@@ -13,4 +13,30 @@ final class MuteGroupUITests: DeskUITestCase {
         XCTAssertEqual(element("mute-/ch/08/mix/on").value as? String, "", "Bass is in no group")
         saveScreenshot("group-muted-m")
     }
+
+    /// A tap switches the group on the desk at once and back; all six fit above the pills with the mains in view.
+    func testTheMainPageSwitchesAGroup() {
+        launch()
+        app.buttons["Main"].tap()
+        let group = element("mute-group-1")
+        XCTAssertTrue(group.appears(within: 3))
+        XCTAssertTrue(element("mute-group-6").isHittable, "the grid fits the iPhone SE")
+        XCTAssertTrue(app.buttons["LR"].isHittable, "the mains stay in view above it")
+        group.tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/config/mute/1") == .int(1) })
+        XCTAssertTrue(eventually(within: 2) { group.value as? String == "On" })
+        saveScreenshot("mute-groups")
+        group.tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/config/mute/1") == .int(0) })
+    }
+
+    /// A desk mute group has no name: its button names its strips instead, or says it's empty.
+    func testAGroupNamesItsStrips() {
+        launch()
+        app.buttons["Main"].tap()
+        let drums = element("mute-group-1")
+        XCTAssertTrue(drums.appears(within: 3))
+        XCTAssertTrue(drums.label.contains("Kick"), drums.label)
+        XCTAssertTrue(element("mute-group-4").label.contains("empty"), element("mute-group-4").label)
+    }
 }
