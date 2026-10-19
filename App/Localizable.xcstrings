@@ -4,9 +4,6 @@
     " & " : {
 
     },
-    " %@ mutes when you tap Done." : {
-
-    },
     " → " : {
 
     },
@@ -39,6 +36,16 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "%@ %@ mutes when you tap Done." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@ mutes when you tap Done."
           }
         }
       }
