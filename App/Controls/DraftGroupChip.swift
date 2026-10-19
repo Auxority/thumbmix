@@ -9,6 +9,8 @@ struct DraftGroupChip: View {
     let shown: Assignment
     var isGroupOn = false
     let identifier: String
+    /// What VoiceOver says: the kind of group and, for a mute group that's on, the red border in words.
+    let label: Text
     let action: () -> Void
     @ScaledMetric private var sizeScale: CGFloat = 1
 
@@ -35,6 +37,7 @@ struct DraftGroupChip: View {
         .buttonStyle(.plain)
         .dimmedUntilRead(shown != .unread)
         .accessibilityIdentifier(identifier)
+        .accessibilityLabel(label)
         .accessibilityValue(value)
     }
 

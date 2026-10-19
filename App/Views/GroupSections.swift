@@ -31,8 +31,16 @@ struct GroupSections: View {
         let current = mirror.assignment(of: strip, to: group)
         return DraftGroupChip(
             title: "\(number(group))", caption: dcaName(group), shown: draft.shown(group, current: current),
-            isGroupOn: muteGroupIsOn(group), identifier: identifier(group)
+            isGroupOn: muteGroupIsOn(group), identifier: identifier(group), label: label(group)
         ) { draft.toggle(group, current: current) }
+    }
+
+    private func label(_ group: Membership) -> Text {
+        switch group {
+        case .dca(let number): Text("DCA \(number), \(dcaName(group) ?? "")")
+        case .muteGroup(let number):
+            muteGroupIsOn(group) ? Text("Mute group \(number), on") : Text("Mute group \(number)")
+        }
     }
 
     /// Joining a group that's on mutes the strip there and then; Done is the moment, so say so before it.

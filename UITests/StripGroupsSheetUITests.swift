@@ -34,6 +34,10 @@ final class StripGroupsSheetUITests: DeskUITestCase {
     func testJoiningAnOnGroupSaysItMutes() {
         desk.change("/config/mute/2", 1)
         openKicksSheet()
+        // The red border has words for VoiceOver too, and a chip says which kind of group it is.
+        XCTAssertEqual(element("sheet-mute-2").label, "Mute group 2, on")
+        XCTAssertEqual(element("sheet-mute-3").label, "Mute group 3")
+        XCTAssertEqual(element("sheet-dca-2").label, "DCA 2, Band")
         XCTAssertFalse(element("mutes-on-done").exists)
         element("sheet-mute-2").tap()
         let warning = element("mutes-on-done")
