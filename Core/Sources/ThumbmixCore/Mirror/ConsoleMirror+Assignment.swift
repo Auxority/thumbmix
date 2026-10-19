@@ -13,7 +13,7 @@ public enum Membership: Hashable, Sendable {
         }
     }
 
-    /// Bit 0 = DCA 1 or mute group 1. The doc states neither bit order; m32-probe sections 4 and 11 check them.
+    /// Bit 0 = DCA 1 or mute group 1. The doc states neither bit order; m32-probe sections 4 and 14 check them.
     public var bit: Int32 {
         switch self {
         case .dca(let number), .muteGroup(let number): Int32(1) << (number - 1)

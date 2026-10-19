@@ -19,7 +19,7 @@ extension ConsoleMirror {
     }
 
     /// In a group read as on, on either side of a linked pair: the pair's row shows one M for both. A group still
-    /// unread counts neither way. Assumed: the group mute leaves the strip's own `mix/on` alone (m32-probe section 11).
+    /// unread counts neither way. Assumed: the group mute leaves the strip's own `mix/on` alone (m32-probe section 14).
     public func isMutedByGroup(_ strip: StripID) -> Bool {
         let sides = isLinked(strip) ? strip.pairSides : [strip]
         let onGroups = (1...Catalog.muteGroupCount).filter { isMuteGroupOn($0) == true }
@@ -35,7 +35,7 @@ extension ConsoleMirror {
     }
 
     /// Asks the desk again for every group's state: whether `/xremote` pushes a group switched on the desk is
-    /// unverified (m32-probe section 11), so the Main page re-reads them each time it opens. Ignored until live.
+    /// unverified (m32-probe section 14), so the Main page re-reads them each time it opens. Ignored until live.
     public func readMuteGroups() {
         guard isLive else { return }
         reads.add(Catalog.muteGroupAddresses, urgent: true)
