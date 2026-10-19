@@ -28,21 +28,21 @@ struct EditStripSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    // The icon beside the name, its grid on a page of its own (the user, 2026-10-19), so the
+                    // sheet's sections fit one screen.
+                    HStack(alignment: .bottom, spacing: 8) {
+                        IconTile(icon: icon) { IconPage(selection: $icon) }
+                        nameField
+                    }
                     if let partner {
-                        NameField(title: "Name · \(strip.defaultName)", placeholder: strip.defaultName, name: $name)
                         NameField(
                             title: "Name · \(partner.defaultName)", placeholder: partner.defaultName,
                             name: $partnerName, identifier: "strip-name-partner")
-                    } else {
-                        NameField(title: "Name", placeholder: strip.defaultName, name: $name)
                     }
                     StripColorPicker(color: $color)
-                    IconPicker(selection: $icon)
                 }
                 .padding(16)
             }
-            // Dragging the sheet puts the keyboard away, so search results under it can be reached.
-            .scrollDismissesKeyboard(.interactively)
             .background(Theme.background)
             .navigationTitle(partner == nil ? strip.defaultName : strip.pairDefaultName)
             .navigationBarTitleDisplayMode(.inline)
@@ -64,6 +64,63 @@ struct EditStripSheet: View {
                 .sharedBackgroundVisibility(.hidden)
             }
         }
+    }
+
+    /// A pair's first field names its odd side; the even side's goes under the icon and this one.
+    @ViewBuilder private var nameField: some View {
+        if partner != nil {
+            NameField(title: "Name · \(strip.defaultName)", placeholder: strip.defaultName, name: $name)
+        } else {
+            NameField(title: "Name", placeholder: strip.defaultName, name: $name)
+        }
+    }
+}
+
+/// The strip's icon as a square beside the name, with the pencil the strip screen shows next to the name (option A,
+/// 2026-10-19). A tap opens the grid; the draft takes the pick, so the desk still sees it only on Done.
+private struct IconTile<Page: View>: View {
+    let icon: Int
+    @ViewBuilder let page: () -> Page
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            SectionLabel("Icon")
+            NavigationLink(destination: page) {
+                Image(ConsoleIcon.icon(icon).imageName).resizable().frame(width: 30, height: 30)
+                    .foregroundStyle(.white)
+                    .frame(width: 48, height: 48)
+                    .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
+                    .overlay(alignment: .bottomTrailing) { pencil.offset(x: 6, y: 6) }
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("icon-tile")
+            .accessibilityLabel("Icon")
+            .accessibilityValue(ConsoleIcon.icon(icon).name)
+        }
+    }
+
+    private var pencil: some View {
+        Image(systemName: "pencil").font(.system(size: 11, weight: .bold)).foregroundStyle(.white)
+            .frame(width: 22, height: 22)
+            .background(Theme.raised, in: Circle())
+            .overlay(Circle().stroke(.black, lineWidth: 2))
+    }
+}
+
+/// The icon grid on its own page; a pick goes back to the sheet.
+private struct IconPage: View {
+    @Binding var selection: Int
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ScrollView {
+            IconPicker(selection: $selection) { dismiss() }.padding(16)
+        }
+        // Dragging puts the keyboard away, so search results under it can be reached.
+        .scrollDismissesKeyboard(.interactively)
+        .background(Theme.background)
+        .navigationTitle("Icon")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -156,12 +213,12 @@ private struct StripColorPicker: View {
 /// The app's own drawing of each desk icon (`Design/strip-icons`), with the desk's name under it.
 private struct IconPicker: View {
     @Binding var selection: Int
+    let onPick: () -> Void
     @State private var search = ""
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionLabel("Icon")
             TextField("Search icons", text: $search)
                 .accessibilityIdentifier("icon-search")
                 .autocorrectionDisabled()
@@ -188,6 +245,7 @@ private struct IconPicker: View {
     private func tile(_ icon: ConsoleIcon) -> some View {
         Button {
             selection = icon.number
+            onPick()
         } label: {
             VStack(spacing: 2) {
                 Image(icon.imageName).resizable().frame(width: 24, height: 24).foregroundStyle(.white)
