@@ -58,4 +58,30 @@ struct SoloTests {
             #expect(await eventually { fake.value(at: gtrL.solo) == .int(1) })
         }
     }
+
+    /// The fake desk plays the desk's CLEAR SOLO (doc p.69), so the app's Clear can be tested end to end.
+    @Test func clearSoloSilencesEverySwitch() async throws {
+        try await withLink { fake, link in
+            fake.deskChange(StripID(.input, 1).solo, .int(1))
+            fake.deskChange(StripID(.bus, 3).solo, .int(1))
+
+            link.send(OSCMessage("/-action/clearsolo", [.int(1)]))
+
+            #expect(await eventually { fake.value(at: StripID(.input, 1).solo) == .int(0) })
+            #expect(await eventually { fake.value(at: StripID(.bus, 3).solo) == .int(0) })
+        }
+    }
+
+    /// Exclusive solo (doc p.21) keeps one solo at a time. Assumed to hold for OSC sets too until m32-probe says.
+    @Test func exclusiveSoloKeepsOnlyTheLast() async throws {
+        try await withLink { fake, link in
+            fake.deskChange("/config/solo/exclusive", .int(1))
+            fake.deskChange(StripID(.input, 1).solo, .int(1))
+
+            link.send(OSCMessage(StripID(.input, 2).solo, [.int(1)]))
+
+            #expect(await eventually { fake.value(at: StripID(.input, 2).solo) == .int(1) })
+            #expect(await eventually { fake.value(at: StripID(.input, 1).solo) == .int(0) })
+        }
+    }
 }
