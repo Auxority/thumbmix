@@ -36,6 +36,8 @@ public final class ConsoleMirror {
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
     @ObservationIgnored let log = Logger(subsystem: "thumbmix", category: "mirror")
+    /// A stroke on the overview's names, from hold to lift, and on until the Exclusive solo question is answered.
+    public internal(set) var soloStroke: ActiveSoloStroke?
     /// The engineer answered Keep to the Exclusive solo question for this desk; the App sets it per connection.
     @ObservationIgnored public var keepsExclusiveSolo = false
     /// Called each time the console answers as an M32: on connect, and again after an outage.
