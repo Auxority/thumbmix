@@ -21,7 +21,7 @@ struct MembershipDraftTests {
             toggle(.dca(2), of: kick, in: &draft, mirror)
             toggle(.muteGroup(2), of: kick, in: &draft, mirror)
             #expect(fake.value(at: kick.dcaMask!) == .int(0b1), "nothing sent before Done")
-            mirror.apply(draft, to: kick)
+            mirror.apply(draft, to: [kick])
             #expect(await eventually { fake.value(at: kick.dcaMask!) == .int(0b11) })
             #expect(await eventually { fake.value(at: kick.muteGroupMask!) == .int(0b11) })
         }
@@ -34,7 +34,7 @@ struct MembershipDraftTests {
             toggle(.dca(2), of: kick, in: &draft, mirror)
             fake.deskChange(kick.dcaMask!, .int(0b101))
             #expect(await eventually { mirror.cell(kick.dcaMask!).argument == .int(0b101) })
-            mirror.apply(draft, to: kick)
+            mirror.apply(draft, to: [kick])
             #expect(await eventually { fake.value(at: kick.dcaMask!) == .int(0b111) })
         }
     }
@@ -45,7 +45,7 @@ struct MembershipDraftTests {
             toggle(.dca(2), of: kick, in: &draft, mirror)
             draft.toggle(.dca(2), current: mirror.assignment(of: kick, to: .dca(2)))
             #expect(draft.isEmpty)
-            mirror.apply(draft, to: kick)
+            mirror.apply(draft, to: [kick])
             mirror.toggleMuteGroup(6)
             #expect(await eventually { fake.value(at: "/config/mute/6") == .int(1) }, "a later set arrived")
             #expect(!fake.receivedSets.contains { $0.address == kick.dcaMask! })
@@ -61,9 +61,52 @@ struct MembershipDraftTests {
                 #expect(draft.shown(.dca(2), current: current) == .leftOnly)
                 draft.toggle(.dca(2), current: current)
                 #expect(draft.shown(.dca(2), current: current) == .assigned)
-                mirror.apply(draft, to: gtrL)
+                mirror.apply(draft, to: [gtrL, gtrR])
                 #expect(await eventually { fake.value(at: gtrR.dcaMask!) == .int(0b10) })
                 #expect(fake.value(at: gtrL.dcaMask!) == .int(0b10))
+            })
+    }
+
+    /// A side whose mask went unread before Done (a resync) holds back the whole pair: never half a stereo source.
+    @Test func aPairIsWrittenWholeOrNotAtAll() async throws {
+        try await withLiveDesk { fake, mirror in
+            var draft = MembershipDraft()
+            toggle(.dca(3), of: gtrL, in: &draft, mirror)
+            mirror.cell(gtrR.dcaMask!).argument = nil
+            mirror.apply(draft, to: [gtrL, gtrR])
+            mirror.toggleMuteGroup(6)
+            #expect(await eventually { fake.value(at: "/config/mute/6") == .int(1) }, "a later set arrived")
+            #expect(!fake.receivedSets.contains { $0.address == gtrL.dcaMask! })
+        }
+    }
+
+    /// The sheet writes the shape it opened with, as its name fields do, even if the desk unlinked the pair meanwhile.
+    @Test func doneWritesTheShapeTheSheetOpenedWith() async throws {
+        try await withLiveDesk { fake, mirror in
+            var draft = MembershipDraft()
+            toggle(.dca(3), of: gtrL, in: &draft, mirror)
+            fake.deskChange(gtrL.linkAddress!, .int(0))
+            #expect(await eventually { !mirror.isLinked(gtrL) })
+            mirror.apply(draft, to: [gtrL, gtrR])
+            #expect(await eventually { fake.value(at: gtrR.dcaMask!) == .int(0b110) })
+            #expect(fake.value(at: gtrL.dcaMask!) == .int(0b110))
+        }
+    }
+
+    /// Half a pair already in a group that's on is silent already: the warning names only the side that mutes.
+    @Test func aHalfPairNamesTheSideThatMutes() async throws {
+        try await withLiveDesk(
+            before: { fake in
+                fake.deskChange("/ch/09/grp/mute", .int(0b10))
+                fake.deskChange("/config/mute/2", .int(1))
+            },
+            body: { _, mirror in
+                var draft = MembershipDraft()
+                toggle(.muteGroup(2), of: gtrL, in: &draft, mirror)
+                #expect(mirror.sidesMutedOnDone(draft, of: [gtrL, gtrR]) == [gtrR])
+                var kicks = MembershipDraft()
+                toggle(.muteGroup(2), of: kick, in: &kicks, mirror)
+                #expect(mirror.sidesMutedOnDone(kicks, of: [kick]) == [kick])
             })
     }
 

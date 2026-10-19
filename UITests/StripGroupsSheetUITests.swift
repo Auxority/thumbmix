@@ -45,6 +45,32 @@ final class StripGroupsSheetUITests: DeskUITestCase {
         XCTAssertTrue(warning.label.contains("Kick") && warning.label.contains("2"), warning.label)
     }
 
+    /// The warning names the strip as it will be called after Done, and the icon's "Icon" is read once.
+    func testTheWarningNamesTheTypedName() {
+        desk.change("/config/mute/2", 1)
+        openKicksSheet()
+        XCTAssertFalse(app.staticTexts["Icon"].exists || app.staticTexts["ICON"].exists, "the tile says Icon")
+        let field = app.textFields["strip-name"]
+        field.tap()
+        field.typeText("er")
+        element("sheet-mute-2").tap()
+        let warning = element("mutes-on-done")
+        XCTAssertTrue(warning.appears(within: 2))
+        XCTAssertTrue(warning.label.contains("Kicker"), warning.label)
+    }
+
+    /// The desk holds only Gtr L on DCA 2: the chip says which side, once.
+    func testAHalfPairShowsItsSide() {
+        desk.change("/ch/10/grp/dca", 0)
+        launchAndOpen("Gtr")
+        app.buttons["edit-strip"].tap()
+        let chip = element("sheet-dca-2")
+        XCTAssertTrue(chip.appears(within: 3))
+        XCTAssertEqual(chip.value as? String, "Left side only")
+        XCTAssertEqual(chip.label, "DCA 2, Band")
+        saveScreenshot("strip-groups-sheet-half-pair")
+    }
+
     func testADCAHasNoGroupSections() {
         launchAndOpen("Drums", group: "DCA")
         app.buttons["edit-strip"].tap()

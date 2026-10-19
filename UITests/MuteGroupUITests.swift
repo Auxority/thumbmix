@@ -76,6 +76,27 @@ final class MuteGroupUITests: DeskUITestCase {
         XCTAssertFalse(element("mute-assign-/dca/1").exists)
     }
 
+    /// A group the desk never answered for is disabled, also to VoiceOver, not a real "Off".
+    func testAnUnreadGroupIsDisabled() {
+        desk.forget("/config/mute/3")
+        launch()
+        app.buttons["Main"].tap()
+        let group = element("mute-group-3")
+        XCTAssertTrue(group.appears(within: 3))
+        XCTAssertFalse(group.isEnabled)
+        XCTAssertTrue(element("mute-group-1").isEnabled)
+    }
+
+    /// The header counts the group's strips in words that agree: "1 strip", not "1 strips".
+    func testAHeaderCountsOneStrip() {
+        desk.change("/ch/14/grp/mute", 0)
+        openMuteGroup(2)
+        let header = element("mute-group-header")
+        XCTAssertTrue(header.appears(within: 3))
+        XCTAssertTrue(header.label.contains("1 strip"), header.label)
+        XCTAssertFalse(header.label.contains("strips"), header.label)
+    }
+
     private func openMuteGroup(_ group: Int) {
         launch()
         app.buttons["Main"].tap()

@@ -42,7 +42,7 @@ struct EditStripSheet: View {
                             name: $partnerName, identifier: "strip-name-partner")
                     }
                     StripColorPicker(color: $color)
-                    GroupSections(strip: strip, mirror: mirror, draft: $groups)
+                    GroupSections(strip: strip, sides: typedSides, mirror: mirror, draft: $groups)
                 }
                 .padding(16)
             }
@@ -58,7 +58,7 @@ struct EditStripSheet: View {
                     Button("Done") {
                         mirror.edit(strip, name: name, color: color, icon: icon)
                         if let partner { mirror.edit(partner, name: partnerName, color: color, icon: icon) }
-                        mirror.apply(groups, to: strip)
+                        mirror.apply(groups, to: typedSides.map(\.side))
                         dismiss()
                     }
                     .fontWeight(.bold)
@@ -68,6 +68,16 @@ struct EditStripSheet: View {
                 .sharedBackgroundVisibility(.hidden)
             }
         }
+    }
+
+    /// The sides as the sheet opened (a pair stays one even if the desk unlinks it meanwhile), each with the name typed
+    /// so far, or its default name while the field is empty, as the desk would show it.
+    private var typedSides: [(side: StripID, name: String)] {
+        let typed = StripName.sanitized(name)
+        let own = (strip, typed.isEmpty ? strip.defaultName : typed)
+        guard let partner else { return [own] }
+        let partnerTyped = StripName.sanitized(partnerName)
+        return [own, (partner, partnerTyped.isEmpty ? partner.defaultName : partnerTyped)]
     }
 
     /// A pair's first field names its odd side; the even side's goes under the icon and this one.
@@ -88,7 +98,8 @@ private struct IconTile<Page: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionLabel("Icon")
+            // The tile says "Icon" itself; VoiceOver would read it twice.
+            SectionLabel("Icon").accessibilityHidden(true)
             NavigationLink(destination: page) {
                 Image(ConsoleIcon.icon(icon).imageName).resizable().frame(width: 30, height: 30)
                     .foregroundStyle(.white)

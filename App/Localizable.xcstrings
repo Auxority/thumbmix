@@ -40,6 +40,16 @@
         }
       }
     },
+    "%@ %@ mute when you tap Done." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@ mute when you tap Done."
+          }
+        }
+      }
+    },
     "%@ %@ mutes when you tap Done." : {
       "localizations" : {
         "en" : {
@@ -107,9 +117,6 @@
     "%lld soloed" : {
 
     },
-    "%lld strips" : {
-
-    },
     "%lld unused" : {
 
     },
@@ -122,6 +129,9 @@
           }
         }
       }
+    },
+    "^[%lld strip](inflect: true)" : {
+
     },
     "192.168.1.62" : {
 
@@ -367,6 +377,16 @@
     },
     "Mute group %lld" : {
 
+    },
+    "Mute group %lld, ^[%lld strip](inflect: true)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mute group %1$lld, ^[%2$lld strip](inflect: true)"
+          }
+        }
+      }
     },
     "Mute group %lld, empty" : {
 
