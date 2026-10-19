@@ -45,8 +45,12 @@ struct StripRow: View {
                         .font(.headline)
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
-                    if !number.isEmpty {
-                        Text(number).font(.caption2).foregroundStyle(Theme.secondaryText)
+                        .foregroundStyle(isSoloed ? Theme.soloYellow : .white)
+                        // Held back for the Exclusive solo question: not soloed yet, so not yellow.
+                        .opacity(look == .pending ? 0.6 : 1)
+                    if !numberLine.isEmpty {
+                        Text(numberLine).font(.caption2)
+                            .foregroundStyle(isSoloed ? Theme.soloYellow : Theme.secondaryText)
                     }
                 }
                 Spacer(minLength: 0)
@@ -55,8 +59,15 @@ struct StripRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(name)
-        .accessibilityValue(number)
+        .accessibilityValue(numberLine)
     }
+
+    private var look: SoloLook { mirror.soloLook(item) }
+
+    private var isSoloed: Bool { look == .soloed }
+
+    /// "1 · Solo" while soloed: a cue beside the yellow that works without colour (option 2, 2026-10-19).
+    private var numberLine: String { isSoloed ? ConsoleMirror.soloCaption(number) : number }
 
     private var stripe: some View { ItemStripe(item: item, mirror: mirror) }
 

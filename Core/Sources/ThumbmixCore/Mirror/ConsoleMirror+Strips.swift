@@ -91,6 +91,14 @@ extension ConsoleMirror {
         }.count
     }
 
+    /// The line under a soloed name, a cue beside its yellow that works without colour (option 2, 2026-10-19):
+    /// "Ch 9-10 · Solo", or "Solo" where the name has no line under it.
+    public static func soloCaption(_ base: String?) -> String {
+        let solo = CoreStrings.text("Solo")
+        guard let base, !base.isEmpty else { return solo }
+        return "\(base) · \(solo)"
+    }
+
     public var isExclusiveSolo: Bool { cell(Catalog.exclusiveSolo).argument == .int(1) }
 
     public func turnOffExclusiveSolo() { set(Catalog.exclusiveSolo, .int(0)) }

@@ -112,6 +112,13 @@ struct SoloTests {
         }
     }
 
+    /// Yellow alone fails colour-blind engineers: a soloed name also says so in words (cue option 2, 2026-10-19).
+    @Test func soloCaptionReadsInWords() {
+        #expect(ConsoleMirror.soloCaption("Ch 9-10") == "Ch 9-10 · Solo")
+        #expect(ConsoleMirror.soloCaption(nil) == "Solo")
+        #expect(ConsoleMirror.soloCaption("") == "Solo")
+    }
+
     /// The safety rule: an unread switch is neither on nor off, and a row with one shows nothing.
     @Test func anUnreadSoloIsNeitherOnNorOff() async throws {
         try await withLiveDesk { _, mirror in
