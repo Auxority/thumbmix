@@ -39,15 +39,18 @@ struct MuteGroupButton: View {
             .opacity(names.isEmpty && isOn != true ? Theme.dimmedOpacity : 1)
             .contentShape(RoundedRectangle(cornerRadius: 10))
             .onTapGesture { mirror.toggleMuteGroup(group) }
-            .onLongPressGesture(minimumDuration: 0.5) { onHold?(group) }
-            .dimmedUntilRead(isOn != nil)
+            .modifier(HoldToChoose(group: group, onHold: onHold))
+            // One element first, then disabled: VoiceOver then says "dimmed" for a group the desk hasn't sent.
             .accessibilityElement(children: .ignore)
+            .dimmedUntilRead(isOn != nil)
             .accessibilityAddTraits(.isButton)
-            .accessibilityIdentifier("mute-group-\(group)")
-            .accessibilityLabel(accessibilityName(names))
+            .accessibilityIdentifier(wide ? "mute-group-header" : "mute-group-\(group)")
+            .accessibilityLabel(wide ? Text("Mute group \(group), ^[\(names.count) strip](inflect: true)") : accessibilityName(names))
             .accessibilityValue(isOn.map { $0 ? Text("On") : Text("Off") } ?? Text(verbatim: ""))
             .accessibilityAction { mirror.toggleMuteGroup(group) }
-            .accessibilityAction(named: "Choose strips") { onHold?(group) }
+            .accessibilityActions {
+                if let onHold { Button("Choose strips") { onHold(group) } }
+            }
     }
 
     @ViewBuilder private func label(isOn: Bool, names: [String]) -> some View {
@@ -56,7 +59,7 @@ struct MuteGroupButton: View {
             HStack {
                 Text(isOn ? "Group \(group) · On" : "Group \(group) · Off").font(.headline)
                 Spacer(minLength: 8)
-                Text("\(names.count) strips").font(.caption)
+                Text("^[\(names.count) strip](inflect: true)").font(.caption)
             }
             .padding(.horizontal, 12)
         } else {
@@ -72,5 +75,19 @@ struct MuteGroupButton: View {
         names.isEmpty
             ? Text("Mute group \(group), empty")
             : Text("Mute group \(group): \(names.formatted(.list(type: .and)))")
+    }
+}
+
+/// The grid's hold that opens a group's strips; the members screen's header has none.
+private struct HoldToChoose: ViewModifier {
+    let group: Int
+    let onHold: ((Int) -> Void)?
+
+    func body(content: Content) -> some View {
+        if let onHold {
+            content.onLongPressGesture(minimumDuration: 0.5) { onHold(group) }
+        } else {
+            content
+        }
     }
 }

@@ -5,6 +5,8 @@ import ThumbmixCore
 /// sheet, not on the Mix tab. Only the sections the strip's kind has.
 struct GroupSections: View {
     let strip: StripID
+    /// Each side the sheet edits, with the name typed for it so far.
+    let sides: [(side: StripID, name: String)]
     let mirror: ConsoleMirror
     @Binding var draft: MembershipDraft
     private let dcaColumns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 4)
@@ -44,15 +46,25 @@ struct GroupSections: View {
     }
 
     /// Joining a group that's on mutes the strip there and then; Done is the moment, so say so before it.
+    /// Names the sides as typed in the sheet, so a rename reads as it will after Done; a half pair already in the group
+    /// names only the side that mutes.
     @ViewBuilder private var warning: some View {
         let groups = mirror.mutesOnDone(draft, of: strip).map { String(localized: "Group \($0)") }
-        if !groups.isEmpty {
+        let muted = mirror.sidesMutedOnDone(draft, of: sides.map(\.side))
+        if !groups.isEmpty, !muted.isEmpty {
             let list = groups.formatted(.list(type: .and))
             let isOn = Text(groups.count == 1 ? "\(list) is on:" : "\(list) are on:")
                 .foregroundStyle(Theme.groupMuteText)
-            Text("\(isOn) \(mirror.displayName(strip)) mutes when you tap Done.")
-                .font(.footnote)
-                .accessibilityIdentifier("mutes-on-done")
+            let names = sides.filter { muted.contains($0.side) }.map(\.name).formatted(.list(type: .and))
+            Group {
+                if muted.count == 1 {
+                    Text("\(isOn) \(names) mutes when you tap Done.")
+                } else {
+                    Text("\(isOn) \(names) mute when you tap Done.")
+                }
+            }
+            .font(.footnote)
+            .accessibilityIdentifier("mutes-on-done")
         }
     }
 

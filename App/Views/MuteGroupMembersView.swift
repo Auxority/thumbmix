@@ -33,7 +33,9 @@ struct MuteGroupMembersView: View {
         }
         .keepsFoldInPlace()
         .background(Theme.background)
+        // Dimmed as a whole while not live, as the overview's list: the name rows too, not only the chips.
         .disabled(!mirror.isLive)
+        .opacity(mirror.isLive ? 1 : 0.4)
         .navigationTitle(title)
         .demoTitle(title)
         .navigationBarTitleDisplayMode(.inline)

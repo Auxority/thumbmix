@@ -38,16 +38,33 @@ extension ConsoleMirror {
         )
     }
 
-    /// Done: per side and mask, one set with the ticked bits changed on the mask as the desk holds it now.
-    public func apply(_ draft: MembershipDraft, to strip: StripID) {
-        for side in assignmentSides(of: strip) {
-            let byMask = Dictionary(grouping: draft.groups) { $0.mask(of: side) }
+    /// Done: per side and mask, one set with the ticked bits changed on the mask as the desk holds it now. `sides` is
+    /// the shape the sheet opened with, as its name fields are. A group with any side's mask unread is left out
+    /// whole: never half a stereo source.
+    public func apply(_ draft: MembershipDraft, to sides: [StripID]) {
+        let writable = draft.groups.filter { group in sides.allSatisfy { maskValue($0, group) != nil } }
+        for side in sides {
+            let byMask = Dictionary(grouping: writable) { $0.mask(of: side) }
             for case (let address?, let groups) in byMask {
-                guard case .int(var mask)? = cell(address).argument else { continue }
+                guard var mask = maskValue(side, groups[0]) else { continue }
                 for group in groups { mask = draft.wants(group) == true ? mask | group.bit : mask & ~group.bit }
                 set(address, .int(mask))
             }
         }
+    }
+
+    /// The sides Done newly mutes: those not yet in a mute group that's on and that the draft adds them to.
+    public func sidesMutedOnDone(_ draft: MembershipDraft, of sides: [StripID]) -> [StripID] {
+        let onGroups = draft.joined.filter { group in
+            guard case .muteGroup(let number) = group else { return false }
+            return isMuteGroupOn(number) == true
+        }
+        return sides.filter { side in onGroups.contains { !isMember(side, of: $0) } }
+    }
+
+    private func maskValue(_ side: StripID, _ group: Membership) -> Int32? {
+        guard let address = group.mask(of: side), case .int(let mask)? = cell(address).argument else { return nil }
+        return mask
     }
 
     /// The mute groups the draft adds the strip to that are on now: Done mutes the strip there and then.
