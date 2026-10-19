@@ -43,12 +43,17 @@ final class MuteGroupUITests: DeskUITestCase {
     /// A hold opens who's in the group instead of switching it: a press a bit too slow changes nothing on the desk.
     func testHoldingAGroupOpensWhoIsInIt() {
         openMuteGroup(2)
-        XCTAssertEqual(desk.value("/config/mute/2"), .int(0), "the hold didn't switch the group")
         let vox = element("mute-assign-/ch/13")
         XCTAssertTrue(vox.appears(within: 3))
         XCTAssertEqual(vox.value as? String, "Assigned")
         XCTAssertEqual(element("mute-assign-/ch/08").value as? String, "Not assigned", "Bass")
         saveScreenshot("mute-group-members")
+        // Back on Main, long after any send a tap on release would have made: the group is still off.
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        let group = element("mute-group-2")
+        XCTAssertTrue(group.appears(within: 3))
+        XCTAssertEqual(group.value as? String, "Off", "the hold didn't switch the group")
+        XCTAssertEqual(desk.value("/config/mute/2"), .int(0))
     }
 
     /// A tap applies at once and keeps the strip's other groups; a second tap takes it out again.
