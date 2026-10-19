@@ -291,5 +291,6 @@ print("Put buses 15-16 and channel 1 back as the show needs them.")
 await probeEQDefaults()
 await probeReadTiming()
 await probeSendMeters()
+await probeMuteGroups()
 
 transport.cancel()

@@ -11,7 +11,8 @@ struct UnusedFoldRow: View {
     static let sendsKey = "unusedShown.sends"
     static let fedByKey = "unusedShown.fedBy"
     static let membersKey = "unusedShown.members"
-    static let storageKeys = [overviewKey, sendsKey, fedByKey, membersKey]
+    static let muteGroupMembersKey = "unusedShown.muteGroupMembers"
+    static let storageKeys = [overviewKey, sendsKey, fedByKey, membersKey, muteGroupMembersKey]
     let strips: [StripID]
     @Binding var isOpen: Bool
 

@@ -152,14 +152,6 @@ extension ConsoleMirror {
         return names.isEmpty ? nil : names.formatted(.list(type: .and).locale(locale))
     }
 
-    /// Bit 0 = DCA 1. The doc doesn't state the bit order; m32-probe section 4 checks it.
-    public func isMember(_ strip: StripID, ofDCA dca: Int) -> Bool {
-        guard let address = strip.dcaMask, case .int(let mask)? = cell(address).argument else {
-            return false
-        }
-        return mask & (1 << (dca - 1)) != 0
-    }
-
     /// The name exactly as the desk holds it, empty when unnamed: what the edit sheet starts from.
     public func rawName(_ strip: StripID) -> String {
         guard case .string(let name)? = cell(strip.name).argument else { return "" }

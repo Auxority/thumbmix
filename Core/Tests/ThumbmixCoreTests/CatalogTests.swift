@@ -13,6 +13,24 @@ struct CatalogTests {
         #expect(StripID(.dca, 3).prefix == "/dca/3")
     }
 
+    /// A strip's M shows a group muting it on every page, so the groups and every mask are read on connect.
+    @Test func connectReadsTheMuteGroupsAndEveryStripsMask() {
+        let read = Set(Catalog.overviewAddresses())
+        #expect(Catalog.muteGroupAddresses == (1...6).map { "/config/mute/\($0)" })
+        #expect(Catalog.muteGroupAddresses.allSatisfy(read.contains))
+        let masks = StripKind.allCases.flatMap(StripID.all).compactMap(\.muteGroupMask)
+        #expect(masks.count == 72, "32 inputs, 8 aux ins, 8 FX returns, 16 buses, 6 matrices, 2 mains")
+        #expect(masks.allSatisfy(read.contains))
+        #expect(StripID(.dca, 1).muteGroupMask == nil)
+        #expect(StripID(.mainMono).muteGroupMask == "/main/m/grp/mute")
+    }
+
+    /// Whether the desk pushes a group switched on it is unverified (m32-probe section 14): the audit loop re-reads
+    /// the groups while live, so a strip's red-bordered M can't stay wrong.
+    @Test func theAuditReReadsTheMuteGroups() {
+        #expect(Set(Catalog.muteGroupAddresses).isSubset(of: Set(Catalog.auditAddresses())))
+    }
+
     @Test func dcaFaderAndOnHaveNoMixLevel() {
         #expect(StripID(.dca, 3).fader == "/dca/3/fader")
         #expect(StripID(.dca, 3).on == "/dca/3/on")

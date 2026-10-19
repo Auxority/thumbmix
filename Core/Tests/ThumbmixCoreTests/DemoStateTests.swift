@@ -45,6 +45,13 @@ struct DemoStateTests {
         Expected("/ch/01/mix/mlevel", .float(0.75)),
         Expected("/ch/02/mix/mono", .int(0)),
         Expected("/ch/02/mix/mlevel", .float(0)),
+        // Every group off, an int switch; the drums in mute group 1, the vocals in group 2.
+        Expected("/config/mute/1", .int(0), "an int switch, off; it matches no suffix"),
+        Expected("/config/mute/6", .int(0)),
+        Expected("/ch/01/grp/mute", .int(0b01), "Kick in mute group 1"),
+        Expected("/ch/13/grp/mute", .int(0b10), "Vox 1 in mute group 2"),
+        Expected("/ch/08/grp/mute", .int(0), "Bass in none"),
+        Expected("/mtx/01/grp/mute", .int(0), "an int mask, not mid-travel"),
     ]
 
     @Test(arguments: expected) func theDemoStartsWith(_ entry: Expected) {

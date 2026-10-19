@@ -9,6 +9,8 @@ struct OverviewView: View {
     var onKeepExclusive: () -> Void = {}
     @State private var group: StripGroup = .inputs
     @State private var openStrip: StripID?
+    /// The mute group a hold on the Main page opened.
+    @State private var openMuteGroup: Int?
     /// One open fold for every group of the overview.
     @AppStorage(UnusedFoldRow.overviewKey) private var showsUnused = false
     @State private var stroke = SoloStrokeDriver()
@@ -63,6 +65,7 @@ struct OverviewView: View {
                     } else {
                         TipView(SoloStrokeTip()).padding(.horizontal, 12)
                     }
+                    if group == .main { muteGroups }
                     PillBar(items: StripGroup.allCases, selection: $group, title: \.shortTitle, label: \.title)
                 }
             }
@@ -81,7 +84,26 @@ struct OverviewView: View {
             .navigationDestination(item: $openStrip) { strip in
                 ChannelView(strip: strip, mirror: mirror)
             }
+            .navigationDestination(item: $openMuteGroup) { group in
+                MuteGroupMembersView(group: group, mirror: mirror)
+            }
         }
+    }
+
+    /// Pinned above the pills, so all six stay in reach (I3, 2026-10-19). Read again each time the page opens: whether
+    /// the desk pushes a group switched on it is unverified (m32-probe section 14).
+    private var muteGroups: some View {
+        VStack(spacing: 6) {
+            TipView(MuteGroupHoldTip())
+            MuteGroupGrid(mirror: mirror) { group in
+                openMuteGroup = group
+                Task { await MuteGroupHoldTip.openedByHolding.donate() }
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
+        .disabled(!mirror.isLive)
+        .onAppear { mirror.readMuteGroups() }
     }
 
     private func row(_ item: OverviewItem, of rows: [OverviewItem], proxy: ScrollViewProxy) -> some View {

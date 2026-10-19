@@ -88,6 +88,11 @@ public struct StripID: Hashable, Sendable, Identifiable {
         [.input, .auxIn, .fxReturn, .bus].contains(kind) ? prefix + "/grp/dca" : nil
     }
 
+    /// The mute groups the strip is in, 6 bits (doc p.27-38); a DCA has none.
+    public var muteGroupMask: String? {
+        kind == .dca ? nil : prefix + "/grp/mute"
+    }
+
     public var hasGate: Bool { kind == .input }
     public var hasDynamics: Bool { [.input, .bus, .matrix, .mainStereo, .mainMono].contains(kind) }
     /// Channels, buses, matrices and the mains have an insert (doc p.26-37); aux ins and FX returns don't.

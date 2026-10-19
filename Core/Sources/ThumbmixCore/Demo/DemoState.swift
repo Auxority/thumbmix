@@ -14,6 +14,8 @@ public enum DemoState {
 
     private static func build() -> [String: OSCArgument] {
         var state = Dictionary(uniqueKeysWithValues: Catalog.allAddresses().map { ($0, defaultValue(for: $0)) })
+        // Off; "/config/mute/1" matches no suffix and would start at mid-travel.
+        for group in Catalog.muteGroupAddresses { state[group] = .int(0) }
         addBand(to: &state)
         addMonitors(to: &state)
         addReturnsDCAsAndMain(to: &state)
@@ -46,6 +48,8 @@ public enum DemoState {
             patch(strip, name, color: color, in: &state)
             // Drums on DCA 1, the band on DCA 2, vocals on DCA 3.
             if let dcaMask = strip.dcaMask { state[dcaMask] = .int(offset < 7 ? 1 : offset < 12 ? 2 : 4) }
+            // Drums in mute group 1, vocals in group 2: one to silence between songs, one for the talk-over.
+            if let muteMask = strip.muteGroupMask { state[muteMask] = .int(offset < 7 ? 1 : offset < 12 ? 0 : 2) }
         }
         // Patched but never named, as often happens mid-soundcheck: visible only while its fader is up.
         state[StripID(.input, 17).fader] = unity
@@ -104,6 +108,7 @@ public enum DemoState {
     /// First matching suffix wins; anything else is a continuous parameter at mid-travel.
     private static let defaultsBySuffix: [(suffix: String, value: OSCArgument)] = [
         ("/config/name", .string("")), ("/config/color", .int(0)), ("/config/icon", .int(1)), ("/grp/dca", .int(0)),
+        ("/grp/mute", .int(0)),
         // Delay before the generic "/on": the demo's delays start off, at 0.3 ms.
         ("/delay/on", .int(0)), ("/delay/time", .float(0)),
         // Inserts before the generic "/on": off, after the EQ, no slot.
