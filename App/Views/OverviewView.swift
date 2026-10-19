@@ -84,6 +84,9 @@ struct OverviewView: View {
             .navigationDestination(item: $openStrip) { strip in
                 ChannelView(strip: strip, mirror: mirror)
             }
+            .navigationDestination(item: $openMuteGroup) { group in
+                MuteGroupMembersView(group: group, mirror: mirror)
+            }
         }
     }
 
@@ -92,7 +95,10 @@ struct OverviewView: View {
     private var muteGroups: some View {
         VStack(spacing: 6) {
             TipView(MuteGroupHoldTip())
-            MuteGroupGrid(mirror: mirror) { openMuteGroup = $0 }
+            MuteGroupGrid(mirror: mirror) { group in
+                openMuteGroup = group
+                Task { await MuteGroupHoldTip.openedByHolding.donate() }
+            }
         }
         .padding(.horizontal, 12)
         .padding(.bottom, 8)

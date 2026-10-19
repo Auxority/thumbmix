@@ -53,6 +53,16 @@
     "%@ fader" : {
 
     },
+    "%@ in mute group %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ in mute group %2$lld"
+          }
+        }
+      }
+    },
     "%@ in the main mix" : {
 
     },
@@ -323,6 +333,9 @@
     "Mute %@" : {
 
     },
+    "Mute group %lld" : {
+
+    },
     "Mute group %lld, empty" : {
 
     },
@@ -567,6 +580,9 @@
 
     },
     "Unsolo %@" : {
+
+    },
+    "While the group is on, a strip you add mutes at once." : {
 
     },
     "White" : {

@@ -39,4 +39,44 @@ final class MuteGroupUITests: DeskUITestCase {
         XCTAssertTrue(drums.label.contains("Kick"), drums.label)
         XCTAssertTrue(element("mute-group-4").label.contains("empty"), element("mute-group-4").label)
     }
+
+    /// A hold opens who's in the group instead of switching it: a press a bit too slow changes nothing on the desk.
+    func testHoldingAGroupOpensWhoIsInIt() {
+        openMuteGroup(2)
+        XCTAssertEqual(desk.value("/config/mute/2"), .int(0), "the hold didn't switch the group")
+        let vox = element("mute-assign-/ch/13")
+        XCTAssertTrue(vox.appears(within: 3))
+        XCTAssertEqual(vox.value as? String, "Assigned")
+        XCTAssertEqual(element("mute-assign-/ch/08").value as? String, "Not assigned", "Bass")
+        saveScreenshot("mute-group-members")
+    }
+
+    /// A tap applies at once and keeps the strip's other groups; a second tap takes it out again.
+    func testAChipAddsAStripAtOnce() {
+        openMuteGroup(2)
+        let bass = element("mute-assign-/ch/08")
+        XCTAssertTrue(bass.appears(within: 3))
+        bass.tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/08/grp/mute") == .int(0b10) })
+        bass.tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/08/grp/mute") == .int(0) })
+    }
+
+    /// Matrices and the mains can be in a mute group; DCAs can't.
+    func testTheMembersScreenListsMatricesAndMains() {
+        openMuteGroup(1)
+        XCTAssertTrue(element("mute-assign-/ch/01").appears(within: 3))
+        XCTAssertTrue(element("mute-assign-/mtx/01").exists)
+        XCTAssertTrue(element("mute-assign-/main/st").exists)
+        XCTAssertFalse(element("mute-assign-/dca/1").exists)
+    }
+
+    private func openMuteGroup(_ group: Int) {
+        launch()
+        app.buttons["Main"].tap()
+        let button = element("mute-group-\(group)")
+        XCTAssertTrue(button.appears(within: 3))
+        button.press(forDuration: 1.0)
+        XCTAssertTrue(app.navigationBars["Mute group \(group)"].appears(within: 3))
+    }
 }
