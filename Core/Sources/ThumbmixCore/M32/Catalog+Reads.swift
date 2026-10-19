@@ -13,7 +13,7 @@ extension Catalog {
     // starting ~100 of each at once starved the main actor for seconds on CI.
     private static let overview: [String] =
         StripKind.allCases.flatMap(StripID.all).flatMap(overviewAddresses(of:)) + headampIndexAddresses
-        + rtaAddresses + linkAddresses + [exclusiveSolo]
+        + rtaAddresses + linkAddresses + [exclusiveSolo] + muteGroupAddresses
 
     private static let all: [String] = {
         let tabs = StripKind.allCases.flatMap(StripID.all).flatMap { strip in
@@ -72,7 +72,7 @@ extension Catalog {
     private static func overviewAddresses(of strip: StripID) -> [String] {
         // Solo too: S sits beside the slim fader on every tab, and an unread switch ignores taps.
         [strip.name, strip.color, strip.icon, strip.fader, strip.on, strip.solo]
-            + [strip.pan, strip.dcaMask].compactMap { $0 }
+            + [strip.pan, strip.dcaMask, strip.muteGroupMask].compactMap { $0 }
     }
 
     private static func inputAddresses(_ strip: StripID, headamp: Int?) -> [String] {
