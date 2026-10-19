@@ -60,7 +60,6 @@ None open.
   - Output meter on the Mix tab: the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too.
   - Input meter marks at −18 dBFS and 0 dBFS? A nominal-level mark and a clip mark, so gain can be set by eye. Check what the desk's own input meter shows first.
   - Muted strips: check whether muting should grey out the meters, or anything else.
-- [ ] **A strip's DCAs and mute groups in its edit sheet** (2026-10-19, designed: `notes/2026-10-19-mute-groups-design.md` §4, mock `strip-groups-s1-v10.html`). Under Colour, a DCAs and a Mute groups section of chips, sent with the name on Done; the icon becomes a tile with a pencil badge left of the name, and its grid moves to a page of its own. Mute groups on the Main page shipped first.
 
 ## Code and docs
 

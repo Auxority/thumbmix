@@ -40,6 +40,16 @@
         }
       }
     },
+    "%@ %@ mutes when you tap Done." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@ mutes when you tap Done."
+          }
+        }
+      }
+    },
     "%@ and %@" : {
       "localizations" : {
         "en" : {
@@ -49,6 +59,9 @@
           }
         }
       }
+    },
+    "%@ are on:" : {
+
     },
     "%@ fader" : {
 
@@ -64,6 +77,9 @@
       }
     },
     "%@ in the main mix" : {
+
+    },
+    "%@ is on:" : {
 
     },
     "%@ on %@" : {
@@ -167,6 +183,19 @@
     "Cyan" : {
 
     },
+    "DCA %lld, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "DCA %1$lld, %2$@"
+          }
+        }
+      }
+    },
+    "DCAs" : {
+
+    },
     "DEMO" : {
 
     },
@@ -231,6 +260,9 @@
 
     },
     "Green" : {
+
+    },
+    "Group %lld" : {
 
     },
     "Group %lld · Off" : {
@@ -337,6 +369,9 @@
 
     },
     "Mute group %lld, empty" : {
+
+    },
+    "Mute group %lld, on" : {
 
     },
     "Mute group %lld: %@" : {

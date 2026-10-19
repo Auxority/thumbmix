@@ -86,7 +86,7 @@ The fake M32 keeps every set it receives, so restart it for a clean desk. CI als
 8. An insert's slot matches the desk, and its on/off and position change the desk.
 9. Sends and Fed by match the desk's sends-on-fader, also on Main LR and Main M. A send's tap point, send pan and Follow LR pan match the desk.
 10. A pair linked on the desk shows as one row; linking and unlinking from a strip's Mix tab does the same on the desk. Move a pair's fader with Console.app on the Mac filtered on "thumbmix": no "didn't follow a linked edit" line.
-11. Switch a mute group on the Main page: the desk's mute group key lights and the M of each strip in it gets a red border. Switch one on the desk: the app follows (at the latest when the Main page opens). Hold a group and tick a strip: the desk's mute group screen shows it in that group.
+11. Switch a mute group on the Main page: the desk's mute group key lights and the M of each strip in it gets a red border. Switch one on the desk: the app follows (at the latest when the Main page opens). Hold a group and tick a strip: the desk's mute group screen shows it in that group. Tick a DCA and a mute group in a strip's edit sheet: the desk shows both after Done, neither after Cancel.
 12. Power off the access point: the app shows "Disconnected — retrying" and disables its controls. Restore power: the app resyncs and re-enables them.
 13. VoiceOver's swipe up and down adjusts parameter rows (XCUITest can't drive it).
 
