@@ -74,12 +74,20 @@ extension ConsoleMirror {
 
     /// The unused strips the tab folds away; an assigned one stays in view, and a pair stays while either side is in.
     public func unusedStrips(notIn group: Membership) -> [StripID] {
-        unusedStrips(Self.dcaAssignableStrips) { isUnused($0) && !isMember($0, of: group) }
+        unusedStrips(Self.assignableStrips(group)) { isUnused($0) && !isMember($0, of: group) }
+    }
+
+    /// Every strip with a mask for `group`'s kind, in desk order.
+    public static func assignableStrips(_ group: Membership) -> [StripID] {
+        switch group {
+        case .dca: dcaAssignableStrips
+        case .muteGroup: muteGroupAssignableStrips
+        }
     }
 
     /// The doc doesn't say whether the desk links DCA or mute group assignment; half a stereo source in a group is
     /// never wanted, so a linked pair writes both sides, as Solo does.
-    private func assignmentSides(of strip: StripID) -> [StripID] {
+    func assignmentSides(of strip: StripID) -> [StripID] {
         isLinked(strip) ? strip.pairSides : [strip]
     }
 
