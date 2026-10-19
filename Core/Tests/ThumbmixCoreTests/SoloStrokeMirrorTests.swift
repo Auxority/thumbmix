@@ -106,6 +106,50 @@ struct SoloStrokeMirrorTests {
             })
     }
 
+    /// The spec: while contact is lost the stroke is off. A stroke left open would hold every switch it listed, so the
+    /// desk's solos would never show again and no later stroke could start.
+    @Test func lostContactEndsTheStroke() async throws {
+        try await withLiveDesk { fake, mirror in
+            let rows = inputRows(mirror)
+            _ = mirror.beginSoloStroke(rows, at: row(1, in: rows))
+            _ = mirror.moveSoloStroke(to: row(2, in: rows))
+            fake.stop()
+
+            #expect(await eventually { !mirror.isLive })
+            #expect(mirror.soloStroke == nil)
+        }
+    }
+
+    /// Clear during a stroke (a second thumb on the bar) wins: the stroke ends and the desk's cleared solos show.
+    @Test func clearEndsAHeldStroke() async throws {
+        try await withLiveDesk { fake, mirror in
+            let rows = inputRows(mirror)
+            _ = mirror.beginSoloStroke(rows, at: row(1, in: rows))
+            _ = mirror.moveSoloStroke(to: row(3, in: rows))
+            #expect(await eventually { soloed(fake, 1...3) })
+
+            mirror.clearSolo()
+
+            #expect(mirror.soloStroke == nil)
+            #expect(await eventually { mirror.soloedCount == 0 })
+        }
+    }
+
+    /// The overview went away mid-stroke: the switches it held show the desk's values again.
+    @Test func abandoningReleasesTheHolds() async throws {
+        try await withLiveDesk { fake, mirror in
+            let rows = inputRows(mirror)
+            let tom2 = StripID(.input, 5)
+            _ = mirror.beginSoloStroke(rows, at: row(1, in: rows))
+
+            mirror.abandonSoloStroke()
+            fake.deskChange(tom2.solo, .int(1))
+
+            #expect(mirror.soloStroke == nil)
+            #expect(await eventually { mirror.cell(tom2.solo).argument == .int(1) })
+        }
+    }
+
     /// Contact lost before the answer: nothing held back is ever written, and nothing is asked.
     @Test func lostContactDropsTheHeldSolos() async throws {
         try await withLiveDesk(

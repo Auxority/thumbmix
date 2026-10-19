@@ -62,6 +62,14 @@ final class SoloStrokeDriver {
         isAskingExclusive = mirror.endSoloStroke()
     }
 
+    /// The mirror dropped the stroke without a lift (contact lost, Clear, the app sent away): stop following the
+    /// finger, and close a question that no longer has rows to answer for.
+    func strokeEnded() {
+        edgeScroll?.cancel()
+        held = nil
+        isAskingExclusive = false
+    }
+
     /// The row under the finger, or the nearest built one when it's in the gap between two.
     private func row(at y: CGFloat) -> Int? {
         let built = rows.indices.compactMap { index in frames[rows[index]].map { (index, $0) } }

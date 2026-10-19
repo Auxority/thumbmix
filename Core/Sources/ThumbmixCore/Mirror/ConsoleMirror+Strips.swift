@@ -105,6 +105,8 @@ extension ConsoleMirror {
 
     /// The desk's CLEAR SOLO (doc p.69). Whether it pushes every switch it clears isn't documented, so all are re-read.
     public func clearSolo() {
+        // Clear wins over a stroke still held (a second thumb on the bar): its holds would hide the cleared solos.
+        abandonSoloStroke()
         command("/-action/clearsolo", .int(1))
         let now = ContinuousClock.now
         for strip in StripKind.allCases.flatMap(StripID.all) { holds.rereadSoon(strip.solo, now: now) }

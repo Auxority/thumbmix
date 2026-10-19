@@ -5,7 +5,8 @@ public enum SoloLook: Sendable {
     case off, soloed, pending, unread
 }
 
-/// The rows a stroke runs over, as the overview listed them at touch-down, and the stroke's maths.
+/// The rows a stroke runs over, as the overview listed them at touch-down, and the stroke's maths. The mirror keeps
+/// one from hold to lift, and on until the Exclusive solo question is answered.
 public struct ActiveSoloStroke: Sendable {
     let rows: [OverviewItem]
     var stroke: SoloStroke
@@ -64,6 +65,14 @@ extension ConsoleMirror {
         }
         if !isLive { active.stroke.cancel() }
         apply(active.stroke.resolve(turnOff: turnOff && isLive), to: active.rows)
+        finish(active)
+    }
+
+    /// Ends the stroke without a lift: contact lost, Clear, the overview gone or the app sent to the background (a
+    /// held gesture's lift may never come). Nothing held back is written; every switch it held is read back.
+    public func abandonSoloStroke() {
+        guard var active = soloStroke else { return }
+        active.stroke.cancel()
         finish(active)
     }
 

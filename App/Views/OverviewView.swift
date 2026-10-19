@@ -44,7 +44,6 @@ struct OverviewView: View {
                     }
                 }
                 .sensoryFeedback(.selection, trigger: stroke.ticks)
-                .exclusiveSoloAlert(isPresented: $stroke.isAskingExclusive, mirror: mirror, onKeep: onKeepExclusive)
                 .keepsFoldInPlace()
                 // Each list gets its own scroll view, so it starts where a list naturally starts. Keeping
                 // one left the old offset past a shorter list (only black), and scrolling it to a top
@@ -68,6 +67,7 @@ struct OverviewView: View {
                 }
             }
             .background(Theme.background)
+            .soloStrokeLifecycle(stroke, mirror: mirror, onKeep: onKeepExclusive)
             .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
             // No title (2026-10-15): the bar holds Disconnect, and in Offline mode the DEMO pill, nothing more.
             .demoTitle(nil)

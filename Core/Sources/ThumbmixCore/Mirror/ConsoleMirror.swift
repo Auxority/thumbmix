@@ -36,7 +36,6 @@ public final class ConsoleMirror {
     @ObservationIgnored private var auditIndex = 0
     @ObservationIgnored private var tasks: [Task<Void, Never>] = []
     @ObservationIgnored let log = Logger(subsystem: "thumbmix", category: "mirror")
-    /// A stroke on the overview's names, from hold to lift, and on until the Exclusive solo question is answered.
     public internal(set) var soloStroke: ActiveSoloStroke?
     /// The engineer answered Keep to the Exclusive solo question for this desk; the App sets it per connection.
     @ObservationIgnored public var keepsExclusiveSolo = false
@@ -241,6 +240,7 @@ public final class ConsoleMirror {
         case .lost:
             reads = ReadQueue()
             linkCopies.forget()
+            abandonSoloStroke()
             status = .lost
         case .failed(let failure):
             status = .failed(failure)
