@@ -78,10 +78,12 @@ final class ChannelUITests: DeskUITestCase {
         saveScreenshot("phantom-alert")
         turnOn.buttons["Cancel"].tap()
         XCTAssertEqual(phantom.value as? String, "Off", "Cancel leaves the desk as it was")
+        XCTAssertEqual(desk.value("/headamp/044/phantom"), .int(0))
 
         phantom.tap()
         turnOn.buttons["Turn On"].tap()
         XCTAssertTrue(eventually(within: 2) { phantom.value as? String == "On" })
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/headamp/044/phantom") == .int(1) }, "on at the desk")
         saveScreenshot("phantom-on")
 
         phantom.tap()
@@ -89,6 +91,7 @@ final class ChannelUITests: DeskUITestCase {
         XCTAssertTrue(turnOff.appears(within: 2))
         turnOff.buttons["Turn Off"].tap()
         XCTAssertTrue(eventually(within: 2) { phantom.value as? String == "Off" })
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/headamp/044/phantom") == .int(0) }, "off at the desk")
     }
 
     func testInternalSourceShowsTrimNotGain() {

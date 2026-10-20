@@ -7,6 +7,7 @@ final class OverviewUITests: DeskUITestCase {
         let fader = app.descendants(matching: .any)["/ch/01/mix/fader"]
         XCTAssertTrue(fader.appears(within: 5))
         let before = fader.value as? String
+        let deskBefore = desk.value("/ch/01/mix/fader")
 
         fader.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5))
             .press(
@@ -14,6 +15,7 @@ final class OverviewUITests: DeskUITestCase {
                 thenDragTo: fader.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5)))
 
         XCTAssertNotEqual(fader.value as? String, before)
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/01/mix/fader") != deskBefore }, "the drag reached the desk")
     }
 
     /// A short swipe starting on the fader itself: iOS 27 drops rows scrolled far off screen, so a full swipe
@@ -85,7 +87,9 @@ final class OverviewUITests: DeskUITestCase {
         let mute = app.buttons["mute-/ch/01/mix/on"]
         mute.tap()
         XCTAssertEqual(mute.label, "Unmute Kick")
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/01/mix/on") == .int(0) }, "muted on the desk")
         mute.tap()
         XCTAssertEqual(mute.label, "Mute Kick")
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/01/mix/on") == .int(1) }, "unmuted on the desk")
     }
 }

@@ -23,6 +23,11 @@ final class DCAUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 3) { self.app.buttons["icon-tile"].value as? String == "Drum Kit" })
         app.buttons["Done"].tap()
         XCTAssertTrue(app.staticTexts["Rhythm secti"].appears(within: 3))
+        XCTAssertTrue(
+            eventually(within: 2) { self.desk.value("/dca/2/config/name") == .string("Rhythm secti") },
+            "the name reached the desk")
+        XCTAssertEqual(desk.value("/dca/2/config/color"), .int(2), "green")
+        XCTAssertEqual(desk.value("/dca/2/config/icon"), .int(11), "Drum Kit")
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(app.buttons["Rhythm secti"].appears(within: 3))
     }
@@ -53,6 +58,7 @@ final class DCAUITests: DeskUITestCase {
         app.buttons["Cancel"].tap()
         XCTAssertTrue(app.staticTexts["Vox"].appears(within: 3))
         XCTAssertFalse(app.staticTexts["VoxX"].exists)
+        XCTAssertEqual(desk.value("/dca/3/config/name"), .string("Vox"), "nothing reached the desk")
     }
 
     /// Every strip is listed, assigned or not: Bass (Ch 8) is on DCA 2, not Drums.
