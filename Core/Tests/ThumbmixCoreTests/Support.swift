@@ -32,9 +32,40 @@ let syncTimeout = Duration.seconds(30)
 func liveMirror(port: UInt16, auditAddresses: [String] = Catalog.auditAddresses()) async -> ConsoleMirror {
     let mirror = ConsoleMirror(
         link: ConsoleLink(host: "127.0.0.1", port: port, timing: .fast), auditAddresses: auditAddresses)
+    await syncGate.enter()
     mirror.start()
     #expect(await eventually(timeout: syncTimeout) { mirror.isLive }, "the mirror never finished its sync")
+    await syncGate.leave()
     return mirror
+}
+
+/// ~80 suites each sync ~4000 addresses at once; on a busy CPU every sync slowed down together and many missed
+/// `syncTimeout` (2026-10-20, reproduced with 24 busy processes on this Mac). A few syncs at a time each get a core
+/// and finish well inside it; all at once gained no speed, the CPU being the limit.
+let syncGate = SyncGate(permits: max(2, ProcessInfo.processInfo.activeProcessorCount / 2))
+
+actor SyncGate {
+    private var permits: Int
+    private var waiting: [CheckedContinuation<Void, Never>] = []
+
+    init(permits: Int) { self.permits = permits }
+
+    func enter() async {
+        if permits > 0 {
+            permits -= 1
+            return
+        }
+        await withCheckedContinuation { waiting.append($0) }
+    }
+
+    /// Hands the permit straight to the next waiting sync, if any.
+    func leave() {
+        guard waiting.isEmpty else {
+            waiting.removeFirst().resume()
+            return
+        }
+        permits += 1
+    }
 }
 
 /// Runs `body` against a fresh fake desk and a mirror that is live on it, and stops both afterwards, however

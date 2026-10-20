@@ -154,7 +154,9 @@ struct ConsoleMirrorTests {
 
             mirror.beginEdit(fader)
             mirror.set(fader, .float(0.6))
-            try await Task.sleep(for: .milliseconds(100))
+            // The desk's change must come after the app's set: a set still in flight on a busy CI runner would land
+            // last and leave 0.6 on the desk.
+            #expect(await eventually { fake.value(at: fader) == .float(0.6) }, "the app's set reached the desk")
             fake.deskChange(fader, .float(0.1))
             try await Task.sleep(for: .milliseconds(50))
             mirror.endEdit(fader)
