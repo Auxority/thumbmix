@@ -36,6 +36,14 @@ final class InsertUITests: DeskUITestCase {
         app.buttons["Done"].tap()
         XCTAssertTrue(eventually(within: 2) { (self.element("insert-more").value as? String)?.hasSuffix("· On") == true })
         saveScreenshot("insert-line-on")
+
+        // The engineer clears the slot on the desk: the line says so, and the sheet has nothing left to switch.
+        desk.change("/ch/13/insert/sel", 0)
+        XCTAssertTrue(eventually(within: 2) { line.value as? String == "No slot picked on the desk" })
+        openInsert(title: "Insert · Vox 1")
+        XCTAssertTrue(eventually(within: 2) { slot.value as? String == "None" })
+        XCTAssertFalse(insert.isEnabled, "no slot, no insert to switch")
+        XCTAssertFalse(element("/ch/13/insert/pos").isEnabled, "no slot, no position")
     }
 
     func testAnAuxInsertAsksFirst() {
@@ -57,18 +65,6 @@ final class InsertUITests: DeskUITestCase {
         XCTAssertTrue(alert.appears(within: 2))
         alert.buttons["Turn On"].tap()
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/08/insert/on") == .int(1) })
-    }
-
-    func testNoSlotDisablesTheInsert() {
-        launchAndOpen("Kick")
-        let line = element("insert-more")
-        XCTAssertTrue(eventually(within: 2) { line.value as? String == "No slot picked on the desk" })
-        openInsert(title: "Insert · Kick")
-        let slot = element("/ch/01/insert/sel")
-        XCTAssertTrue(slot.appears(within: 2))
-        XCTAssertEqual(slot.value as? String, "None")
-        XCTAssertFalse(app.buttons["toggle-/ch/01/insert/on"].isEnabled)
-        XCTAssertFalse(element("/ch/01/insert/pos").isEnabled)
     }
 
     /// A pair's Mix tab may scroll (two pans), but a fader drag that wanders vertically must stay a drag.

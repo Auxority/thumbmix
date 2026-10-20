@@ -30,6 +30,15 @@ final class EQUITests: DeskUITestCase {
 
         graph.coordinate(withNormalizedOffset: moved).doubleTap()
         XCTAssertTrue(eventually(within: 2) { gain.value as? String == "0.0 dB" }, "a double-tap resets the band")
+
+        // The desk switches the EQ off: the graph keeps the bands as set, drawn dashed (mock C), and says so.
+        desk.change("/ch/01/eq/2/g", float: 0.3)
+        desk.change("/ch/01/preamp/hpon", 1)
+        desk.change("/ch/01/eq/on", 0)
+        XCTAssertTrue(eventually(within: 2) { graph.value as? String == "EQ off" }, "the desk's EQ off reached the graph")
+        saveScreenshot("eq-off-dashed")
+        desk.change("/ch/01/eq/on", 1)
+        XCTAssertTrue(eventually(within: 2) { graph.value as? String != "EQ off" }, "and back on")
     }
 
     /// Type is a list: it says each type in words, the desk's term under it, and the closed row keeps the desk's term.

@@ -1,6 +1,6 @@
 import XCTest
 
-/// A row's double-tap reset, and the EQ graph when the EQ is off.
+/// A row's double-tap reset.
 @MainActor
 final class EQBandUITests: DeskUITestCase {
     /// Like a double-tap on the band's point in the graph, every row resets at once, no question: an EQ band's
@@ -31,20 +31,5 @@ final class EQBandUITests: DeskUITestCase {
         row.doubleTap()
         XCTAssertTrue(eventually(within: 2) { row.value as? String == initial }, "the double-tap reset it")
         XCTAssertEqual(app.alerts.count, 0)
-    }
-
-    /// Off, the graph keeps the bands as set, drawn dashed (mock C), and says so to VoiceOver.
-    func testAnEQThatIsOffKeepsItsCurve() {
-        desk.change("/ch/01/eq/on", 0)
-        desk.change("/ch/01/eq/2/g", float: 0.3)
-        // A band 1 boost under the live low cut: the yellow piece must not take its shape.
-        desk.change("/ch/01/eq/1/g", float: 0.75)
-        desk.change("/ch/01/preamp/hpon", 1)
-        launchAndOpen("Kick", tab: "EQ")
-        let graph = element("eq-graph")
-        XCTAssertTrue(eventually(within: 2) { graph.value as? String == "EQ off" })
-        saveScreenshot("eq-off-dashed")
-        desk.change("/ch/01/eq/on", 1)
-        XCTAssertTrue(eventually(within: 2) { graph.value as? String != "EQ off" })
     }
 }
