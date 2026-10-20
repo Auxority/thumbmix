@@ -6,6 +6,7 @@ struct GateTab: View {
     let mirror: ConsoleMirror
     /// The other side of a pair whose dynamics aren't linked: its curve is drawn faint.
     var ghost: StripID?
+    @State private var isKeyOpen = false
 
     var body: some View {
         let gate = Catalog.gate(strip)
@@ -23,8 +24,16 @@ struct GateTab: View {
                 ForEach([gate.threshold, gate.range, gate.attack, gate.hold, gate.release]) {
                     ParameterRow(spec: $0, mirror: mirror)
                 }
+                // Set once: one line that opens a sheet, like the Comp's (2026-10-20).
+                FoldedLineButton(line: mirror.gateKeyFold(strip), identifier: "gate-key") { isKeyOpen = true }
+            }
+        }
+        .sheet(isPresented: $isKeyOpen) {
+            let title = mirror.sheetTitle(String(localized: "Gate key"), strip: strip, perSide: ghost != nil)
+            FoldSheet(title: title, mirror: mirror) {
                 KeySection(key: Catalog.gateKey(strip), mirror: mirror)
             }
+            .foldSheetPresentation([.medium])
         }
     }
 

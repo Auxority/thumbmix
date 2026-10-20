@@ -71,15 +71,19 @@ final class DynamicsKeyUITests: DeskUITestCase {
 
     func testTheGateListensToAnotherChannel() {
         launchAndOpen("Kick", tab: "Gate")
-        scrollDown(from: "/ch/01/gate/mode")
+        XCTAssertFalse(element("/ch/01/gate/keysrc").exists, "the key lives in its sheet")
+        openSheet("gate-key", title: "Gate key · Kick")
         let source = app.buttons["/ch/01/gate/keysrc"]
-        XCTAssertTrue(source.appears(within: 2))
+        XCTAssertTrue(eventually(within: 2) { source.isEnabled })
         source.tap()
         let snare = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Ch 2 · Snare")).firstMatch
         XCTAssertTrue(snare.appears(within: 2))
         snare.tap()
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/01/gate/keysrc") == .int(2) })
         saveScreenshot("gate-key")
+        app.buttons["Done"].tap()
+        let line = element("gate-key")
+        XCTAssertTrue(eventually(within: 2) { (line.value as? String)?.hasPrefix("Ch 2 · Snare") == true })
     }
 
     /// A send tapped after the EQ starts hearing the comp once it moves before the EQ: the app names it and asks.
