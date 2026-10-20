@@ -38,58 +38,48 @@ final class ConnectUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
     }
 
-    func testRefusesAnInvalidAddress() {
-        let app = launch()
+    /// Text that isn't an address reopens the alert saying why, text kept to fix. An address that answers as an X32 is
+    /// refused: Thumbmix speaks the M32's protocol.
+    func testATypedX32IsRefused() {
+        guard let desk = TestDesk.start(for: self, model: "X32") else { return }
+        let app = launch(desk.reachable)
 
-        let field = openAddressAlert(app)
+        var field = openAddressAlert(app)
         clear(field)
         field.typeText("192.168.1")
         app.alerts.buttons["Connect"].tap()
-
         XCTAssertTrue(app.alerts["Not an IP address"].appears(within: 3), "the alert reopens saying why")
-        XCTAssertEqual(app.alerts.textFields.firstMatch.value as? String, "192.168.1", "the text stays to fix")
+        field = app.alerts.textFields.firstMatch
+        XCTAssertEqual(field.value as? String, "192.168.1", "the text stays to fix")
+
+        clear(field)
+        field.typeText("127.0.0.1")
+        app.alerts.buttons["Connect"].tap()
+        XCTAssertTrue(app.alerts["That's an X32"].appears(within: 10))
     }
 
-    /// iOS hides a denied Local Network permission as silence, so the alert asks about both causes.
+    /// iOS hides a denied Local Network permission as silence, so the alert asks about both causes. The console used
+    /// last is the card, which has no swipe; one in the list can be forgotten.
     func testANoReplyNamesTheConsole() {
         // Nothing listens on port 9 of this Mac.
-        let app = launch(["-consolePort", "9"], remembering: ["Fake M32"])
+        let app = launch(["-consolePort", "9"], remembering: ["Fake M32", "Zaal 2"])
 
         XCTAssertTrue(app.staticTexts["Not found"].appears(within: 8))
         app.buttons["Connect"].tap()
-
         let alert = app.alerts["Can't reach Fake M32"]
         XCTAssertTrue(alert.appears(within: 10))
         XCTAssertTrue(alert.buttons["Settings"].exists)
         saveScreenshot("connect-no-reply")
         alert.buttons["OK"].tap()
         XCTAssertTrue(app.buttons["Enter IP"].appears(within: 3))
-    }
-
-    func testATypedX32IsRefused() {
-        guard let desk = TestDesk.start(for: self, model: "X32") else { return }
-        let app = launch(desk.reachable)
-
-        let field = openAddressAlert(app)
-        clear(field)
-        field.typeText("127.0.0.1")
-        app.alerts.buttons["Connect"].tap()
-
-        XCTAssertTrue(app.alerts["That's an X32"].appears(within: 10))
-    }
-
-    /// The console used last is the card, which has no swipe; one in the list can be forgotten.
-    func testSwipingARowForgetsTheConsole() {
-        let app = launch(["-consolePort", "9"], remembering: ["De Fontein FOH", "Zaal 2"])
 
         let row = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Zaal 2'")).firstMatch
         XCTAssertTrue(row.appears(within: 5))
         XCTAssertTrue(row.isHittable)
         row.swipeLeft()
         app.buttons["Forget"].tap()
-
-        XCTAssertTrue(eventually(within: 3) { !row.exists })
-        XCTAssertTrue(app.staticTexts["De Fontein FOH"].exists, "the card stays")
+        XCTAssertTrue(eventually(within: 3) { !row.exists }, "the row is forgotten")
+        XCTAssertTrue(app.staticTexts["Fake M32"].exists, "the card stays")
     }
 
     /// `remembering`: consoles on this Mac's loopback, the first one used last. None by default, so consoles
