@@ -45,6 +45,7 @@ struct CompTab: View {
     let mirror: ConsoleMirror
     /// The other side of a pair whose dynamics aren't linked: its curve is drawn faint.
     var ghost: StripID?
+    @State private var isMoreOpen = false
 
     var body: some View {
         let dynamics = Catalog.dynamics(strip)
@@ -70,16 +71,15 @@ struct CompTab: View {
                 ]) {
                     ParameterRow(spec: $0, mirror: mirror).disabled(autoTimed.contains($0.address))
                 }
-                // Set and forget: below the settings an engineer rides.
-                HStack(spacing: 8) {
-                    ChoiceMenu(spec: dynamics.detector, mirror: mirror)
-                    ChoiceMenu(spec: dynamics.envelope, mirror: mirror)
-                }
-                if let position = Catalog.dynamicsPosition(strip) {
-                    CompPositionMenu(spec: position, strip: strip, mirror: mirror)
-                }
-                KeySection(key: Catalog.dynamicsKey(strip), mirror: mirror)
+                // What nobody rides is one line that opens a sheet: the tab never changes length.
+                FoldedLineButton(line: mirror.compFold(strip), identifier: "comp-more") { isMoreOpen = true }
             }
+        }
+        .sheet(isPresented: $isMoreOpen) {
+            FoldSheet(title: mirror.sheetTitle(String(localized: "Comp"), strip: strip, perSide: ghost != nil), mirror: mirror) {
+                CompMoreSettings(strip: strip, mirror: mirror)
+            }
+            .foldSheetPresentation([.large])
         }
     }
 
@@ -100,18 +100,44 @@ struct CompTab: View {
     }
 }
 
-/// What the gate or comp listens to (layout A, 2026-10-14): last, below everything an engineer rides.
+/// The Comp's sheet (mock B, 2026-10-20): the key first, then the detector and where the comp sits.
+private struct CompMoreSettings: View {
+    let strip: StripID
+    let mirror: ConsoleMirror
+
+    var body: some View {
+        let dynamics = Catalog.dynamics(strip)
+        KeySection(key: Catalog.dynamicsKey(strip), mirror: mirror)
+        Text("Detector").sectionLabel()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4).padding(.top, 10)
+        HStack(spacing: 8) {
+            ChoiceMenu(spec: dynamics.detector, mirror: mirror)
+            ChoiceMenu(spec: dynamics.envelope, mirror: mirror)
+        }
+        if let position = Catalog.dynamicsPosition(strip) {
+            CompPositionMenu(spec: position, strip: strip, mirror: mirror)
+        }
+    }
+}
+
+/// What the gate or comp listens to: opened from the tab's folded line, never on the tab itself.
 struct KeySection: View {
     let key: KeySpecs
     let mirror: ConsoleMirror
 
     var body: some View {
-        Text("Key").sectionLabel()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 4).padding(.top, 10)
-        if let source = key.sourceAddress {
-            ChoiceMenu(spec: Catalog.keySource(source, rawName: mirror.rawName), mirror: mirror)
+        // Source in the heading (S2, 2026-10-20): set once, it needn't cost a row.
+        HStack {
+            Text("Key").sectionLabel()
+            Spacer(minLength: 8)
+            if let source = key.sourceAddress {
+                ChoiceMenu(
+                    spec: Catalog.keySource(source, rawName: mirror.rawName), mirror: mirror,
+                    compactLabel: String(localized: "Listens to"))
+            }
         }
+        .padding(.horizontal, 4)
         HStack(spacing: 8) {
             ToggleChip(spec: key.filterOn, mirror: mirror, onColor: .green)
             ChoiceMenu(spec: key.filterType, mirror: mirror)

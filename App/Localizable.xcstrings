@@ -178,6 +178,9 @@
     "Colour" : {
 
     },
+    "Comp" : {
+
+    },
     "Compressor curve" : {
 
     },
@@ -210,6 +213,9 @@
 
     },
     "DEMO" : {
+
+    },
+    "Detector" : {
 
     },
     "Disconnect" : {
@@ -356,6 +362,9 @@
           }
         }
       }
+    },
+    "Listens to" : {
+
     },
     "Low cut off" : {
 

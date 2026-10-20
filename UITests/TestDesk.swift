@@ -54,6 +54,11 @@ final class TestDesk: Sendable {
         fake.deskChange(address, .float(value))
     }
 
+    /// Plays a pulled cable: the desk ignores everything and sends nothing, so the app loses contact.
+    func goSilent() {
+        fake.silent = true
+    }
+
     /// The app never reads this address: call it before `launch()`.
     func forget(_ address: String) {
         fake.forget(address)

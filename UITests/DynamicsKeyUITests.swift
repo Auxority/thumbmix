@@ -23,11 +23,36 @@ final class DynamicsKeyUITests: DeskUITestCase {
     func testAutoTimeAndTheCompsKeyFilterSwitch() {
         launchAndOpen("Kick", tab: "Comp")
         tapToggle("/ch/01/dyn/auto")
-        scrollDown(from: "/ch/01/dyn/mode")
+        openSheet("comp-more", title: "Comp · Kick")
         XCTAssertEqual(element("/ch/01/dyn/keysrc").value as? String, "Self")
         tapToggle("/ch/01/dyn/filter/on")
         XCTAssertTrue(element("/ch/01/dyn/filter/f").exists)
         saveScreenshot("comp-key")
+    }
+
+    /// Mock B + S2 (2026-10-20): what nobody rides is one line on the tab; the sheet has Source in the KEY heading.
+    func testTheCompsSetOnceSettingsOpenFromOneLine() {
+        launchAndOpen("Kick", tab: "Comp")
+        XCTAssertFalse(element("/ch/01/dyn/det").exists)
+        openSheet("comp-more", title: "Comp · Kick")
+        let source = element("/ch/01/dyn/keysrc")
+        XCTAssertTrue(eventually(within: 2) { source.isEnabled })
+        XCTAssertEqual(source.value as? String, "Self")
+        XCTAssertLessThan(source.frame.maxY, element("toggle-/ch/01/dyn/filter/on").frame.minY, "above the filter")
+        XCTAssertLessThan(source.frame.height, 48, "a text menu in the heading, not a row")
+        XCTAssertTrue(element("/ch/01/dyn/det").exists)
+        saveScreenshot("comp-sheet")
+    }
+
+    /// A large sheet covers the tab's banner: it says itself that contact is gone, and its controls stop.
+    func testASheetSaysWhenContactIsLost() {
+        launchAndOpen("Kick", tab: "Comp")
+        openSheet("comp-more", title: "Comp · Kick")
+        let detector = app.buttons["/ch/01/dyn/det"]
+        XCTAssertTrue(eventually(within: 2) { detector.isEnabled })
+        desk.goSilent()
+        XCTAssertTrue(app.staticTexts["Disconnected — retrying"].appears(within: 8))
+        XCTAssertFalse(detector.isEnabled)
     }
 
     /// The desk ignores Attack and Release under Auto time: dimmed in place, back when Auto time goes off.
@@ -62,7 +87,7 @@ final class DynamicsKeyUITests: DeskUITestCase {
         desk.change("/ch/01/mix/01/on", 1)
         desk.change("/ch/01/mix/01/type", 2)
         launchAndOpen("Kick", tab: "Comp")
-        scrollDown(from: "/ch/01/dyn/mode")
+        openSheet("comp-more", title: "Comp · Kick")
         pickBeforeEQ()
         XCTAssertTrue(app.alerts["Move the comp before the EQ?"].appears(within: 2))
         saveScreenshot("comp-position-alert")
@@ -77,7 +102,7 @@ final class DynamicsKeyUITests: DeskUITestCase {
     /// The demo's sends are tapped before the fader: they hear the comp wherever it sits, so nothing asks.
     func testMovingTheCompWithNoMixChangingDoesntAsk() {
         launchAndOpen("Kick", tab: "Comp")
-        scrollDown(from: "/ch/01/dyn/mode")
+        openSheet("comp-more", title: "Comp · Kick")
         pickBeforeEQ()
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/01/dyn/pos") == .int(0) })
         XCTAssertEqual(app.alerts.count, 0)
@@ -89,6 +114,13 @@ final class DynamicsKeyUITests: DeskUITestCase {
         XCTAssertTrue(menu.appears(within: 2), address)
         menu.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.05)))
+    }
+
+    private func openSheet(_ line: String, title: String) {
+        let button = app.buttons[line]
+        XCTAssertTrue(button.appears(within: 2), line)
+        button.tap()
+        XCTAssertTrue(app.navigationBars[title].appears(within: 2), title)
     }
 
     private func tapToggle(_ address: String) {

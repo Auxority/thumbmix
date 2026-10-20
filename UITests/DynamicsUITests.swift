@@ -70,6 +70,7 @@ final class DynamicsUITests: DeskUITestCase {
 
     func testDetectorAndEnvelopeAreDropdowns() {
         launchAndOpen("Snare", tab: "Comp")
+        app.buttons["comp-more"].tap()
         pick("Average level", in: "/ch/02/dyn/det", from: "PEAK", to: "RMS")
         pick("Linear", in: "/ch/02/dyn/env", from: "LOG", to: "LIN")
         saveScreenshot("comp-dropdowns")
