@@ -1,7 +1,7 @@
 import Foundation
 
-/// The desk's real-time analyser. It measures one source at a time for the whole desk, so the app
-/// borrows it while a channel's EQ is open and puts the desk's own setting back afterwards.
+/// The desk's real-time analyser. It measures one source at a time for the whole desk, so the app borrows it while
+/// a channel's EQ or a key graph is open and puts the desk's own setting back afterwards.
 public enum RTA {
     /// int: 0 none, 1 Monitor, 2-33 Ch01-32, 34-41 Aux1-8, 42-49 FX1L-FX4R, 50-65 Bus01-16,
     /// 66-71 Mtx1-6, 72 Main, 73 Mono (doc p.58).

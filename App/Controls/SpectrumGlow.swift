@@ -1,8 +1,8 @@
 import SwiftUI
 import ThumbmixCore
 
-/// The desk's RTA for this channel, after its EQ: a glow in the channel's colour behind the EQ curve.
-/// It has its own scale, -90 dBFS at the bottom to 0 at the top, independent of the curve's ±15 dB.
+/// The desk's RTA for the strip it follows: a glow in that strip's colour behind the EQ curve or the key filter.
+/// It has its own scale, -90 dBFS at the bottom to 0 at the top, independent of the curve's.
 /// Reads the spectrum cell itself, so 20 Hz updates redraw only the glow.
 struct SpectrumGlow: View {
     static let floor = -90.0
@@ -53,18 +53,23 @@ struct SpectrumGlow: View {
 /// with the first data, it pushed the rows under it down a line just after the tab opened.
 struct RTAStatus: View {
     let spectrum: SpectrumCell
-    let name: String
-    /// A gate's key is heard before the EQ (2026-10-20): the line says which the glow shows.
+    /// nil while it isn't known which strip the glow shows.
+    let name: String?
+    /// The key graph shows some strips before their EQ (2026-10-20): the line says which the glow shows.
     var afterEQ = true
+    /// The engineer pointed the RTA elsewhere on the desk: the app let go (`ConsoleMirror.isRTATakenByDesk`).
+    var isTakenByDesk = false
 
     var body: some View {
         Group {
-            if spectrum.decibels.isEmpty {
+            if isTakenByDesk {
+                Text("RTA: in use on the desk")
+            } else if spectrum.decibels.isEmpty || name == nil {
                 Text("RTA: waiting for the desk…")
             } else if afterEQ {
-                Text("RTA follows \(name) (after EQ)")
+                Text("RTA follows \(name ?? "") (after EQ)")
             } else {
-                Text("RTA follows \(name) (before EQ)")
+                Text("RTA follows \(name ?? "") (before EQ)")
             }
         }
         .font(.caption2)

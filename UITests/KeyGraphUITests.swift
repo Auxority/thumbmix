@@ -72,6 +72,59 @@ final class KeyGraphUITests: DeskUITestCase {
         saveScreenshot("key-graph-filter-on")
     }
 
+    /// Like a row: only a sideways drag moves Freq, so a swipe down to close the sheet never nudges it.
+    func testAVerticalSwipeOnTheGraphLeavesFreq() {
+        desk.change("/ch/01/gate/filter/on", 1)
+        launchAndOpen("Kick", tab: "Gate")
+        openSheet("gate-key", title: "Gate key · Kick")
+        let graph = element("key-graph")
+        XCTAssertTrue(graph.appears(within: 2))
+        let start = frequency()
+        graph.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2))
+            .press(forDuration: 0.05, thenDragTo: graph.coordinate(withNormalizedOffset: CGVector(dx: 0.56, dy: 0.95)))
+        XCTAssertFalse(eventually(within: 1) { self.frequency() != start }, "Freq moved")
+    }
+
+    /// Once the drag ends, the desk's own changes show again: the edit hold doesn't outlive the finger.
+    func testTheDesksFrequencyShowsAgainAfterADrag() {
+        desk.change("/ch/01/gate/filter/on", 1)
+        launchAndOpen("Kick", tab: "Gate")
+        openSheet("gate-key", title: "Gate key · Kick")
+        let graph = element("key-graph")
+        XCTAssertTrue(graph.appears(within: 2))
+        graph.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5))
+            .press(forDuration: 0.05, thenDragTo: graph.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
+        let row = element("/ch/01/gate/filter/f")
+        let dragged = row.value as? String
+        Thread.sleep(forTimeInterval: 1)
+        desk.change("/ch/01/gate/filter/f", float: 0.1)
+        XCTAssertTrue(eventually(within: 3) { row.value as? String != dragged }, "the desk's value")
+    }
+
+    func testTheGraphReadsItsFilterToVoiceOver() {
+        launchAndOpen("Kick", tab: "Gate")
+        openSheet("gate-key", title: "Gate key · Kick")
+        let graph = element("key-graph")
+        XCTAssertTrue(graph.appears(within: 2))
+        XCTAssertEqual(graph.label, "Key filter")
+        XCTAssertEqual(graph.value as? String, "HC12 632 Hz, Off")
+    }
+
+    /// The engineer points the RTA elsewhere on the desk while the sheet is open: the desk wins, and the line says so.
+    func testTheDeskTakingTheRTABackSaysSo() {
+        desk.change("/ch/01/gate/keysrc", 2)
+        launchAndOpen("Kick", tab: "Gate")
+        openSheet("gate-key", title: "Gate key · Kick")
+        XCTAssertTrue(eventually(within: 3) { self.rta == (.int(3), .int(0)) })
+        Thread.sleep(forTimeInterval: 0.5)
+        desk.change(RTA.source, 66)
+        let caption = element("rta-status")
+        XCTAssertTrue(eventually(within: 3) { caption.label == "RTA: in use on the desk" }, caption.label)
+        app.buttons["Done"].tap()
+        Thread.sleep(forTimeInterval: 0.5)
+        XCTAssertEqual(desk.value(RTA.source), .int(66), "the engineer's choice stays")
+    }
+
     /// A gate's cut is gain reduction too (doc p.17): the graph shows when the key makes it act.
     func testTheGraphShowsGainReduction() {
         launchAndOpen("Kick", tab: "Gate")

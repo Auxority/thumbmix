@@ -33,7 +33,7 @@ public final class ConsoleMirror {
     @ObservationIgnored private let overview: [String]
     @ObservationIgnored private let overviewSet: Set<String>
     @ObservationIgnored var reads = ReadQueue()
-    @ObservationIgnored private var meterCells: [StripID: MeterCell] = [:]
+    @ObservationIgnored var meterCells: [StripID: MeterCell] = [:]
     @ObservationIgnored var pendingSends: [String: OSCArgument] = [:]
     @ObservationIgnored var holds = EditHolds(hold: ConsoleMirror.editHold)
     @ObservationIgnored var linkCopies = LinkCopyCheck()
@@ -198,21 +198,6 @@ public final class ConsoleMirror {
         guard case .float(let value) = argument else { return argument }
         guard value.isFinite else { return nil }
         return .float(min(max(value, 0), 1))
-    }
-
-    private func applyMeters(_ message: OSCMessage) {
-        guard case .blob(let blob)? = message.arguments.first else { return }
-        let readings = MeterBanks.readings(
-            address: message.address, values: MeterBlob.floats(from: blob))
-        for (strip, reading) in readings {
-            guard let cell = meterCells[strip] else { continue }
-            // Explicit equality checks: older Observation versions notify on every write, which redraws idle meters at 20 Hz.
-            if cell.level != reading.level { cell.level = reading.level }
-            if let gate = reading.gateGain, cell.gateGain != gate { cell.gateGain = gate }
-            if let dynamics = reading.dynamicsGain, cell.dynamicsGain != dynamics {
-                cell.dynamicsGain = dynamics
-            }
-        }
     }
 
     private func tick() {
