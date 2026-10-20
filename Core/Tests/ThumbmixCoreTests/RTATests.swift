@@ -143,6 +143,106 @@ struct RTATests {
             })
     }
 
+    /// A new key source moves the RTA before the EQ: closing must hand back the position the desk had.
+    @Test func aRepointKeepsItsPositionForTheHandBack() async throws {
+        try await withRTADesk(
+            before: { fake in
+                fake.deskChange(RTA.source, .int(50))
+                fake.deskChange(RTA.position, .int(1))
+            },
+            body: { fake, mirror in
+                #expect(await eventually { mirror.cell(RTA.position).argument == .int(1) })
+                mirror.followRTA(StripID(.input, 1))
+                mirror.followRTA(StripID(.input, 2), afterEQ: false)
+                #expect(await eventually { fake.value(at: RTA.position) == .int(0) })
+                mirror.releaseRTA()
+                #expect(await eventually { fake.value(at: RTA.source) == .int(50) && fake.value(at: RTA.position) == .int(1) })
+            })
+    }
+
+    /// The desk was before the EQ, the app borrowed it before the EQ, the engineer flipped it: the flip stays.
+    @Test func aPositionTheEngineerFlippedIsKept() async throws {
+        try await withRTADesk(
+            before: { fake in
+                fake.deskChange(RTA.source, .int(50))
+                fake.deskChange(RTA.position, .int(0))
+            },
+            body: { fake, mirror in
+                #expect(await eventually { mirror.cell(RTA.source).argument == .int(50) })
+                mirror.followRTA(StripID(.input, 2), afterEQ: false)
+                #expect(await eventually { fake.value(at: RTA.source) == .int(3) })
+                try await Task.sleep(for: ConsoleMirror.editHold + .milliseconds(100))
+                fake.deskChange(RTA.position, .int(1))
+                #expect(await eventually { mirror.cell(RTA.position).argument == .int(1) })
+                mirror.releaseRTA()
+                #expect(await eventually { fake.value(at: RTA.source) == .int(50) })
+                #expect(fake.value(at: RTA.position) == .int(1))
+            })
+    }
+
+    /// The engineer pointed the RTA elsewhere on the desk while the app borrowed it: the desk wins. A later re-point
+    /// (a new key source, a resync) doesn't take it back, and what still shows the app's value is handed back.
+    @Test func theDeskTakingTheRTABackEndsTheLoan() async throws {
+        try await withRTADesk(
+            before: { fake in
+                fake.deskChange(RTA.source, .int(50))
+                fake.deskChange(RTA.position, .int(0))
+            },
+            body: { fake, mirror in
+                #expect(await eventually { mirror.cell(RTA.source).argument == .int(50) })
+                mirror.followRTA(StripID(.input, 1))
+                #expect(await eventually { fake.value(at: RTA.source) == .int(2) })
+                try await Task.sleep(for: ConsoleMirror.editHold + .milliseconds(100))
+                fake.deskChange(RTA.source, .int(66))
+                #expect(await eventually { mirror.cell(RTA.source).argument == .int(66) })
+
+                mirror.followRTA(StripID(.input, 2), afterEQ: false)
+
+                #expect(mirror.isRTATakenByDesk)
+                #expect(await eventually { fake.value(at: RTA.position) == .int(0) }, "ours, so handed back")
+                #expect(fake.value(at: RTA.source) == .int(66), "the engineer's")
+                #expect(mirror.spectrum.decibels.isEmpty)
+                mirror.releaseRTA()
+                #expect(!mirror.isRTATakenByDesk, "the next borrower starts afresh")
+            })
+    }
+
+    /// No re-point needed: the desk's own change ends the loan at once, so the glow never shows another strip under
+    /// the app's caption.
+    @Test func theDesksChangeEndsTheLoanAtOnce() async throws {
+        try await withRTADesk { fake, mirror in
+            mirror.followRTA(StripID(.input, 1))
+            #expect(await eventually { fake.value(at: RTA.source) == .int(2) })
+            try await Task.sleep(for: ConsoleMirror.editHold + .milliseconds(100))
+            fake.deskChange(RTA.source, .int(66))
+            #expect(await eventually { mirror.isRTATakenByDesk })
+            #expect(mirror.spectrum.decibels.isEmpty)
+        }
+    }
+
+    /// Closing the key sheet while contact is lost: the hand-back waits for the desk, then applies where the desk
+    /// still shows the app's value.
+    @Test func aHandBackWhileLostHappensOnReturn() async throws {
+        try await withRTADesk(
+            before: { fake in
+                fake.deskChange(RTA.source, .int(50))
+                fake.deskChange(RTA.position, .int(0))
+            },
+            body: { fake, mirror in
+                #expect(await eventually { mirror.cell(RTA.source).argument == .int(50) })
+                mirror.followRTA(StripID(.input, 1))
+                #expect(await eventually { fake.value(at: RTA.source) == .int(2) && fake.value(at: RTA.position) == .int(1) })
+                fake.silent = true
+                #expect(await eventually { !mirror.isLive })
+                mirror.releaseRTA()
+                fake.deskChange(RTA.source, .int(66))
+                fake.silent = false
+                #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
+                #expect(await eventually { fake.value(at: RTA.position) == .int(0) }, "still ours: handed back")
+                #expect(fake.value(at: RTA.source) == .int(66), "changed on the desk meanwhile: kept")
+            })
+    }
+
     @Test func switchingChannelsKeepsTheOriginalToRestore() async throws {
         try await withRTADesk(
             before: { fake in

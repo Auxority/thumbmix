@@ -33,6 +33,12 @@ public struct KeyFilterState: Equatable, Sendable {
     }
 }
 
+/// What a key listens to: a strip, and whether the RTA shows it after its EQ.
+public struct KeyListening: Equatable, Sendable {
+    public let strip: StripID
+    public let afterEQ: Bool
+}
+
 extension ConsoleMirror {
     /// nil until the desk sent the type and frequency: the graph never draws a guessed shape.
     public func keyFilter(_ key: KeySpecs) -> KeyFilterState? {
@@ -47,15 +53,15 @@ extension ConsoleMirror {
     /// The strip the key listens to, and whether the RTA shows it after its EQ: what the gate or comp hears. A gate
     /// sits before the EQ (unverified); a comp keyed on itself hears its own position; another strip is taken before
     /// its EQ (unverified, TODO). nil while anything it depends on is unread: the app never borrows the RTA on a guess.
-    public func keyRTA(_ strip: StripID, owner: KeyOwner) -> (strip: StripID, afterEQ: Bool)? {
+    public func keyRTA(_ strip: StripID, owner: KeyOwner) -> KeyListening? {
         let key = owner == .gate ? Catalog.gateKey(strip) : Catalog.dynamicsKey(strip)
         if let address = key.sourceAddress {
             guard case .int(let source)? = cell(address).argument else { return nil }
-            if source > 0 { return keySource(Int(source)).map { ($0, false) } }
+            if source > 0 { return keySource(Int(source)).map { KeyListening(strip: $0, afterEQ: false) } }
         }
-        guard owner == .comp else { return (strip, false) }
+        guard owner == .comp else { return KeyListening(strip: strip, afterEQ: false) }
         guard let position = Catalog.dynamicsPosition(strip), let after = value(position) else { return nil }
-        return (strip, after >= 1)
+        return KeyListening(strip: strip, afterEQ: after >= 1)
     }
 
     /// `keysrc` 1-64 (0 is the strip itself).

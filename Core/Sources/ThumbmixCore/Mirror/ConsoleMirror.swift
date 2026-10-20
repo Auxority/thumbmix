@@ -24,6 +24,11 @@ public final class ConsoleMirror {
     @ObservationIgnored public let spectrum = SpectrumCell()
     /// Set while the app borrows the desk's RTA; see ConsoleMirror+RTA.
     @ObservationIgnored var rtaLoan: RTALoan?
+    /// Handed back while contact was lost: applied once the desk is live again (`returnPendingRTA`).
+    @ObservationIgnored var pendingRTAReturn: RTALoan?
+    /// The engineer pointed the RTA elsewhere on the desk while the app borrowed it: the desk wins until the
+    /// borrower (a tab or sheet) lets go.
+    public internal(set) var isRTATakenByDesk = false
     /// Read on connect; everything else is read per tab (`ConsoleMirror+Reads`) and forgotten on a resync.
     @ObservationIgnored private let overview: [String]
     @ObservationIgnored private let overviewSet: Set<String>
@@ -167,7 +172,10 @@ public final class ConsoleMirror {
         // A reply of another type (",i" where the parameter is ",f") is garbage, not a new value.
         if let known = cell.argument, !known.hasSameType(as: argument) { return }
         // Stored before the reply is counted: the last answer turns the status live, and screens rebuild on that.
-        if !holds.isHeld(message.address, now: .now) { store(argument, in: cell, at: message.address, arrivedAt: arrival) }
+        if !holds.isHeld(message.address, now: .now) {
+            store(argument, in: cell, at: message.address, arrivedAt: arrival)
+            noteRTASetting(message.address)
+        }
         noteReply(message.address)
     }
 
@@ -278,6 +286,7 @@ public final class ConsoleMirror {
         }
         log.info("sync done")
         status = .live
+        returnPendingRTA()
         startBackgroundFill()
         pumpReads()
     }

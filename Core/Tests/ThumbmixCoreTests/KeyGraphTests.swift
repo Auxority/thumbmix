@@ -41,6 +41,7 @@ struct KeyGraphTests {
         let key = Catalog.gateKey(ch1)
         #expect(mirror([:]).keyFilter(key) != nil)
         #expect(mirror([:], forgetting: ["/ch/01/gate/filter/type"]).keyFilter(key) == nil)
+        #expect(mirror([:], forgetting: ["/ch/01/gate/filter/f"]).keyFilter(key) == nil)
         #expect(mirror([:], forgetting: ["/ch/01/gate/filter/on"]).isKeyFilterOn(key) == nil)
     }
 
