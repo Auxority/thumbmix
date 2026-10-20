@@ -3,10 +3,27 @@ import XCTest
 /// Auto time, the key and the comp position, below everything an engineer rides (mocks 2026-10-14-dyn-key).
 @MainActor
 final class DynamicsKeyUITests: DeskUITestCase {
+    /// Mock B (2026-10-20): the rows ridden mid-show, in reach without a scroll.
+    func testRideRowsAreOnTheFirstScreen() {
+        launchAndOpen("Kick", tab: "Comp")
+        XCTAssertTrue(element("/ch/01/dyn/thr").appears(within: 2))
+        for row in ["thr", "ratio", "mgain"] { XCTAssertTrue(element("/ch/01/dyn/" + row).isHittable, row) }
+    }
+
+    /// U1 (2026-10-20): Auto last in the On · Mode row, so a tap that misses it opens Mode, never switches the comp off.
+    func testAutoSitsBesideOnAndMode() {
+        launchAndOpen("Kick", tab: "Comp")
+        let on = element("toggle-/ch/01/dyn/on")
+        let auto = element("toggle-/ch/01/dyn/auto")
+        XCTAssertTrue(auto.appears(within: 2))
+        XCTAssertEqual(auto.frame.midY, on.frame.midY, accuracy: 1)
+        XCTAssertGreaterThan(auto.frame.minX, element("/ch/01/dyn/mode").frame.maxX)
+    }
+
     func testAutoTimeAndTheCompsKeyFilterSwitch() {
         launchAndOpen("Kick", tab: "Comp")
-        scrollDown(from: "/ch/01/dyn/mode")
         tapToggle("/ch/01/dyn/auto")
+        scrollDown(from: "/ch/01/dyn/mode")
         XCTAssertEqual(element("/ch/01/dyn/keysrc").value as? String, "Self")
         tapToggle("/ch/01/dyn/filter/on")
         XCTAssertTrue(element("/ch/01/dyn/filter/f").exists)

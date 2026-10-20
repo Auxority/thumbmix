@@ -55,15 +55,18 @@ struct CompTab: View {
                     curve: curve(dynamics), meter: mirror.meter(strip), reduction: \.dynamicsGain,
                     identifier: "comp-graph", label: "Compressor curve",
                     ghostOutput: ghost.flatMap { self.curve(Catalog.dynamics($0)) }?.output)
+                // Auto last (U1, 2026-10-20): a tap that misses it opens Mode, never switches the comp off.
                 HStack(spacing: 8) {
                     ToggleChip(spec: dynamics.on, mirror: mirror, onColor: .green)
                     ChoiceMenu(spec: dynamics.mode, mirror: mirror)
+                    ToggleChip(spec: dynamics.auto, mirror: mirror, title: String(localized: "Auto"), onColor: .green)
                 }
                 // Auto time takes over Attack and Release: dimmed in place, like a cut filter's Gain and Q.
                 let autoTimed = mirror.isAutoTimeOn(strip) ? Set(dynamics.autoTimed.map(\.address)) : []
+                // What's ridden mid-show first, in reach on the SE without a scroll (mock B, 2026-10-20).
                 ForEach([
-                    dynamics.threshold, dynamics.ratio, dynamics.knee, dynamics.attack, dynamics.hold,
-                    dynamics.release, dynamics.makeup, dynamics.mix,
+                    dynamics.threshold, dynamics.ratio, dynamics.makeup, dynamics.mix, dynamics.knee, dynamics.attack,
+                    dynamics.hold, dynamics.release,
                 ]) {
                     ParameterRow(spec: $0, mirror: mirror).disabled(autoTimed.contains($0.address))
                 }
@@ -72,11 +75,8 @@ struct CompTab: View {
                     ChoiceMenu(spec: dynamics.detector, mirror: mirror)
                     ChoiceMenu(spec: dynamics.envelope, mirror: mirror)
                 }
-                HStack(spacing: 8) {
-                    if let position = Catalog.dynamicsPosition(strip) {
-                        CompPositionMenu(spec: position, strip: strip, mirror: mirror)
-                    }
-                    ToggleChip(spec: dynamics.auto, mirror: mirror, onColor: .green)
+                if let position = Catalog.dynamicsPosition(strip) {
+                    CompPositionMenu(spec: position, strip: strip, mirror: mirror)
                 }
                 KeySection(key: Catalog.dynamicsKey(strip), mirror: mirror)
             }
