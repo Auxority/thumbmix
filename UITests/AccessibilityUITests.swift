@@ -1,17 +1,9 @@
 import XCTest
 
-/// What VoiceOver and larger text get: which choice is selected, which strip a control belongs to, rows that grow.
+/// What VoiceOver and larger text get: which strip a control belongs to, which colour is selected, rows that grow.
+/// Which group pill is selected is in `PillBarUITests`.
 @MainActor
 final class AccessibilityUITests: DeskUITestCase {
-    func testGroupPillsSayWhichIsSelected() {
-        launch()
-        XCTAssertTrue(app.buttons["Inputs"].appears(within: 5))
-        XCTAssertTrue(app.buttons["Inputs"].isSelected)
-        app.buttons["Buses"].tap()
-        XCTAssertTrue(eventually(within: 2) { self.app.buttons["Buses"].isSelected })
-        XCTAssertFalse(app.buttons["Inputs"].isSelected)
-    }
-
     /// Forty rows of "Fader" and "Mute" tell a VoiceOver user nothing; each control says its strip.
     func testOverviewControlsNameTheirStrip() {
         launch()
@@ -24,6 +16,8 @@ final class AccessibilityUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { mute.label == "Unmute Kick" })
     }
 
+    /// Each swatch says its colour and whether it is picked. The inverted colours are a second row of swatches, not a
+    /// switch (B, 2026-10-17).
     func testColourSwatchesSayTheirNameAndWhichIsSelected() {
         launchAndOpen("Kick")
         app.buttons["edit-strip"].tap()
@@ -33,20 +27,14 @@ final class AccessibilityUITests: DeskUITestCase {
         XCTAssertTrue(red.isSelected, "the demo desk colours Kick red")
         XCTAssertFalse(app.buttons["color-green"].isSelected)
         XCTAssertEqual(app.buttons["color-off"].label, "No colour")
-    }
 
-    /// The inverted colours are a second row of swatches, not a switch (B, 2026-10-17).
-    func testInvertedColoursAreTheirOwnSwatches() {
-        launchAndOpen("Kick")
-        app.buttons["edit-strip"].tap()
         let invertedRed = app.buttons["color-red-inverted"]
-        XCTAssertTrue(invertedRed.appears(within: 2))
         XCTAssertEqual(invertedRed.label, "Red")
         XCTAssertEqual(invertedRed.value as? String, "Inverted")
-        XCTAssertFalse(app.switches["Inverted"].exists)
+        XCTAssertFalse(app.switches["Inverted"].exists, "not a switch")
         invertedRed.tap()
         XCTAssertTrue(eventually(within: 2) { invertedRed.isSelected })
-        XCTAssertFalse(app.buttons["color-red"].isSelected)
+        XCTAssertFalse(red.isSelected)
         saveScreenshot("colour-swatches")
     }
 

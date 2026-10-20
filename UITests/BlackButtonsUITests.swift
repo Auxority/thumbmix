@@ -3,16 +3,15 @@ import XCTest
 /// iOS wraps toolbar buttons in grey glass; on an OLED screen they're glass tinted black instead.
 @MainActor
 final class BlackButtonsUITests: DeskUITestCase {
-    func testDisconnectIsBlack() {
+    /// The overview's Disconnect, then the edit sheet's Cancel and Done.
+    func testToolbarButtonsAreBlack() {
         launch()
         saveScreenshot("overview-buttons")
         XCTAssertFalse(app.navigationBars.staticTexts["Thumbmix"].exists, "the overview has no title")
         assertFillIsBlack(app.buttons["Disconnect"])
         assertNotSqueezed(app.buttons["Disconnect"])
-    }
 
-    func testEditStripCancelAndDoneAreBlack() {
-        launchAndOpen("Kick")
+        open("Kick")
         app.buttons["edit-strip"].tap()
         XCTAssertTrue(app.buttons["Done"].appears(within: 3))
         XCTAssertTrue(app.buttons["Done"].settles(within: 3))
