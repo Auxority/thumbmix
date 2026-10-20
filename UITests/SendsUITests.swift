@@ -33,12 +33,7 @@ final class SendsUITests: DeskUITestCase {
         element("tap-EQ").tap()
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/mix/01/type") == .int(2) }, "after EQ")
 
-        element("tap-Group").tap()
-        app.alerts.buttons["Make subgroup"].tap()
-        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/mix/01/type") == .int(5) }, "a subgroup")
-        XCTAssertTrue(app.staticTexts["Subgroup"].appears(within: 2))
-        XCTAssertEqual(element("tap-Group").value as? String, "In this mix")
-        XCTAssertTrue(element("tap-Group").isSelected)
+        aMonoMixCanBeASubgroup()
 
         let mon2 = app.buttons["Open Mon 2"]
         mon2.tap()
@@ -51,6 +46,24 @@ final class SendsUITests: DeskUITestCase {
         app.navigationBars.buttons.firstMatch.tap()
         XCTAssertTrue(app.staticTexts["Ch 13"].appears(within: 3))
         XCTAssertTrue(app.buttons["Sends"].isSelected, "back where it left")
+    }
+
+    /// A mono mix's chain ends in Group: a subgroup set on the desk shows as one, not as After fader, and from the
+    /// app Group asks first.
+    private func aMonoMixCanBeASubgroup() {
+        // The app's own edit holds the address for a moment: the desk's change after it must wait that out.
+        Thread.sleep(forTimeInterval: 1)
+        desk.change("/ch/13/mix/01/type", 5)
+        XCTAssertTrue(app.staticTexts["Subgroup"].appears(within: 2), "the desk's subgroup, not After fader")
+        XCTAssertEqual(element("tap-Group").value as? String, "In this mix")
+        XCTAssertTrue(element("tap-Group").isSelected)
+
+        // Set from the app: Group asks first.
+        element("tap-Fader").tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/mix/01/type") == .int(4) }, "After fader")
+        element("tap-Group").tap()
+        app.alerts.buttons["Make subgroup"].tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/mix/01/type") == .int(5) }, "the app's subgroup")
     }
 
     /// A linked bus pair is one send, and its › opens the pan settings (mock H): the pan and Follow LR pan reach the
