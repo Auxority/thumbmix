@@ -3,6 +3,8 @@ import XCTest
 /// The "to Main LR" pill on the Mix tab's name line (mock 2026-10-13): every tap asks first, both ways.
 @MainActor
 final class MainLRUITests: DeskUITestCase {
+    /// The pill is on the Mix tab only. It is taller than the name: without a fixed header height the fader sat 4 pt
+    /// lower on Mix than on EQ. A matrix has none (`SendsUITests`).
     func testTakingAChannelOutAndBackAsksEachTime() {
         launchAndOpen("Kick")
         let pill = element("mainLR-/ch/01/mix/st")
@@ -18,33 +20,16 @@ final class MainLRUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { pill.label == "Kick out of the main mix" })
         saveScreenshot("main-lr-out")
 
+        Thread.sleep(forTimeInterval: 0.4)
         pill.tap()
         let sendBack = app.alerts["Send Kick to the main mix?"]
         XCTAssertTrue(sendBack.appears(within: 2))
         sendBack.buttons["Cancel"].tap()
         XCTAssertEqual(desk.value("/ch/01/mix/st"), .int(0), "Cancel changes nothing")
-    }
 
-    /// The pill is taller than the name; without a fixed header height the fader sat 4 pt lower on Mix than on EQ.
-    func testSwitchingTabsDoesNotMoveTheFader() {
-        launchAndOpen("Kick")
-        XCTAssertTrue(element("mainLR-/ch/01/mix/st").appears(within: 2))
         let onMix = element("/ch/01/mix/fader").frame.minY
         app.buttons["EQ"].tap()
-        XCTAssertTrue(eventually(within: 2) { !self.element("mainLR-/ch/01/mix/st").exists })
-        XCTAssertEqual(element("/ch/01/mix/fader").frame.minY, onMix, accuracy: 0.5)
-    }
-
-    /// Mix tab only; and a matrix has no LR switch on the desk.
-    func testThePillShowsOnlyOnTheMixTabOfStripsThatHaveIt() {
-        launchAndOpen("Kick")
-        XCTAssertTrue(element("mainLR-/ch/01/mix/st").appears(within: 2))
-        app.buttons["EQ"].tap()
-        XCTAssertTrue(eventually(within: 2) { !self.element("mainLR-/ch/01/mix/st").exists }, "not on other tabs")
-        app.navigationBars.buttons.firstMatch.tap()
-        app.buttons["Matrix"].tap()
-        open("Fill")
-        XCTAssertTrue(element("solo-/-stat/solosw/65").appears(within: 2))
-        XCTAssertFalse(app.descendants(matching: .any).matching(identifier: "mainLR-/mtx/01/mix/st").firstMatch.exists)
+        XCTAssertTrue(eventually(within: 2) { !pill.exists }, "not on other tabs")
+        XCTAssertEqual(element("/ch/01/mix/fader").frame.minY, onMix, accuracy: 0.5, "the fader didn't move")
     }
 }
