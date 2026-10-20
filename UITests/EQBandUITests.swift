@@ -21,6 +21,19 @@ final class EQBandUITests: DeskUITestCase {
         gain.doubleTap()
         XCTAssertTrue(eventually(within: 2) { gain.value as? String == "0.0 dB" }, "the preamp gain reset")
         XCTAssertEqual(app.alerts.count, 0)
+
+        // The demo's comps start at 12 dB makeup and 2:1; their resets are 0 dB and 3:1.
+        app.buttons["Comp"].tap()
+        let makeup = element("/ch/01/dyn/mgain")
+        XCTAssertTrue(makeup.appears(within: 2))
+        XCTAssertEqual(makeup.value as? String, "12.0 dB")
+        makeup.doubleTap()
+        XCTAssertTrue(eventually(within: 2) { makeup.value as? String == "0.0 dB" }, "the makeup gain reset")
+        let ratio = element("/ch/01/dyn/ratio")
+        XCTAssertEqual(ratio.value as? String, "2.0:1")
+        ratio.doubleTap()
+        XCTAssertTrue(eventually(within: 2) { ratio.value as? String == "3.0:1" }, "the ratio reset")
+        XCTAssertEqual(app.alerts.count, 0)
     }
 
     private func dragAndDoubleTap(_ row: XCUIElement, from initial: String) {

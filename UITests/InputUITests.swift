@@ -44,6 +44,29 @@ final class InputUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { on.value as? String == "On" })
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/01/delay/on") == .int(1) }, "on at the desk")
         saveScreenshot("input-delay")
+        aDragThatLeavesTheRowKeepsItsSpeed(trim)
+    }
+
+    /// One speed wherever the finger is: the finer speeds off the row came too late for a small nudge, so exact
+    /// values are typed instead (2026-10-12). The row only claims a mostly sideways drag, and XCUITest drags in a
+    /// straight line, so the finger leaves the row on a shallow slant.
+    private func aDragThatLeavesTheRowKeepsItsSpeed(_ trim: XCUIElement) {
+        let start = trim.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 160, dy: 0)))
+        let alongTheRow = decibels(trim)
+        trim.doubleTap()
+        XCTAssertTrue(eventually(within: 2) { self.decibels(trim) == 0 })
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 160, dy: 150)))
+        let farBelow = decibels(trim)
+        XCTAssertGreaterThan(alongTheRow, 0)
+        XCTAssertEqual(farBelow, alongTheRow, accuracy: 0.5, "\(farBelow) dB far below vs \(alongTheRow) dB along")
+    }
+
+    /// "+6.0 dB" or "−3.5 dB" as a number.
+    private func decibels(_ row: XCUIElement) -> Double {
+        let text = (row.value as? String ?? "").replacingOccurrences(of: "−", with: "-")
+            .replacingOccurrences(of: " dB", with: "").replacingOccurrences(of: "+", with: "")
+        return Double(text) ?? .nan
     }
 
     /// The safety rule: a chip shows nothing the desk didn't send. Unread, it waits disabled rather than claim "Off".
