@@ -1,21 +1,9 @@
 import XCTest
 
-/// What VoiceOver and larger text get: which strip a control belongs to, which colour is selected, rows that grow.
-/// Which group pill is selected is in `PillBarUITests`.
+/// What VoiceOver and larger text get: which colour is selected, rows that grow. Which group pill is selected is in
+/// `PillBarUITests`, which strip an overview control belongs to in `OverviewUITests`.
 @MainActor
 final class AccessibilityUITests: DeskUITestCase {
-    /// Forty rows of "Fader" and "Mute" tell a VoiceOver user nothing; each control says its strip.
-    func testOverviewControlsNameTheirStrip() {
-        launch()
-        let fader = element("/ch/01/mix/fader")
-        XCTAssertTrue(fader.appears(within: 5))
-        XCTAssertEqual(fader.label, "Kick fader")
-        let mute = app.buttons["mute-/ch/01/mix/on"]
-        XCTAssertEqual(mute.label, "Mute Kick")
-        mute.tap()
-        XCTAssertTrue(eventually(within: 2) { mute.label == "Unmute Kick" })
-    }
-
     /// Each swatch says its colour and whether it is picked. The inverted colours are a second row of swatches, not a
     /// switch (B, 2026-10-17).
     func testColourSwatchesSayTheirNameAndWhichIsSelected() {
@@ -38,14 +26,20 @@ final class AccessibilityUITests: DeskUITestCase {
         saveScreenshot("colour-swatches")
     }
 
-    func testDCAMemberRowsGrowWithLargerText() {
+    /// The overview's rows and a DCA's member rows grow with the text size. A row is at least 48 pt at any size, so
+    /// only taller shows the text grew.
+    func testRowsGrowWithLargerText() {
         launch(["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
+        let fader = element("/ch/01/mix/fader")
+        XCTAssertTrue(fader.appears(within: 5))
+        XCTAssertGreaterThan(fader.frame.height, 70, "an overview row")
+        saveScreenshot("dynamic-type-overview")
+
         app.buttons["DCA"].tap()
         open("Drums")
         app.buttons["Members"].tap()
         let snare = element("member-/ch/02")
         XCTAssertTrue(snare.appears(within: 3))
-        // The row is at least 48 pt at any size: only taller shows the text grew.
-        XCTAssertGreaterThan(snare.frame.height, 60)
+        XCTAssertGreaterThan(snare.frame.height, 60, "a DCA member row")
     }
 }
