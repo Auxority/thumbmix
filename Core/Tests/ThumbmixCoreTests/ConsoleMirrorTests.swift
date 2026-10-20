@@ -101,7 +101,7 @@ struct ConsoleMirrorTests {
     }
 
     @Test func metersFillCells() async throws {
-        try await withLiveDesk { fake, mirror in
+        try await withLiveDesk(meters: true) { fake, mirror in
             #expect(await eventually { mirror.meter(StripID(.input, 1)).level > 0 })
             #expect(await eventually { mirror.meter(StripID(.input, 1)).gateGain < 1 })
         }
@@ -119,7 +119,7 @@ struct ConsoleMirrorTests {
     @Test func goesLiveWithoutAnUnansweredAddressAndIgnoresEditsToIt() async throws {
         var state = DemoState.values()
         state["/ch/02/mix/fader"] = nil
-        let fake = try FakeM32(state: state)
+        let fake = try FakeM32(state: state, streamsMeters: false)
         let port = try await fake.start()
         defer { fake.stop() }
         let mirror = await liveMirror(port)

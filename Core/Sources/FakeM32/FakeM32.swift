@@ -26,9 +26,12 @@ public final class FakeM32: @unchecked Sendable {
     private var isCopyingLinkedEdits = true
     private var getsToDrop = 0
     private var sets: [OSCMessage] = []
+    /// Off for Core tests that don't read meters: ~80 parallel fakes streaming them took most of a CI runner's CPU.
+    private let streamsMeters: Bool
 
     public init(
-        port: UInt16 = 0, model: String = "M32", state: [String: OSCArgument] = DemoState.values()
+        port: UInt16 = 0, model: String = "M32", state: [String: OSCArgument] = DemoState.values(),
+        streamsMeters: Bool = true
     ) throws {
         let parameters = NWParameters.udp
         parameters.requiredLocalEndpoint = .hostPort(
@@ -37,6 +40,7 @@ public final class FakeM32: @unchecked Sendable {
         listener = try NWListener(using: parameters)
         self.state = state
         modelStorage = model
+        self.streamsMeters = streamsMeters
     }
 
     /// Starts listening and returns the bound UDP port.
@@ -47,7 +51,7 @@ public final class FakeM32: @unchecked Sendable {
                 listener.stateUpdateHandler = { [self] in handleListener($0) }
                 listener.newConnectionHandler = { [self] in accept($0) }
                 listener.start(queue: queue)
-                startMeterTimer()
+                if streamsMeters { startMeterTimer() }
             }
         }
     }
@@ -273,24 +277,12 @@ public final class FakeM32: @unchecked Sendable {
         guard !isSilent else { return }
         let now = Date()
         let time = now.timeIntervalSince(started)
-        let afterEQ = rtaAfterEQ()
+        let afterEQ = FakeState.rtaAfterEQ(in: state)
         for client in clients.values {
             for (bank, until) in client.meterBanksUntil where until > now {
                 send(OSCMessage(bank, [.blob(FakeState.meterBlob(bank: bank, time: time, afterEQ: afterEQ))]), to: client)
             }
         }
-    }
-
-    /// With the RTA "after EQ" on a strip, the curve the app draws for that strip's EQ and low cut. Whether the
-    /// desk's "after EQ" includes the low cut is open (m32-probe section 6); the demo assumes it does.
-    private func rtaAfterEQ() -> (Double) -> Double {
-        guard state[RTA.position] == .int(RTA.afterEQ), case .int(let source)? = state[RTA.source],
-            let strip = StripKind.allCases.flatMap(StripID.all).first(where: { $0.rtaSource == source })
-        else { return { _ in 0 } }
-        let values = state
-        let bands = EQReading.bands(strip) { values[$0] }
-        let lowCut = EQReading.lowCut(strip) { values[$0] }
-        return { hertz in EQReading.decibels(at: hertz, bands: bands, lowCut: lowCut) }
     }
 
     private func send(_ message: OSCMessage, to client: Client) {

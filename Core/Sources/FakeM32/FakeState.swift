@@ -11,6 +11,17 @@ enum FakeState {
             : MeterBlob.encode(meterValues(bank: bank, time: time))
     }
 
+    /// With the RTA "after EQ" on a strip, the curve the app draws for that strip's EQ and low cut. Whether the
+    /// desk's "after EQ" includes the low cut is open (m32-probe section 6); the demo assumes it does.
+    static func rtaAfterEQ(in state: [String: OSCArgument]) -> (Double) -> Double {
+        guard state[RTA.position] == .int(RTA.afterEQ), case .int(let source)? = state[RTA.source],
+            let strip = StripKind.allCases.flatMap(StripID.all).first(where: { $0.rtaSource == source })
+        else { return { _ in 0 } }
+        let bands = EQReading.bands(strip) { state[$0] }
+        let lowCut = EQReading.lowCut(strip) { state[$0] }
+        return { hertz in EQReading.decibels(at: hertz, bands: bands, lowCut: lowCut) }
+    }
+
     /// A falling pink-ish spectrum with a slowly sweeping bump, so the glow visibly moves in the simulator.
     static func spectrum(time: Double, afterEQ: (Double) -> Double = { _ in 0 }) -> [Float] {
         (0..<RTA.bandCount).map { band in

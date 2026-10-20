@@ -14,8 +14,10 @@ func eventually(timeout: Duration = .seconds(8), _ condition: () -> Bool) async 
     return condition()
 }
 
-func startFake(model: String = "M32") async throws -> (FakeM32, UInt16) {
-    let fake = try FakeM32(model: model)
+/// Without `meters`, the fake streams none: ~80 parallel fakes streaming them at the desk's rate took most of a CI
+/// runner's CPU, and syncs missed `syncTimeout` (2026-10-19). Only tests that read meters or the RTA ask for them.
+func startFake(model: String = "M32", meters: Bool = false) async throws -> (FakeM32, UInt16) {
+    let fake = try FakeM32(model: model, streamsMeters: meters)
     return (fake, try await fake.start())
 }
 
@@ -40,10 +42,10 @@ func liveMirror(port: UInt16, auditAddresses: [String] = Catalog.auditAddresses(
 @MainActor
 func withLiveDesk(
     copiesLinkedEdits: Bool = true, dropsGets: Int = 0, auditAddresses: [String] = Catalog.auditAddresses(),
-    before: (FakeM32) -> Void = { _ in },
+    meters: Bool = false, before: (FakeM32) -> Void = { _ in },
     body: (FakeM32, ConsoleMirror) async throws -> Void
 ) async throws {
-    let (fake, port) = try await startFake()
+    let (fake, port) = try await startFake(meters: meters)
     defer { fake.stop() }
     fake.copiesLinkedEdits = copiesLinkedEdits
     fake.dropNextGets(dropsGets)

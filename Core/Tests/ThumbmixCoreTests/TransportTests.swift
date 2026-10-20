@@ -90,7 +90,7 @@ struct TransportTests {
     }
 
     @Test func metersStreamAsBlobs() async throws {
-        let (fake, port) = try await startFake()
+        let (fake, port) = try await startFake(meters: true)
         defer { fake.stop() }
         let transport = UDPTransport(host: "127.0.0.1", port: port)
         transport.start()
@@ -108,5 +108,27 @@ struct TransportTests {
             return
         }
         #expect(MeterBlob.floats(from: blob).count == 96)
+    }
+
+    /// ~80 parallel fakes streaming meters at the desk's rate took most of a CI runner's CPU, so syncs missed their
+    /// deadline (2026-10-19); Core tests stream meters only where they read them.
+    @Test func aFakeWithoutMetersSendsNoneEvenWhenSubscribed() async throws {
+        let fake = try FakeM32(streamsMeters: false)
+        let port = try await fake.start()
+        defer { fake.stop() }
+        let transport = UDPTransport(host: "127.0.0.1", port: port)
+        transport.start()
+        defer { transport.cancel() }
+        let recorder = MessageRecorder(transport.messages)
+
+        var reply: OSCMessage?
+        for _ in 1...5 where reply == nil {
+            transport.send(OSCMessage("/meters", [.string("/meters/1")]))
+            transport.send(OSCMessage("/info"))
+            reply = await recorder.wait(for: "/info")
+        }
+        #expect(reply != nil, "the fake is up and answering")
+        try await Task.sleep(for: .milliseconds(200))  // four meter ticks
+        #expect(recorder.last(address: "/meters/1") == nil)
     }
 }
