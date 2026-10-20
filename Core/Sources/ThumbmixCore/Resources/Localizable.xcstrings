@@ -663,6 +663,16 @@
         }
       }
     },
+    "Filter off" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter off"
+          }
+        }
+      }
+    },
     "Flip" : {
       "localizations" : {
         "en" : {
@@ -914,6 +924,16 @@
         }
       }
     },
+    "Key" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Key"
+          }
+        }
+      }
+    },
     "Keys" : {
       "localizations" : {
         "en" : {
@@ -1143,6 +1163,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mtx"
+          }
+        }
+      }
+    },
+    "No slot picked on the desk" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No slot picked on the desk"
           }
         }
       }
