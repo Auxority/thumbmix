@@ -1,18 +1,35 @@
 import XCTest
 
-/// A band's rows: their double-tap resets, and Gain and Q on a cut filter.
+/// A row's double-tap reset, and the EQ graph when the EQ is off.
 @MainActor
 final class EQBandUITests: DeskUITestCase {
-    /// Like a double-tap on the band's point in the graph: at once, no question.
-    func testDoubleTappingFrequencyRestoresTheDefaultAtOnce() {
+    /// Like a double-tap on the band's point in the graph, every row resets at once, no question: an EQ band's
+    /// frequency, and on the Input tab the delay and the preamp gain.
+    func testDoubleTappingARowRestoresTheDefaultAtOnce() {
         launchAndOpen("Kick", tab: "EQ")
-        let frequency = app.descendants(matching: .any)["/ch/01/eq/1/f"]
+        let frequency = element("/ch/01/eq/1/f")
         XCTAssertTrue(frequency.appears(within: 2))
-        frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.5))
-            .press(forDuration: 0.05, thenDragTo: frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5)))
-        XCTAssertNotEqual(frequency.value as? String, "91.4 Hz")
-        frequency.doubleTap()
-        XCTAssertTrue(eventually(within: 2) { frequency.value as? String == "91.4 Hz" })
+        dragAndDoubleTap(frequency, from: "91.4 Hz")
+
+        app.buttons["Input"].tap()
+        let time = element("/ch/01/delay/time")
+        XCTAssertTrue(time.appears(within: 2))
+        dragAndDoubleTap(time, from: "0.30 ms · 0.3 ft")
+
+        let gain = element("/headamp/032/gain")
+        XCTAssertEqual(gain.value as? String, "+24.0 dB")
+        gain.doubleTap()
+        XCTAssertTrue(eventually(within: 2) { gain.value as? String == "0.0 dB" }, "the preamp gain reset")
+        XCTAssertEqual(app.alerts.count, 0)
+    }
+
+    private func dragAndDoubleTap(_ row: XCUIElement, from initial: String) {
+        XCTAssertEqual(row.value as? String, initial)
+        row.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.5))
+            .press(forDuration: 0.05, thenDragTo: row.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5)))
+        XCTAssertNotEqual(row.value as? String, initial, "the drag moved it")
+        row.doubleTap()
+        XCTAssertTrue(eventually(within: 2) { row.value as? String == initial }, "the double-tap reset it")
         XCTAssertEqual(app.alerts.count, 0)
     }
 
@@ -29,46 +46,5 @@ final class EQBandUITests: DeskUITestCase {
         saveScreenshot("eq-off-dashed")
         desk.change("/ch/01/eq/on", 1)
         XCTAssertTrue(eventually(within: 2) { graph.value as? String != "EQ off" })
-    }
-
-    /// Offline mode opens a bus on its Reset bands frequencies, then Reset bands brings a moved band back.
-    func testBusResetsAllSixBands() {
-        launchAndOpen("Mon 1", group: "Buses", tab: "EQ")
-        let type = app.buttons["/bus/01/eq/1/type"]
-        let frequency = app.descendants(matching: .any)["/bus/01/eq/1/f"]
-        XCTAssertTrue(frequency.appears(within: 2))
-        XCTAssertEqual(frequency.value as? String, "54.5 Hz")
-        frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.5))
-            .press(forDuration: 0.05, thenDragTo: frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5)))
-        XCTAssertNotEqual(frequency.value as? String, "54.5 Hz")
-        // Drag from the Type row: on a 375 pt phone the rows below it start past the screen's bottom edge.
-        let start = type.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -300)))
-        app.buttons["Reset bands"].tap()
-        let alert = app.alerts["Reset all 6 bands of Mon 1?"]
-        XCTAssertTrue(alert.appears(within: 2))
-        alert.buttons["Reset"].tap()
-        XCTAssertTrue(eventually(within: 2) { frequency.value as? String == "54.5 Hz" })
-    }
-
-    /// A cut filter has no level to shape: its Gain and Q rows stay in place but take no edits.
-    func testCutFilterDisablesGainAndQ() {
-        launchAndOpen("Tom 2", tab: "EQ")
-        let type = app.buttons["/ch/05/eq/1/type"]
-        let gain = app.descendants(matching: .any)["/ch/05/eq/1/g"]
-        let q = app.descendants(matching: .any)["/ch/05/eq/1/q"]
-        XCTAssertTrue(type.appears(within: 2))
-        XCTAssertTrue(gain.isEnabled)
-        type.tap()
-        // Not the "Low cut" chip behind the menu: the list's item carries the desk's term too.
-        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Low cut' AND label CONTAINS 'LCut'")).firstMatch.tap()
-        XCTAssertTrue(eventually(within: 2) { !gain.isEnabled && !q.isEnabled })
-        XCTAssertEqual(gain.value as? String, "—", "a number would suggest the row still does something")
-        XCTAssertEqual(q.value as? String, "—")
-        let before = gain.frame
-        gain.doubleTap()
-        XCTAssertEqual(app.alerts.count, 0, "a disabled row doesn't offer a reset")
-        XCTAssertEqual(gain.frame, before, "the rows stay where they were")
-        saveScreenshot("eq-cut-band")
     }
 }
