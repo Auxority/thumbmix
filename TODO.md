@@ -45,7 +45,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - Running in the background, often while the app isn't connected: the intent makes its own connection (~0.6 s).
   - Naming strips: the desk's names ("Vox 1") as `AppEntity` values the engineer picks in Shortcuts.
   - Adding the first intent: delete `LM_SKIP_METADATA_EXTRACTION` from `project.yml`, or the system never sees it.
-- [ ] **More reset options** (2026-10-17). Which values get a reset, and where? Ask the user before mocking.
+- [ ] **More reset options** (2026-10-17; gate and comp first, 2026-10-20). A reset for the gate and the compressor, maybe for the Input tab too (gain, trim, delay). Which values does each reset, to what, and where does it sit? Ask the user before mocking; EQ's Reset bands (with its alert) is today's model.
 - [ ] **Should picking a view in the app pick it on the desk, or the other way round, or neither?** (2026-10-17) Decide first (e.g. selected channel, the desk's screen page).
 
 - [ ] **Make the insert slot editable** once m32-probe answers what picking a held slot does. The Slot row becomes a menu in place (mock `insert-slot-future-v2.html`): each slot names its effect and the strip holding it; a held slot asks first, naming the strip that loses it.
@@ -58,6 +58,12 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - Muted strips: check whether muting should grey out the meters, or anything else.
 
 ## Code and docs
+
+- [ ] **The full UI suite in ≤ 3 minutes** (2026-10-20; today ~12 min). Measured on a cold run of 172 tests: build ~2.7 min, tests 9.6 min. The tests add up to 1338 s on 3 clones, unevenly (518/449/371 s). A test costs ≥ 3 s (median 5 s), a class's first ~11 s (the launch). 3 minutes needs ~4–5× less test time, more than any plumbing gives:
+  - **Architecture (the next step):** "App thin, a UI test checks only the wiring" has drifted. Sort each UI test into wiring (keep about one per screen and control kind) or behaviour/layout (move into Core, where a unit test takes milliseconds), and cut it to ~60 UI tests. Start with the slowest classes (Pair 119 s, Sends 110 s, DCA 85 s).
+  - Per-test floor (~3 s × 172): measure how much of it is the connect and sync of the fresh fake desk vs. XCUITest itself, before changing either.
+  - Runner: more clones than 3 (heat: watch it), slowest classes first to even out the clones, `build-for-testing` once and `test-without-building` per run.
+  - CI: a macOS runner for the UI suite, so the Mac doesn't run it at all (minutes cost; CI runs none today).
 
 - [ ] **The user rewrites README by hand** (2026-10-17); developer details (build, tests, gates) move to a separate Markdown file.
 - [ ] **A pull request template** (2026-10-17): What and why, How I tested it (lint + Core tests; full UI suite if the change shows in the app), Screenshots. A Maxxton hook on the Mac blocks agents from writing `.github/pull_request_template.md`, so the user adds it.
