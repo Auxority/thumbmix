@@ -9,23 +9,31 @@ struct SpectrumGlow: View {
 
     let spectrum: SpectrumCell
     let color: Color
+    /// The key graph's filter (dB at a frequency): the glow is bright only where the filter lets the sound through,
+    /// and the whole spectrum shows dimmed behind it (2026-10-20).
+    var filter: ((Double) -> Double)?
 
     var body: some View {
         let decibels = spectrum.decibels
         Canvas { context, size in
             guard decibels.count > 1 else { return }
-            let outline = Self.outline(decibels, in: size)
-            var area = outline
-            area.addLine(to: CGPoint(x: size.width, y: size.height))
-            area.addLine(to: CGPoint(x: 0, y: size.height))
-            area.closeSubpath()
-            let fade = Gradient(colors: [color.opacity(0.5), color.opacity(0)])
-            context.fill(
-                area, with: .linearGradient(fade, startPoint: .zero, endPoint: CGPoint(x: 0, y: size.height)))
-            context.stroke(outline, with: .color(color.opacity(0.85)), lineWidth: 1)
+            guard let filter else { return draw(decibels, strength: 1, in: context, size: size) }
+            draw(decibels, strength: 0.3, in: context, size: size)
+            draw(RTA.filtered(decibels, by: filter), strength: 1, in: context, size: size)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    private func draw(_ decibels: [Float], strength: Double, in context: GraphicsContext, size: CGSize) {
+        let outline = Self.outline(decibels, in: size)
+        var area = outline
+        area.addLine(to: CGPoint(x: size.width, y: size.height))
+        area.addLine(to: CGPoint(x: 0, y: size.height))
+        area.closeSubpath()
+        let fade = Gradient(colors: [color.opacity(0.5 * strength), color.opacity(0)])
+        context.fill(area, with: .linearGradient(fade, startPoint: .zero, endPoint: CGPoint(x: 0, y: size.height)))
+        context.stroke(outline, with: .color(color.opacity(0.85 * strength)), lineWidth: 1)
     }
 
     /// x follows the EQ graph's log 20 Hz-20 kHz axis, so a peak sits under the band that shapes it.
@@ -46,13 +54,17 @@ struct SpectrumGlow: View {
 struct RTAStatus: View {
     let spectrum: SpectrumCell
     let name: String
+    /// A gate's key is heard before the EQ (2026-10-20): the line says which the glow shows.
+    var afterEQ = true
 
     var body: some View {
         Group {
             if spectrum.decibels.isEmpty {
                 Text("RTA: waiting for the desk…")
-            } else {
+            } else if afterEQ {
                 Text("RTA follows \(name) (after EQ)")
+            } else {
+                Text("RTA follows \(name) (before EQ)")
             }
         }
         .font(.caption2)
