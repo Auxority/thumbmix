@@ -46,7 +46,8 @@ struct SendSheet: View {
     }
 
     /// While the send follows the strip's LR pan, or is a subgroup (which follows it too), its own pan is ignored
-    /// (assumed; m32-probe 10e), so the pan rows can't be dragged.
+    /// (the M32 disables the send's pan under Follow LR pan, seen on the desk 2026-10-20), so the pan rows can't be
+    /// dragged.
     @ViewBuilder private var panRows: some View {
         ForEach(sides) { side in
             if let pan = Catalog.sendPan(from: side, to: target) {
