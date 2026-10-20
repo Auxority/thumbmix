@@ -25,8 +25,8 @@ struct EQResetTests {
             #expect(defaults?.map(\.typeIndex) == [1, 2, 2, 2, 2, 4], "LShv, PEQ × 4, HShv on \(strip)")
             #expect(defaults?.allSatisfy { $0.gain == 0 && $0.q == 2 } == true, "\(strip)")
         }
-        #expect(Catalog.eqDefaults(StripID(.auxIn, 1)) == input, "assumed like an input's (TODO)")
-        #expect(Catalog.eqDefaults(StripID(.fxReturn, 1)) == input, "assumed like an input's (TODO)")
+        #expect(Catalog.eqDefaults(StripID(.auxIn, 1)) == input, "read on the desk: like an input's")
+        #expect(Catalog.eqDefaults(StripID(.fxReturn, 1)) == input, "read on the desk: like an input's")
     }
 
     /// The desk keeps 201 frequency steps, 3.5% apart: a default must name one step, not fall between two.

@@ -139,7 +139,8 @@ public enum Catalog {
     }
 
     /// What the desk's own EQ reset gives, restored by Reset bands and a row's double-tap: Q 2, 0 dB (read on the
-    /// M32, FW 4.13, 2026-10-20; buses and mains like a matrix). The desk hides a shelf's Q; Q 2 there is assumed.
+    /// M32, FW 4.13, 2026-10-20; buses and mains like a matrix, aux ins and FX returns like an input). A shelf keeps
+    /// Q 2 too, though the desk hides it.
     /// The desk's "1k97" is the 1977 Hz step (doc p.150, 0.6650).
     public static func eqDefaults(_ strip: StripID) -> [EQBandState]? {
         let bands: [(EQFilterType, Double)] =
