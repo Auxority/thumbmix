@@ -1,6 +1,7 @@
 /// Every read of the mirror: the overview on connect, then an opened tab's values first and the background fill
 /// (`ConsoleMirror+Reads`). A few requests in flight, re-asking for replies UDP lost; the author's own dump tools pace
-/// requests the same way to avoid overrunning Wi-Fi (doc p.6).
+/// requests the same way to avoid overrunning Wi-Fi (doc p.6). 8 stays: on the M32 (2026-10-20, m32-probe section 12)
+/// the overview took 1.20 s at 8 with none lost, 0.44 s at 32 but with 6 of 769 replies lost.
 @MainActor
 final class ReadQueue {
     private let window: Int
