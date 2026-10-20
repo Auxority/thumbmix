@@ -37,10 +37,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
   - **Meters only for the strips in view?** Draw (or update) meters only for the rows on screen, not every strip. Measure first; if it saves only 1–2 % CPU, it isn't worth it and this sub-item goes.
 
-## Small fixes
-
-- [ ] **A send's sheet during a lost contact** (2026-10-20, found while building the fold sheets): `SendSheet` inherits the tab's `.disabled`, so its Done greys out (a swipe still closes it), and a large sheet covers the tab's "Disconnected — retrying" banner. `FoldSheet` fixes both (its own `StatusBanner` inset, `.environment(\.isEnabled, true)`); do the same, with `DynamicsKeyUITests.testASheetSaysWhenContactIsLost` as the model test.
-
 ## Features
 
 - [ ] **Shortcuts** (2026-10-17): App Intents for the Shortcuts app, the Action button and Control Center, e.g. "Mute Vox 1", "Solo Kick", "Fader of Vox 1 to −5 dB". Not Siri voice (the user: unreliable next to a PA). Ask before mocking:

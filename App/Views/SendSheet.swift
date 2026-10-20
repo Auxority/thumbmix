@@ -27,16 +27,22 @@ struct SendSheet: View {
                 }
                 .padding(16)
                 .disabled(!mirror.isLive)
+                .opacity(mirror.isLive ? 1 : 0.4)
             }
+            // The sheet covers the tab's banner: it says itself when contact is lost, as `FoldSheet` does.
+            .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .principal) { title }
+                // The strip screens behind are disabled while contact is lost: no opening one from here either.
+                ToolbarItem(placement: .principal) { title.disabled(!mirror.isLive) }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }.fontWeight(.bold).buttonStyle(.darkCapsule)
                 }
                 .sharedBackgroundVisibility(.hidden)
             }
         }
+        // The tab disables everything while contact is lost, and a sheet inherits that: Done must still close it.
+        .environment(\.isEnabled, true)
     }
 
     /// While the send follows the strip's LR pan, or is a subgroup (which follows it too), its own pan is ignored
