@@ -11,49 +11,8 @@ final class PairUITests: DeskUITestCase {
         XCTAssertTrue(app.buttons["Mix"].appears(within: 3))
     }
 
-    /// With Gain/Delay linked, the desk switches 48V on both sides: the alert says so before it happens.
-    func testPhantomPowerOnALinkedPairNamesThePartner() {
-        launchAndOpenGuitars()
-        app.buttons["Input"].tap()
-        let phantom = app.buttons["toggle-/headamp/040/phantom"]
-        XCTAssertTrue(phantom.appears(within: 2))
-        phantom.tap()
-        let alert = app.alerts["Turn on 48V for Gtr L?"]
-        XCTAssertTrue(alert.appears(within: 2))
-        XCTAssertTrue(alert.staticTexts["Also powers Gtr R (linked)."].exists)
-        saveScreenshot("phantom-linked-alert")
-        alert.buttons["Cancel"].tap()
-    }
-
-    /// Polarity follows the Gain/Delay link too (assumed; m32-probe 7e), so flipping one side names the other.
-    func testPolarityOnALinkedPairNamesThePartner() {
-        launchAndOpenGuitars()
-        app.buttons["Input"].tap()
-        let flip = app.buttons["toggle-/ch/09/preamp/invert"]
-        XCTAssertTrue(flip.appears(within: 2))
-        flip.tap()
-        let alert = app.alerts["Flip the polarity of Gtr L?"]
-        XCTAssertTrue(alert.appears(within: 2))
-        let partnerLine = NSPredicate(format: "label CONTAINS %@", "Also flips Gtr R (linked).")
-        XCTAssertTrue(alert.staticTexts.containing(partnerLine).firstMatch.exists)
-        alert.buttons["Cancel"].tap()
-    }
-
-    /// An unticked Gain/Delay Link keeps each side's preamp apart: no partner in the alert.
-    func testPhantomPowerWithoutGainLinkNamesNoPartner() {
-        desk.change("/config/linkcfg/hadly", 0)
-        launchAndOpenGuitars()
-        app.buttons["Input"].tap()
-        let phantom = app.buttons["toggle-/headamp/040/phantom"]
-        XCTAssertTrue(phantom.appears(within: 2))
-        phantom.tap()
-        let alert = app.alerts["Turn on 48V for Gtr L?"]
-        XCTAssertTrue(alert.appears(within: 2))
-        XCTAssertFalse(alert.staticTexts["Also powers Gtr R (linked)."].exists)
-        alert.buttons["Cancel"].tap()
-    }
-
-    /// One fader and mute for both sides, but the desk keeps a pan per side.
+    /// One fader and mute for both sides, but the desk keeps a pan and a name per side. The linked EQ needs no side
+    /// picker, and the linked preamp's alerts (48V, polarity: assumed, m32-probe 7e) name the partner they also switch.
     func testAPairOpensAsOneStereoStrip() {
         launchAndOpenGuitars()
         XCTAssertTrue(app.navigationBars["Ch 9-10"].exists)
@@ -64,12 +23,50 @@ final class PairUITests: DeskUITestCase {
         XCTAssertEqual(element("/ch/10/mix/pan").label, "Pan · Gtr R")
         XCTAssertFalse(app.buttons["side-R"].exists)
         saveScreenshot("pair-mix")
+
+        // A block count that flips while a linked edit settles mustn't resize the Insert sheet: it opens tall.
+        app.buttons["insert-more"].tap()
+        let done = app.buttons["Done"]
+        XCTAssertTrue(done.appears(within: 2))
+        XCTAssertLessThan(done.frame.minY, app.frame.height / 3, "the Insert sheet opens large")
+        done.tap()
+
+        app.buttons["edit-strip"].tap()
+        let left = app.textFields["strip-name"]
+        XCTAssertTrue(left.appears(within: 3))
+        XCTAssertEqual(left.value as? String, "Gtr L", "each side keeps its own name")
+        XCTAssertEqual(app.textFields["strip-name-partner"].value as? String, "Gtr R")
+        XCTAssertTrue(app.buttons["color-green"].exists, "one colour for the pair")
+        app.buttons["Cancel"].tap()
+
         app.buttons["EQ"].tap()
         XCTAssertTrue(element("/ch/09/eq/1/f").appears(within: 2))
         XCTAssertFalse(app.buttons["side-R"].exists, "the desk links the EQ")
+
+        app.buttons["Input"].tap()
+        let phantom = app.buttons["toggle-/headamp/040/phantom"]
+        XCTAssertTrue(phantom.appears(within: 2))
+        phantom.tap()
+        let phantomAlert = app.alerts["Turn on 48V for Gtr L?"]
+        XCTAssertTrue(phantomAlert.appears(within: 2))
+        XCTAssertTrue(phantomAlert.staticTexts["Also powers Gtr R (linked)."].exists, "48V names the partner")
+        saveScreenshot("phantom-linked-alert")
+        phantomAlert.buttons["Cancel"].tap()
+
+        // An alert ignores opening while the last one still animates out (CLAUDE.md, System alerts).
+        Thread.sleep(forTimeInterval: 0.4)
+        app.buttons["toggle-/ch/09/preamp/invert"].tap()
+        let flipAlert = app.alerts["Flip the polarity of Gtr L?"]
+        XCTAssertTrue(flipAlert.appears(within: 2))
+        let partnerLine = NSPredicate(format: "label CONTAINS %@", "Also flips Gtr R (linked).")
+        XCTAssertTrue(flipAlert.staticTexts.containing(partnerLine).firstMatch.exists, "polarity names the partner")
+        flipAlert.buttons["Cancel"].tap()
     }
 
+    /// Linking only couples what the desk's Link Preferences tick: with the EQ unticked, the alert says it stays
+    /// separate, and Cancel leaves the desk as it was.
     func testLinkAndUnlinkFromTheMixTab() {
+        desk.change("/config/linkcfg/eq", 0)
         launch()
         app.buttons["Buses"].tap()
         app.buttons["Mon 3"].tap()
@@ -80,10 +77,18 @@ final class PairUITests: DeskUITestCase {
         link.tap()
         let alert = app.alerts["Link Mon 3 and Mon 4?"]
         XCTAssertTrue(alert.appears(within: 2))
-        XCTAssertTrue(alert.staticTexts["They'll work as one stereo channel."].exists)
+        XCTAssertTrue(alert.staticTexts["They'll work as one stereo channel.\nEQ stays separate."].exists)
         saveScreenshot("link-alert")
+        alert.buttons["Cancel"].tap()
+        XCTAssertTrue(app.navigationBars["Bus 3"].exists, "Cancel leaves the desk as it was")
+        XCTAssertEqual(desk.value("/config/buslink/3-4"), .int(0), "Cancel sends nothing")
+
+        Thread.sleep(forTimeInterval: 0.4)
+        link.tap()
+        XCTAssertTrue(alert.appears(within: 2))
         alert.buttons["Link"].tap()
         XCTAssertTrue(app.navigationBars["Bus 3-4"].appears(within: 3))
+        XCTAssertEqual(desk.value("/config/buslink/3-4"), .int(1), "linked on the desk")
         XCTAssertEqual(app.buttons["edit-strip"].value as? String, "Mon")
         XCTAssertEqual(link.label, "Unlink Mon 3 · Bus 3 and Mon 4 · Bus 4")
 
@@ -93,37 +98,15 @@ final class PairUITests: DeskUITestCase {
         XCTAssertTrue(unlink.staticTexts["Each can be set on its own again."].exists)
         unlink.buttons["Unlink"].tap()
         XCTAssertTrue(app.navigationBars["Bus 3"].appears(within: 3))
+        XCTAssertEqual(desk.value("/config/buslink/3-4"), .int(0), "unlinked on the desk")
     }
 
-    /// Linking only couples what the desk's Link Preferences tick: the alert says what stays separate.
-    func testTheLinkAlertSaysWhatStaysSeparate() {
-        desk.change("/config/linkcfg/eq", 0)
-        launch()
-        app.buttons["Buses"].tap()
-        app.buttons["Mon 3"].tap()
-        app.buttons["link-button"].tap()
-        let alert = app.alerts["Link Mon 3 and Mon 4?"]
-        XCTAssertTrue(alert.appears(within: 2))
-        XCTAssertTrue(alert.staticTexts["They'll work as one stereo channel.\nEQ stays separate."].exists)
-        alert.buttons["Cancel"].tap()
-        XCTAssertTrue(app.navigationBars["Bus 3"].exists, "Cancel leaves the desk as it was")
-    }
-
-    /// Each side keeps its own name on the desk; the pair gets one colour and icon.
-    func testEditStripNamesBothSides() {
-        launchAndOpenGuitars()
-        app.buttons["edit-strip"].tap()
-        let left = app.textFields["strip-name"]
-        XCTAssertTrue(left.appears(within: 3))
-        XCTAssertEqual(left.value as? String, "Gtr L")
-        XCTAssertEqual(app.textFields["strip-name-partner"].value as? String, "Gtr R")
-        XCTAssertTrue(app.buttons["color-green"].exists)
-        app.buttons["Cancel"].tap()
-    }
-
-    /// The engineer unticks Dynamics Link on the desk: Gate and Comp now show one side at a time.
+    /// The engineer unticks Dynamics and Gain/Delay Link on the desk: Gate and Comp show one side at a time, the
+    /// Comp's sheet and key graph follow the side shown, and the 48V alert names no partner.
     func testAnUnlinkedSectionShowsOneSideAtATime() {
         desk.change("/config/linkcfg/dyn", 0)
+        desk.change("/config/linkcfg/hadly", 0)
+        desk.change("/ch/10/dyn/keysrc", 0)
         launchAndOpenGuitars()
         app.buttons["Comp"].tap()
         XCTAssertTrue(app.staticTexts["Dynamics aren't linked on the desk."].appears(within: 2))
@@ -132,44 +115,26 @@ final class PairUITests: DeskUITestCase {
         XCTAssertTrue(element("/ch/10/dyn/thr").appears(within: 2))
         XCTAssertFalse(element("/ch/09/dyn/thr").exists)
         saveScreenshot("pair-comp-unlinked")
+
+        let line = app.buttons["comp-more"]
+        XCTAssertTrue(line.appears(within: 2))
+        line.tap()
+        XCTAssertTrue(app.navigationBars["Comp · Gtr R"].appears(within: 2), "the sheet names the side it edits")
+        XCTAssertTrue(eventually(within: 3) { self.desk.value(RTA.source) == .int(11) }, "the key graph hears ch 10")
+        app.buttons["Done"].tap()
+
         app.buttons["EQ"].tap()
+        XCTAssertTrue(element("/ch/09/eq/1/f").appears(within: 2))
         XCTAssertFalse(app.buttons["side-R"].exists, "the EQ is still linked")
-    }
 
-    /// The Comp's sheet edits the side the tab shows, so it names that side.
-    func testAnUnlinkedCompSheetNamesTheSideItEdits() {
-        desk.change("/config/linkcfg/dyn", 0)
-        launchAndOpenGuitars()
-        app.buttons["Comp"].tap()
-        app.buttons["side-R"].tap()
-        let line = app.buttons["comp-more"]
-        XCTAssertTrue(line.appears(within: 2))
-        line.tap()
-        XCTAssertTrue(app.navigationBars["Comp · Gtr R"].appears(within: 2))
-    }
-
-    /// Side R shown, its comp keyed on itself: the key graph borrows the RTA for R, not L.
-    func testAnUnlinkedPairsKeyGraphFollowsTheSideShown() {
-        desk.change("/config/linkcfg/dyn", 0)
-        desk.change("/ch/10/dyn/keysrc", 0)
-        launchAndOpenGuitars()
-        app.buttons["Comp"].tap()
-        app.buttons["side-R"].tap()
-        let line = app.buttons["comp-more"]
-        XCTAssertTrue(line.appears(within: 2))
-        line.tap()
-        XCTAssertTrue(eventually(within: 3) { self.desk.value(RTA.source) == .int(11) }, "ch 10")
-    }
-
-    /// The pair's Insert sheet opens tall: a block count that flips while a linked edit settles mustn't resize it.
-    func testAPairsInsertSheetOpensTall() {
-        launchAndOpenGuitars()
-        let line = app.buttons["insert-more"]
-        XCTAssertTrue(line.appears(within: 2))
-        line.tap()
-        let done = app.buttons["Done"]
-        XCTAssertTrue(done.appears(within: 2))
-        XCTAssertLessThan(done.frame.minY, app.frame.height / 3, "a large sheet")
+        app.buttons["Input"].tap()
+        let phantom = app.buttons["toggle-/headamp/040/phantom"]
+        XCTAssertTrue(phantom.appears(within: 2))
+        phantom.tap()
+        let alert = app.alerts["Turn on 48V for Gtr L?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        XCTAssertFalse(alert.staticTexts["Also powers Gtr R (linked)."].exists, "each side's preamp is its own")
+        alert.buttons["Cancel"].tap()
     }
 
     /// The fader and the insert unlinked: the Mix tab shows one side, and its Insert sheet edits that side only.
