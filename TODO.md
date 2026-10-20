@@ -27,6 +27,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **EQ cut filters.** Set a band to LCut, HCut and (on a main) BU12: do Gain and Q really do nothing? The app disables both rows there (`Catalog.eqTypeShapesLevel`); the doc lists gain and Q for every type without saying.
   - Crossovers (`Crossover`, guessed): on a matrix or main, set band 1 and band 6 to LR24 at 1 kHz. Does band 1 cut the lows and band 6 the highs? Is it −6 dB at 1 kHz, and BS24 −3 dB? Is band 2 (or 5) really off meanwhile? Can bands 2-5 be set to BU6 … LR24 at all? The app draws those flat.
 - [ ] **How VEQ differs from PEQ.** The M32 manual only says VEQ is "a bell filter that provides a more 'Vintage EQ' sound"; the app draws it exactly like PEQ. Set two bands to PEQ and VEQ with the same frequency, gain and Q, and compare the desk's EQ screen (or the RTA on pink noise): skirts that dip past flat (a forum claim), a wider or narrower Q? Then give `EQResponse` its own VEQ curve.
+- [ ] **What the key graph shows** (2026-10-20): key a gate on another channel and on itself, and a comp on another channel. Does the desk's key hear that channel before or after its EQ, and a gate keyed on itself before its EQ? (The app's glow assumes before, `ConsoleMirror.keyRTA`.) And does the RTA's PRE/POST tap sit before or after the gate and comp? If PRE comes after the gate, a gate keyed on itself shows a glow that drops out when the gate closes, not what its detector hears. Then set each key filter type on the desk (LC6, LC12, HC6, HC12, BP Q 1-10) and compare its key screen with the app's curve: drawn as first-order and Butterworth cuts and second-order band-passes, an assumption (`KeyFilterState`).
 - [ ] **Compressor knee width per step.** The app draws 6 dB per knee step (knee 5 = 30 dB), a guess: no source gives the unit, and `m32-probe` can't read it. Set knee 0 and 5 on the desk and compare its dynamics screen with the app's curve, or measure: a test tone at the threshold, 4:1, and the gain reduction meter at each knee step. Then set `TransferCurve.kneeDecibelsPerStep`.
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
 - [ ] Walk the acceptance checklist in `README.md`.
@@ -48,7 +49,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - Running in the background, often while the app isn't connected: the intent makes its own connection (~0.6 s).
   - Naming strips: the desk's names ("Vox 1") as `AppEntity` values the engineer picks in Shortcuts.
   - Adding the first intent: delete `LM_SKIP_METADATA_EXTRACTION` from `project.yml`, or the system never sees it.
-- [ ] **Show the key in Gate and Comp** (2026-10-17): the key source and key filter, in the graph or near it. Mock first.
 - [ ] **More reset options** (2026-10-17). Which values get a reset, and where? Ask the user before mocking.
 - [ ] **Should picking a view in the app pick it on the desk, or the other way round, or neither?** (2026-10-17) Decide first (e.g. selected channel, the desk's screen page).
 

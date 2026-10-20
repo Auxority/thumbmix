@@ -24,11 +24,16 @@ public final class ConsoleMirror {
     @ObservationIgnored public let spectrum = SpectrumCell()
     /// Set while the app borrows the desk's RTA; see ConsoleMirror+RTA.
     @ObservationIgnored var rtaLoan: RTALoan?
+    /// Handed back while contact was lost: applied once the desk is live again (`returnPendingRTA`).
+    @ObservationIgnored var pendingRTAReturn: RTALoan?
+    /// The engineer pointed the RTA elsewhere on the desk while the app borrowed it: the desk wins until the
+    /// borrower (a tab or sheet) lets go.
+    public internal(set) var isRTATakenByDesk = false
     /// Read on connect; everything else is read per tab (`ConsoleMirror+Reads`) and forgotten on a resync.
     @ObservationIgnored private let overview: [String]
     @ObservationIgnored private let overviewSet: Set<String>
     @ObservationIgnored var reads = ReadQueue()
-    @ObservationIgnored private var meterCells: [StripID: MeterCell] = [:]
+    @ObservationIgnored var meterCells: [StripID: MeterCell] = [:]
     @ObservationIgnored var pendingSends: [String: OSCArgument] = [:]
     @ObservationIgnored var holds = EditHolds(hold: ConsoleMirror.editHold)
     @ObservationIgnored var linkCopies = LinkCopyCheck()
@@ -167,7 +172,10 @@ public final class ConsoleMirror {
         // A reply of another type (",i" where the parameter is ",f") is garbage, not a new value.
         if let known = cell.argument, !known.hasSameType(as: argument) { return }
         // Stored before the reply is counted: the last answer turns the status live, and screens rebuild on that.
-        if !holds.isHeld(message.address, now: .now) { store(argument, in: cell, at: message.address, arrivedAt: arrival) }
+        if !holds.isHeld(message.address, now: .now) {
+            store(argument, in: cell, at: message.address, arrivedAt: arrival)
+            noteRTASetting(message.address)
+        }
         noteReply(message.address)
     }
 
@@ -190,21 +198,6 @@ public final class ConsoleMirror {
         guard case .float(let value) = argument else { return argument }
         guard value.isFinite else { return nil }
         return .float(min(max(value, 0), 1))
-    }
-
-    private func applyMeters(_ message: OSCMessage) {
-        guard case .blob(let blob)? = message.arguments.first else { return }
-        let readings = MeterBanks.readings(
-            address: message.address, values: MeterBlob.floats(from: blob))
-        for (strip, reading) in readings {
-            guard let cell = meterCells[strip] else { continue }
-            // Explicit equality checks: older Observation versions notify on every write, which redraws idle meters at 20 Hz.
-            if cell.level != reading.level { cell.level = reading.level }
-            if let gate = reading.gateGain, cell.gateGain != gate { cell.gateGain = gate }
-            if let dynamics = reading.dynamicsGain, cell.dynamicsGain != dynamics {
-                cell.dynamicsGain = dynamics
-            }
-        }
     }
 
     private func tick() {
@@ -278,6 +271,7 @@ public final class ConsoleMirror {
         }
         log.info("sync done")
         status = .live
+        returnPendingRTA()
         startBackgroundFill()
         pumpReads()
     }

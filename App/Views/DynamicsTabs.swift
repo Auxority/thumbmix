@@ -31,9 +31,9 @@ struct GateTab: View {
         .sheet(isPresented: $isKeyOpen) {
             let title = mirror.sheetTitle(String(localized: "Gate key"), strip: strip, perSide: ghost != nil)
             FoldSheet(title: title, mirror: mirror) {
-                KeySection(key: Catalog.gateKey(strip), mirror: mirror)
+                KeySection(key: Catalog.gateKey(strip), strip: strip, owner: .gate, mirror: mirror)
             }
-            .foldSheetPresentation([.medium])
+            .foldSheetPresentation([.large])
         }
     }
 
@@ -116,7 +116,7 @@ private struct CompMoreSettings: View {
 
     var body: some View {
         let dynamics = Catalog.dynamics(strip)
-        KeySection(key: Catalog.dynamicsKey(strip), mirror: mirror)
+        KeySection(key: Catalog.dynamicsKey(strip), strip: strip, owner: .comp, mirror: mirror)
         Text("Detector").sectionLabel()
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4).padding(.top, 10)
@@ -133,6 +133,9 @@ private struct CompMoreSettings: View {
 /// What the gate or comp listens to: opened from the tab's folded line, never on the tab itself.
 struct KeySection: View {
     let key: KeySpecs
+    /// The gate's or comp's own strip: the side shown, for a pair whose dynamics aren't linked.
+    let strip: StripID
+    let owner: KeyOwner
     let mirror: ConsoleMirror
 
     var body: some View {
@@ -147,6 +150,7 @@ struct KeySection: View {
             }
         }
         .padding(.horizontal, 4)
+        KeyGraph(key: key, strip: strip, owner: owner, mirror: mirror)
         HStack(spacing: 8) {
             ToggleChip(spec: key.filterOn, mirror: mirror, onColor: .green)
             ChoiceMenu(spec: key.filterType, mirror: mirror)

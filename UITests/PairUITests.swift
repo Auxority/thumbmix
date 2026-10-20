@@ -148,6 +148,19 @@ final class PairUITests: DeskUITestCase {
         XCTAssertTrue(app.navigationBars["Comp · Gtr R"].appears(within: 2))
     }
 
+    /// Side R shown, its comp keyed on itself: the key graph borrows the RTA for R, not L.
+    func testAnUnlinkedPairsKeyGraphFollowsTheSideShown() {
+        desk.change("/config/linkcfg/dyn", 0)
+        desk.change("/ch/10/dyn/keysrc", 0)
+        launchAndOpenGuitars()
+        app.buttons["Comp"].tap()
+        app.buttons["side-R"].tap()
+        let line = app.buttons["comp-more"]
+        XCTAssertTrue(line.appears(within: 2))
+        line.tap()
+        XCTAssertTrue(eventually(within: 3) { self.desk.value(RTA.source) == .int(11) }, "ch 10")
+    }
+
     /// The pair's Insert sheet opens tall: a block count that flips while a linked edit settles mustn't resize it.
     func testAPairsInsertSheetOpensTall() {
         launchAndOpenGuitars()
