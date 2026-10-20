@@ -40,7 +40,7 @@ struct RTATests {
     private func withRTADesk(
         before: (FakeM32) -> Void = { _ in }, body: (FakeM32, ConsoleMirror) async throws -> Void
     ) async throws {
-        try await withLiveDesk(auditAddresses: [], before: before, body: body)
+        try await withLiveDesk(auditAddresses: [], meters: true, before: before, body: body)
     }
 
     @Test func followingPointsTheDeskRTAAndReleasingPutsItBack() async throws {
@@ -82,7 +82,7 @@ struct RTATests {
     /// The offline demo's spectrum is measured "after EQ" like the desk's: a band boosted, then cut, by 15 dB
     /// moves the spectrum there far more than the fake's own wobble (a few dB).
     @Test func theDemoSpectrumFollowsTheEQ() async throws {
-        try await withLiveDesk { fake, mirror in
+        try await withLiveDesk(meters: true) { fake, mirror in
             let kick = StripID(.input, 1)
             await openTab(.eq, of: kick, in: mirror)
             let gain = Catalog.eqBand(kick, 1).gain

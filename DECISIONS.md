@@ -112,6 +112,7 @@ Settled choices about how Thumbmix behaves, with the reason, so nobody proposes 
 
 ## How we decide
 
+- **Core test fakes stream no meters unless a test asks** (2026-10-20, `startFake(meters:)`): ~80 parallel fakes streaming meters at the desk's 20 Hz took most of a CI runner's CPU, so syncs missed `syncTimeout`. Measured next to N busy processes, the suite failed every sync from N = 15 on `main` and passes at N = 20 without meters. Not chosen, after measuring them: decoding meters off the main actor (~17), a faster blob decoder (~17), keeping only each bank's newest blob and stretching the read timeout (no change). The app reads one desk's meters, far below that load.
 - **UI is picked from mocks shown side by side**; glass and material choices from real iOS 27 simulator screenshots, since HTML can't show glass.
 - **One app launch per UI test class, not per simulator** (2026-10-12): one launch per simulator measured slower (556 s vs 523 s) and adds an easy-to-forget rule.
 - **Left as they are by the code review** (2026-10-15, two copies don't make a pattern yet): `ConsoleMirror` and `Catalog` stay unsplit; the send-sheet setup shared by `SendsTab` and `FedByTab`; the Gate and Comp tabs' shared layout (their curves move to Core with "more comp settings"); the per-kind name stems ("Ch", "Aux"), which would churn the string catalogs.
