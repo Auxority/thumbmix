@@ -15,5 +15,5 @@ func probeEQDefaults() async {
         }
         print(strip.defaultName + ": " + bands.joined(separator: ", "))
     }
-    print("RESULT: the app resets all three to 91 Hz, 418 Hz, 1910 Hz and 8730 Hz. Different = fix Catalog.eqDefaults.")
+    print("RESULT: the app resets all three to 125 Hz, 497 Hz, 1977 Hz and 10024 Hz. Different = fix Catalog.eqDefaults.")
 }
