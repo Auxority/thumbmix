@@ -59,10 +59,11 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Code and docs
 
-- [ ] **The full UI suite in ≤ 3 minutes** (2026-10-20; today ~12 min). Measured on a cold run of 172 tests: build ~2.7 min, tests 9.6 min. The tests add up to 1338 s on 3 clones, unevenly (518/449/371 s). A test costs ≥ 3 s (median 5 s), a class's first ~11 s (the launch). 3 minutes needs ~4–5× less test time, more than any plumbing gives:
-  - **Architecture (the next step):** "App thin, a UI test checks only the wiring" has drifted. Sort each UI test into wiring (keep about one per screen and control kind) or behaviour/layout (move into Core, where a unit test takes milliseconds), and cut it to ~60 UI tests. Start with the slowest classes (Pair 119 s, Sends 110 s, DCA 85 s).
-  - Per-test floor (~3 s × 172): measure how much of it is the connect and sync of the fresh fake desk vs. XCUITest itself, before changing either.
-  - Runner: more clones than 3 (heat: watch it), slowest classes first to even out the clones, `build-for-testing` once and `test-without-building` per run.
+- [ ] **The full UI suite in ≤ 3 minutes** (2026-10-20; today ~12 min). Measured on a cold run of 172 tests: build ~2.7 min, tests 9.6 min. The tests add up to 1338 s on 3 clones, unevenly (518/449/371 s). A test costs ≥ 3 s (median 5 s), a class's first ~11 s (the launch). The UI tests stay the main tests: they check the app from the outside (screen and fake desk), whatever the code inside looks like, so nothing moves into Core unit tests (the user, 2026-10-20). The time comes from fewer setups and more clones:
+  - **Feature tests (in progress):** the audit (`notes/2026-10-20-ui-test-audit.md`) keeps 88 tests, merges 62 into them as steps (same setup plus one check), and deletes 21 whose logic a Core test already checks. First the weak tests that never read the desk get `desk.value` checks (overview drag and mute, DCA rename and Cancel, 48V), then the merges, one PR per feature area. 176 → ~85 tests. A long test stops at its first failure, so each step's assert message names the step. Open: 5 tests check logic only the UI reaches (e.g. `gainDelayPartner`); move that logic to Core, or keep them.
+  - **A few non-functional tests**, apart from the features: everything fits the iPhone SE's 375 pt, VoiceOver names every control, the safety rule (contact lost: banner, controls off, resync before live), and maybe one performance check (`XCTOSSignpostMetric` on a scroll or fader drag).
+  - Runner: 6 clones instead of 3 (heat: watch it) and the slowest classes first, to even out the clones. With the feature tests, ~1080 s / 6 ≈ 3 min of tests. Also `build-for-testing` once and `test-without-building` per run.
+  - Per-test floor (~3 s): measure how much of it is the connect and sync of the fresh fake desk vs. XCUITest itself, before changing either.
   - CI: a macOS runner for the UI suite, so the Mac doesn't run it at all (minutes cost; CI runs none today).
 
 - [ ] **The user rewrites README by hand** (2026-10-17); developer details (build, tests, gates) move to a separate Markdown file.
