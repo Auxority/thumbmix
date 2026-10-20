@@ -27,6 +27,23 @@ final class FedBySendSheetUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/mix/01/type") == .int(4) })
     }
 
+    /// Like the fold sheets: the sheet covers the tab's banner, so it shows its own, and Done still closes it.
+    func testTheSheetSaysWhenContactIsLost() {
+        launch()
+        openVoxSendFromMon1()
+        let tap = element("tap-Fader")
+        XCTAssertTrue(eventually(within: 2) { tap.isEnabled })
+        desk.goSilent()
+        let banners = app.staticTexts.matching(NSPredicate(format: "label == %@", "Disconnected — retrying"))
+        let sheetTop = app.buttons["Open Vox 1"].frame.maxY
+        XCTAssertTrue(
+            eventually(within: 8) { banners.allElementsBoundByIndex.contains { $0.frame.minY >= sheetTop - 1 } },
+            "the sheet's own banner, under its title, not the tab's behind it")
+        XCTAssertFalse(tap.isEnabled)
+        XCTAssertFalse(app.buttons["Open Vox 1"].isEnabled, "no opening strips while the tab is disabled either")
+        XCTAssertTrue(app.buttons["Done"].isEnabled, "the sheet still closes")
+    }
+
     func testTheTitleOpensTheSourceOnItsSendsAndTheBusOnlyCloses() {
         launch()
         openVoxSendFromMon1()
