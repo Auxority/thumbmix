@@ -67,22 +67,6 @@ final class InsertUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/08/insert/on") == .int(1) })
     }
 
-    /// A pair's Mix tab may scroll (two pans), but a fader drag that wanders vertically must stay a drag.
-    func testASlantedFaderDragOnAPairDoesNotScrollThePage() {
-        launch()
-        app.swipeUp()
-        app.buttons["Gtr"].tap()
-        XCTAssertTrue(app.buttons["Mix"].appears(within: 3))
-        let fader = element("/ch/09/mix/fader")
-        XCTAssertTrue(fader.appears(within: 2))
-        let before = fader.value as? String
-        let top = fader.frame.minY
-        fader.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.3))
-            .press(forDuration: 0.05, thenDragTo: fader.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.9)))
-        XCTAssertTrue(eventually(within: 2) { fader.value as? String != before })
-        XCTAssertEqual(fader.frame.minY, top, accuracy: 2, "the page scrolled")
-    }
-
     private func openInsert(title: String) {
         let line = app.buttons["insert-more"]
         XCTAssertTrue(line.appears(within: 2))

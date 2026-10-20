@@ -11,6 +11,26 @@ final class PairUITests: DeskUITestCase {
         XCTAssertTrue(app.buttons["Mix"].appears(within: 3))
     }
 
+    /// A pair's Mix tab may scroll (two pans), but a fader drag that wanders vertically must stay a drag.
+    private func aSlantedFaderDragDoesNotScrollThePage() {
+        let fader = element("/ch/09/mix/fader")
+        let before = fader.value as? String
+        let top = fader.frame.minY
+        fader.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.3))
+            .press(forDuration: 0.05, thenDragTo: fader.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.9)))
+        XCTAssertTrue(eventually(within: 2) { fader.value as? String != before }, "the slanted drag moved the fader")
+        XCTAssertEqual(fader.frame.minY, top, accuracy: 2, "the page scrolled")
+    }
+
+    /// A block count that flips while a linked edit settles mustn't resize the Insert sheet: it opens tall.
+    private func theInsertSheetOpensTall() {
+        app.buttons["insert-more"].tap()
+        let done = app.buttons["Done"]
+        XCTAssertTrue(done.appears(within: 2))
+        XCTAssertLessThan(done.frame.minY, app.frame.height / 3, "the Insert sheet opens large")
+        done.tap()
+    }
+
     /// One fader and mute for both sides, but the desk keeps a pan and a name per side. The linked EQ needs no side
     /// picker, and the linked preamp's alerts (48V, polarity: assumed, m32-probe 7e) name the partner they also switch.
     func testAPairOpensAsOneStereoStrip() {
@@ -23,13 +43,8 @@ final class PairUITests: DeskUITestCase {
         XCTAssertEqual(element("/ch/10/mix/pan").label, "Pan · Gtr R")
         XCTAssertFalse(app.buttons["side-R"].exists)
         saveScreenshot("pair-mix")
-
-        // A block count that flips while a linked edit settles mustn't resize the Insert sheet: it opens tall.
-        app.buttons["insert-more"].tap()
-        let done = app.buttons["Done"]
-        XCTAssertTrue(done.appears(within: 2))
-        XCTAssertLessThan(done.frame.minY, app.frame.height / 3, "the Insert sheet opens large")
-        done.tap()
+        aSlantedFaderDragDoesNotScrollThePage()
+        theInsertSheetOpensTall()
 
         app.buttons["edit-strip"].tap()
         let left = app.textFields["strip-name"]

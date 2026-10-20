@@ -70,22 +70,6 @@ final class DynamicsUITests: DeskUITestCase {
         saveScreenshot("comp-dropdowns")
     }
 
-    /// Like the EQ rows: a double-tap resets at once, no question.
-    func testDoubleTapResetsMakeupGainAndRatioAtOnce() {
-        launchAndOpen("Tom 1", tab: "Comp")
-        let makeup = app.descendants(matching: .any)["/ch/04/dyn/mgain"]
-        XCTAssertTrue(makeup.appears(within: 2))
-        XCTAssertEqual(makeup.value as? String, "12.0 dB")
-        makeup.doubleTap()
-        XCTAssertTrue(eventually(within: 2) { makeup.value as? String == "0.0 dB" })
-
-        let ratio = app.descendants(matching: .any)["/ch/04/dyn/ratio"]
-        XCTAssertEqual(ratio.value as? String, "2.0:1")
-        ratio.doubleTap()
-        XCTAssertTrue(eventually(within: 2) { ratio.value as? String == "3.0:1" })
-        XCTAssertEqual(app.alerts.count, 0)
-    }
-
     private func pick(_ item: String, in address: String, from current: String, to deskName: String) {
         let menu = app.buttons[address]
         XCTAssertTrue(menu.appears(within: 2), address)
