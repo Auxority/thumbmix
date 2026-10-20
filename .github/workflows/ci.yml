@@ -25,9 +25,9 @@ env:
   GIT_CONFIG_VALUE_0: main
 
 jobs:
-  # A PR that changes only Markdown skips `check`: skipped by `if` counts as success for the required check, where
-  # a paths filter would leave it pending. Main always runs in full (DECISIONS: Release builds main's newest green
-  # commit). A diff that fails counts as code: a failed job here would skip `check` too.
+  # A PR that changes only Markdown skips `check` and `unused`: skipped by `if` counts as success for a required
+  # check, where a paths filter would leave it pending. Main always runs in full (DECISIONS: Release builds main's
+  # newest green commit). A diff that fails counts as code: a failed job here would skip both too.
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -91,5 +91,23 @@ jobs:
             -destination 'generic/platform=iOS' \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
+  # Beside `check`, not after it: `swiftlint analyze` is single-threaded and has no faster mode, and as `check`'s
+  # last step it was the longest (2.5-5.5 min, 2026-10-20), so a PR waited for it after everything else had passed.
+  unused:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: xcode-27
+    timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install SwiftLint and XcodeGen
+        run: brew install swiftlint xcodegen
+
+      # scripts/unused.sh builds the project but doesn't generate it.
       - name: Find unused code
-        run: scripts/unused.sh
+        run: |
+          xcodegen generate
+          scripts/unused.sh
