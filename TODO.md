@@ -38,7 +38,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Small fixes
 
-None open.
+- [ ] **A send's sheet during a lost contact** (2026-10-20, found while building the fold sheets): `SendSheet` inherits the tab's `.disabled`, so its Done greys out (a swipe still closes it), and a large sheet covers the tab's "Disconnected — retrying" banner. `FoldSheet` fixes both (its own `StatusBanner` inset, `.environment(\.isEnabled, true)`); do the same, with `DynamicsKeyUITests.testASheetSaysWhenContactIsLost` as the model test.
 
 ## Features
 
@@ -49,7 +49,6 @@ None open.
   - Naming strips: the desk's names ("Vox 1") as `AppEntity` values the engineer picks in Shortcuts.
   - Adding the first intent: delete `LM_SKIP_METADATA_EXTRACTION` from `project.yml`, or the system never sees it.
 - [ ] **Show the key in Gate and Comp** (2026-10-17): the key source and key filter, in the graph or near it. Mock first.
-- [ ] **Too many options at once on Comp, Gate and the Mix tab's Insert block** (2026-10-17). Each needs a redesign that shows less at a time. Mock first.
 - [ ] **More reset options** (2026-10-17). Which values get a reset, and where? Ask the user before mocking.
 - [ ] **Should picking a view in the app pick it on the desk, or the other way round, or neither?** (2026-10-17) Decide first (e.g. selected channel, the desk's screen page).
 

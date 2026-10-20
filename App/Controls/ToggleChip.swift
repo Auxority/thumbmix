@@ -26,6 +26,8 @@ struct ToggleChip: View {
         .buttonStyle(.plain)
         .dimmedUntilRead(state != nil)
         .accessibilityIdentifier("toggle-" + spec.address)
+        // The full name even when the chip shows a short title ("Auto" reads "Auto time").
+        .accessibilityLabel(spec.label)
         .accessibilityValue(state == nil ? Text(verbatim: "") : Text(isOn ? "On" : "Off"))
     }
 }

@@ -8,6 +8,8 @@ struct ChoiceMenu: View {
     let mirror: ConsoleMirror
     /// Takes the picked value instead of sending it, for a choice that asks first.
     var onSelect: ((OSCArgument) -> Void)?
+    /// Drawn as text with no box, under this label: a choice set once, that a heading can hold (S2, 2026-10-20).
+    var compactLabel: String?
     @ScaledMetric private var sizeScale: CGFloat = 1
 
     var body: some View {
@@ -23,20 +25,37 @@ struct ChoiceMenu: View {
                 }
             }
         } label: {
-            HStack {
-                Text(spec.label).font(.subheadline).foregroundStyle(Theme.secondaryText)
-                Spacer(minLength: 8)
-                Text(text).font(.body.weight(.semibold)).foregroundStyle(.white)
-                Image(systemName: "chevron.up.chevron.down").font(.caption).foregroundStyle(Theme.secondaryText)
-            }
-            .lineLimit(1)
-            .padding(.horizontal, 12)
-            .frame(height: 48 * sizeScale)
-            .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
+            if let compactLabel { compact(compactLabel, text) } else { row(text) }
         }
         .disabled(current == nil)
+        // Its name only: the value is read once, as the value.
+        .accessibilityLabel(compactLabel ?? spec.label)
         .accessibilityIdentifier(spec.address)
         .accessibilityValue(text)
+    }
+
+    private func row(_ text: String) -> some View {
+        HStack {
+            Text(spec.label).font(.subheadline).foregroundStyle(Theme.secondaryText)
+            Spacer(minLength: 8)
+            Text(text).font(.body.weight(.semibold)).foregroundStyle(.white)
+            Image(systemName: "chevron.up.chevron.down").font(.caption).foregroundStyle(Theme.secondaryText)
+        }
+        .lineLimit(1)
+        .padding(.horizontal, 12)
+        .frame(height: 48 * sizeScale)
+        .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func compact(_ label: String, _ text: String) -> some View {
+        HStack(spacing: 6) {
+            Text(verbatim: label).font(.subheadline).foregroundStyle(Theme.secondaryText)
+            Text(text).font(.subheadline.weight(.semibold)).foregroundStyle(.white)
+            Image(systemName: "chevron.up.chevron.down").font(.caption2).foregroundStyle(Theme.secondaryText)
+        }
+        .lineLimit(1)
+        .frame(minHeight: 44 * sizeScale)
+        .contentShape(Rectangle())
     }
 
     /// The option in words with the desk's name under it, so the list explains and the closed row matches the desk.

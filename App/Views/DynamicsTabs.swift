@@ -6,6 +6,7 @@ struct GateTab: View {
     let mirror: ConsoleMirror
     /// The other side of a pair whose dynamics aren't linked: its curve is drawn faint.
     var ghost: StripID?
+    @State private var isKeyOpen = false
 
     var body: some View {
         let gate = Catalog.gate(strip)
@@ -23,8 +24,16 @@ struct GateTab: View {
                 ForEach([gate.threshold, gate.range, gate.attack, gate.hold, gate.release]) {
                     ParameterRow(spec: $0, mirror: mirror)
                 }
+                // Set once: one line that opens a sheet, like the Comp's (2026-10-20).
+                FoldedLineButton(line: mirror.gateKeyFold(strip), identifier: "gate-key") { isKeyOpen = true }
+            }
+        }
+        .sheet(isPresented: $isKeyOpen) {
+            let title = mirror.sheetTitle(String(localized: "Gate key"), strip: strip, perSide: ghost != nil)
+            FoldSheet(title: title, mirror: mirror) {
                 KeySection(key: Catalog.gateKey(strip), mirror: mirror)
             }
+            .foldSheetPresentation([.medium])
         }
     }
 
@@ -45,6 +54,7 @@ struct CompTab: View {
     let mirror: ConsoleMirror
     /// The other side of a pair whose dynamics aren't linked: its curve is drawn faint.
     var ghost: StripID?
+    @State private var isMoreOpen = false
 
     var body: some View {
         let dynamics = Catalog.dynamics(strip)
@@ -55,31 +65,30 @@ struct CompTab: View {
                     curve: curve(dynamics), meter: mirror.meter(strip), reduction: \.dynamicsGain,
                     identifier: "comp-graph", label: "Compressor curve",
                     ghostOutput: ghost.flatMap { self.curve(Catalog.dynamics($0)) }?.output)
+                // Auto last (U1, 2026-10-20): a tap that misses it opens Mode, never switches the comp off.
                 HStack(spacing: 8) {
                     ToggleChip(spec: dynamics.on, mirror: mirror, onColor: .green)
                     ChoiceMenu(spec: dynamics.mode, mirror: mirror)
+                    ToggleChip(spec: dynamics.auto, mirror: mirror, title: String(localized: "Auto"), onColor: .green)
                 }
                 // Auto time takes over Attack and Release: dimmed in place, like a cut filter's Gain and Q.
                 let autoTimed = mirror.isAutoTimeOn(strip) ? Set(dynamics.autoTimed.map(\.address)) : []
+                // What's ridden mid-show first, in reach on the SE without a scroll (mock B, 2026-10-20).
                 ForEach([
-                    dynamics.threshold, dynamics.ratio, dynamics.knee, dynamics.attack, dynamics.hold,
-                    dynamics.release, dynamics.makeup, dynamics.mix,
+                    dynamics.threshold, dynamics.ratio, dynamics.makeup, dynamics.mix, dynamics.knee, dynamics.attack,
+                    dynamics.hold, dynamics.release,
                 ]) {
                     ParameterRow(spec: $0, mirror: mirror).disabled(autoTimed.contains($0.address))
                 }
-                // Set and forget: below the settings an engineer rides.
-                HStack(spacing: 8) {
-                    ChoiceMenu(spec: dynamics.detector, mirror: mirror)
-                    ChoiceMenu(spec: dynamics.envelope, mirror: mirror)
-                }
-                HStack(spacing: 8) {
-                    if let position = Catalog.dynamicsPosition(strip) {
-                        CompPositionMenu(spec: position, strip: strip, mirror: mirror)
-                    }
-                    ToggleChip(spec: dynamics.auto, mirror: mirror, onColor: .green)
-                }
-                KeySection(key: Catalog.dynamicsKey(strip), mirror: mirror)
+                // What nobody rides is one line that opens a sheet: the tab never changes length.
+                FoldedLineButton(line: mirror.compFold(strip), identifier: "comp-more") { isMoreOpen = true }
             }
+        }
+        .sheet(isPresented: $isMoreOpen) {
+            FoldSheet(title: mirror.sheetTitle(String(localized: "Comp"), strip: strip, perSide: ghost != nil), mirror: mirror) {
+                CompMoreSettings(strip: strip, mirror: mirror)
+            }
+            .foldSheetPresentation([.large])
         }
     }
 
@@ -100,18 +109,44 @@ struct CompTab: View {
     }
 }
 
-/// What the gate or comp listens to (layout A, 2026-10-14): last, below everything an engineer rides.
+/// The Comp's sheet (mock B, 2026-10-20): the key first, then the detector and where the comp sits.
+private struct CompMoreSettings: View {
+    let strip: StripID
+    let mirror: ConsoleMirror
+
+    var body: some View {
+        let dynamics = Catalog.dynamics(strip)
+        KeySection(key: Catalog.dynamicsKey(strip), mirror: mirror)
+        Text("Detector").sectionLabel()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4).padding(.top, 10)
+        HStack(spacing: 8) {
+            ChoiceMenu(spec: dynamics.detector, mirror: mirror)
+            ChoiceMenu(spec: dynamics.envelope, mirror: mirror)
+        }
+        if let position = Catalog.dynamicsPosition(strip) {
+            CompPositionMenu(spec: position, strip: strip, mirror: mirror)
+        }
+    }
+}
+
+/// What the gate or comp listens to: opened from the tab's folded line, never on the tab itself.
 struct KeySection: View {
     let key: KeySpecs
     let mirror: ConsoleMirror
 
     var body: some View {
-        Text("Key").sectionLabel()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 4).padding(.top, 10)
-        if let source = key.sourceAddress {
-            ChoiceMenu(spec: Catalog.keySource(source, rawName: mirror.rawName), mirror: mirror)
+        // Source in the heading (S2, 2026-10-20): set once, it needn't cost a row.
+        HStack {
+            Text("Key").sectionLabel()
+            Spacer(minLength: 8)
+            if let source = key.sourceAddress {
+                ChoiceMenu(
+                    spec: Catalog.keySource(source, rawName: mirror.rawName), mirror: mirror,
+                    compactLabel: String(localized: "Listens to"))
+            }
         }
+        .padding(.horizontal, 4)
         HStack(spacing: 8) {
             ToggleChip(spec: key.filterOn, mirror: mirror, onColor: .green)
             ChoiceMenu(spec: key.filterType, mirror: mirror)

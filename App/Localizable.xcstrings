@@ -148,6 +148,9 @@
     "Assigned" : {
 
     },
+    "Auto" : {
+
+    },
     "Band" : {
 
     },
@@ -173,6 +176,9 @@
 
     },
     "Colour" : {
+
+    },
+    "Comp" : {
 
     },
     "Compressor curve" : {
@@ -207,6 +213,9 @@
 
     },
     "DEMO" : {
+
+    },
+    "Detector" : {
 
     },
     "Disconnect" : {
@@ -264,6 +273,9 @@
 
     },
     "Gate curve" : {
+
+    },
+    "Gate key" : {
 
     },
     "GR %@ dB" : {
@@ -353,6 +365,9 @@
           }
         }
       }
+    },
+    "Listens to" : {
+
     },
     "Low cut off" : {
 
