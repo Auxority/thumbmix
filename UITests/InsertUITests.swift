@@ -32,6 +32,7 @@ final class InsertUITests: DeskUITestCase {
         saveScreenshot("insert-fx")
         app.buttons["Done"].tap()
         XCTAssertTrue(eventually(within: 2) { (self.element("insert-more").value as? String)?.hasSuffix("· On") == true })
+        saveScreenshot("insert-line-on")
     }
 
     func testAnAuxInsertAsksFirst() {

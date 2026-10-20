@@ -136,6 +136,41 @@ final class PairUITests: DeskUITestCase {
         XCTAssertFalse(app.buttons["side-R"].exists, "the EQ is still linked")
     }
 
+    /// The Comp's sheet edits the side the tab shows, so it names that side.
+    func testAnUnlinkedCompSheetNamesTheSideItEdits() {
+        desk.change("/config/linkcfg/dyn", 0)
+        launchAndOpenGuitars()
+        app.buttons["Comp"].tap()
+        app.buttons["side-R"].tap()
+        let line = app.buttons["comp-more"]
+        XCTAssertTrue(line.appears(within: 2))
+        line.tap()
+        XCTAssertTrue(app.navigationBars["Comp · Gtr R"].appears(within: 2))
+    }
+
+    /// The pair's Insert sheet opens tall: a block count that flips while a linked edit settles mustn't resize it.
+    func testAPairsInsertSheetOpensTall() {
+        launchAndOpenGuitars()
+        let line = app.buttons["insert-more"]
+        XCTAssertTrue(line.appears(within: 2))
+        line.tap()
+        let done = app.buttons["Done"]
+        XCTAssertTrue(done.appears(within: 2))
+        XCTAssertLessThan(done.frame.minY, app.frame.height / 3, "a large sheet")
+    }
+
+    /// The fader and the insert unlinked: the Mix tab shows one side, and its Insert sheet edits that side only.
+    func testAOneSideInsertSheetNamesThatSide() {
+        desk.change("/config/linkcfg/fdrmute", 0)
+        desk.change("/config/linkcfg/dyn", 0)
+        // An unlinked fader lists each side on the overview.
+        launchAndOpen("Gtr L")
+        let line = app.buttons["insert-more"]
+        XCTAssertTrue(line.appears(within: 2))
+        line.tap()
+        XCTAssertTrue(app.navigationBars["Insert · Gtr L"].appears(within: 2))
+    }
+
     /// With the EQ unlinked, the desk's RTA follows the side shown, not the side the tab opened on.
     func testTheRTAFollowsTheChosenSide() throws {
         desk.change("/config/linkcfg/eq", 0)

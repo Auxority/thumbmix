@@ -27,6 +27,9 @@ struct FoldSheet<Content: View>: View {
                 .sharedBackgroundVisibility(.hidden)
             }
         }
+        // The tab disables everything while contact is lost, and a sheet inherits that: Done must still close it.
+        // The controls above disable themselves.
+        .environment(\.isEnabled, true)
     }
 }
 

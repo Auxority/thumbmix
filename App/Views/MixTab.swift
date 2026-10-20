@@ -27,8 +27,8 @@ struct MixTab: View {
                 }
                 if strip.linkAddress != nil { LinkButton(strip: strip, mirror: mirror) }
                 // Under Pan and Link: nothing above moves (mock A′). One line that opens the block, like the Comp's (I1).
-                let blocks = mirror.insertBlocks(strip, partner: panPartner)
-                if !blocks.isEmpty {
+                if strip.hasInsert {
+                    let blocks = mirror.insertBlocks(strip, partner: panPartner)
                     FoldedLineButton(line: mirror.insertFold(blocks), identifier: "insert-more") { isInsertOpen = true }
                 }
             }
@@ -41,14 +41,17 @@ struct MixTab: View {
     /// A pair the desk doesn't link inserts for shows both blocks.
     private var insertSheet: some View {
         let blocks = mirror.insertBlocks(strip, partner: panPartner)
-        return FoldSheet(title: mirror.sheetTitle(String(localized: "Insert"), strip: strip, perSide: false), mirror: mirror) {
+        // One side of a pair, its insert not shared: the edit reaches that side only, so the title names it.
+        let perSide = panPartner == nil && !mirror.isShared(.dynamics)
+        return FoldSheet(title: mirror.sheetTitle(String(localized: "Insert"), strip: strip, perSide: perSide), mirror: mirror) {
             ForEach(blocks, id: \.self) { sides in
                 InsertBlock(
                     sides: sides, mirror: mirror,
                     title: blocks.count == 2 ? String(localized: "Insert · \(mirror.name(sides[0]))") : nil)
             }
         }
-        .foldSheetPresentation(blocks.count == 2 ? [.large] : [.medium])
+        // By the pair, not the block count: that flips for a moment while a linked edit settles, and the sheet with it.
+        .foldSheetPresentation(panPartner == nil ? [.medium] : [.large])
     }
 
     @ViewBuilder private func panRow(_ side: StripID, title: String?) -> some View {

@@ -70,7 +70,29 @@ struct FoldedLineTests {
         let mirror = mirror(["/ch/13/insert/on": .int(1), "/ch/13/insert/pos": .int(0)])
         let line = mirror.insertFold([[vox]], locale: .testEnglish)
         #expect(line.names == "Insert · Before EQ")
-        #expect(line.values == (try #require(mirror.insertLabel([vox]))) + " · On")
+        #expect(line.values == (try #require(mirror.insertLabel([vox]))))
+        #expect(line.states == [true], "drawn as a green On (B, 2026-10-20)")
+        #expect(line.text == line.values + " · On")
+    }
+
+    @Test func anInsertThatsOffSaysOff() {
+        let line = mirror(["/ch/13/insert/on": .int(0)]).insertFold([[vox]], locale: .testEnglish)
+        #expect(line.states == [false])
+        #expect(line.text.hasSuffix(" · Off"))
+    }
+
+    @Test func aLineWithoutAStateHasNone() {
+        let line = mirror(plainComp).compFold(kick, locale: .testEnglish)
+        #expect(line.states.isEmpty)
+        #expect(line.text == line.values)
+    }
+
+    /// A filter that's on but whose type or frequency wasn't read yet: one dash, not "— —".
+    @Test func anUnreadFilterSettingShowsOneDash() {
+        let changes = plainComp.merging(["/ch/01/dyn/filter/on": .int(1)]) { $1 }
+        let line = mirror(changes, forgetting: ["/ch/01/dyn/filter/type", "/ch/01/dyn/filter/f"])
+            .compFold(kick, locale: .testEnglish)
+        #expect(line.values == "RMS · LOG · After EQ · Self · —")
     }
 
     @Test func anEmptySlotSaysSo() {
@@ -91,7 +113,8 @@ struct FoldedLineTests {
             "/ch/10/insert/pos": .int(0),
         ]).insertFold([[gtrL], [gtrR]], locale: .testEnglish)
         #expect(line.names == "Insert · Gtr L / Gtr R · Before EQ")
-        #expect(line.values.hasSuffix(" · On / Off"))
+        #expect(line.states == [true, false], "odd side first, each in its own colour")
+        #expect(line.text.hasSuffix(" · On / Off"))
     }
 
     @Test func aSheetTitleNamesTheSideItEdits() {

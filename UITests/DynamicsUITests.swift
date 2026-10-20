@@ -70,7 +70,10 @@ final class DynamicsUITests: DeskUITestCase {
 
     func testDetectorAndEnvelopeAreDropdowns() {
         launchAndOpen("Snare", tab: "Comp")
-        app.buttons["comp-more"].tap()
+        let line = app.buttons["comp-more"]
+        XCTAssertTrue(line.appears(within: 2))
+        line.tap()
+        XCTAssertTrue(app.navigationBars["Comp · Snare"].appears(within: 2))
         pick("Average level", in: "/ch/02/dyn/det", from: "PEAK", to: "RMS")
         pick("Linear", in: "/ch/02/dyn/env", from: "LOG", to: "LIN")
         saveScreenshot("comp-dropdowns")

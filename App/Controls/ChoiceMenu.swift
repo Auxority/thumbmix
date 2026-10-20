@@ -28,6 +28,8 @@ struct ChoiceMenu: View {
             if let compactLabel { compact(compactLabel, text) } else { row(text) }
         }
         .disabled(current == nil)
+        // Its name only: the value is read once, as the value.
+        .accessibilityLabel(compactLabel ?? spec.label)
         .accessibilityIdentifier(spec.address)
         .accessibilityValue(text)
     }

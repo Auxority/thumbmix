@@ -1,6 +1,7 @@
 import XCTest
 
-/// Auto time, the key and the comp position, below everything an engineer rides (mocks 2026-10-14-dyn-key).
+/// The Comp's order, Auto time, and the folded line and sheets that hold the key, detector and comp position
+/// (mocks 2026-10-20-fewer-options).
 @MainActor
 final class DynamicsKeyUITests: DeskUITestCase {
     /// Mock B (2026-10-20): the rows ridden mid-show, in reach without a scroll.
@@ -51,8 +52,35 @@ final class DynamicsKeyUITests: DeskUITestCase {
         let detector = app.buttons["/ch/01/dyn/det"]
         XCTAssertTrue(eventually(within: 2) { detector.isEnabled })
         desk.goSilent()
-        XCTAssertTrue(app.staticTexts["Disconnected — retrying"].appears(within: 8))
+        let banners = app.staticTexts.matching(NSPredicate(format: "label == %@", "Disconnected — retrying"))
+        let sheetTop = app.navigationBars["Comp · Kick"].frame.maxY
+        XCTAssertTrue(
+            eventually(within: 8) { banners.allElementsBoundByIndex.contains { $0.frame.minY >= sheetTop - 1 } },
+            "the sheet's own banner, under its title, not the tab's behind it")
         XCTAssertFalse(detector.isEnabled)
+        XCTAssertTrue(app.buttons["Done"].isEnabled, "the sheet still closes")
+    }
+
+    /// VoiceOver reads each control's full name once, whatever the chip or heading shows.
+    func testShortControlsSayTheirFullName() {
+        launchAndOpen("Kick", tab: "Comp")
+        XCTAssertTrue(element("toggle-/ch/01/dyn/auto").appears(within: 2))
+        XCTAssertEqual(element("toggle-/ch/01/dyn/auto").label, "Auto time")
+        openSheet("comp-more", title: "Comp · Kick")
+        XCTAssertEqual(element("/ch/01/dyn/keysrc").label, "Listens to")
+        XCTAssertEqual(element("/ch/01/dyn/det").label, "Detector")
+    }
+
+    /// A long key source and its filter fit the line on the SE: it shrinks a little rather than cut the filter off.
+    func testALongCompLineShrinksToFit() {
+        desk.change("/ch/01/dyn/keysrc", 13)
+        desk.change("/ch/01/dyn/filter/on", 1)
+        launchAndOpen("Kick", tab: "Comp")
+        let line = element("comp-more")
+        XCTAssertTrue(eventually(within: 2) { (line.value as? String)?.contains("Ch 13 · Vox 1 · ") == true })
+        scrollDown(from: "/ch/01/dyn/mode")
+        XCTAssertTrue(eventually(within: 2) { line.isHittable })
+        saveScreenshot("comp-line-long")
     }
 
     /// The desk ignores Attack and Release under Auto time: dimmed in place, back when Auto time goes off.

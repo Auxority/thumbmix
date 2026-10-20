@@ -8,6 +8,14 @@ final class AuxInUITests: DeskUITestCase {
         open("Aux 1")
     }
 
+    /// Aux ins have no insert (doc p.28): no folded Insert line, which would read "—" forever.
+    func testAnAuxInHasNoInsertLine() {
+        launch()
+        openAux1()
+        XCTAssertTrue(element("/auxin/01/mix/fader").appears(within: 2))
+        XCTAssertFalse(element("insert-more").exists)
+    }
+
     /// The demo's aux ins are the desk's line jacks: no preamp, so the Input tab shows Trim alone.
     func testAuxGetsInputEQAndSendsTabs() {
         launch()

@@ -38,7 +38,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Small fixes
 
-None open.
+- [ ] **A send's sheet during a lost contact** (2026-10-20, found while building the fold sheets): `SendSheet` inherits the tab's `.disabled`, so its Done greys out (a swipe still closes it), and a large sheet covers the tab's "Disconnected — retrying" banner. `FoldSheet` fixes both (its own `StatusBanner` inset, `.environment(\.isEnabled, true)`); do the same, with `DynamicsKeyUITests.testASheetSaysWhenContactIsLost` as the model test.
 
 ## Features
 

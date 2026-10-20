@@ -5,10 +5,21 @@ import Foundation
 public struct FoldedLine: Equatable, Sendable {
     public let names: String
     public let values: String
+    /// On or off after the values, one per side when a pair's sides differ (odd first): drawn as a green "On" or a
+    /// grey "Off" (B, 2026-10-20), in words too so it reads without colour.
+    public let states: [Bool]
 
-    public init(names: String, values: String) {
+    public init(names: String, values: String, states: [Bool] = []) {
         self.names = names
         self.values = values
+        self.states = states
+    }
+
+    public static func word(_ isOn: Bool) -> String { isOn ? CoreStrings.text("On") : CoreStrings.text("Off") }
+
+    /// The whole line as one text, for VoiceOver.
+    public var text: String {
+        states.isEmpty ? values : values + " · " + states.map(Self.word).joined(separator: " / ")
     }
 }
 
@@ -36,23 +47,22 @@ extension ConsoleMirror {
         let sides = blocks.flatMap { $0 }
         // Unread counts as neither empty nor set, as in the block itself.
         guard !sides.isEmpty, isInsertRead(sides) else { return FoldedLine(names: CoreStrings.text("Insert"), values: "—") }
-        var names = [CoreStrings.text("Insert")]
-        if blocks.count > 1 { names.append(blocks.map { name($0[0]) }.joined(separator: " / ")) }
-        names.append(perBlock(blocks) { self.insertSpec($0).map { self.named($0.position, locale) } ?? "—" })
-        return FoldedLine(names: names.joined(separator: " · "), values: insertValues(blocks, sides: sides, locale))
+        var parts = [CoreStrings.text("Insert")]
+        if blocks.count > 1 { parts.append(blocks.map { name($0[0]) }.joined(separator: " / ")) }
+        parts.append(perBlock(blocks) { self.insertSpec($0).map { self.named($0.position, locale) } ?? "—" })
+        let names = parts.joined(separator: " · ")
+        if sides.compactMap(insertSlot).allSatisfy({ $0 == .none }) {
+            return FoldedLine(names: names, values: CoreStrings.text("No slot picked on the desk"))
+        }
+        // One state when every block agrees, else each block's: never one side's alone.
+        let states = blocks.map { cell(Catalog.insert($0[0])?.on.address ?? "").argument == .int(1) }
+        return FoldedLine(
+            names: names, values: insertLabel(sides) ?? "—", states: Set(states).count == 1 ? [states[0]] : states)
     }
 
     /// "Comp · Vox 1". A linked pair reads as one, unless the tab shows one side of a section the desk doesn't link.
     public func sheetTitle(_ section: String, strip: StripID, perSide: Bool) -> String {
         section + " · " + (perSide || !isLinked(strip) ? name(strip) : pairName(strip))
-    }
-
-    private func insertValues(_ blocks: [[StripID]], sides: [StripID], _ locale: Locale) -> String {
-        if sides.compactMap(insertSlot).allSatisfy({ $0 == .none }) {
-            return CoreStrings.text("No slot picked on the desk")
-        }
-        let state = perBlock(blocks) { self.insertSpec($0).map { self.shown($0.on, locale) } ?? "—" }
-        return (insertLabel(sides) ?? "—") + " · " + state
     }
 
     private func insertSpec(_ strip: StripID) -> InsertSpecs? { Catalog.insert(strip) }
@@ -68,12 +78,18 @@ extension ConsoleMirror {
         var parts: [String] = []
         if let source = key.sourceAddress { parts.append(shown(Catalog.keySource(source, rawName: rawName), locale)) }
         switch normalized(key.filterOn).map({ $0 >= 0.5 }) {
-        case true?: parts.append(shown(key.filterType, locale) + " " + shown(key.filterFrequency, locale))
+        case true?: parts.append(filterText(key, locale))
         case false? where parts.isEmpty: parts.append(CoreStrings.text("Filter off"))
         case false?: break
         case nil: parts.append("—")
         }
         return parts.joined(separator: " · ")
+    }
+
+    /// "LC12 150 Hz"; one "—" while either is unread, not "— —".
+    private func filterText(_ key: KeySpecs, _ locale: Locale) -> String {
+        guard normalized(key.filterType) != nil, normalized(key.filterFrequency) != nil else { return "—" }
+        return shown(key.filterType, locale) + " " + shown(key.filterFrequency, locale)
     }
 
     /// As the closed control shows it; "—" until the desk sent it.
