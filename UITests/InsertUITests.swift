@@ -4,23 +4,39 @@ import XCTest
 /// The Mix tab's Insert block (mock A′, 2026-10-14): slot read-only, Insert asks first only for an aux slot.
 @MainActor
 final class InsertUITests: DeskUITestCase {
+    /// I1 (2026-10-20): one line under Pan, like the Comp's, that opens today's block in a sheet.
+    func testTheInsertOpensFromOneLine() {
+        desk.change("/ch/13/insert/on", 0)
+        launchAndOpen("Vox 1")
+        let line = element("insert-more")
+        XCTAssertTrue(line.appears(within: 2))
+        XCTAssertTrue(line.isHittable, "on the SE's first screen")
+        XCTAssertTrue(eventually(within: 2) { (line.value as? String)?.hasSuffix("· Off") == true })
+        XCTAssertEqual(line.value as? String, "FX5 L · Dual DeEsser · Off")
+        openInsert(title: "Insert · Vox 1")
+        saveScreenshot("insert-sheet")
+    }
+
     func testAnFXInsertSwitchesOnAtOnce() {
         desk.change("/ch/13/insert/on", 0)
         launchAndOpen("Vox 1")
+        openInsert(title: "Insert · Vox 1")
         let slot = element("/ch/13/insert/sel")
         let insert = app.buttons["toggle-/ch/13/insert/on"]
         XCTAssertTrue(slot.appears(within: 2))
         XCTAssertEqual(slot.value as? String, "FX5 L · Dual DeEsser")
-        XCTAssertTrue(insert.isHittable, "on the SE's first screen")
         insert.tap()
         XCTAssertTrue(eventually(within: 2) { insert.value as? String == "On" })
         XCTAssertEqual(app.alerts.count, 0)
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/insert/on") == .int(1) })
         saveScreenshot("insert-fx")
+        app.buttons["Done"].tap()
+        XCTAssertTrue(eventually(within: 2) { (self.element("insert-more").value as? String)?.hasSuffix("· On") == true })
     }
 
     func testAnAuxInsertAsksFirst() {
         launchAndOpen("Bass")
+        openInsert(title: "Insert · Bass")
         let insert = app.buttons["toggle-/ch/08/insert/on"]
         XCTAssertTrue(insert.appears(within: 2))
         insert.tap()
@@ -41,6 +57,9 @@ final class InsertUITests: DeskUITestCase {
 
     func testNoSlotDisablesTheInsert() {
         launchAndOpen("Kick")
+        let line = element("insert-more")
+        XCTAssertTrue(eventually(within: 2) { line.value as? String == "No slot picked on the desk" })
+        openInsert(title: "Insert · Kick")
         let slot = element("/ch/01/insert/sel")
         XCTAssertTrue(slot.appears(within: 2))
         XCTAssertEqual(slot.value as? String, "None")
@@ -50,6 +69,7 @@ final class InsertUITests: DeskUITestCase {
 
     func testPositionPicksBeforeTheEQ() {
         launchAndOpen("Vox 1")
+        openInsert(title: "Insert · Vox 1")
         let position = app.buttons["/ch/13/insert/pos"]
         XCTAssertTrue(position.appears(within: 2))
         position.tap()
@@ -59,7 +79,7 @@ final class InsertUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/13/insert/pos") == .int(0) })
     }
 
-    /// The Mix tab scrolls to fit the Insert blocks, but a fader drag that wanders vertically must stay a drag.
+    /// A pair's Mix tab may scroll (two pans), but a fader drag that wanders vertically must stay a drag.
     func testASlantedFaderDragOnAPairDoesNotScrollThePage() {
         launch()
         app.swipeUp()
@@ -73,5 +93,12 @@ final class InsertUITests: DeskUITestCase {
             .press(forDuration: 0.05, thenDragTo: fader.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.9)))
         XCTAssertTrue(eventually(within: 2) { fader.value as? String != before })
         XCTAssertEqual(fader.frame.minY, top, accuracy: 2, "the page scrolled")
+    }
+
+    private func openInsert(title: String) {
+        let line = app.buttons["insert-more"]
+        XCTAssertTrue(line.appears(within: 2))
+        line.tap()
+        XCTAssertTrue(app.navigationBars[title].appears(within: 2), title)
     }
 }

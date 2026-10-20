@@ -7,6 +7,7 @@ struct MixTab: View {
     let mirror: ConsoleMirror
     /// The other side of a linked pair: the fader is shared, but each side keeps its own pan.
     var panPartner: StripID?
+    @State private var isInsertOpen = false
 
     var body: some View {
         ScrollView {
@@ -25,17 +26,29 @@ struct MixTab: View {
                     panRow(strip, title: nil)
                 }
                 if strip.linkAddress != nil { LinkButton(strip: strip, mirror: mirror) }
-                // Under Pan and Link: nothing above moves (mock A′). A pair the desk doesn't link inserts for shows both.
+                // Under Pan and Link: nothing above moves (mock A′). One line that opens the block, like the Comp's (I1).
                 let blocks = mirror.insertBlocks(strip, partner: panPartner)
-                ForEach(blocks, id: \.self) { sides in
-                    InsertBlock(
-                        sides: sides, mirror: mirror,
-                        title: blocks.count == 2 ? String(localized: "Insert · \(mirror.name(sides[0]))") : nil)
+                if !blocks.isEmpty {
+                    FoldedLineButton(line: mirror.insertFold(blocks), identifier: "insert-more") { isInsertOpen = true }
                 }
             }
         }
         // A single strip fits the SE at default text size and can't scroll, so a fader drag never turns into a page scroll.
         .scrollBounceBehavior(.basedOnSize)
+        .sheet(isPresented: $isInsertOpen) { insertSheet }
+    }
+
+    /// A pair the desk doesn't link inserts for shows both blocks.
+    private var insertSheet: some View {
+        let blocks = mirror.insertBlocks(strip, partner: panPartner)
+        return FoldSheet(title: mirror.sheetTitle(String(localized: "Insert"), strip: strip, perSide: false), mirror: mirror) {
+            ForEach(blocks, id: \.self) { sides in
+                InsertBlock(
+                    sides: sides, mirror: mirror,
+                    title: blocks.count == 2 ? String(localized: "Insert · \(mirror.name(sides[0]))") : nil)
+            }
+        }
+        .foldSheetPresentation(blocks.count == 2 ? [.large] : [.medium])
     }
 
     @ViewBuilder private func panRow(_ side: StripID, title: String?) -> some View {
