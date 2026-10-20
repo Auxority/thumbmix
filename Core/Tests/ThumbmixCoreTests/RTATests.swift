@@ -123,6 +123,26 @@ struct RTATests {
         }
     }
 
+    /// The key graph shows what a gate hears, before the source's EQ (2026-10-20).
+    @Test func followingBeforeTheEQSetsPositionZeroAndReleasePutsItBack() async throws {
+        try await withRTADesk(
+            before: { fake in
+                fake.deskChange(RTA.source, .int(50))
+                fake.deskChange(RTA.position, .int(1))
+            },
+            body: { fake, mirror in
+                #expect(await eventually { mirror.cell(RTA.position).argument == .int(1) })
+
+                mirror.followRTA(StripID(.input, 2), afterEQ: false)
+
+                #expect(await eventually { fake.value(at: RTA.source) == .int(3) && fake.value(at: RTA.position) == .int(0) })
+
+                mirror.releaseRTA()
+
+                #expect(await eventually { fake.value(at: RTA.source) == .int(50) && fake.value(at: RTA.position) == .int(1) })
+            })
+    }
+
     @Test func switchingChannelsKeepsTheOriginalToRestore() async throws {
         try await withRTADesk(
             before: { fake in
