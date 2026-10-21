@@ -4,9 +4,9 @@
 #   scripts/ui-test.sh                         the whole suite, on clones
 #   scripts/ui-test.sh EQUITests/testX ...     only those tests (or classes), one at a time on the SE itself
 #   scripts/ui-test.sh --serial                the whole suite on the SE itself, when cloning fails
-# Other arguments starting with - go to xcodebuild. Screenshots land in build/screens. A run whose first test
-# hasn't started after 2 minutes has hung (CLAUDE.md, "A hung UI run") and is stopped (exit 2); a failed run
-# during which the Mac slept exits 3.
+# Other arguments starting with - go to xcodebuild. Screenshots land in build/screens; a failed run's result bundle
+# and log are kept in build/ui-test-failed/<time>. A run whose first test hasn't started after 2 minutes has hung
+# (CLAUDE.md, "A hung UI run") and is stopped (exit 2); a failed run during which the Mac slept exits 3.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 log=build/ui-test.log
@@ -70,7 +70,17 @@ grep -E ": error: |Test [Cc]ase .* failed" "$log" | sort -u || true
 summary=$(xcrun xcresulttool get test-results summary --path "$results" 2>/dev/null || true)
 count() { printf '%s\n' "$summary" | sed -nE "s/^  \"$1\" : ([0-9]+),?$/\1/p"; }
 if [ -n "$summary" ]; then echo "$(count passedTests) passed, $(count failedTests) failed, $(count skippedTests) skipped"; fi
+# The log can lose a failure's message the same way; the bundle keeps it.
+printf '%s\n' "$summary" | jq -r '.testFailures[]? | "\(.testIdentifierString): \(.failureText)"' 2>/dev/null || true
 grep -E "\*\* TEST " "$log" || true
+
+# The next run deletes the bundle, and a flake may not come back: keep a failed run's evidence.
+if [ "$status" -ne 0 ] && [ -d "$results" ]; then
+  kept="build/ui-test-failed/$(date '+%Y-%m-%d-%H%M%S')"
+  mkdir -p "$kept"
+  cp -R "$results" "$log" "$kept/"
+  echo "Kept this run's result bundle and log in $kept (open the .xcresult in Xcode for screenshots)."
+fi
 
 # A Mac that sleeps mid-run (lid closed on battery) stalls every running test for 15+ minutes, which then fail
 # with "Timed out while synthesizing event": no app failure, so say so instead of leaving it to be guessed.
