@@ -81,6 +81,14 @@ jobs:
         if: steps.version.outputs.version != ''
         run: brew install xcodegen
 
+      # The runner image ships watch simulators without their runtime; xcodebuild asserts once per device for each
+      # (DVTAssertions "SimDevice native architecture is nil"), 25 times in an archive.
+      - name: Delete simulators without a runtime
+        if: steps.version.outputs.version != ''
+        run: |
+          xcrun simctl list devices unavailable
+          xcrun simctl delete unavailable
+
       - name: Build unsigned IPA
         if: steps.version.outputs.version != ''
         env:

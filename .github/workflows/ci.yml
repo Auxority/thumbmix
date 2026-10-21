@@ -106,6 +106,13 @@ jobs:
       - name: Install SwiftLint and XcodeGen
         run: brew install swiftlint xcodegen
 
+      # The runner image ships watch simulators without their runtime; xcodebuild asserts once per device for each
+      # (DVTAssertions "SimDevice native architecture is nil"), 55 times in this build.
+      - name: Delete simulators without a runtime
+        run: |
+          xcrun simctl list devices unavailable
+          xcrun simctl delete unavailable
+
       # scripts/unused.sh builds the project but doesn't generate it.
       - name: Find unused code
         run: |
