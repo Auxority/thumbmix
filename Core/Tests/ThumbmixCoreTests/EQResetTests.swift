@@ -15,14 +15,18 @@ struct EQResetTests {
     private let sixBandStrips = [StripID(.bus, 1), StripID(.matrix, 1), StripID(.mainStereo), StripID(.mainMono)]
 
     @Test func everyStripWithBandsHasDefaults() {
-        #expect(Catalog.eqDefaults(kick)?.map(\.frequency) == [91.4, 418, 1910, 8730])
+        let input = Catalog.eqDefaults(kick)
+        #expect(input?.map(\.frequency) == [124.7, 496.6, 1977, 10_020])
+        #expect(input?.map(\.typeIndex) == [2, 2, 2, 4], "PEQ, PEQ, PEQ, HShv")
+        #expect(input?.allSatisfy { $0.gain == 0 && $0.q == 2 } == true)
         for strip in sixBandStrips {
             let defaults = Catalog.eqDefaults(strip)
-            #expect(defaults?.map(\.frequency) == [54.5, 153.5, 418, 1140, 3210, 8730], "\(strip)")
-            #expect(defaults?.allSatisfy { $0.typeIndex == 2 && $0.gain == 0 && $0.q == 1.7 } == true, "\(strip)")
+            #expect(defaults?.map(\.frequency) == [79.6, 158.9, 496.6, 1977, 5020, 10_020], "\(strip)")
+            #expect(defaults?.map(\.typeIndex) == [1, 2, 2, 2, 2, 4], "LShv, PEQ × 4, HShv on \(strip)")
+            #expect(defaults?.allSatisfy { $0.gain == 0 && $0.q == 2 } == true, "\(strip)")
         }
-        #expect(Catalog.eqDefaults(StripID(.auxIn, 1)) == Catalog.eqDefaults(kick), "assumed like an input's (TODO)")
-        #expect(Catalog.eqDefaults(StripID(.fxReturn, 1)) == Catalog.eqDefaults(kick), "assumed like an input's (TODO)")
+        #expect(Catalog.eqDefaults(StripID(.auxIn, 1)) == input, "read on the desk: like an input's")
+        #expect(Catalog.eqDefaults(StripID(.fxReturn, 1)) == input, "read on the desk: like an input's")
     }
 
     /// The desk keeps 201 frequency steps, 3.5% apart: a default must name one step, not fall between two.
@@ -56,14 +60,14 @@ struct EQResetTests {
     /// One source of truth: a row's double-tap restores what Reset bands would.
     @Test func bandRowsResetToTheBandsDefault() {
         let band = Catalog.eqBand(StripID(.matrix, 2), 3)
-        #expect(band.frequency.resetValue == 418)
-        #expect(band.q.resetValue == 1.7)
+        #expect(band.frequency.resetValue == 496.6)
+        #expect(band.q.resetValue == 2)
         #expect(band.gain.resetValue == 0)
-        #expect(Catalog.eqBand(kick, 4).frequency.resetValue == 8730)
+        #expect(Catalog.eqBand(kick, 4).frequency.resetValue == 10_020)
     }
 
-    /// Matrices and mains offer 14 types; the defaults use only PEQ, which sits at the same index for all.
-    @Test func resetBandsOnAMainWritesPEQ() async throws {
+    /// Matrices and mains offer 14 types; the defaults use only LShv, PEQ and HShv, at the same index for all.
+    @Test func resetBandsOnAMainWritesAHighShelf() async throws {
         try await withLiveDesk { fake, mirror in
             let main = StripID(.mainStereo)
             fake.deskChange("/main/st/eq/6/type", .int(13))
@@ -72,8 +76,8 @@ struct EQResetTests {
             mirror.resetEQBands(main)
 
             let specs = Catalog.eqBand(main, 6)
-            #expect(await eventually { fake.value(at: specs.type.address) == .int(2) })
-            #expect(await eventually { abs((deskValue(fake, specs.frequency) ?? 0) - 8730) < 1 })
+            #expect(await eventually { fake.value(at: specs.type.address) == .int(4) })
+            #expect(await eventually { abs((deskValue(fake, specs.frequency) ?? 0) - 10_020) < 10 })
         }
     }
 
@@ -108,14 +112,16 @@ struct EQResetTests {
 
             mirror.resetEQBands(kick)
 
-            let expected: [(hertz: Double, band: Int)] = [(91.4, 1), (418, 2), (1910, 3), (8730, 4)]
-            for (hertz, band) in expected {
+            let expected: [(type: Double, hertz: Double, band: Int)] = [
+                (2, 124.7, 1), (2, 496.6, 2), (2, 1977, 3), (4, 10_020, 4),
+            ]
+            for (type, hertz, band) in expected {
                 let specs = Catalog.eqBand(kick, band)
                 #expect(
                     await eventually {
-                        deskValue(fake, specs.type) == 2 && deskValue(fake, specs.gain) == 0
+                        deskValue(fake, specs.type) == type && deskValue(fake, specs.gain) == 0
                             && abs((deskValue(fake, specs.frequency) ?? 0) - hertz) < hertz * 0.01
-                            && abs((deskValue(fake, specs.q) ?? 0) - 1.7) < 0.05
+                            && abs((deskValue(fake, specs.q) ?? 0) - 2) < 0.05
                     }, "band \(band)")
             }
         }

@@ -4,8 +4,8 @@ import XCTest
 /// Reset bands, and the spectrum after the background.
 @MainActor
 final class EQUITests: DeskUITestCase {
-    /// Where band 1 of an input sits on the graph at its default: 91.4 Hz on the log axis, 0 dB.
-    private static let kickBand1 = CGVector(dx: log(91.4 / 20) / log(1000), dy: 0.5)
+    /// Where band 1 of an input sits on the graph at its default: 124.7 Hz on the log axis, 0 dB.
+    private static let kickBand1 = CGVector(dx: log(124.75 / 20) / log(1000), dy: 0.5)
 
     func testTheEQTab() {
         launchAndOpen("Kick", tab: "EQ")
@@ -51,17 +51,17 @@ final class EQUITests: DeskUITestCase {
     private func dragOnTheGraphMovesTheGrabbedBand(_ graph: XCUIElement) {
         let frequency = element("/ch/01/eq/1/f")
         let gain = element("/ch/01/eq/1/g")
-        XCTAssertEqual(frequency.value as? String, "91.4 Hz")
+        XCTAssertEqual(frequency.value as? String, "125 Hz")
         let nearBand1 = graph.coordinate(withNormalizedOffset: Self.kickBand1).withOffset(CGVector(dx: 20, dy: -25))
         nearBand1.press(forDuration: 0.3)
-        XCTAssertEqual(frequency.value as? String, "91.4 Hz", "a touch near the band moved it")
+        XCTAssertEqual(frequency.value as? String, "125 Hz", "a touch near the band moved it")
         XCTAssertEqual(gain.value as? String, "0.0 dB", "a touch near the band moved it")
 
         let deskBefore = desk.value("/ch/01/eq/1/f")
         let moved = CGVector(dx: 0.5, dy: 0.25)
         graph.coordinate(withNormalizedOffset: Self.kickBand1)
             .press(forDuration: 0.1, thenDragTo: graph.coordinate(withNormalizedOffset: moved))
-        XCTAssertNotEqual(frequency.value as? String, "91.4 Hz")
+        XCTAssertNotEqual(frequency.value as? String, "125 Hz")
         XCTAssertNotEqual(gain.value as? String, "0.0 dB")
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/01/eq/1/f") != deskBefore }, "the drag reached the desk")
         saveScreenshot("task-15-eq")
@@ -141,7 +141,7 @@ final class EQUITests: DeskUITestCase {
         frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.5))
             .press(forDuration: 0.05, thenDragTo: frequency.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5)))
         let moved = frequency.value as? String
-        XCTAssertNotEqual(moved, "91.4 Hz")
+        XCTAssertNotEqual(moved, "125 Hz")
         let reset = app.buttons["Reset bands"]
         if !reset.isHittable {
             let type = app.buttons["/ch/01/eq/1/type"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
@@ -154,6 +154,6 @@ final class EQUITests: DeskUITestCase {
         XCTAssertEqual(frequency.value as? String, moved, "Cancel leaves the bands")
         reset.tap()
         alert.buttons["Reset"].tap()
-        XCTAssertEqual(frequency.value as? String, "91.4 Hz")
+        XCTAssertEqual(frequency.value as? String, "125 Hz")
     }
 }

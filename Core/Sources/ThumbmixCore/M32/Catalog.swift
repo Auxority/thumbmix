@@ -138,18 +138,23 @@ public enum Catalog {
         )
     }
 
-    /// The engineer's EQ starting points, restored by Reset bands and a row's double-tap: PEQs at Q 1.7, 0 dB.
-    /// Six-band strips use the desk's steps nearest the engineer's 55.1, 152, 418, 1150, 3170 and 8730 Hz;
-    /// compare them with the real desk (TODO).
+    /// What the desk's own EQ reset gives, restored by Reset bands and a row's double-tap: Q 2, 0 dB (read on the
+    /// M32, FW 4.13, 2026-10-20; buses and mains like a matrix, aux ins and FX returns like an input). A shelf keeps
+    /// Q 2 too, though the desk hides it.
+    /// The desk's "1k97" is the 1977 Hz step (doc p.150, 0.6650).
     public static func eqDefaults(_ strip: StripID) -> [EQBandState]? {
-        let frequencies: [Double] =
+        let bands: [(EQFilterType, Double)] =
             switch strip.eqBandCount {
-            case 4: [91.4, 418, 1910, 8730]
-            case 6: [54.5, 153.5, 418, 1140, 3210, 8730]
+            case 4: [(.parametric, 124.7), (.parametric, 496.6), (.parametric, 1977), (.highShelf, 10_020)]
+            case 6:
+                [
+                    (.lowShelf, 79.6), (.parametric, 158.9), (.parametric, 496.6), (.parametric, 1977),
+                    (.parametric, 5020), (.highShelf, 10_020),
+                ]
             default: []
             }
-        guard !frequencies.isEmpty else { return nil }
-        return frequencies.map { EQBandState(typeIndex: EQFilterType.parametric.rawValue, frequency: $0, gain: 0, q: 1.7) }
+        guard !bands.isEmpty else { return nil }
+        return bands.map { type, hertz in EQBandState(typeIndex: type.rawValue, frequency: hertz, gain: 0, q: 2) }
     }
 
     /// `eqDefaults` for one band as the desk's arguments, each snapped to the nearest step its scale has.
