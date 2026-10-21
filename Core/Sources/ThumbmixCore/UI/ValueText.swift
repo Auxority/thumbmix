@@ -47,9 +47,11 @@ public enum ValueText {
     }
 
     private static func hertz(_ value: Double, _ locale: Locale) -> String {
-        // Three significant digits, like the desk: 91.4 Hz, 418 Hz, 1.91 kHz.
-        if value < 100 { return number(value, digits: 1, locale) + " Hz" }
-        return value < 1000 ? number(value, digits: 0, locale) + " Hz" : number(value / 1000, digits: 2, locale) + " kHz"
+        // The desk's own text (doc p.150 table): 124.7 Hz, and kHz cut to two decimals, "1k02" for 1025.7 Hz. The
+        // 0.02 Hz lets 1909.985 Hz read "1k91" as the table does; with it, all 201 steps match.
+        if value < 1000 { return number(value, digits: 1, locale) + " Hz" }
+        let kilohertz = ((value + 0.02) / 10).rounded(.down) / 100
+        return number(kilohertz, digits: 2, locale) + " kHz"
     }
 
     private static func milliseconds(_ value: Double, _ locale: Locale) -> String {

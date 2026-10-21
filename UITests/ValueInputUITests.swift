@@ -5,7 +5,7 @@ import XCTest
 final class ValueInputUITests: DeskUITestCase {
     /// The alert says the range. Text that isn't a value, and a number past either end, reopen the alert saying so,
     /// text kept; neither reaches the desk ("100" on a fader must not set +10 dB). A value in range is set.
-    /// Where a typed value lands on the desk's grid (1k → 991 Hz) is `ValueInputTests` in Core.
+    /// Where a typed value lands on the desk's grid (1k → 990.9 Hz) is `ValueInputTests` in Core.
     func testHoldingAFaderTypesItsValue() {
         launchAndOpen("Kick")
         let fader = element("/ch/01/mix/fader")
