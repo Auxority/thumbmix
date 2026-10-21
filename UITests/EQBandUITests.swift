@@ -9,7 +9,7 @@ final class EQBandUITests: DeskUITestCase {
         launchAndOpen("Kick", tab: "EQ")
         let frequency = element("/ch/01/eq/1/f")
         XCTAssertTrue(frequency.appears(within: 2))
-        dragAndDoubleTap(frequency, from: "125 Hz")
+        dragAndDoubleTap(frequency, from: "124.7 Hz")
 
         app.buttons["Input"].tap()
         let time = element("/ch/01/delay/time")
