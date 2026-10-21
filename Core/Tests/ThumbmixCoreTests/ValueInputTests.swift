@@ -77,13 +77,13 @@ struct ValueInputTests {
         expectValue("20k", frequency, 20000)
     }
 
-    /// The desk keeps 201 frequency steps: 1 kHz lands on the nearest, 991 Hz, and the row shows that.
+    /// The desk keeps 201 frequency steps: 1 kHz lands on the nearest, 990.9 Hz, and the row shows that.
     @Test func aTypedFrequencyLandsOnTheDesksStep() {
         guard case .value(let position) = ValueInput.read("1k", for: frequency) else {
             Issue.record("1k was refused")
             return
         }
-        #expect(ValueText.format(position, frequency, locale: .testEnglish) == "991 Hz")
+        #expect(ValueText.format(position, frequency, locale: .testEnglish) == "990.9 Hz")
     }
 
     @Test func qAndDelayTakePlainNumbers() {

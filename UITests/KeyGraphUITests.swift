@@ -21,7 +21,7 @@ final class KeyGraphUITests: DeskUITestCase {
         // A gate's cut is gain reduction too (doc p.17): the graph shows when the key makes it act.
         XCTAssertTrue(element("key-reduction").label.hasPrefix("GR "), "gain reduction")
         XCTAssertEqual(graph.label, "Key filter", "VoiceOver")
-        XCTAssertEqual(graph.value as? String, "HC12 632 Hz, Off", "VoiceOver")
+        XCTAssertEqual(graph.value as? String, "HC12 632.5 Hz, Off", "VoiceOver")
         saveScreenshot("key-graph-gate")
 
         app.buttons["Done"].tap()

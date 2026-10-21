@@ -50,11 +50,20 @@ struct UIMathTests {
         #expect(ValueText.format(nil, fader, locale: .testEnglish) == "—")
     }
 
+    /// The desk's own text for its steps (doc p.150, "1k97" = 1.97 kHz): one decimal below 1 kHz, and above it kHz
+    /// cut to two decimals, not rounded (1025.7 Hz is "1k02"). These steps sit where three digits or rounding differ.
+    @Test(arguments: [
+        (0.5, "632.5 Hz"), (0.265, "124.7 Hz"), (0.465, "496.6 Hz"), (0.565, "990.9 Hz"), (0.57, "1.02 kHz"),
+        (0.66, "1.91 kHz"), (0.665, "1.97 kHz"), (0.9, "10.02 kHz"), (0.995, "19.32 kHz"),
+    ])
+    func frequenciesReadLikeTheDesk(position: Float, text: String) {
+        let band = Catalog.eqBand(StripID(.input, 1), 1)
+        #expect(ValueText.format(position, band.frequency, locale: .testEnglish) == text)
+    }
+
     @Test func otherUnits() {
         let band = Catalog.eqBand(StripID(.input, 1), 1)
-        #expect(ValueText.format(0.5, band.frequency, locale: .testEnglish) == "632 Hz")
         #expect(ValueText.format(1, band.frequency, locale: .testEnglish) == "20.00 kHz")
-        // Like the desk, three significant digits: 91.4 Hz, not 91 Hz.
         #expect(ValueText.format(0.22, band.frequency, locale: .testEnglish) == "91.4 Hz")
         #expect(ValueText.format(0, band.frequency, locale: .testEnglish) == "20.0 Hz")
         let pan = Catalog.pan(StripID(.input, 1))!
