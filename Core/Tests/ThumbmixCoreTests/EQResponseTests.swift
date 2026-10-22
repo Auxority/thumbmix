@@ -20,6 +20,19 @@ struct EQResponseTests {
         #expect(abs(EQResponse.decibels(at: 15_000, bands: [band]) - 6) < 0.5)
     }
 
+    /// The desk shows no Q for a shelf and draws it smooth (2026-10-22): the app's shelf ignores Q, so a cut
+    /// never bumps above 0 dB as an RBJ shelf with Q 3.5 did.
+    @Test(arguments: [1, 4])
+    func shelfIgnoresQAndNeverOvershoots(typeIndex: Int) {
+        let narrow = EQBandState(typeIndex: typeIndex, frequency: 202.3, gain: -3, q: 3.5)
+        let wide = EQBandState(typeIndex: typeIndex, frequency: 202.3, gain: -3, q: 0.5)
+        for hertz in stride(from: 20.0, through: 20_000, by: 10) {
+            let decibels = EQResponse.decibels(at: hertz, bands: [narrow])
+            #expect(decibels == EQResponse.decibels(at: hertz, bands: [wide]))
+            #expect(decibels < 0.01)
+        }
+    }
+
     /// A main's six bands, flat, with `changes` swapped in by band number (1...6).
     private func mainBands(_ changes: [Int: EQBandState]) -> [EQBandState] {
         (1...6).map { changes[$0] ?? EQBandState(typeIndex: 2, frequency: 1000, gain: 0, q: 2) }

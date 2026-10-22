@@ -22,8 +22,11 @@ struct EQGraph: View {
         let band: Int
         let x: Float
         let y: Float
+        /// The tag's place beside its dot at touch-down, kept for the whole drag.
+        let pin: EQTagLayout.Pin
     }
     @State private var pinchStartQ: Float?
+    @ScaledMetric(relativeTo: .caption2) private var tagSize: CGFloat = 22
     /// Reset by SwiftUI when a touch ends and also when the system cancels it (a call, Notification Center),
     /// which `onEnded` never reports: a hold left behind would keep the desk from moving the band.
     @GestureState private var isTouching = false
@@ -68,14 +71,19 @@ struct EQGraph: View {
                 // Rendered offscreen at the graph's full size: drawn straight, the curve jumped 16 pt up or down for a
                 // frame now and then while a band moved (iPhone 11 Pro, 2026-10-19), the grid and points staying put.
                 .drawingGroup()
+                let markers = markers(in: size)
                 ForEach(points, id: \.self) { band in
                     let isLowCut = band == Self.lowCutBand
-                    BandPoint(
-                        label: isLowCut ? "L" : "\(band)", isSelected: band == selectedBand,
-                        tint: isLowCut && lowCutAsSet != nil ? Self.lowCutColor : nil
+                    let isDragged = band == grab?.band
+                    EQBandMarker(
+                        label: isLowCut ? "L" : "\(band)", dot: markers[band]!.dot, tag: markers[band]!.tag,
+                        isSelected: band == selectedBand, tint: isLowCut && lowCutAsSet != nil ? Self.lowCutColor : .white,
+                        tagSize: tagSize
                     )
                     .opacity((isLowCut ? !isLowCutOff : isEQOn) ? 1 : 0.5)
-                    .position(position(of: band, in: size))
+                    .zIndex(band == selectedBand ? 1 : 0)
+                    // Tags making room slide; the dragged one follows the finger at once (2026-10-22, Q6 B).
+                    .animation(isDragged ? nil : .easeOut(duration: 0.2), value: markers[band]!)
                 }
             }
             .contentShape(Rectangle())
@@ -111,6 +119,19 @@ struct EQGraph: View {
         return CGPoint(x: x, y: y)
     }
 
+    /// Each point's dot on its value and its number tag; the dragged band's tag keeps its place beside its dot.
+    private func markers(in size: CGSize) -> [Int: EQBandMarker.Place] {
+        let dots = Dictionary(uniqueKeysWithValues: points.map { ($0, position(of: $0, in: size)) })
+        let tags = EQTagLayout(tagSize: tagSize).tags(
+            for: dots.mapValues { EQTagLayout.Spot(x: $0.x, y: $0.y) }, width: size.width, height: size.height,
+            pinned: grab?.pin)
+        return Dictionary(
+            uniqueKeysWithValues: dots.map { band, dot in
+                let tag = tags[band]!
+                return (band, EQBandMarker.Place(dot: dot, tag: CGPoint(x: tag.x, y: tag.y)))
+            })
+    }
+
     /// The "L" point sits at the cutoff on the -3 dB line, where the filter starts to bite.
     private func lowCutPosition(in size: CGSize) -> CGPoint {
         let x = CGFloat(EQAxis.position(hertz: lowCutHertz ?? 100)) * size.width
@@ -143,19 +164,26 @@ struct EQGraph: View {
         return path
     }
 
+    /// The lines' numbers (2026-10-22, A1t): frequencies along the top, where the low cut and the glow rarely reach.
     private func drawGrid(in context: GraphicsContext, size: CGSize) {
         var grid = Path()
-        for decibels in [-12.0, -6, 0, 6, 12] {
+        for (decibels, text) in [(-12.0, "−12"), (-6, "−6"), (0, ""), (6, "+6"), (12, "+12")] {
             let y = Self.graphY(decibels: decibels) * size.height
             grid.move(to: CGPoint(x: 0, y: y))
             grid.addLine(to: CGPoint(x: size.width, y: y))
+            context.draw(Self.gridNumber(text), at: CGPoint(x: 4, y: y - 1), anchor: .bottomLeading)
         }
-        for hertz in [100.0, 1000, 10_000] {
+        for (hertz, text) in [(100.0, "100"), (1000, "1k"), (10_000, "10k")] {
             let x = EQAxis.position(hertz: hertz) * size.width
             grid.move(to: CGPoint(x: x, y: 0))
             grid.addLine(to: CGPoint(x: x, y: size.height))
+            context.draw(Self.gridNumber(text), at: CGPoint(x: x + 3, y: 4), anchor: .topLeading)
         }
         context.stroke(grid, with: .color(Theme.raised), lineWidth: 1)
+    }
+
+    private static func gridNumber(_ text: String) -> Text {
+        Text(verbatim: text).font(.system(size: 10, weight: .semibold)).foregroundStyle(Theme.secondaryText)
     }
 
     private func dragGesture(in size: CGSize) -> some Gesture {
@@ -183,7 +211,9 @@ struct EQGraph: View {
         guard let band = nearestBand(to: point, in: size), let origin = graphPosition(of: band) else { return nil }
         selectedBand = band
         pointAddresses(of: band).forEach(mirror.beginEdit)
-        return Grab(band: band, x: origin.x, y: origin.y)
+        let place = markers(in: size)[band]!
+        return Grab(
+            band: band, x: origin.x, y: origin.y, pin: EQTagLayout.Pin(band: band, offset: place.tag.x - place.dot.x))
     }
 
     /// Where a point is on the graph (0...1), from values the desk sent; nil if any was never read.
@@ -200,9 +230,8 @@ struct EQGraph: View {
         MagnifyGesture()
             .updating($isPinching) { _, pinching, _ in pinching = true }
             .onChanged { value in
-                // The low cut and the band's cut filters have no Q.
-                guard selectedBand != Self.lowCutBand, mirror.eqBandShapesLevel(strip, selectedBand) == true
-                else { return }
+                // The low cut, cut filters and shelves have no Q.
+                guard selectedBand != Self.lowCutBand, mirror.eqBandHasQ(strip, selectedBand) == true else { return }
                 let q = Catalog.eqBand(strip, selectedBand).q
                 if pinchStartQ == nil {
                     guard let current = mirror.normalized(q) else { return }
@@ -239,10 +268,12 @@ struct EQGraph: View {
     }
 
     /// Only a touch near a point grabs it, so a stray touch on the graph changes nothing.
+    /// A touch on a dot or on its tag grabs the band; on dots that share a spot, the selected one wins (2026-10-22).
     private func nearestBand(to point: CGPoint, in size: CGSize) -> Int? {
-        let distances = points.map { band -> (Int, CGFloat) in
-            let p = position(of: band, in: size)
-            return (band, hypot(p.x - point.x, p.y - point.y))
+        let distances = markers(in: size).map { band, place -> (Int, CGFloat) in
+            let distance = min(
+                hypot(place.dot.x - point.x, place.dot.y - point.y), hypot(place.tag.x - point.x, place.tag.y - point.y))
+            return (band, band == selectedBand ? distance - 0.5 : distance)
         }
         guard let nearest = distances.min(by: { $0.1 < $1.1 }), nearest.1 < 44 else { return nil }
         return nearest.0
@@ -264,21 +295,5 @@ struct EQGraph: View {
         guard let frequency = Catalog.lowCut(strip)?.frequency else { return }
         let hertz = EQAxis.hertz(at: Double(x))
         mirror.set(frequency, value: hertz)
-    }
-}
-
-private struct BandPoint: View {
-    let label: String
-    let isSelected: Bool
-    /// The low cut's colour while it is on; bands use the selection colours.
-    var tint: Color?
-    @ScaledMetric private var size: CGFloat = 28
-
-    var body: some View {
-        Circle()
-            .fill(tint ?? (isSelected ? Color.white : Theme.raised))
-            .frame(width: size, height: size)
-            .overlay(Circle().stroke(.white, lineWidth: isSelected && tint != nil ? 2 : 0))
-            .overlay(Text(label).font(.caption.bold()).foregroundStyle(isSelected || tint != nil ? .black : .white))
     }
 }

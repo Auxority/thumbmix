@@ -48,8 +48,9 @@ enum EQResponse {
         let cosine = cos(w0)
         let a = pow(10, band.gain / 40)
         let alpha = sin(w0) / (2 * band.q)
+        // Cuts and shelves ignore the band's Q: a shelf's slope is the cookbook's S = 1, smooth like the desk draws it.
         let cutAlpha = sin(w0) / (2 * 0.707)
-        let shelf = 2 * sqrt(a) * alpha
+        let shelf = 2 * sqrt(a) * cutAlpha
         switch band.type {
         case .lowCut:  // 12 dB/oct high-pass
             return Coefficients(
@@ -228,9 +229,18 @@ extension ConsoleMirror {
 
     /// false on a cut filter, whose Gain and Q do nothing; nil until the desk sent the band's type.
     public func eqBandShapesLevel(_ strip: StripID, _ band: Int) -> Bool? {
+        eqBandType(strip, band)?.shapesLevel
+    }
+
+    /// false on a shelf or cut, whose Q the desk doesn't show; nil until the desk sent the band's type.
+    public func eqBandHasQ(_ strip: StripID, _ band: Int) -> Bool? {
+        eqBandType(strip, band)?.hasQ
+    }
+
+    private func eqBandType(_ strip: StripID, _ band: Int) -> EQFilterType? {
         let type = Catalog.eqBand(strip, band).type
         guard let position = normalized(type) else { return nil }
-        return EQFilterType(rawValue: Int(type.scale.value(fromNormalized: position)))?.shapesLevel
+        return EQFilterType(rawValue: Int(type.scale.value(fromNormalized: position)))
     }
 
     /// Puts every band back to `Catalog.eqDefaults`; a no-op on strips without defaults.

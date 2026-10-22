@@ -58,6 +58,10 @@ public enum EQFilterType: Int, CaseIterable, Sendable {
         }
     }
 
+    /// Only bells have a Q to set: the desk's EQ screen shows none for a shelf (2026-10-22), and the cut filters have
+    /// none (`shapesLevel`). Whether a shelf's Q changes the sound is unverified (TODO).
+    public var hasQ: Bool { self == .parametric || self == .vintage }
+
     /// BU6…LR24, which only a main or matrix EQ's outer bands take.
     public var isCrossover: Bool { rawValue >= EQFilterType.butterworth6.rawValue }
 }

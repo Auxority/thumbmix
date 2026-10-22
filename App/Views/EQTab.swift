@@ -49,12 +49,13 @@ struct EQTab: View {
         .onChange(of: strip) { mirror.followRTA(strip) }
     }
 
-    /// A cut filter's Gain and Q do nothing, so they're disabled, not removed: nothing below them moves.
+    /// A cut filter's Gain and Q do nothing, and a shelf shows no Q on the desk, so they're disabled, not removed:
+    /// nothing below them moves.
     @ViewBuilder private func bandRows(_ specs: EQBandSpecs) -> some View {
-        let shapesLevel = mirror.eqBandShapesLevel(strip, band) != false
         ChoiceMenu(spec: specs.type, mirror: mirror)
         ParameterRow(spec: specs.frequency, mirror: mirror)
-        ForEach([specs.gain, specs.q]) { ParameterRow(spec: $0, mirror: mirror).disabled(!shapesLevel) }
+        ParameterRow(spec: specs.gain, mirror: mirror).disabled(mirror.eqBandShapesLevel(strip, band) == false)
+        ParameterRow(spec: specs.q, mirror: mirror).disabled(mirror.eqBandHasQ(strip, band) == false)
     }
 
     /// On the desk the low cut belongs to the preamp, so "Reset bands" leaves it alone.
