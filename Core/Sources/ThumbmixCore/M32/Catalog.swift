@@ -36,16 +36,14 @@ public enum Catalog {
     }
 
     /// The channel's high-pass filter (doc p.25). The desk keeps it in the preamp section; only input
-    /// channels have one, so the app shows it with the EQ bands of inputs only.
+    /// channels have one, so the app shows it with the EQ bands of inputs only. No `hpslope`: setting it on the
+    /// desk changes nothing (the user, 2026-10-22), and the desk's own EQ screen shows no slope.
     public static func lowCut(_ strip: StripID) -> LowCutSpecs? {
         guard strip.kind == .input else { return nil }
         let p = strip.prefix + "/preamp/"
         return LowCutSpecs(
             on: ParamSpec(p + "hpon", CoreStrings.text("Low cut"), .toggle, .plain),
-            frequency: ParamSpec(p + "hpf", CoreStrings.text("Freq"), .log(min: 20, max: 400, steps: 101), .hertz),
-            slope: ParamSpec(
-                p + "hpslope", CoreStrings.text("Slope"), .choice(["12 dB/oct", "18 dB/oct", "24 dB/oct"]), .plain)
-        )
+            frequency: ParamSpec(p + "hpf", CoreStrings.text("Freq"), .log(min: 20, max: 400, steps: 101), .hertz))
     }
 
     /// Only input channels have a delay (doc p.25).

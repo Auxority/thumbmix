@@ -135,11 +135,10 @@ struct Crossover {
     }
 }
 
-/// The channel low cut as a Butterworth high-pass of order 2, 3 or 4 (12/18/24 dB/oct): -3 dB at the
-/// cutoff. Like `EQResponse`, a picture of what the filter does, not a measurement of the desk.
+/// The channel low cut as a 4th-order Butterworth high-pass (24 dB/oct): -3 dB at the cutoff. The desk's slope
+/// setting changes nothing (the user, 2026-10-22); 24 dB/oct is read off the desk's EQ screen, an estimate.
 public struct LowCutState: Equatable, Sendable {
     public let frequency: Double
-    public let slopeIndex: Int
 
     public func decibels(at hertz: Double) -> Double {
         -10 * log10(1 + pow(frequency / hertz, 2 * order))
@@ -150,7 +149,7 @@ public struct LowCutState: Equatable, Sendable {
         frequency / pow(pow(10, -decibels / 10) - 1, 1 / (2 * order))
     }
 
-    private var order: Double { Double(slopeIndex + 2) }
+    private let order = 4.0
 }
 
 /// A strip's EQ and low cut from raw desk values, wherever they are kept: the mirror's cells for the graph, the
@@ -162,14 +161,12 @@ public enum EQReading {
         return lowCutAsSet(strip, value: value)
     }
 
-    /// The cut as set, heard or not; nil when the strip has none or its switch, frequency or slope were never read.
+    /// The cut as set, heard or not; nil when the strip has none or its switch or frequency were never read.
     public static func lowCutAsSet(_ strip: StripID, value: (String) -> OSCArgument?) -> LowCutState? {
         guard let specs = Catalog.lowCut(strip), value(specs.on.address) != nil,
-            let frequency = normalized(specs.frequency, value), let slope = normalized(specs.slope, value)
+            let frequency = normalized(specs.frequency, value)
         else { return nil }
-        return LowCutState(
-            frequency: specs.frequency.scale.value(fromNormalized: frequency),
-            slopeIndex: Int(specs.slope.scale.value(fromNormalized: slope)))
+        return LowCutState(frequency: specs.frequency.scale.value(fromNormalized: frequency))
     }
 
     /// What is heard: empty when the strip's EQ is off, so the curve is flat.

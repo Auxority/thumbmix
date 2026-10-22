@@ -63,7 +63,6 @@ struct EQTab: View {
             ToggleChip(spec: lowCut.on, mirror: mirror, onColor: EQGraph.lowCutColor)
             ParameterRow(spec: lowCut.frequency, mirror: mirror, accent: EQGraph.lowCutColor)
         }
-        ChoiceMenu(spec: lowCut.slope, mirror: mirror)
     }
 
     /// Resetting rewrites every band on the desk at once, so it asks first.

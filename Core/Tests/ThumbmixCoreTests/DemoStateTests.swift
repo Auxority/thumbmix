@@ -27,7 +27,6 @@ struct DemoStateTests {
     static let expected = [
         Expected("/ch/01/delay/on", .int(0), "delay starts off"),
         Expected("/ch/01/preamp/hpon", .int(0), "low cut off, an int"),
-        Expected("/ch/01/preamp/hpslope", .int(2), "low cut slope, an int"),
         Expected("/ch/01/preamp/invert", .int(0), "a toggle, not mid-travel"),
         Expected("/-stat/solosw/01", .int(0), "unsoloed"),
         Expected("/ch/01/mix/st", .int(1), "channel starts in the main mix"),
