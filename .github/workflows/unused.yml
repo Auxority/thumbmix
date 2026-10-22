@@ -1,0 +1,47 @@
+# Unused code, once a week on main instead of on every PR (2026-10-22, the user): `swiftlint analyze` is
+# single-threaded with no faster mode, and at 2.5-5.5 min it was CI's slowest job. Agents still run
+# scripts/unused.sh before a push (CLAUDE.md, Hooks); a failed run here mails whoever last edited this schedule.
+name: Unused code
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Silences git's "Using 'master' as the name for the initial branch" hint: actions/checkout runs `git init`
+# before any step could set it.
+env:
+  GIT_CONFIG_COUNT: 1
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+
+jobs:
+  unused:
+    runs-on: xcode-27
+    timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install SwiftLint and XcodeGen
+        run: brew install swiftlint xcodegen
+
+      # xcodebuild finds no runtime for the image's watch simulators and asserts per device (DVTAssertions "SimDevice
+      # native architecture is nil", 25-55 times here), while simctl calls them available. The app is iPhone only.
+      - name: Delete the watch simulators
+        run: |
+          xcrun simctl list runtimes
+          for device in $(xcrun simctl list -j devices | jq -r '.devices | to_entries[] | select(.key | contains("watchOS")) | .value[].udid'); do
+            xcrun simctl delete "$device"
+          done
+          xcrun simctl list devices watchOS
+
+      # scripts/unused.sh builds the project but doesn't generate it.
+      - name: Find unused code
+        run: |
+          xcodegen generate
+          scripts/unused.sh
