@@ -1,5 +1,5 @@
 # A push to main (a merged PR) with a feat or fix commit becomes a GitHub Release with an unsigned IPA for
-# SideStore, versioned from the commit titles (scripts/next-version.sh), once CI (`check` and `unused`) passed
+# SideStore, versioned from the commit titles (scripts/next-version.sh), once CI (`check`) passed
 # on that commit. A manual run releases a version you type, such as 1.0.0 or 1.0.0-rc.1. Everything below
 # 1.0.0, and every -rc, is marked as a pre-release. Every run builds main's newest commit that passed CI; a
 # manual run refuses to start until that is main's latest commit.
