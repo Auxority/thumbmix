@@ -30,6 +30,16 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
 - [ ] Walk the acceptance checklist in `README.md`.
 
+## Fixes
+
+- [ ] **The EQ graph doesn't look like the desk's** (2026-10-22). The user compared the same EQ on both (low cut 149 Hz; LShv 202 Hz −3 dB; PEQ 496.6 Hz −6 dB Q 2.2; PEQ 1.97 kHz −3 dB Q 5; PEQ 1.26 kHz 0 dB Q 3.5). Screenshots: `notes/2026-10-22-eq-graph/` (app Ch 18, desk CH17). What differs:
+  - The low shelf. The app draws it with its Q (3.5, an RBJ shelf), which overshoots into a bump above 0 dB near 200 Hz. The desk shows no Q for LShv/HShv and draws a smooth shelf. Check on the desk whether a shelf's Q changes the sound at all; if it doesn't, draw shelves at a fixed slope and hide (or disable) Q for them, as for the cut filters.
+  - No axis labels. The desk labels frequency (20, 40, 60, 80, 100, 200 … 20k) and gain (±5, ±10, ±15 dB) with a full log grid; the app has the same ±15 dB range but only three vertical lines and no numbers.
+  - The line breaks around the handles (see 4 and 3), and handles that sit close together cover each other (L and 1).
+  - Anything else the user means by "needs some love": ask before mocking. Mock first, side by side with the desk's screen.
+- [ ] **The console used last shows up, but not as Online** (2026-10-22), on the Connect screen. `LastUsedCard` takes its state from `sightings.presence(of:)`: Online only when the console answered this visit's latest scan (`Discovery.scan`, a unicast sweep of the phone's /24). Find out first, with logs, whether the scan doesn't reach the console (other subnet, the desk's IP changed, a reply lost) or reaches it and the match fails (the address and name both have to match `KnownConsoles`).
+- [ ] **Remove the low cut's Slope** (2026-10-22): the user found it does nothing on the desk, and the desk's EQ screen shows no slope for LOW CUT. Delete the row (`EQTab`, `Catalog`'s `hpslope`), then decide which slope the curve uses (`EQResponse` takes the order from the slope today): compare the app's curve with the desk's at one frequency.
+
 ## Performance
 
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
@@ -37,6 +47,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Features
 
+- [ ] **The key filter graph, closer to what the user had in mind** (2026-10-22): the Comp and Gate sheets now show two graphs (the key graph from #160 and the curve), and the user wants one. Ask what one graph should show, then mock first.
 - [ ] **Shortcuts** (2026-10-17): App Intents for the Shortcuts app, the Action button and Control Center, e.g. "Mute Vox 1", "Solo Kick", "Fader of Vox 1 to −5 dB". Not Siri voice (the user: unreliable next to a PA). Ask before mocking:
   - Which actions? Each one changes the desk without the engineer looking at the app.
   - The safety rule: an intent connects, reads the current value, then sets; it fails out loud when the desk doesn't answer, never acting on a guess. A relative change ("+3 dB") needs that read; an absolute one ("mute") still needs the desk to answer.
@@ -48,7 +59,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 - [ ] **Make the insert slot editable** once m32-probe answers what picking a held slot does. The Slot row becomes a menu in place (mock `insert-slot-future-v2.html`): each slot names its effect and the strip holding it; a held slot asks first, naming the strip that loses it.
 - [ ] **A gain helper** (behaviour agreed 2026-10-19, waits on m32-probe "Input meters"): while the musician plays, the app sets the preamp gain itself, only during a listen it starts. The average at −18 dBFS for sustained sources, the typical hit at −12 for percussive ones (measured: hits > 15 dB above the average), the loudest repeated hit never above −6; it checks the source when the meter doesn't follow the gain or past +50 dB. Steps, clip rules and the measurements on real stems are in `notes/2026-10-19-gain-helper-design.md`, demos in `notes/mocks/2026-10-19-gain-helper/`. Then mock the UI: where it starts, what shows while it listens.
-- [ ] **Presets from the channel name**, based on James Attaway's *Live Mixing Field Guide*: a channel called "Kick" offers kick presets first (EQ, gate, compressor, low cut). Find a good spot to pick them from (mock first).
+- [ ] **Presets from the channel name**, based on James Attaway's *Live Mixing Field Guide*: a channel called "Kick" offers kick presets first (EQ, gate, compressor, low cut). Find a good spot to pick them from (mock first). The engineer can remove a preset they don't use, and a reset or restore brings the removed ones back (2026-10-22).
 - [ ] **More meters**, each weighed by its usefulness and its performance cost (see "Meters only for the strips in view?"):
   - Fed by: a meter per source row showing what it puts into the bus: its signal at the send's tap point (with the fader when post-fader) plus the send level, so a +10 dB fader and a +10 dB send show clipping (2026-10-14, mocks in `notes/mocks/2026-10-14-fed-by-inputs/`). Waits on `m32-probe` section 13: the doc names no per-send meter, only "16 bus send meters" (`/meters/7`, p.18) without saying whose. If they are the selected channel's sends, they cover one strip at a time; computing it from the strip's own meters misses the EQ on Pre/Post EQ taps (only post gain and post-fade are metered, `/meters/6`), a guess the safety rule forbids.
   - Output meter on the Mix tab: the level after gate, EQ and compressor, if the desk sends one (find which meter bank carries it). Decide whether the Sends tab gets it too.
@@ -57,6 +68,9 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Code and docs
 
+- [ ] **Release by hand, before 1.0.0** (2026-10-22): from then on a merge to main publishes nothing by itself (`release.yml`'s `workflow_run` trigger goes; `workflow_dispatch` stays). The manual run still builds the IPA, publishes the release and updates the SideStore source by itself. Fits with "At 1.0.0: serve the SideStore source as a release asset" below. Decide whether the typed version stays optional (empty: from the commit titles, as now). Update DECISIONS and README's release notes.
+- [ ] **Screenshots in SideStore** (2026-10-22): AltStore's source format, which SideStore reads, takes screenshots per app (https://faq.altstore.io/developers/make-a-source). Add them in `scripts/sidestore-source.sh` from images kept in the repo, and decide which screens to show.
+- [ ] **"Weekly dedup run replaces current one"** (2026-10-22, the user's words): unclear. The repo has no dedup run today; DECISIONS says "No duplication check in CI" (PMD CPD trial, 2026-10-19). Ask the user what it means before doing anything.
 - [ ] **The full UI suite in ≤ 3 minutes** (2026-10-20; ~6 min now). The UI tests stay the main tests: they check the app from the outside (screen and fake desk), whatever the code inside looks like (the user, 2026-10-20). One setup per feature with its checks as steps (each assert message names its step) took 176 tests to 53 (#164-#174): total test time 1338 s → 697 s, the test phase 9.6 → 5.7 min on 3 clones (an incremental build; a cold one adds ~2.7 min). A UI test belongs only where the screen and the desk meet; logic a Core test checks, with its wiring tested elsewhere, has no UI test of its own. Next:
   - **Runner (the next step):** the 3 clones finish unevenly (293/212/193 s): run the slowest classes first. Then 6 clones instead of 3 (heat: watch it): ~700 s / 6 ≈ 2 min of tests. Also `build-for-testing` once and `test-without-building` per run.
   - **A performance check, maybe** (`XCTOSSignpostMetric` on a scroll or fader drag). The other non-functional checks (SE fit, VoiceOver, the safety rule) are steps of the feature tests now.
