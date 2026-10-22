@@ -25,7 +25,8 @@ public struct EQTagLayout: Sendable {
     }
 
     /// The band being dragged: its tag keeps the sideways `offset` from its dot it had at touch-down, so it never
-    /// slides out from under the finger, and the others make room (Q6 B).
+    /// slides out from under the finger, and the others make room (Q6 B). Only at an edge does the row, and with it
+    /// that tag, stay inside the graph instead.
     public struct Pin: Equatable, Sendable {
         public let band: Int
         public let offset: Double
@@ -68,13 +69,13 @@ public struct EQTagLayout: Sendable {
         let ordered = bands.sorted { (dots[$0]!.x, $0) < (dots[$1]!.x, $1) }
         let step = tagSize + gap
         let rowWidth = Double(ordered.count) * tagSize + Double(ordered.count - 1) * gap
-        let start: Double
+        let wanted: Double
         if let pinned, let index = ordered.firstIndex(of: pinned.band) {
-            start = dots[pinned.band]!.x + pinned.offset - tagSize / 2 - Double(index) * step
+            wanted = dots[pinned.band]!.x + pinned.offset - tagSize / 2 - Double(index) * step
         } else {
-            let centre = ordered.map { dots[$0]!.x }.reduce(0, +) / Double(ordered.count)
-            start = min(max(centre - rowWidth / 2, margin), width - margin - rowWidth)
+            wanted = ordered.map { dots[$0]!.x }.reduce(0, +) / Double(ordered.count) - rowWidth / 2
         }
+        let start = min(max(wanted, margin), width - margin - rowWidth)
         let y = rowY(ordered.map { dots[$0]!.y }, height: height)
         let tags = Dictionary(
             uniqueKeysWithValues: ordered.enumerated().map { index, band in

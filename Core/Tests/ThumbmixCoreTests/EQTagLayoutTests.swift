@@ -65,6 +65,13 @@ struct EQTagLayoutTests {
         #expect(dragged[2]!.x == dragged[3]!.x + layout.tagSize + layout.gap, "2, now higher, made room on the right")
     }
 
+    /// Near an edge a dragged row stays inside the graph too, so no row-mate is cut off or out of reach.
+    @Test func aDraggedRowStaysInsideTheGraph() {
+        let pin = EQTagLayout.Pin(band: 2, offset: 0)
+        let row = tags([2: spot(width - 3, 140), 3: spot(width - 2, 140)], pinned: pin)
+        #expect(row[3]!.x + layout.tagSize / 2 <= width - 2)
+    }
+
     @Test func tagsAtDifferentHeightsDontJoin() {
         let row = tags([1: spot(150, 60), 2: spot(152, 150)])
         #expect(row == [1: spot(150, 60 - layout.lift), 2: spot(152, 150 - layout.lift)])
