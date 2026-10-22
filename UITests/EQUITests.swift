@@ -76,11 +76,7 @@ final class EQUITests: DeskUITestCase {
         XCTAssertTrue(on.appears(within: 2))
         XCTAssertEqual(on.value as? String, "Off")
         XCTAssertEqual(element("/ch/01/preamp/hpf").value as? String, "89.4 Hz")
-        let slope = app.buttons["/ch/01/preamp/hpslope"]
-        XCTAssertEqual(slope.value as? String, "24 dB/oct")
-        slope.tap()
-        app.buttons["12 dB/oct"].tap()
-        XCTAssertEqual(slope.value as? String, "12 dB/oct")
+        XCTAssertFalse(app.buttons["/ch/01/preamp/hpslope"].exists, "no Slope: it changes nothing on the desk")
         XCTAssertTrue((graph.value as? String)?.contains("Low cut off") == true)
         saveScreenshot("low-cut-off")
         on.tap()

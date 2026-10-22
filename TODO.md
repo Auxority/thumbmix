@@ -38,7 +38,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
   - The line breaks around the handles (see 4 and 3), and handles that sit close together cover each other (L and 1).
   - Anything else the user means by "needs some love": ask before mocking. Mock first, side by side with the desk's screen.
 - [ ] **The console used last shows up, but not as Online** (2026-10-22), on the Connect screen. `LastUsedCard` takes its state from `sightings.presence(of:)`: Online only when the console answered this visit's latest scan (`Discovery.scan`, a unicast sweep of the phone's /24). Find out first, with logs, whether the scan doesn't reach the console (other subnet, the desk's IP changed, a reply lost) or reaches it and the match fails (the address and name both have to match `KnownConsoles`).
-- [ ] **Remove the low cut's Slope** (2026-10-22): the user found it does nothing on the desk, and the desk's EQ screen shows no slope for LOW CUT. Delete the row (`EQTab`, `Catalog`'s `hpslope`), then decide which slope the curve uses (`EQResponse` takes the order from the slope today): compare the app's curve with the desk's at one frequency.
 
 ## Performance
 
@@ -103,3 +102,4 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - VEQ is drawn as PEQ: no source gives its shape (see "How VEQ differs from PEQ").
 - The comp curve blends Comp mix with Makeup gain on the compressed side only: no source says where makeup sits (see m32-probe "Comp mix").
 - The EQ and low-cut curves are RBJ and Butterworth approximations, not measurements of the desk.
+- The low cut is drawn at 24 dB/oct, read off a photo of the desk's EQ screen (2026-10-22): compare the app's curve with the desk's at one frequency to confirm it.

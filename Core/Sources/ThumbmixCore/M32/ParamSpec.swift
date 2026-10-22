@@ -72,8 +72,8 @@ public struct InsertSpecs: Sendable, Equatable {
 }
 
 public struct LowCutSpecs: Sendable {
-    public let on, frequency, slope: ParamSpec
-    public var all: [ParamSpec] { [on, frequency, slope] }
+    public let on, frequency: ParamSpec
+    public var all: [ParamSpec] { [on, frequency] }
 }
 
 public struct EQBandSpecs: Sendable {

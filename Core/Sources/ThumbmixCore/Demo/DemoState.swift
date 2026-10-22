@@ -118,7 +118,7 @@ public enum DemoState {
         ("/filter/on", .int(0)), ("/filter/type", .int(3)), ("/keysrc", .int(0)), ("/dyn/auto", .int(0)),
         // Comps start fully compressed, not at the mid-travel fallback's 50 % (assumed, like a desk after a reset).
         ("/dyn/mix", .float(1)),
-        ("/hpon", .int(0)), ("/hpslope", .int(2)), ("/on", .int(1)), ("/mix/st", .int(1)),
+        ("/hpon", .int(0)), ("/on", .int(1)), ("/mix/st", .int(1)),
         // Mono off, its level at -∞: a desk after a reset (assumed).
         ("/mix/mono", .int(0)), ("/mix/mlevel", .float(0)),
         ("/type", .int(2)),
