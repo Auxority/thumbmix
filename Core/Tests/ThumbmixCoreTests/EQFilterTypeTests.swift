@@ -18,6 +18,11 @@ struct EQFilterTypeTests {
         #expect(EQFilterType.allCases.filter(\.shapesLevel).map(\.deskName) == ["LShv", "PEQ", "VEQ", "HShv"])
     }
 
+    /// The desk shows no Q for a shelf (2026-10-22), so only the bells keep a Q row.
+    @Test func onlyBellsHaveAQ() {
+        #expect(EQFilterType.allCases.filter(\.hasQ).map(\.deskName) == ["PEQ", "VEQ"])
+    }
+
     @Test func aTypeNumberTheDeskDoesNotHaveIsNoType() {
         #expect(EQBandState(typeIndex: 14, frequency: 1000, gain: 0, q: 1).type == nil)
     }

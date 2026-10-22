@@ -14,6 +14,7 @@ final class EQUITests: DeskUITestCase {
         XCTAssertTrue(frequency.appears(within: 5))
         let graph = element("eq-graph")
         dragOnTheGraphMovesTheGrabbedBand(graph)
+        aTagPicksItsBandWhereDotsShareASpot(graph)
         lowCutIsTheFirstChoiceInTheBandPicker(graph)
         theDesksEQOffKeepsTheCurve(graph)
         app.buttons["1"].tap()
@@ -69,6 +70,35 @@ final class EQUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { gain.value as? String == "0.0 dB" }, "a double-tap resets the band")
     }
 
+    /// The desk puts band 3 on band 2's spot: their dots coincide, so their tags share a row, 2 left and 3 right, one
+    /// tag and a gap (22 + 3 pt) apart and 20 pt above the dots (`EQTagLayout`). A tap on a tag picks that band;
+    /// a tap on the shared dot keeps the selected one (2026-10-22).
+    private func aTagPicksItsBandWhereDotsShareASpot(_ graph: XCUIElement) {
+        guard case .float(let frequency) = desk.value("/ch/01/eq/2/f"), case .float(let gain) = desk.value("/ch/01/eq/2/g")
+        else { return XCTFail("the desk holds band 2") }
+        desk.change("/ch/01/eq/3/f", float: frequency)
+        desk.change("/ch/01/eq/3/g", float: gain)
+        app.buttons["3"].tap()
+        XCTAssertTrue(
+            eventually(within: 2) {
+                self.element("/ch/01/eq/3/f").value as? String == "496.6 Hz"
+                    && self.element("/ch/01/eq/3/g").value as? String == "0.0 dB"
+            }, "the desk moved 3 onto 2")
+        app.buttons["1"].tap()
+        let dot = graph.coordinate(withNormalizedOffset: CGVector(dx: Double(frequency), dy: 1 - Double(gain)))
+        dot.withOffset(CGVector(dx: 12.5, dy: -20)).tap()
+        XCTAssertTrue(element("/ch/01/eq/3/f").appears(within: 2), "the right-hand tag picks band 3")
+        saveScreenshot("eq-shared-spot")
+        // Apart in time, so two taps never make the graph's double-tap, which resets a band.
+        Thread.sleep(forTimeInterval: 0.6)
+        dot.withOffset(CGVector(dx: -12.5, dy: -20)).tap()
+        XCTAssertTrue(element("/ch/01/eq/2/f").appears(within: 2), "the left-hand tag picks band 2")
+        Thread.sleep(forTimeInterval: 0.6)
+        dot.tap()
+        XCTAssertTrue(element("/ch/01/eq/2/f").appears(within: 2), "the shared dot keeps the selected band")
+        app.buttons["1"].tap()
+    }
+
     /// Off, the cut as set is drawn dashed, like unheard bands (2026-10-17).
     private func lowCutIsTheFirstChoiceInTheBandPicker(_ graph: XCUIElement) {
         app.buttons["LC"].tap()
@@ -111,6 +141,7 @@ final class EQUITests: DeskUITestCase {
         lowShelf.tap()
         XCTAssertEqual(type.value as? String, "LShv")
         XCTAssertTrue(gain.isEnabled)
+        XCTAssertTrue(eventually(within: 2) { !q.isEnabled }, "the desk shows no Q for a shelf")
 
         type.tap()
         // Not the "Low cut" chip behind the menu: the list's item carries the desk's term too.
