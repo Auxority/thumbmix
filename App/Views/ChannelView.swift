@@ -38,7 +38,7 @@ struct ChannelView: View {
         .disabled(!mirror.isLive)
         .opacity(mirror.isLive ? 1 : 0.4)
         .background(Theme.background)
-        .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
+        .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(mirror: mirror) }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if tabs.count > 1 { PillBar(items: tabs, selection: $tab, title: \.title, label: \.title) }
         }

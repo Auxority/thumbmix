@@ -17,7 +17,7 @@ struct FoldSheet<Content: View>: View {
                     .opacity(mirror.isLive ? 1 : 0.4)
             }
             // The sheet covers the tab's banner: it says itself when contact is lost.
-            .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
+            .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(mirror: mirror) }
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

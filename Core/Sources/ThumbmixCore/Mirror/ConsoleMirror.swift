@@ -2,20 +2,20 @@ import Foundation
 import Observation
 import os
 
-public enum MirrorStatus: Equatable, Sendable {
-    case connecting
-    case syncing(Double)
-    case live
-    case lost
-    case failed(LinkFailure)
-}
-
 /// The app's copy of the console. Incoming OSC updates cells; edits update cells at once and go
 /// out at most every 20 ms per address.
 @MainActor @Observable
 public final class ConsoleMirror {
-    public internal(set) var status: MirrorStatus = .connecting
-    public var isLive: Bool { status == .live }
+    public internal(set) var status: MirrorStatus = .connecting {
+        didSet {
+            if isLive != (status == .live) { isLive = status == .live }
+            if failure != status.failure { failure = status.failure }
+        }
+    }
+    /// Stored, not read from `status`: a screen that dims until live, or the root that swaps in the Connect screen
+    /// on a failure, mustn't redraw for each percent of the sync, which only the banner shows.
+    public private(set) var isLive = false
+    public private(set) var failure: LinkFailure?
     /// Sections whose partner didn't follow the app's edit this session; see ConsoleMirror+Link.
     public internal(set) var sectionsSeenUnlinked: Set<LinkSection> = []
 
