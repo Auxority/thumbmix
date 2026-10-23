@@ -7,21 +7,35 @@ class DeskUITestCase: XCTestCase {
     /// Started on first use, so a test can change the desk before the app launches.
     lazy var desk: TestDesk! = TestDesk.start(for: self)
 
-    /// One launch per test class: a launch is ~6.5 of a test's ~9.5 s (mostly XCTest attaching to the app), so
-    /// later tests send the running app to their own fresh desk instead. Other classes launch the app themselves.
-    nonisolated(unsafe) private static var running: (app: XCUIApplication, arguments: [String])?
+    /// One launch per simulator, across test classes: a launch is ~6.5 s (mostly XCTest attaching to the app), so
+    /// later tests send the running app to their own fresh desk instead. It relaunches when the arguments change.
+    nonisolated(unsafe) fileprivate static var running: (app: XCUIApplication, arguments: [String])?
+
+    override class func setUp() {
+        super.setUp()
+        _ = otherLaunchObserver
+    }
 
     override func setUp() {
         continueAfterFailure = false
     }
 
-    override class func tearDown() {
-        running = nil
-        super.tearDown()
+    /// A failed test may leave a sheet or alert open: the next test, maybe of another class, launches afresh.
+    override func tearDown() {
+        // Not `hasSucceeded`: it reads false until the run has stopped, after tearDown.
+        if let testRun, testRun.totalFailureCount > 0 { Self.running = nil }
     }
 
+    /// Classes like `ConnectUITests` launch the app with their own arguments, and the app they leave running looks
+    /// the same as ours: a test of theirs starting drops ours. Kept here, so it lives as long as the test run.
+    nonisolated private static let otherLaunchObserver: OtherLaunchObserver = {
+        let observer = OtherLaunchObserver()
+        XCTestObservationCenter.shared.addTestObserver(observer)
+        return observer
+    }()
+
     /// Every list shows its unused strips, as these tests were written for; `UnusedFoldUITests` starts them folded.
-    /// Set at each launch, so a fold opened in another class doesn't leak in.
+    /// Read only at a launch: a class that opens or closes a fold must launch with other arguments, as that one does.
     class var showsUnusedStrips: Bool { true }
 
     /// Launched per test rather than in setUp: the setUp override is nonisolated, XCUIApplication is main-actor.
@@ -74,4 +88,10 @@ class DeskUITestCase: XCTestCase {
     }
 
     static let exclusiveSolo = "/config/solo/exclusive"
+}
+
+private final class OtherLaunchObserver: NSObject, XCTestObservation, Sendable {
+    func testCaseWillStart(_ testCase: XCTestCase) {
+        if !(testCase is DeskUITestCase) { DeskUITestCase.running = nil }
+    }
 }
