@@ -1,7 +1,17 @@
 import SwiftUI
 import ThumbmixCore
 
+/// Reads the status in its own body: the screen it sits on then doesn't redraw for each percent of the sync, which
+/// cost the overview ~1 s per connect (2026-10-23).
 struct StatusBanner: View {
+    let mirror: ConsoleMirror
+
+    var body: some View {
+        StatusText(status: mirror.status)
+    }
+}
+
+private struct StatusText: View {
     let status: MirrorStatus
 
     var body: some View {
@@ -29,9 +39,9 @@ struct StatusBanner: View {
 #if DEBUG
     #Preview {
         VStack(spacing: 0) {
-            StatusBanner(status: .connecting)
-            StatusBanner(status: .syncing(0.42))
-            StatusBanner(status: .lost)
+            StatusText(status: .connecting)
+            StatusText(status: .syncing(0.42))
+            StatusText(status: .lost)
         }
     }
 #endif

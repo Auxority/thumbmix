@@ -25,6 +25,21 @@ struct ConsoleLinkTests {
         }
     }
 
+    /// The desk answers `/xinfo` within milliseconds: waiting out the resend tick first made every connect ~0.5 s
+    /// slower. A 30 s tick tells the two apart by far more than a busy runner can blur.
+    @Test func goesLiveAsSoonAsTheConsoleAnswers() async throws {
+        let (fake, port) = try await startFake()
+        defer { fake.stop() }
+        var timing = LinkTiming.fast
+        timing.identifyTimeout = .seconds(60)
+        timing.tick = .seconds(30)
+        let link = ConsoleLink(host: "127.0.0.1", port: port, timing: timing)
+        defer { link.stop() }
+        link.start()
+
+        #expect(await eventually { if case .live = link.state { true } else { false } }, "before the first resend")
+    }
+
     /// The Connect screen remembers a console by the name set on the desk, which only `/xinfo` carries.
     @Test func aMirrorReportsTheConsoleItIdentified() async throws {
         let (fake, port) = try await startFake()

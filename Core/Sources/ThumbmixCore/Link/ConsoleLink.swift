@@ -152,7 +152,7 @@ public final class ConsoleLink {
         let deadline = ContinuousClock.now + timing.identifyTimeout
         while info == nil, ContinuousClock.now < deadline, !Task.isCancelled {
             transport.send(OSCMessage(Self.identity))
-            try? await Task.sleep(for: timing.tick)
+            await awaitInfo(until: min(ContinuousClock.now + timing.tick, deadline))
         }
         // stop() may have landed mid-identify; going live now would start a supervise loop nobody owns.
         guard !Task.isCancelled else { return }
@@ -167,6 +167,14 @@ public final class ConsoleLink {
         state = .live(info)
         renew()
         tasks.append(Task { [weak self] in await self?.supervise() })
+    }
+
+    /// Resent every tick but looked for every 10 ms: the desk answers within milliseconds, and going live only at
+    /// the next tick made every connect ~0.5 s slower.
+    private func awaitInfo(until resend: ContinuousClock.Instant) async {
+        while info == nil, ContinuousClock.now < resend, !Task.isCancelled {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
     }
 
     /// One loop carries out the supervisor's decisions, so renewals and liveness can't drift apart.

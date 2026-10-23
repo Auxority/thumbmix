@@ -13,6 +13,27 @@ struct ConsoleMirrorTests {
         return mirror
     }
 
+    /// The banner shows each percent of the sync; a screen that only dims until live, or the root that watches for a
+    /// failure, must not redraw for each one (it cost the overview ~1 s per sync, 2026-10-23).
+    @Test func syncProgressNotifiesOnlyStatusReaders() {
+        let mirror = ConsoleMirror(link: ConsoleLink(host: "127.0.0.1", port: 9))
+        mirror.status = .syncing(0)
+        let isLive = Changes(mirror) { _ = $0.isLive }
+        let failure = Changes(mirror) { _ = $0.failure }
+
+        mirror.status = .syncing(0.5)
+        #expect(isLive.count == 0, "progress")
+        #expect(failure.count == 0, "progress")
+        mirror.status = .live
+        #expect(isLive.count == 1, "live")
+        mirror.status = .lost
+        #expect(isLive.count == 2 && !mirror.isLive, "lost")
+        mirror.status = .failed(.noReply)
+        #expect(failure.count == 1 && mirror.failure == .noReply, "failed")
+        mirror.status = .connecting
+        #expect(failure.count == 2 && mirror.failure == nil, "connecting again")
+    }
+
     @Test func syncFillsTheOverview() async throws {
         try await withLiveDesk { fake, mirror in
             #expect(mirror.isLive)
@@ -220,6 +241,33 @@ private final class UnreadAtStatusChange {
 
     private func record() {
         unread = addresses.filter { mirror.cell($0).argument == nil }
+        watch()
+    }
+}
+
+/// Counts the changes a view reading only `read` would redraw for.
+@MainActor
+private final class Changes {
+    private(set) var count = 0
+    private let mirror: ConsoleMirror
+    private let read: (ConsoleMirror) -> Void
+
+    init(_ mirror: ConsoleMirror, _ read: @escaping (ConsoleMirror) -> Void) {
+        self.mirror = mirror
+        self.read = read
+        watch()
+    }
+
+    private func watch() {
+        withObservationTracking {
+            read(mirror)
+        } onChange: { [weak self] in
+            MainActor.assumeIsolated { self?.record() }
+        }
+    }
+
+    private func record() {
+        count += 1
         watch()
     }
 }

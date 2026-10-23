@@ -21,10 +21,7 @@ final class AppModel {
 
     var isOffline: Bool { demoConsole != nil }
 
-    var failure: LinkFailure? {
-        guard case .failed(let failure)? = mirror?.status else { return nil }
-        return failure
-    }
+    var failure: LinkFailure? { mirror?.failure }
 
     /// A real M32 always listens on 10023. UI tests pass `-consolePort` to reach the fake desk each test starts.
     static var consolePort: UInt16 {

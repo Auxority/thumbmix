@@ -71,7 +71,7 @@ struct OverviewView: View {
             }
             .background(Theme.background)
             .soloStrokeLifecycle(stroke, mirror: mirror, onKeep: onKeepExclusive)
-            .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(status: mirror.status) }
+            .safeAreaInset(edge: .top, spacing: 0) { StatusBanner(mirror: mirror) }
             // No title (2026-10-15): the bar holds Disconnect, and in Offline mode the DEMO pill, nothing more.
             .demoTitle(nil)
             .navigationBarTitleDisplayMode(.inline)
