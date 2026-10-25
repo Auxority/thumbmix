@@ -1,5 +1,6 @@
 import FakeM32
 import Foundation
+import Observation
 import Testing
 
 @testable import ThumbmixCore
@@ -123,4 +124,31 @@ func openTab(_ tab: ChannelTab, of strip: StripID, in mirror: ConsoleMirror) asy
 extension Locale {
     /// Fixed formatting for assertions, whatever language the test machine runs in.
     static let testEnglish = Locale(identifier: "en_US_POSIX")
+}
+
+/// Counts the changes a view reading only `read` would redraw for.
+@MainActor
+final class Changes {
+    private(set) var count = 0
+    private let mirror: ConsoleMirror
+    private let read: (ConsoleMirror) -> Void
+
+    init(_ mirror: ConsoleMirror, _ read: @escaping (ConsoleMirror) -> Void) {
+        self.mirror = mirror
+        self.read = read
+        watch()
+    }
+
+    private func watch() {
+        withObservationTracking {
+            read(mirror)
+        } onChange: { [weak self] in
+            MainActor.assumeIsolated { self?.record() }
+        }
+    }
+
+    private func record() {
+        count += 1
+        watch()
+    }
 }

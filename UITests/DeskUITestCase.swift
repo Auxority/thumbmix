@@ -54,8 +54,8 @@ class DeskUITestCase: XCTestCase {
             app.launch()
             Self.running = (app, arguments)
         }
-        // Names show while the sync still runs and the rows are disabled; a tap then does nothing. With several
-        // simulators sharing the Mac, the sync can outlast the first tap.
+        // A new desk's rows show once its sync is done; a list held through a lost contact shows them disabled until
+        // then, where a tap does nothing. With several simulators sharing the Mac, the sync can outlast the first tap.
         let kick = app.buttons["Kick"]
         XCTAssertTrue(eventually(within: 15) { kick.exists && kick.isEnabled })
     }
