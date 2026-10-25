@@ -20,8 +20,9 @@ struct OverviewView: View {
             VStack(spacing: 10) {
                 ScrollViewReader { proxy in
                     ScrollView {
-                        let unused = mirror.unusedStrips(group.strips, where: mirror.isUnused)
-                        SteadyRows(wanted: mirror.overviewItems(group.strips, showUnused: showsUnused), mirror: mirror) {
+                        let list = mirror.overviewList(group.strips, showUnused: showsUnused)
+                        let unused = list.unused
+                        SteadyRows(wanted: list.items, mirror: mirror) {
                             rows in
                             LazyVStack(spacing: 6) {
                                 ForEach(rows) { item in

@@ -5,6 +5,17 @@ public enum StripeHalf: Hashable, Sendable {
     case full, top, bottom
 }
 
+/// An overview list's rows, and the strips its fold holds.
+public struct OverviewList: Equatable, Sendable {
+    public let items: [OverviewItem]
+    public let unused: [StripID]
+
+    struct Key: Hashable {
+        let strips: [StripID]
+        let showUnused: Bool
+    }
+}
+
 /// One overview row: a strip, or a linked pair whose faders move together (held by its odd side).
 public enum OverviewItem: Hashable, Identifiable, Sendable {
     case strip(StripID, StripeHalf)
@@ -54,6 +65,18 @@ extension ConsoleMirror {
     /// every 100 ms.
     public func fingerLifted() async throws {
         while isFingerDown { try await Task.sleep(for: .milliseconds(100)) }
+    }
+
+    /// Read from the desk only while live: during a sync each arriving value would rebuild the whole list (~0.5 s per
+    /// connect, 2026-10-24). Meanwhile the list last read live holds still; a list never read live (a first connect,
+    /// a group first opened mid-resync) shows none until then.
+    public func overviewList(_ strips: [StripID], showUnused: Bool) -> OverviewList {
+        let key = OverviewList.Key(strips: strips, showUnused: showUnused)
+        guard isLive else { return liveOverviewLists[key] ?? OverviewList(items: [], unused: []) }
+        let list = OverviewList(
+            items: overviewItems(strips, showUnused: showUnused), unused: unusedStrips(strips, where: isUnused))
+        liveOverviewLists[key] = list
+        return list
     }
 
     /// The rows for `strips`, without the unused ones unless `showUnused` (`unusedStrips`: a pair hides only when both

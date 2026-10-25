@@ -244,30 +244,3 @@ private final class UnreadAtStatusChange {
         watch()
     }
 }
-
-/// Counts the changes a view reading only `read` would redraw for.
-@MainActor
-private final class Changes {
-    private(set) var count = 0
-    private let mirror: ConsoleMirror
-    private let read: (ConsoleMirror) -> Void
-
-    init(_ mirror: ConsoleMirror, _ read: @escaping (ConsoleMirror) -> Void) {
-        self.mirror = mirror
-        self.read = read
-        watch()
-    }
-
-    private func watch() {
-        withObservationTracking {
-            read(mirror)
-        } onChange: { [weak self] in
-            MainActor.assumeIsolated { self?.record() }
-        }
-    }
-
-    private func record() {
-        count += 1
-        watch()
-    }
-}

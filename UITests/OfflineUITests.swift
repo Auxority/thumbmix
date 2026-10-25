@@ -40,7 +40,7 @@ final class OfflineUITests: XCTestCase {
         let offline = app.buttons["Try a demo console"]
         XCTAssertTrue(offline.appears(within: 5))
         offline.tap()
-        // Names show while the sync still runs and the rows are disabled; a tap then does nothing.
+        // The demo desk's rows show once its sync is done.
         let kick = app.buttons["Kick"]
         XCTAssertTrue(eventually(within: 15) { kick.exists && kick.isEnabled })
     }

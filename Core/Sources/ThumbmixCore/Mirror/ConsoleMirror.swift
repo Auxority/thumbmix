@@ -34,6 +34,8 @@ public final class ConsoleMirror {
     @ObservationIgnored private let overviewSet: Set<String>
     @ObservationIgnored var reads = ReadQueue()
     @ObservationIgnored var meterCells: [StripID: MeterCell] = [:]
+    /// Each overview list as last read live (`overviewList`).
+    @ObservationIgnored var liveOverviewLists: [OverviewList.Key: OverviewList] = [:]
     @ObservationIgnored var pendingSends: [String: OSCArgument] = [:]
     @ObservationIgnored var holds = EditHolds(hold: ConsoleMirror.editHold)
     @ObservationIgnored var linkCopies = LinkCopyCheck()
