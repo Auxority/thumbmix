@@ -42,7 +42,7 @@ final class SoloStrokeDriver {
             return
         }
         let ticked = mirror.beginSoloStroke(listed, at: start)
-        log.info("solo stroke at row \(start) of \(listed.count): \(ticked.isEmpty ? "refused" : "started")")
+        log.info("solo stroke at row \(start) of \(listed.count): \(ticked.isEmpty ? "refused" : "started", privacy: .public)")
         guard !ticked.isEmpty else { return }
         rows = listed
         held = item

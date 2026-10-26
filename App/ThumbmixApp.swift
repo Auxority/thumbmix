@@ -36,6 +36,7 @@ struct ThumbmixApp: App {
             RootView(model: model)
                 .preferredColorScheme(.dark)
                 .tint(.white)
+                .modifier(ShakeToShareLog())
         }
     }
 }
