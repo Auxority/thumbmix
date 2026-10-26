@@ -555,6 +555,12 @@
     "Settings" : {
 
     },
+    "Share" : {
+
+    },
+    "Share this run's log?" : {
+
+    },
     "Shares an input with %@" : {
 
     },
@@ -613,6 +619,9 @@
 
     },
     "Thumbmix only works with the Midas M32." : {
+
+    },
+    "To attach to a GitHub issue about a problem you just saw." : {
 
     },
     "Try a demo console" : {

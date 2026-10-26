@@ -36,6 +36,10 @@ Join the console's Wi-Fi and open Thumbmix. It scans the network and lists every
 
 No console nearby? **Try a demo console** runs a demo M32 inside the app, so every screen works without a mixer. A DEMO pill at the top of the screen shows it isn't a real desk, and each visit starts from a fresh demo desk.
 
+## Report a problem
+
+Saw something go wrong? Shake the phone while Thumbmix is open, tap **Share**, and attach the file to a [new issue](../../issues/new) with what you did and what you expected. The file holds what Thumbmix logged since it opened: desk and channel names and network addresses, nothing about you. Share it before closing the app; a fresh start begins a new log.
+
 ## Develop
 
 Install the tools with `brew install xcodegen swiftlint`; `swift format` ships with Xcode.

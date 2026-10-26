@@ -96,8 +96,11 @@ final class AppModel {
 
         /// UI tests launch the app once per test class (a launch is most of a test's time) and send each next
         /// test's fresh fake desk as `thumbmix-test://connect?port=N`. Always this Mac's loopback, never another host.
+        /// XCUITest can't shake a simulator, so `thumbmix-test://shake` plays one.
         func openTestURL(_ url: URL) {
-            guard url.scheme == "thumbmix-test", url.host() == "connect",
+            guard url.scheme == "thumbmix-test" else { return }
+            if url.host() == "shake" { NotificationCenter.default.post(name: .deviceShaken, object: nil) }
+            guard url.host() == "connect",
                 let value = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?
                     .first(where: { $0.name == "port" })?.value,
                 let port = UInt16(value), port > 0
