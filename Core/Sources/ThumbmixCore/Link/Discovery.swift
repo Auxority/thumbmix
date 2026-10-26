@@ -76,13 +76,13 @@ public enum Discovery {
         defer { close(socketHandle) }
 
         let request = [UInt8](OSCCodec.encode(OSCMessage("/xinfo")))
-        // By errno: hosts that don't exist fail with EHOSTDOWN once ARP gave up; every send failing means no network.
-        let failures = Dictionary(
-            grouping: hosts.compactMap { sendRequest(request, to: $0, port: port, on: socketHandle) }, by: { $0 }
-        ).mapValues(\.count)
-        if !failures.isEmpty {
-            let counts = failures.sorted { $0.key < $1.key }.map { "errno \($0.key) ×\($0.value)" }
-            log.notice("discovery: sends failed: \(counts.joined(separator: ", "), privacy: .public)")
+        // Hosts that don't exist fail with EHOSTDOWN once ARP gave up; every send failing means no network.
+        let errnos = hosts.compactMap { sendRequest(request, to: $0, port: port, on: socketHandle) }
+        if !errnos.isEmpty {
+            log.log(
+                level: errnos.count == hosts.count ? .error : .info,
+                "discovery: \(errnos.count) of \(hosts.count) sends failed, errno \(Set(errnos).sorted(), privacy: .public)"
+            )
         }
 
         var found: [String: NetworkConsole] = [:]
@@ -90,13 +90,10 @@ public enum Discovery {
         while deadline.timeIntervalSinceNow > 0 {
             guard let (host, reply) = receiveReply(on: socketHandle, until: deadline) else { break }
             guard reply.address == "/xinfo" else { continue }
-            let console = NetworkConsole(
+            found[host] = NetworkConsole(
                 host: host, name: reply.string(at: 1) ?? host, model: reply.string(at: 2) ?? "?")
-            log.notice(
-                "discovery: \(console.id, privacy: .public) answered as \(console.model, privacy: .public)")
-            found[host] = console
         }
-        log.notice("discovery: \(found.count) consoles from \(hosts.count) hosts")
+        log.info("discovery: \(found.count) consoles from \(hosts.count) hosts")
         return found.values.sorted { $0.host < $1.host }
     }
 

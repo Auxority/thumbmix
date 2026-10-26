@@ -78,23 +78,6 @@ struct ConsoleSightingsTests {
         #expect(sightings.rows(known: known) == [other])
     }
 
-    /// The log says why a remembered console is Not found: a renamed desk, a new address, or silence.
-    @Test func aMissSaysWhatTheScanSawInstead() {
-        var sightings = ConsoleSightings()
-        #expect(sightings.sighting(of: fontein) == .notScanned)
-
-        let renamed = NetworkConsole(host: fontein.host, name: "FOH", model: "M32")
-        let moved = NetworkConsole(host: "192.168.1.63", name: fontein.name, model: "M32")
-        sightings.scanned([renamed], known: KnownConsoles([fontein]))
-        #expect(sightings.sighting(of: fontein) == .addressAnsweredAs(name: "FOH"))
-        sightings.scanned([moved], known: KnownConsoles([fontein]))
-        #expect(sightings.sighting(of: fontein) == .nameAnsweredFrom(host: "192.168.1.63"))
-        sightings.scanned([], known: KnownConsoles([fontein]))
-        #expect(sightings.sighting(of: fontein) == .noReply)
-        sightings.scanned([fontein], known: KnownConsoles([fontein]))
-        #expect(sightings.sighting(of: fontein) == .answered(model: "M32"))
-    }
-
     @Test func anotherConsoleModelIsNotAnM32() {
         var sightings = ConsoleSightings()
         sightings.scanned([x32], known: KnownConsoles())

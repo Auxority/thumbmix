@@ -12,6 +12,8 @@ struct ConnectView: View {
     @State private var isScanning = true
     @State private var hasWiFiAddress = true
     @State private var isTypingAddress = false
+    /// The last scan's log line: a repeat is kept in the phone's log only when it differs.
+    @State private var lastScanLine = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -24,7 +26,7 @@ struct ConnectView: View {
                     }
                 }
                 HStack(spacing: 8) {
-                    Button(isScanning ? "Scanning…" : "Scan again") { Task { await scan(because: "Scan again") } }
+                    Button(isScanning ? "Scanning…" : "Scan again") { Task { await scan() } }
                         .disabled(isScanning)
                     Button("Enter IP") { isTypingAddress = true }
                         .modifier(EnterAddressAlert(isPresented: $isTypingAddress) { model.connect(to: $0) })
@@ -36,11 +38,10 @@ struct ConnectView: View {
         }
         .modifier(ConnectFailureAlert(model: model))
         .task {
-            await scan(because: "the screen opened")
+            await scan()
             // A desk still booting when the screen opened would stay Not found until a restart.
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(5))
-                await scan(because: "every 5 s", showing: false)
+            while (try? await Task.sleep(for: .seconds(5))) != nil {
+                if !isScanning { await scan(showing: false) }
             }
         }
     }
@@ -54,7 +55,7 @@ struct ConnectView: View {
     }
 
     /// `showing`: false for the repeated scans, so the button doesn't flicker to "Scanning…" every few seconds.
-    private func scan(because reason: String, showing: Bool = true) async {
+    private func scan(showing: Bool = true) async {
         if showing { isScanning = true }
         defer { if showing { isScanning = false } }
         let me = Discovery.localIPv4()
@@ -62,10 +63,10 @@ struct ConnectView: View {
         let hosts = Discovery.scanHosts(around: me, known: model.known.all.map(\.host))
         let found = await Discovery.scan(hosts: hosts, port: AppModel.consolePort)
         sightings.scanned(found, known: model.known)
-        guard let lastUsed = model.known.lastUsed else { return }
-        let seen = "last used \(lastUsed.id): \(sightings.sighting(of: lastUsed))"
-        Self.log.notice(
-            "scan (\(reason, privacy: .public)) from \(me ?? "no Wi-Fi", privacy: .public), \(seen, privacy: .public)")
+        let lastUsed = model.known.lastUsed.map { "\($0.id) \(sightings.presence(of: $0))" } ?? "none"
+        let line = "from \(me ?? "no Wi-Fi"): found \(found.map(\.id)), last used \(lastUsed)"
+        Self.log.log(level: showing || line != lastScanLine ? .default : .info, "scan \(line, privacy: .public)")
+        lastScanLine = line
     }
 }
 
