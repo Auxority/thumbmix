@@ -1,14 +1,19 @@
+import OSLog
 import SwiftUI
 import ThumbmixCore
 
 /// Built for one thumb: the console used last is a card just above the buttons, the rarer choices sit higher.
-/// A scan runs on every visit; a row it finds later goes below the others, so nothing moves under a thumb.
+/// A scan runs on every visit and every 5 s while it lasts; a row found later goes below the others, so nothing
+/// moves under a thumb.
 struct ConnectView: View {
     let model: AppModel
+    private static let log = Logger(subsystem: "thumbmix", category: "connect")
     @State private var sightings = ConsoleSightings()
     @State private var isScanning = true
     @State private var hasWiFiAddress = true
     @State private var isTypingAddress = false
+    /// The last scan's log line: a repeat is kept in the phone's log only when it differs.
+    @State private var lastScanLine = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -32,7 +37,13 @@ struct ConnectView: View {
             .padding(.horizontal, 16)
         }
         .modifier(ConnectFailureAlert(model: model))
-        .task { await scan() }
+        .task {
+            await scan()
+            // A desk still booting when the screen opened would stay Not found until a restart.
+            while (try? await Task.sleep(for: .seconds(5))) != nil {
+                if !isScanning { await scan(showing: false) }
+            }
+        }
     }
 
     /// Shown only while the list would otherwise be empty.
@@ -43,14 +54,19 @@ struct ConnectView: View {
         return "No console found. Is this iPhone on the desk's Wi-Fi?"
     }
 
-    private func scan() async {
-        isScanning = true
-        defer { isScanning = false }
+    /// `showing`: false for the repeated scans, so the button doesn't flicker to "Scanning…" every few seconds.
+    private func scan(showing: Bool = true) async {
+        if showing { isScanning = true }
+        defer { if showing { isScanning = false } }
         let me = Discovery.localIPv4()
         hasWiFiAddress = me != nil
         let hosts = Discovery.scanHosts(around: me, known: model.known.all.map(\.host))
         let found = await Discovery.scan(hosts: hosts, port: AppModel.consolePort)
         sightings.scanned(found, known: model.known)
+        let lastUsed = model.known.lastUsed.map { "\($0.id) \(sightings.presence(of: $0))" } ?? "none"
+        let line = "from \(me ?? "no Wi-Fi"): found \(found.map(\.id)), last used \(lastUsed)"
+        Self.log.log(level: showing || line != lastScanLine ? .default : .info, "scan \(line, privacy: .public)")
+        lastScanLine = line
     }
 }
 

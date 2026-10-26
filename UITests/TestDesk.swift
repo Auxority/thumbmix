@@ -59,6 +59,11 @@ final class TestDesk: Sendable {
         fake.silent = true
     }
 
+    /// The cable back in: the desk answers again.
+    func answerAgain() {
+        fake.silent = false
+    }
+
     /// The app never reads this address: call it before `launch()`.
     func forget(_ address: String) {
         fake.forget(address)

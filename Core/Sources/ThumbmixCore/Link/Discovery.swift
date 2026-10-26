@@ -76,10 +76,13 @@ public enum Discovery {
         defer { close(socketHandle) }
 
         let request = [UInt8](OSCCodec.encode(OSCMessage("/xinfo")))
-        let failedSends = hosts.filter { !sendRequest(request, to: $0, port: port, on: socketHandle) }
-            .count
-        if failedSends > 0 {
-            log.warning("discovery: \(failedSends) of \(hosts.count) requests could not be sent")
+        // Hosts that don't exist fail with EHOSTDOWN once ARP gave up; every send failing means no network.
+        let errnos = hosts.compactMap { sendRequest(request, to: $0, port: port, on: socketHandle) }
+        if !errnos.isEmpty {
+            log.log(
+                level: errnos.count == hosts.count ? .error : .info,
+                "discovery: \(errnos.count) of \(hosts.count) sends failed, errno \(Set(errnos).sorted(), privacy: .public)"
+            )
         }
 
         var found: [String: NetworkConsole] = [:]
@@ -94,21 +97,21 @@ public enum Discovery {
         return found.values.sorted { $0.host < $1.host }
     }
 
-    /// False when the request never left the phone, e.g. no route or a full send buffer.
+    /// The errno when the request never left the phone (no route, a full send buffer), else nil.
     private static func sendRequest(
         _ request: [UInt8], to host: String, port: UInt16, on socketHandle: Int32
-    ) -> Bool {
+    ) -> Int32? {
         var destination = sockaddr_in()
         destination.sin_family = sa_family_t(AF_INET)
         destination.sin_port = port.bigEndian
-        guard inet_pton(AF_INET, host, &destination.sin_addr) == 1 else { return false }
+        guard inet_pton(AF_INET, host, &destination.sin_addr) == 1 else { return EINVAL }
         let sent = withUnsafePointer(to: &destination) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
                 sendto(
                     socketHandle, request, request.count, 0, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
             }
         }
-        return sent == request.count
+        return sent == request.count ? nil : errno
     }
 
     /// The next decodable reply and its sender, or nil once the deadline passes.

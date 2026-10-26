@@ -22,6 +22,17 @@ final class ConnectUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Kick"].appears(within: 15))
     }
 
+    /// A desk switched on after the Connect screen opened misses the first scan; a later one finds it, no tap needed.
+    func testADeskThatBootsLaterTurnsOnline() {
+        guard let desk = TestDesk.start(for: self) else { return }
+        desk.goSilent()
+        let app = launch(desk.reachable, remembering: ["Fake M32"])
+        XCTAssertTrue(app.staticTexts["Not found"].appears(within: 8), "step 1: the booting desk missed the first scan")
+
+        desk.answerAgain()
+        XCTAssertTrue(app.staticTexts["Online"].appears(within: 8), "step 2: a later scan found it")
+    }
+
     /// The decimal keypad shows the region's separator, so in the Netherlands it only types commas.
     func testCommasFromADutchKeypadBecomeDots() {
         guard let desk = TestDesk.start(for: self) else { return }

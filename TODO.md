@@ -31,10 +31,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
 - [ ] Walk the acceptance checklist in `README.md`.
 
-## Fixes
-
-- [ ] **The console used last shows up, but not as Online** (2026-10-22), on the Connect screen. `LastUsedCard` takes its state from `sightings.presence(of:)`: Online only when the console answered this visit's latest scan (`Discovery.scan`, a unicast sweep of the phone's /24). Find out first, with logs, whether the scan doesn't reach the console (other subnet, the desk's IP changed, a reply lost) or reaches it and the match fails (the address and name both have to match `KnownConsoles`).
-
 ## Performance
 
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
