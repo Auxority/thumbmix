@@ -43,6 +43,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Features
 
+- [ ] **Share logs** (2026-10-26, as simple as possible): a share button sends this run's log as a text file through the share sheet, read with `OSLogStore(scope: .currentProcessIdentifier)` (subsystem `thumbmix`, notice and up). No log file of the app's own: iOS gives an app only its current run, so a hint by the button says to share before restarting. Check first that iOS 26 still limits `OSLogStore` that way. Mock where the button sits first. The scan logs from #195 (why it ran, what it saw of the last-used console) are the first lines worth sharing.
 - [ ] **The key filter graph, closer to what the user had in mind** (2026-10-22): the Comp and Gate sheets now show two graphs (the key graph from #160 and the curve), and the user wants one. Ask what one graph should show, then mock first.
 - [ ] **Shortcuts** (2026-10-17): App Intents for the Shortcuts app, the Action button and Control Center, e.g. "Mute Vox 1", "Solo Kick", "Fader of Vox 1 to −5 dB". Not Siri voice (the user: unreliable next to a PA). Ask before mocking:
   - Which actions? Each one changes the desk without the engineer looking at the app.
