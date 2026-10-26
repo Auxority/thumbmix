@@ -1,11 +1,11 @@
-# A trial (2026-10-26): how long the full UI suite takes on GitHub's free xcode-27 runner (3 M1 cores, 7 GB),
-# with 1 and with 2 simulator clones, and whether it holds. Runs on pushes to its own branch and by hand;
-# nothing on pull requests until that's decided.
-name: UI suite trial
+# The full UI suite, once a week on main (2026-10-26, the user): agents run it on the Mac before a PR (CLAUDE.md);
+# this catches what slips past that. One simulator clone: on this runner (3 M1 cores, 7 GB) it took ~19 min and
+# passed, two clones took 30 min and starved the app. A failed run mails whoever last edited this schedule.
+name: UI suite
 
 on:
-  push:
-    branches: [ci/ui-suite-trial]
+  schedule:
+    - cron: "0 7 * * 1" # Mondays 07:00 UTC, after unused code
   workflow_dispatch:
 
 permissions:
@@ -20,15 +20,11 @@ env:
 
 jobs:
   ui:
-    strategy:
-      fail-fast: false
-      matrix:
-        workers: [1, 2]
     runs-on: xcode-27
-    timeout-minutes: 60
+    timeout-minutes: 45
     env:
       DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
-      UI_TEST_WORKERS: ${{ matrix.workers }}
+      UI_TEST_WORKERS: 1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -47,21 +43,15 @@ jobs:
         run: |
           runtime=$(xcrun simctl list -j runtimes | jq -r '.runtimes[] | select(.name == "iOS 27.0") | .identifier')
           xcrun simctl create "iPhone SE (3rd generation)" com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation "$runtime"
-          xcrun simctl list devices "iPhone SE"
 
       - name: Run the UI suite
-        run: |
-          started=$(date +%s)
-          status=0
-          scripts/ui-test.sh || status=$?
-          echo "The UI suite took $(( $(date +%s) - started )) s on ${UI_TEST_WORKERS} clone(s), exit $status."
-          exit "$status"
+        run: scripts/ui-test.sh
 
       - name: Keep a failed run's evidence
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: ui-test-failed-${{ matrix.workers }}
+          name: ui-test-failed
           path: |
             build/ui-test.log
             build/ui-test-failed
