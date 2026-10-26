@@ -76,7 +76,7 @@ The fake M32 keeps every set it receives, so restart it for a clean desk. CI als
 
 ## Acceptance checklist (real M32)
 
-1. Scan finds the M32 and marks it Online, and Enter IP works: it starts from the phone's network, shows the number keypad (on a Dutch phone its comma key works too), and "192.168.1" is refused. With Local Network switched off, Connect says "Can't reach …", and its Settings button opens Thumbmix's page with the Local Network switch.
+1. Scan finds the M32 and marks it Online, also when the desk is switched on after the Connect screen opened (within ~5 s of it booting), and Enter IP works: it starts from the phone's network, shows the number keypad (on a Dutch phone its comma key works too), and "192.168.1" is refused. With Local Network switched off, Connect says "Can't reach …", and its Settings button opens Thumbmix's page with the Local Network switch.
 2. Names and colours match the desk for all strip kinds, and a name, colour or icon edited in the app shows up on the desk.
 3. A fader moved on the desk moves in the app, and vice versa, with Mixing Station also connected.
 4. Meters move and roughly match the desk. The EQ tab's spectrum follows the signal, and the desk's RTA source is back as it was after leaving the tab.

@@ -1,10 +1,13 @@
+import OSLog
 import SwiftUI
 import ThumbmixCore
 
 /// Built for one thumb: the console used last is a card just above the buttons, the rarer choices sit higher.
-/// A scan runs on every visit; a row it finds later goes below the others, so nothing moves under a thumb.
+/// A scan runs on every visit and every 5 s while it lasts; a row found later goes below the others, so nothing
+/// moves under a thumb.
 struct ConnectView: View {
     let model: AppModel
+    private static let log = Logger(subsystem: "thumbmix", category: "connect")
     @State private var sightings = ConsoleSightings()
     @State private var isScanning = true
     @State private var hasWiFiAddress = true
@@ -21,7 +24,7 @@ struct ConnectView: View {
                     }
                 }
                 HStack(spacing: 8) {
-                    Button(isScanning ? "Scanning…" : "Scan again") { Task { await scan() } }
+                    Button(isScanning ? "Scanning…" : "Scan again") { Task { await scan(because: "Scan again") } }
                         .disabled(isScanning)
                     Button("Enter IP") { isTypingAddress = true }
                         .modifier(EnterAddressAlert(isPresented: $isTypingAddress) { model.connect(to: $0) })
@@ -32,7 +35,14 @@ struct ConnectView: View {
             .padding(.horizontal, 16)
         }
         .modifier(ConnectFailureAlert(model: model))
-        .task { await scan() }
+        .task {
+            await scan(because: "the screen opened")
+            // A desk still booting when the screen opened would stay Not found until a restart.
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(5))
+                await scan(because: "every 5 s", showing: false)
+            }
+        }
     }
 
     /// Shown only while the list would otherwise be empty.
@@ -43,14 +53,19 @@ struct ConnectView: View {
         return "No console found. Is this iPhone on the desk's Wi-Fi?"
     }
 
-    private func scan() async {
-        isScanning = true
-        defer { isScanning = false }
+    /// `showing`: false for the repeated scans, so the button doesn't flicker to "Scanning…" every few seconds.
+    private func scan(because reason: String, showing: Bool = true) async {
+        if showing { isScanning = true }
+        defer { if showing { isScanning = false } }
         let me = Discovery.localIPv4()
         hasWiFiAddress = me != nil
         let hosts = Discovery.scanHosts(around: me, known: model.known.all.map(\.host))
         let found = await Discovery.scan(hosts: hosts, port: AppModel.consolePort)
         sightings.scanned(found, known: model.known)
+        guard let lastUsed = model.known.lastUsed else { return }
+        let seen = "last used \(lastUsed.id): \(sightings.sighting(of: lastUsed))"
+        Self.log.notice(
+            "scan (\(reason, privacy: .public)) from \(me ?? "no Wi-Fi", privacy: .public), \(seen, privacy: .public)")
     }
 }
 

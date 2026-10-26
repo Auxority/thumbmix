@@ -69,6 +69,28 @@ public struct ConsoleSightings: Equatable, Sendable {
         guard let answer = answered[console.id] else { return .notFound }
         return answer.model.hasPrefix("M32") ? .online : .notAnM32
     }
+
+    /// What the latest scan saw of a console, for the log: a renamed desk or a new address reads differently from
+    /// silence, though all three are Not found.
+    public func sighting(of console: NetworkConsole) -> Sighting {
+        guard let answered else { return .notScanned }
+        if let answer = answered[console.id] { return .answered(model: answer.model) }
+        if let other = answered.values.first(where: { $0.host == console.host }) {
+            return .addressAnsweredAs(name: other.name)
+        }
+        if let moved = answered.values.first(where: { $0.name == console.name }) {
+            return .nameAnsweredFrom(host: moved.host)
+        }
+        return .noReply
+    }
+}
+
+public enum Sighting: Equatable, Sendable {
+    case notScanned
+    case answered(model: String)
+    case addressAnsweredAs(name: String)
+    case nameAnsweredFrom(host: String)
+    case noReply
 }
 
 extension Discovery {

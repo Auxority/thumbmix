@@ -76,10 +76,13 @@ public enum Discovery {
         defer { close(socketHandle) }
 
         let request = [UInt8](OSCCodec.encode(OSCMessage("/xinfo")))
-        let failedSends = hosts.filter { !sendRequest(request, to: $0, port: port, on: socketHandle) }
-            .count
-        if failedSends > 0 {
-            log.warning("discovery: \(failedSends) of \(hosts.count) requests could not be sent")
+        // By errno: hosts that don't exist fail with EHOSTDOWN once ARP gave up; every send failing means no network.
+        let failures = Dictionary(
+            grouping: hosts.compactMap { sendRequest(request, to: $0, port: port, on: socketHandle) }, by: { $0 }
+        ).mapValues(\.count)
+        if !failures.isEmpty {
+            let counts = failures.sorted { $0.key < $1.key }.map { "errno \($0.key) ×\($0.value)" }
+            log.notice("discovery: sends failed: \(counts.joined(separator: ", "), privacy: .public)")
         }
 
         var found: [String: NetworkConsole] = [:]
@@ -87,28 +90,31 @@ public enum Discovery {
         while deadline.timeIntervalSinceNow > 0 {
             guard let (host, reply) = receiveReply(on: socketHandle, until: deadline) else { break }
             guard reply.address == "/xinfo" else { continue }
-            found[host] = NetworkConsole(
+            let console = NetworkConsole(
                 host: host, name: reply.string(at: 1) ?? host, model: reply.string(at: 2) ?? "?")
+            log.notice(
+                "discovery: \(console.id, privacy: .public) answered as \(console.model, privacy: .public)")
+            found[host] = console
         }
-        log.info("discovery: \(found.count) consoles from \(hosts.count) hosts")
+        log.notice("discovery: \(found.count) consoles from \(hosts.count) hosts")
         return found.values.sorted { $0.host < $1.host }
     }
 
-    /// False when the request never left the phone, e.g. no route or a full send buffer.
+    /// The errno when the request never left the phone (no route, a full send buffer), else nil.
     private static func sendRequest(
         _ request: [UInt8], to host: String, port: UInt16, on socketHandle: Int32
-    ) -> Bool {
+    ) -> Int32? {
         var destination = sockaddr_in()
         destination.sin_family = sa_family_t(AF_INET)
         destination.sin_port = port.bigEndian
-        guard inet_pton(AF_INET, host, &destination.sin_addr) == 1 else { return false }
+        guard inet_pton(AF_INET, host, &destination.sin_addr) == 1 else { return EINVAL }
         let sent = withUnsafePointer(to: &destination) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
                 sendto(
                     socketHandle, request, request.count, 0, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
             }
         }
-        return sent == request.count
+        return sent == request.count ? nil : errno
     }
 
     /// The next decodable reply and its sender, or nil once the deadline passes.
