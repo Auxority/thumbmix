@@ -23,17 +23,11 @@ struct ResetTests {
     }
 
     /// One source of truth: a row's double-tap restores what the tab's Reset would.
-    @Test func doubleTapsRestoreTheResetValues() throws {
-        let dynamics = Catalog.dynamics(kick)
-        let comp = Catalog.dynamicsDefaults(kick)
-        for spec in [dynamics.ratio, dynamics.makeup, dynamics.mix] {
-            #expect(spec.resetValue != nil && value(of: spec, in: comp) == spec.resetValue, "\(spec.address)")
-        }
-        let input = Catalog.inputDefaults(kick, headamp: 32)
-        let delay = try #require(Catalog.delay(kick))
-        for spec in [Catalog.headampGain(32), Catalog.trim(kick), delay.time] {
-            #expect(spec.resetValue != nil && value(of: spec, in: input) == spec.resetValue, "\(spec.address)")
-        }
+    @Test func doubleTapsRestoreTheResetValues() {
+        let all = Catalog.gateDefaults(kick) + Catalog.dynamicsDefaults(kick) + Catalog.inputDefaults(kick, headamp: 32)
+        let withDoubleTap = all.filter { $0.spec.resetValue != nil }
+        for (spec, value) in withDoubleTap { #expect(spec.resetValue == value, "\(spec.address)") }
+        #expect(withDoubleTap.count == 6, "ratio, makeup, mix, gain, trim, delay time")
     }
 
     /// The decided values (2026-10-27), provisional until m32-probe section 20 reads the desk's own.
@@ -46,7 +40,10 @@ struct ResetTests {
         let comp = Catalog.dynamicsDefaults(kick)
         #expect(value(of: dynamics.mode, in: comp) == 0, "COMP")
         #expect(value(of: dynamics.threshold, in: comp) == 0, "compresses nothing")
+        #expect(value(of: dynamics.ratio, in: comp) == 5, "3:1")
+        #expect(value(of: dynamics.detector, in: comp) == 0, "PEAK")
         #expect(value(of: dynamics.envelope, in: comp) == 1, "LOG")
+        #expect(value(of: dynamics.auto, in: comp) == 0, "Auto off")
         #expect(Catalog.dynamicsDefaults(StripID(.matrix, 1)).count == comp.count)
         #expect(Catalog.gateDefaults(StripID(.bus, 1)).isEmpty, "only inputs have a gate")
         #expect(Catalog.dynamicsDefaults(StripID(.auxIn, 1)).isEmpty, "aux ins have no comp")
@@ -132,6 +129,47 @@ struct ResetTests {
 
             #expect(await eventually { mirror.resetName(.comp, of: guitarL) == "Gtr L" })
             #expect(mirror.resetName(.eq, of: guitarL) == "Gtr", "EQ still linked")
+        }
+    }
+
+    /// The reason the alert names the pair: the reset reaches the other side too, through the link.
+    @Test func resetGateOnALinkedPairReachesBothSides() async throws {
+        try await withLiveDesk { fake, mirror in
+            let guitarL = StripID(.input, 9)
+            await openTab(.gate, of: guitarL, in: mirror)
+            let threshold = Catalog.gate(StripID(.input, 10)).threshold
+            fake.deskChange(Catalog.gate(guitarL).threshold.address, .float(0.9))
+            fake.deskChange(threshold.address, .float(0.9))
+            #expect(await eventually { mirror.cell(threshold.address).argument == .float(0.9) })
+
+            mirror.resetGate(guitarL)
+
+            #expect(await eventually { deskValue(fake, threshold) == -80 }, "Gtr R's gate on the desk")
+            #expect(await eventually { mirror.value(threshold) == -80 }, "and on screen")
+        }
+    }
+
+    /// `set` skips an unread control, so the button waits until all a reset writes is read: else it resets part.
+    @Test func aResetWaitsUntilEverythingItWritesIsRead() async throws {
+        let unread = ["/ch/01/gate/hold", Catalog.headampIndex(forInput: 3)]
+        try await withLiveDesk(
+            before: { fake in unread.forEach(fake.forget) },
+            body: { _, mirror in
+                mirror.read(.gate, of: kick)
+                await openTab(.comp, of: kick, in: mirror)
+                #expect(await eventually { mirror.cell(Catalog.gate(kick).release.address).argument != nil })
+                #expect(mirror.isReadForReset(.comp, of: kick))
+                #expect(!mirror.isReadForReset(.gate, of: kick), "hold never answered")
+                #expect(!mirror.isReadForReset(.input, of: StripID(.input, 3)), "which preamp feeds it is unknown")
+            })
+    }
+
+    /// A linked pair on one preamp: the title names the pair, so the gain line doesn't name the partner again.
+    @Test func theGainLineLeavesOutThePartner() async throws {
+        try await withLiveDesk { _, mirror in
+            let vox1 = StripID(.input, 13)
+            #expect(mirror.namesSharingHeadamp(with: vox1, locale: .testEnglish) == "Vox 2", "the demo's shared preamp")
+            #expect(mirror.namesSharingHeadamp(with: vox1, besides: StripID(.input, 14), locale: .testEnglish) == nil)
         }
     }
 

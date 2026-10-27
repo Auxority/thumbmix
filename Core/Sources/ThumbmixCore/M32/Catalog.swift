@@ -160,7 +160,7 @@ public enum Catalog {
         guard let defaults = eqDefaults(strip), defaults.indices.contains(band - 1) else { return [] }
         let target = defaults[band - 1]
         let specs = eqBand(strip, band)
-        return arguments([
+        return deskArguments([
             (specs.type, Double(target.typeIndex)), (specs.frequency, target.frequency), (specs.gain, target.gain),
             (specs.q, target.q),
         ])

@@ -89,7 +89,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 ## Known limits
 
 - Offline mode's meters are a time-based animation (`FakeState.meterBlob`): gain, trim, gate and compressor don't move them. Simulating the signal wasn't worth the complexity (decided 2026-10-09).
-- Reset gate, Reset comp and Reset input write provisional values (`Catalog+Defaults`, 2026-10-27): the doc gives no defaults, so thresholds sit at the harmless end (gate −80 dB, comp 0 dB) until m32-probe section 20 reads the desk's own.
+- Reset gate, Reset comp and Reset input write provisional values (`Catalog+Defaults`, 2026-10-27): the doc gives no defaults, so thresholds sit at the harmless end (gate −80 dB, comp 0 dB) until m32-probe section 20 reads the desk's own. Harmless only with the strip as its own key: a gate keyed from another strip stays keyed, so it closes 60 dB whenever that key falls silent.
 - The compressor knee is drawn at 6 dB per step: the doc gives the 0–5 knee setting no unit (see "Compressor knee width per step").
 - Gate curves (EXPn 1:n, GATE, DUCK) follow the engineer's confirmation; the doc only lists the modes.
 - VEQ is drawn as PEQ: no source gives its shape (see "How VEQ differs from PEQ").

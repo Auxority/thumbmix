@@ -31,6 +31,19 @@ final class PairUITests: DeskUITestCase {
         done.tap()
     }
 
+    /// The reset reaches both sides, so its alert names the pair, as the title does (mock A, 2026-10-27).
+    private func theResetAlertNamesThePair() {
+        let reset = app.buttons["Reset bands"]
+        scrollUntilHittable(reset, from: app.buttons["/ch/09/eq/1/type"])
+        reset.tap()
+        let alert = app.alerts["Reset all 4 bands of Gtr?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        saveScreenshot("pair-reset-alert")
+        alert.buttons["Cancel"].tap()
+        // An alert ignores opening while the last one still animates out (CLAUDE.md, System alerts).
+        Thread.sleep(forTimeInterval: 0.4)
+    }
+
     /// One fader and mute for both sides, but the desk keeps a pan and a name per side. The linked EQ needs no side
     /// picker, and the linked preamp's alerts (48V, polarity: assumed, m32-probe 7e) name the partner they also switch.
     func testAPairOpensAsOneStereoStrip() {
@@ -57,14 +70,7 @@ final class PairUITests: DeskUITestCase {
         app.buttons["EQ"].tap()
         XCTAssertTrue(element("/ch/09/eq/1/f").appears(within: 2))
         XCTAssertFalse(app.buttons["side-R"].exists, "the desk links the EQ")
-        // The reset reaches both sides, so its alert names the pair, as the title does (mock A, 2026-10-27).
-        let reset = app.buttons["Reset bands"]
-        scrollUntilHittable(reset, from: app.buttons["/ch/09/eq/1/type"])
-        reset.tap()
-        let resetAlert = app.alerts["Reset all 4 bands of Gtr?"]
-        XCTAssertTrue(resetAlert.appears(within: 2))
-        saveScreenshot("pair-reset-alert")
-        resetAlert.buttons["Cancel"].tap()
+        theResetAlertNamesThePair()
 
         app.buttons["Input"].tap()
         let phantom = app.buttons["toggle-/headamp/040/phantom"]

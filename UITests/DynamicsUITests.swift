@@ -4,6 +4,7 @@ import XCTest
 final class DynamicsUITests: DeskUITestCase {
     /// A drag on Threshold reaches the desk; Mode is a list (a drag past half the row to flip it was easy to miss).
     func testGateTabEditsThreshold() {
+        desk.change("/ch/01/gate/on", 0)
         launchAndOpen("Kick", tab: "Gate")
         let threshold = app.descendants(matching: .any)["/ch/01/gate/thr"]
         XCTAssertTrue(threshold.appears(within: 2))
@@ -27,13 +28,13 @@ final class DynamicsUITests: DeskUITestCase {
         let reset = app.buttons["Reset gate"]
         scrollUntilHittable(reset, from: mode)
         saveScreenshot("gate-reset")
-        let on = desk.value("/ch/01/gate/on")
         reset.tap()
         let alert = app.alerts["Reset the gate of Kick?"]
         XCTAssertTrue(alert.appears(within: 2))
         saveScreenshot("gate-reset-alert")
         alert.buttons["Cancel"].tap()
         XCTAssertEqual(mode.value as? String, "DUCK", "Cancel leaves the gate")
+        Thread.sleep(forTimeInterval: 0.4)
         reset.tap()
         alert.buttons["Reset"].tap()
         XCTAssertTrue(eventually(within: 2) { mode.value as? String == "GATE" })
@@ -41,7 +42,7 @@ final class DynamicsUITests: DeskUITestCase {
             eventually(within: 2) {
                 self.desk.value("/ch/01/gate/mode") == .int(3) && self.desk.value("/ch/01/gate/thr") == .float(0)
             }, "GATE, always open, on the desk")
-        XCTAssertEqual(desk.value("/ch/01/gate/on"), on, "On stays as switched")
+        XCTAssertEqual(desk.value("/ch/01/gate/on"), .int(0), "On stays as switched")
     }
 
     /// Graph first, like the EQ tab, one size on EQ, Gate and Comp (layout A, 2026-10-17). Its space is kept until
@@ -108,6 +109,7 @@ final class DynamicsUITests: DeskUITestCase {
         saveScreenshot("comp-reset-alert")
         alert.buttons["Cancel"].tap()
         XCTAssertEqual(mode.value as? String, "EXP", "Cancel leaves the comp")
+        Thread.sleep(forTimeInterval: 0.4)
         reset.tap()
         alert.buttons["Reset"].tap()
         XCTAssertTrue(eventually(within: 2) { mode.value as? String == "COMP" })

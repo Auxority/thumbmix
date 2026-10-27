@@ -32,7 +32,26 @@ extension ConsoleMirror {
         return pairName(strip)
     }
 
+    /// false until the desk sent every value `tab`'s Reset writes, and which preamp feeds the strip: `set` skips an
+    /// unread control, so an earlier tap would reset only part of what the alert promised.
+    public func isReadForReset(_ tab: ChannelTab, of strip: StripID) -> Bool {
+        resetAddresses(tab, of: strip).allSatisfy { cell($0).argument != nil }
+    }
+
+    private func resetAddresses(_ tab: ChannelTab, of strip: StripID) -> [String] {
+        switch tab {
+        case .eq:
+            (Catalog.eqDefaults(strip) ?? []).indices.flatMap { Catalog.eqBand(strip, $0 + 1).all.map(\.address) }
+        case .gate: Catalog.gateDefaults(strip).map(\.spec.address)
+        case .comp: Catalog.dynamicsDefaults(strip).map(\.spec.address)
+        case .input:
+            [Catalog.headampIndex(strip)].compactMap { $0 }
+                + Catalog.inputDefaults(strip, headamp: headamp(of: strip)).map(\.spec.address)
+        case .mix, .members, .sends, .fedBy: []
+        }
+    }
+
     private func setAll(_ defaults: [(spec: ParamSpec, value: Double)]) {
-        for (address, argument) in Catalog.arguments(defaults) { set(address, argument) }
+        for (address, argument) in Catalog.deskArguments(defaults) { set(address, argument) }
     }
 }

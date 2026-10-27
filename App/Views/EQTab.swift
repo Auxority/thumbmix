@@ -33,7 +33,8 @@ struct EQTab: View {
                 }
                 if let defaults = Catalog.eqDefaults(strip) {
                     ResetButton(
-                        title: "Reset bands", alertTitle: Text("Reset all \(defaults.count) bands of \(mirror.resetName(.eq, of: strip))?")
+                        title: "Reset bands", alertTitle: Text("Reset all \(defaults.count) bands of \(mirror.resetName(.eq, of: strip))?"),
+                        isRead: mirror.isReadForReset(.eq, of: strip)
                     ) { mirror.resetEQBands(strip) }
                 }
             }

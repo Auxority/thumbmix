@@ -30,7 +30,7 @@ struct InputTab: View {
                 // Never 48V: it asks on its own, mic by mic.
                 ResetButton(
                     title: "Reset input", alertTitle: Text("Reset the input of \(mirror.resetName(.input, of: strip))?"),
-                    message: PreampReach(strip, mirror).alsoChanges
+                    message: PreampReach(strip, mirror).alsoChanges, isRead: mirror.isReadForReset(.input, of: strip)
                 ) { mirror.resetInput(strip) }
             }
         }
@@ -100,16 +100,20 @@ private struct PhantomButton: View {
 @MainActor private struct PreampReach {
     let sameInput: String?
     let partner: String?
+    /// `sameInput` without the partner, whom Reset input's title already names as part of the pair.
+    let sameInputBesidesPartner: String?
 
     init(_ strip: StripID, _ mirror: ConsoleMirror) {
         sameInput = mirror.namesSharingHeadamp(with: strip)
-        partner = mirror.gainDelayPartner(of: strip).map { mirror.name($0) }
+        let partnerStrip = mirror.gainDelayPartner(of: strip)
+        partner = partnerStrip.map { mirror.name($0) }
+        sameInputBesidesPartner = mirror.namesSharingHeadamp(with: strip, besides: partnerStrip)
     }
 
     /// The gain belongs to the preamp every channel on that input shares. A linked partner needs no line: the alert's
     /// title names the pair (`resetName`).
     var alsoChanges: String? {
-        sameInput.map { String(localized: "Also changes the gain of \($0) (same input).") }
+        sameInputBesidesPartner.map { String(localized: "Also changes the gain of \($0) (same input).") }
     }
 
     /// 48V belongs to the preamp every channel on that input shares.
