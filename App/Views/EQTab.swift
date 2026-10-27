@@ -7,7 +7,6 @@ struct EQTab: View {
     /// The other side of a pair whose EQ isn't linked: its curve is drawn faint.
     var ghost: StripID?
     @State private var band = 1
-    @State private var isConfirmingReset = false
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -32,7 +31,11 @@ struct EQTab: View {
                 } else {
                     bandRows(Catalog.eqBand(strip, band))
                 }
-                if let defaults = Catalog.eqDefaults(strip) { resetButton(bandCount: defaults.count) }
+                if let defaults = Catalog.eqDefaults(strip) {
+                    ResetButton(
+                        title: "Reset bands", alertTitle: Text("Reset all \(defaults.count) bands of \(mirror.resetName(.eq, of: strip))?")
+                    ) { mirror.resetEQBands(strip) }
+                }
             }
         }
         // The desk's RTA is borrowed only while this tab is on screen, and handed back when the app leaves the foreground.
@@ -64,18 +67,6 @@ struct EQTab: View {
             ToggleChip(spec: lowCut.on, mirror: mirror, onColor: EQGraph.lowCutColor)
             ParameterRow(spec: lowCut.frequency, mirror: mirror, accent: EQGraph.lowCutColor)
         }
-    }
-
-    /// Resetting rewrites every band on the desk at once, so it asks first.
-    private func resetButton(bandCount: Int) -> some View {
-        Button("Reset bands", role: .destructive) { isConfirmingReset = true }
-            .font(.subheadline.weight(.semibold))
-            .frame(maxWidth: .infinity, minHeight: 44)
-            .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
-            .alert("Reset all \(bandCount) bands of \(mirror.name(strip))?", isPresented: $isConfirmingReset) {
-                Button("Cancel", role: .cancel) {}
-                Button("Reset", role: .destructive) { mirror.resetEQBands(strip) }
-            }
     }
 }
 

@@ -27,6 +27,11 @@ struct InputTab: View {
                     if let invert = Catalog.invert(strip) { PolarityButton(spec: invert, strip: strip, mirror: mirror) }
                 }
                 if let delay = Catalog.delay(strip) { delayRow(delay) }
+                // Never 48V: it asks on its own, mic by mic.
+                ResetButton(
+                    title: "Reset input", alertTitle: Text("Reset the input of \(mirror.resetName(.input, of: strip))?"),
+                    message: PreampReach(strip, mirror).alsoChanges
+                ) { mirror.resetInput(strip) }
             }
         }
     }
@@ -89,7 +94,7 @@ private struct PhantomButton: View {
     }
 }
 
-/// Who else switching 48V reaches, named in its alert: channels on the same input (one
+/// Who else switching 48V or Reset input reaches, named in its alert: channels on the same input (one
 /// preamp), and the partner when the desk links Gain/Delay. Warning about a change that may not happen there
 /// (48V on the partner is unverified) is safer than staying silent about one that does.
 @MainActor private struct PreampReach {
@@ -99,6 +104,12 @@ private struct PhantomButton: View {
     init(_ strip: StripID, _ mirror: ConsoleMirror) {
         sameInput = mirror.namesSharingHeadamp(with: strip)
         partner = mirror.gainDelayPartner(of: strip).map { mirror.name($0) }
+    }
+
+    /// The gain belongs to the preamp every channel on that input shares. A linked partner needs no line: the alert's
+    /// title names the pair (`resetName`).
+    var alsoChanges: String? {
+        sameInput.map { String(localized: "Also changes the gain of \($0) (same input).") }
     }
 
     /// 48V belongs to the preamp every channel on that input shares.

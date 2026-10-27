@@ -57,6 +57,14 @@ final class PairUITests: DeskUITestCase {
         app.buttons["EQ"].tap()
         XCTAssertTrue(element("/ch/09/eq/1/f").appears(within: 2))
         XCTAssertFalse(app.buttons["side-R"].exists, "the desk links the EQ")
+        // The reset reaches both sides, so its alert names the pair, as the title does (mock A, 2026-10-27).
+        let reset = app.buttons["Reset bands"]
+        scrollUntilHittable(reset, from: app.buttons["/ch/09/eq/1/type"])
+        reset.tap()
+        let resetAlert = app.alerts["Reset all 4 bands of Gtr?"]
+        XCTAssertTrue(resetAlert.appears(within: 2))
+        saveScreenshot("pair-reset-alert")
+        resetAlert.buttons["Cancel"].tap()
 
         app.buttons["Input"].tap()
         let phantom = app.buttons["toggle-/headamp/040/phantom"]
