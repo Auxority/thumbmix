@@ -27,6 +27,11 @@ struct InputTab: View {
                     if let invert = Catalog.invert(strip) { PolarityButton(spec: invert, strip: strip, mirror: mirror) }
                 }
                 if let delay = Catalog.delay(strip) { delayRow(delay) }
+                // Never 48V: it asks on its own, mic by mic.
+                ResetButton(
+                    title: "Reset input", alertTitle: Text("Reset the input of \(mirror.resetName(.input, of: strip))?"),
+                    message: PreampReach(strip, mirror).alsoChanges, isRead: mirror.isReadForReset(.input, of: strip)
+                ) { mirror.resetInput(strip) }
             }
         }
     }
@@ -89,16 +94,26 @@ private struct PhantomButton: View {
     }
 }
 
-/// Who else switching 48V reaches, named in its alert: channels on the same input (one
+/// Who else switching 48V or Reset input reaches, named in its alert: channels on the same input (one
 /// preamp), and the partner when the desk links Gain/Delay. Warning about a change that may not happen there
 /// (48V on the partner is unverified) is safer than staying silent about one that does.
 @MainActor private struct PreampReach {
     let sameInput: String?
     let partner: String?
+    /// `sameInput` without the partner, whom Reset input's title already names as part of the pair.
+    let sameInputBesidesPartner: String?
 
     init(_ strip: StripID, _ mirror: ConsoleMirror) {
         sameInput = mirror.namesSharingHeadamp(with: strip)
-        partner = mirror.gainDelayPartner(of: strip).map { mirror.name($0) }
+        let partnerStrip = mirror.gainDelayPartner(of: strip)
+        partner = partnerStrip.map { mirror.name($0) }
+        sameInputBesidesPartner = mirror.namesSharingHeadamp(with: strip, besides: partnerStrip)
+    }
+
+    /// The gain belongs to the preamp every channel on that input shares. A linked partner needs no line: the alert's
+    /// title names the pair (`resetName`).
+    var alsoChanges: String? {
+        sameInputBesidesPartner.map { String(localized: "Also changes the gain of \($0) (same input).") }
     }
 
     /// 48V belongs to the preamp every channel on that input shares.

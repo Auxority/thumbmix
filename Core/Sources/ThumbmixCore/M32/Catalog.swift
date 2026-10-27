@@ -160,13 +160,10 @@ public enum Catalog {
         guard let defaults = eqDefaults(strip), defaults.indices.contains(band - 1) else { return [] }
         let target = defaults[band - 1]
         let specs = eqBand(strip, band)
-        let values = [
+        return deskArguments([
             (specs.type, Double(target.typeIndex)), (specs.frequency, target.frequency), (specs.gain, target.gain),
             (specs.q, target.q),
-        ]
-        return values.map { spec, value in
-            (spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
-        }
+        ])
     }
 
     /// `target` is a bus for inputs, aux ins and FX returns, a matrix for buses and mains (`StripKind.sendTarget`).

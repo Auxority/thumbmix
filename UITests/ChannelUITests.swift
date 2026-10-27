@@ -64,6 +64,7 @@ final class ChannelUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 2) { phantom.value as? String == "On" })
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/headamp/044/phantom") == .int(1) }, "on at the desk")
         saveScreenshot("phantom-on")
+        resetInputLeaves48V(gain)
 
         phantom.tap()
         let turnOff = app.alerts["Turn off 48V for Vox 2?"]
@@ -71,5 +72,27 @@ final class ChannelUITests: DeskUITestCase {
         turnOff.buttons["Turn Off"].tap()
         XCTAssertTrue(eventually(within: 2) { phantom.value as? String == "Off" })
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/headamp/044/phantom") == .int(0) }, "off at the desk")
+    }
+
+    /// Reset input names the channel whose gain it changes too (one preamp), and never touches 48V.
+    private func resetInputLeaves48V(_ gain: XCUIElement) {
+        let reset = app.buttons["Reset input"]
+        XCTAssertTrue(reset.isHittable, "on the SE's first screen")
+        let before = gain.value as? String
+        reset.tap()
+        let alert = app.alerts["Reset the input of Vox 2?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        XCTAssertTrue(alert.staticTexts["Also changes the gain of Vox 1 (same input)."].exists)
+        saveScreenshot("input-reset-alert")
+        alert.buttons["Cancel"].tap()
+        XCTAssertEqual(gain.value as? String, before, "Cancel leaves the desk as it was")
+        Thread.sleep(forTimeInterval: 0.4)
+        reset.tap()
+        alert.buttons["Reset"].tap()
+        XCTAssertTrue(eventually(within: 2) { self.desk.value("/headamp/044/gain") == .float(Float(24) / 144) }, "0 dB")
+        XCTAssertEqual(desk.value("/headamp/044/phantom"), .int(1), "48V stays on")
+        saveScreenshot("input-reset")
+        // The next alert is ignored while this one still animates out.
+        Thread.sleep(forTimeInterval: 0.4)
     }
 }

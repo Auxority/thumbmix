@@ -147,8 +147,11 @@ extension ConsoleMirror {
     }
 
     /// `stripsSharingHeadamp` by name in one list ("Vox 2 and Ch 3"); nil when the input is the strip's alone.
-    public func namesSharingHeadamp(with strip: StripID, locale: Locale = .current) -> String? {
-        let names = stripsSharingHeadamp(with: strip).map(name)
+    /// `other` is left out: a linked partner an alert already names as part of the pair.
+    public func namesSharingHeadamp(
+        with strip: StripID, besides other: StripID? = nil, locale: Locale = .current
+    ) -> String? {
+        let names = stripsSharingHeadamp(with: strip).filter { $0 != other }.map(name)
         return names.isEmpty ? nil : names.formatted(.list(type: .and).locale(locale))
     }
 

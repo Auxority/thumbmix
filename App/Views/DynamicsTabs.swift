@@ -26,6 +26,13 @@ struct GateTab: View {
                 }
                 // Set once: one line that opens a sheet, like the Comp's (2026-10-20).
                 FoldedLineButton(line: mirror.gateKeyFold(strip), identifier: "gate-key") { isKeyOpen = true }
+                // The shape only: On and the key are set once and stay, like Reset bands leaves EQ on.
+                ResetButton(
+                    title: "Reset gate", alertTitle: Text("Reset the gate of \(mirror.resetName(.gate, of: strip))?"),
+                    isRead: mirror.isReadForReset(.gate, of: strip)
+                ) {
+                    mirror.resetGate(strip)
+                }
             }
         }
         .sheet(isPresented: $isKeyOpen) {
@@ -82,6 +89,13 @@ struct CompTab: View {
                 }
                 // What nobody rides is one line that opens a sheet: the tab never changes length.
                 FoldedLineButton(line: mirror.compFold(strip), identifier: "comp-more") { isMoreOpen = true }
+                // The shape only: On, the key and Comp position stay.
+                ResetButton(
+                    title: "Reset comp", alertTitle: Text("Reset the comp of \(mirror.resetName(.comp, of: strip))?"),
+                    isRead: mirror.isReadForReset(.comp, of: strip)
+                ) {
+                    mirror.resetDynamics(strip)
+                }
             }
         }
         .sheet(isPresented: $isMoreOpen) {

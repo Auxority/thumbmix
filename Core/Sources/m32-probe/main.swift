@@ -272,5 +272,6 @@ await probeExclusiveSolo()
 await probeMonoMode()
 await probeCompMix()
 await probeInserts()
+await probeResets()
 
 transport.cancel()

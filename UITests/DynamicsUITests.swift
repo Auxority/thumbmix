@@ -4,6 +4,7 @@ import XCTest
 final class DynamicsUITests: DeskUITestCase {
     /// A drag on Threshold reaches the desk; Mode is a list (a drag past half the row to flip it was easy to miss).
     func testGateTabEditsThreshold() {
+        desk.change("/ch/01/gate/on", 0)
         launchAndOpen("Kick", tab: "Gate")
         let threshold = app.descendants(matching: .any)["/ch/01/gate/thr"]
         XCTAssertTrue(threshold.appears(within: 2))
@@ -18,6 +19,30 @@ final class DynamicsUITests: DeskUITestCase {
         XCTAssertTrue(app.descendants(matching: .any)["/ch/01/gate/release"].exists)
         saveScreenshot("task-14-gate")
         pick("Ducker", in: "/ch/01/gate/mode", from: "GATE", to: "DUCK")
+        resetGateAsksFirst()
+    }
+
+    /// The shape only: mode and threshold go back (provisional values, `Catalog.gateDefaults`), On stays.
+    private func resetGateAsksFirst() {
+        let mode = app.buttons["/ch/01/gate/mode"]
+        let reset = app.buttons["Reset gate"]
+        scrollUntilHittable(reset, from: mode)
+        saveScreenshot("gate-reset")
+        reset.tap()
+        let alert = app.alerts["Reset the gate of Kick?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        saveScreenshot("gate-reset-alert")
+        alert.buttons["Cancel"].tap()
+        XCTAssertEqual(mode.value as? String, "DUCK", "Cancel leaves the gate")
+        Thread.sleep(forTimeInterval: 0.4)
+        reset.tap()
+        alert.buttons["Reset"].tap()
+        XCTAssertTrue(eventually(within: 2) { mode.value as? String == "GATE" })
+        XCTAssertTrue(
+            eventually(within: 2) {
+                self.desk.value("/ch/01/gate/mode") == .int(3) && self.desk.value("/ch/01/gate/thr") == .float(0)
+            }, "GATE, always open, on the desk")
+        XCTAssertEqual(desk.value("/ch/01/gate/on"), .int(0), "On stays as switched")
     }
 
     /// Graph first, like the EQ tab, one size on EQ, Gate and Comp (layout A, 2026-10-17). Its space is kept until
@@ -68,6 +93,30 @@ final class DynamicsUITests: DeskUITestCase {
         pick("Average level", in: "/ch/02/dyn/det", from: "PEAK", to: "RMS")
         pick("Linear", in: "/ch/02/dyn/env", from: "LOG", to: "LIN")
         saveScreenshot("comp-dropdowns")
+        app.buttons["Done"].tap()
+        resetCompAsksFirst()
+    }
+
+    /// The shape only, the sheet's detector and envelope included (provisional values, `Catalog.dynamicsDefaults`).
+    private func resetCompAsksFirst() {
+        let mode = app.buttons["/ch/02/dyn/mode"]
+        let reset = app.buttons["Reset comp"]
+        scrollUntilHittable(reset, from: mode)
+        saveScreenshot("comp-reset")
+        reset.tap()
+        let alert = app.alerts["Reset the comp of Snare?"]
+        XCTAssertTrue(alert.appears(within: 2))
+        saveScreenshot("comp-reset-alert")
+        alert.buttons["Cancel"].tap()
+        XCTAssertEqual(mode.value as? String, "EXP", "Cancel leaves the comp")
+        Thread.sleep(forTimeInterval: 0.4)
+        reset.tap()
+        alert.buttons["Reset"].tap()
+        XCTAssertTrue(eventually(within: 2) { mode.value as? String == "COMP" })
+        XCTAssertTrue(
+            eventually(within: 2) {
+                self.desk.value("/ch/02/dyn/det") == .int(0) && self.desk.value("/ch/02/dyn/env") == .int(1)
+            }, "PEAK and LOG on the desk")
     }
 
     private func pick(_ item: String, in address: String, from current: String, to deskName: String) {

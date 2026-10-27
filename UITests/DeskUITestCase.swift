@@ -79,6 +79,16 @@ class DeskUITestCase: XCTestCase {
         app.descendants(matching: .any)[identifier]
     }
 
+    /// A tab's last row (Reset) can start below the SE's bottom edge: drag the tab up from a visible `handle`, never from
+    /// the hidden row, which would land under the tab bar.
+    func scrollUntilHittable(_ target: XCUIElement, from handle: XCUIElement) {
+        XCTAssertTrue(target.appears(within: 2))
+        guard !target.isHittable else { return }
+        let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -300)))
+        XCTAssertTrue(eventually(within: 2) { target.isHittable }, "\(target) on screen after a scroll")
+    }
+
     /// A strip's solo switch on the desk, numbered in the desk's strip order (inputs 1-32, …, buses 49-64).
     func soloAddress(_ number: Int) -> String { String(format: "/-stat/solosw/%02d", number) }
 

@@ -170,10 +170,7 @@ final class EQUITests: DeskUITestCase {
         let moved = frequency.value as? String
         XCTAssertNotEqual(moved, "124.7 Hz")
         let reset = app.buttons["Reset bands"]
-        if !reset.isHittable {
-            let type = app.buttons["/ch/01/eq/1/type"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            type.press(forDuration: 0.05, thenDragTo: type.withOffset(CGVector(dx: 0, dy: -300)))
-        }
+        scrollUntilHittable(reset, from: app.buttons["/ch/01/eq/1/type"])
         reset.tap()
         let alert = app.alerts["Reset all 4 bands of Kick?"]
         XCTAssertTrue(alert.appears(within: 2))

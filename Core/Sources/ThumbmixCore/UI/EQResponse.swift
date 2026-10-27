@@ -242,13 +242,4 @@ extension ConsoleMirror {
         guard let position = normalized(type) else { return nil }
         return EQFilterType(rawValue: Int(type.scale.value(fromNormalized: position)))
     }
-
-    /// Puts every band back to `Catalog.eqDefaults`; a no-op on strips without defaults.
-    public func resetEQBands(_ strip: StripID) {
-        for index in (Catalog.eqDefaults(strip) ?? []).indices { resetEQBand(strip, index + 1) }
-    }
-
-    public func resetEQBand(_ strip: StripID, _ band: Int) {
-        for (address, argument) in Catalog.eqDefaultArguments(strip, band) { set(address, argument) }
-    }
 }

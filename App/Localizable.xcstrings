@@ -136,6 +136,9 @@
     "192.168.1.62" : {
 
     },
+    "Also changes the gain of %@ (same input)." : {
+
+    },
     "Also powers %@ (linked)." : {
 
     },
@@ -508,6 +511,24 @@
       }
     },
     "Reset bands" : {
+
+    },
+    "Reset comp" : {
+
+    },
+    "Reset gate" : {
+
+    },
+    "Reset input" : {
+
+    },
+    "Reset the comp of %@?" : {
+
+    },
+    "Reset the gate of %@?" : {
+
+    },
+    "Reset the input of %@?" : {
 
     },
     "Right side only" : {
