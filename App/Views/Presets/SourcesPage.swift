@@ -140,7 +140,8 @@ private struct SourceRow: View {
 
     private func status(_ result: SourceResult) -> String {
         switch result.status {
-        case .ok: String(localized: "^[\(result.presets.count) preset](inflect: true)")
+        // `String(localized:)` would leave "^[4 preset](inflect: true)" as it is: only an attributed string inflects.
+        case .ok: String(AttributedString(localized: "^[\(result.presets.count) preset](inflect: true)").characters)
         case .cached(let why): String(localized: "Showing the last good read: \(why)")
         case .failed(let why): why
         }
