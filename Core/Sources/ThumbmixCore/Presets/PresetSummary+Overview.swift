@@ -35,13 +35,13 @@ extension PresetSummary {
         }
     }
 
-    /// The first buses that are on, by number; then one line for the rest: "Off", or how many of them are on.
+    /// The first buses that send, by number; then one line for the rest: "Off", or how many of them send.
     private static func sendLines(_ sends: [PresetSend]) -> [PresetLine] {
-        let shown = Array(sends.filter(\.isOn).prefix(shownSends))
+        let shown = Array(sends.filter(\.isSending).prefix(shownSends))
         let lines = shown.map { PresetLine($0.bus.defaultName, $0.text, bus: $0.bus) }
         let rest = sends.filter { send in !shown.contains { $0.bus == send.bus } }
         guard !rest.isEmpty else { return lines }
-        let on = rest.filter(\.isOn).count
+        let on = rest.filter(\.isSending).count
         return lines + [PresetLine(CoreStrings.text("Other buses"), on == 0 ? CoreStrings.text("Off") : CoreStrings.text("\(on) on"))]
     }
 }

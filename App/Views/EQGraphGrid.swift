@@ -7,19 +7,20 @@ enum EQGraphGrid {
     /// The y axis, from the top: +15 dB at 0, -15 dB at 1.
     static func y(decibels: Double) -> Double { 1 - (min(max(decibels, -15), 15) + 15) / 30 }
 
-    static func draw(in context: GraphicsContext, size: CGSize) {
+    /// `numbers` off for a graph too small to read them, as a preset card's.
+    static func draw(in context: GraphicsContext, size: CGSize, numbers showsNumbers: Bool = true) {
         var grid = Path()
         for (decibels, text) in [(-12.0, "−12"), (-6, "−6"), (0, ""), (6, "+6"), (12, "+12")] {
             let lineY = y(decibels: decibels) * size.height
             grid.move(to: CGPoint(x: 0, y: lineY))
             grid.addLine(to: CGPoint(x: size.width, y: lineY))
-            context.draw(number(text), at: CGPoint(x: 4, y: lineY - 1), anchor: .bottomLeading)
+            if showsNumbers { context.draw(number(text), at: CGPoint(x: 4, y: lineY - 1), anchor: .bottomLeading) }
         }
         for (hertz, text) in [(100.0, "100"), (1000, "1k"), (10_000, "10k")] {
             let x = EQAxis.position(hertz: hertz) * size.width
             grid.move(to: CGPoint(x: x, y: 0))
             grid.addLine(to: CGPoint(x: x, y: size.height))
-            context.draw(number(text), at: CGPoint(x: x + 3, y: 4), anchor: .topLeading)
+            if showsNumbers { context.draw(number(text), at: CGPoint(x: x + 3, y: 4), anchor: .topLeading) }
         }
         context.stroke(grid, with: .color(Theme.raised), lineWidth: 1)
     }

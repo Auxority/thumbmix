@@ -312,6 +312,7 @@
       }
     },
     "Band %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

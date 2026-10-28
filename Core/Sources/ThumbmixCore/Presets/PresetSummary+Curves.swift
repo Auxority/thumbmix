@@ -39,6 +39,16 @@ extension PresetSummary {
         return PresetGateCurve(mode: mode, threshold: threshold, range: range, isOn: reader.flag("gate/on") ?? true)
     }
 
+    /// The Mix card's picture: the fader on its throw, 0...1 by the desk's law (0 dB at three quarters), and the pan,
+    /// −1 (left) ... 1 (right). A strip without pan reads centre.
+    public static func mixPosition(_ preset: Preset) -> (fader: Double, pan: Double)? {
+        let reader = PresetReader(preset, .mix, .current)
+        guard let fader = reader.field("mix/fader"), let spec = fader.spec, let decibels = reader.number("mix/fader")
+        else { return nil }
+        let pan = reader.number("mix/pan").map { $0 / 100 } ?? 0
+        return (Double(spec.scale.normalized(forValue: decibels)), pan)
+    }
+
     public static func compCurve(_ preset: Preset) -> PresetCompCurve? {
         let reader = PresetReader(preset, .comp, .current)
         guard let mode = reader.option("dyn/mode"), let threshold = reader.number("dyn/thr"),

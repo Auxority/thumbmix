@@ -104,11 +104,34 @@ struct PresetGlanceTests {
         #expect(lines(.mix) == ["Fader=−∞ dB", "Pan=C"])
     }
 
+    /// The card's picture: where the fader sits on its throw (the desk's law, 0 dB at three quarters) and the pan.
+    @Test func theMixPictureIsTheFadersThrowAndThePan() throws {
+        var preset = Preset.kick
+        preset.values[.mix]?["mix/fader"] = .number(0)
+        preset.values[.mix]?["mix/pan"] = .number(20)
+
+        let mix = try #require(PresetSummary.mixPosition(preset))
+
+        #expect(abs(mix.fader - 0.75) < 0.01)
+        #expect(abs(mix.pan - 0.2) < 0.01)
+        #expect(PresetSummary.mixPosition(.kick)?.fader == 0, "−∞ at the bottom")
+        preset.values[.mix] = nil
+        #expect(PresetSummary.mixPosition(preset) == nil)
+    }
+
     @Test func sendsListTheBusesThatAreOnByNumberForTheDesksName() throws {
         let sends = PresetSummary.overview(.kick, .sends, locale: .testEnglish)
         #expect(sends.map { "\($0.label)=\($0.value)" } == ["Bus 3=−6 dB", "Other buses=Off"])
         #expect(sends[0].bus == StripID(.bus, 3), "the app adds the name the desk gives bus 3 now")
         #expect(sends[1].bus == nil)
+    }
+
+    /// Switched on at −∞ sends nothing: the desk's default for every send, so listing it would fill the card with noise.
+    @Test func aSendAtMinusInfinitySendsNothingAndIsNotListed() {
+        var preset = Preset.kick
+        preset.values[.sends]?["mix/05/on"] = .flag(true)
+        preset.values[.sends]?["mix/05/level"] = .number(-.infinity)
+        #expect(lines(.sends, preset) == ["Bus 3=−6 dB", "Other buses=Off"])
     }
 
     @Test func aSendShowsItsTapOnlyWhenItIsNotAfterTheFader() {

@@ -48,6 +48,8 @@ struct SavePresetSheet: View {
                     }
                 }
                 .listRowBackground(Theme.track)
+                // The app's white tint (ThumbmixApp) would draw a switch that's on as a white blob.
+                .tint(Theme.usualOnGreen)
             }
             .presetPage(mirror)
             .navigationTitle("Save as preset")

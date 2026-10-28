@@ -74,6 +74,8 @@ struct PresetSend {
     let bus: StripID
     let paths: [String]
     let isOn: Bool
+    /// On and above −∞: a send that's on at −∞ (every send's default on the desk) sends nothing.
+    let isSending: Bool
     let level: ValueParts
     /// Only where it isn't after the fader, the desk's usual tap for a send.
     let tap: String?
@@ -95,8 +97,10 @@ struct PresetSend {
         let prefix = String(format: "mix/%02d/", bus.number)
         let paths = reader.fields.map(\.path).filter { $0.hasPrefix(prefix) }
         let tap = reader.option(prefix + "type").flatMap { name in SendTap.allCases.first { $0.deskAbbreviation == name } }
+        let isOn = reader.flag(prefix + "on") ?? false
         return PresetSend(
-            bus: bus, paths: paths, isOn: reader.flag(prefix + "on") ?? false,
+            bus: bus, paths: paths, isOn: isOn,
+            isSending: isOn && reader.number(prefix + "level").map(\.isFinite) == true,
             level: reader.parts(prefix + "level") ?? ValueParts(number: "—"),
             tap: tap == .postFader ? nil : tap?.deskTerm)
     }
