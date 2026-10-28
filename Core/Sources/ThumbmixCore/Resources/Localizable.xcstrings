@@ -562,6 +562,16 @@
         }
       }
     },
+    "Couldn't read it: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't read it: %@"
+          }
+        }
+      }
+    },
     "DCA" : {
       "localizations" : {
         "en" : {
@@ -733,6 +743,16 @@
         }
       }
     },
+    "File" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File"
+          }
+        }
+      }
+    },
     "Filter" : {
       "localizations" : {
         "en" : {
@@ -779,6 +799,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Flip the polarity of %@?"
+          }
+        }
+      }
+    },
+    "Folder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder"
           }
         }
       }
@@ -1266,6 +1296,16 @@
         }
       }
     },
+    "More than 200 files." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More than 200 files."
+          }
+        }
+      }
+    },
     "Move" : {
       "localizations" : {
         "en" : {
@@ -1336,6 +1376,16 @@
         }
       }
     },
+    "Not found. Pick it again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not found. Pick it again."
+          }
+        }
+      }
+    },
     "Off" : {
       "localizations" : {
         "en" : {
@@ -1352,6 +1402,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "On"
+          }
+        }
+      }
+    },
+    "On this iPhone" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On this iPhone"
           }
         }
       }
@@ -1667,6 +1727,16 @@
         }
       }
     },
+    "Still downloading from iCloud. Refresh in a moment." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still downloading from iCloud. Refresh in a moment."
+          }
+        }
+      }
+    },
     "Subgroup" : {
       "localizations" : {
         "en" : {
@@ -1727,6 +1797,66 @@
         }
       }
     },
+    "The address must be https:// with no name, password or query." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The address must be https:// with no name, password or query."
+          }
+        }
+      }
+    },
+    "The answer is not UTF-8 JSON text." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The answer is not UTF-8 JSON text."
+          }
+        }
+      }
+    },
+    "The file is too large." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The file is too large."
+          }
+        }
+      }
+    },
+    "The path %@ leaves the source." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The path %@ leaves the source."
+          }
+        }
+      }
+    },
+    "the server did not answer with the file" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "the server did not answer with the file"
+          }
+        }
+      }
+    },
+    "The source lists more than 200 presets." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The source lists more than 200 presets."
+          }
+        }
+      }
+    },
     "These %lld mixes will start hearing the compressor:\n\n%@" : {
       "localizations" : {
         "en" : {
@@ -1773,6 +1903,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This is not a Thumbmix preset file."
+          }
+        }
+      }
+    },
+    "This is not a Thumbmix source." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is not a Thumbmix source."
           }
         }
       }
@@ -1963,6 +2103,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vocals & mics"
+          }
+        }
+      }
+    },
+    "Web address" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Web address"
           }
         }
       }
