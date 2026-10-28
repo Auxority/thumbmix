@@ -1,0 +1,47 @@
+{
+  "format": "thumbmix-preset",
+  "version": 1,
+  "name": "Bass guitar",
+  "matchWords": [
+    "bass",
+    "bg"
+  ],
+  "stripKind": "input",
+  "eq": {
+    "eq/on": true,
+    "preamp/hpon": true,
+    "preamp/hpf": 30,
+    "eq/1/type": "PEQ",
+    "eq/1/f": 80,
+    "eq/1/g": 2,
+    "eq/1/q": 1.5,
+    "eq/2/type": "PEQ",
+    "eq/2/f": 250,
+    "eq/2/g": -3,
+    "eq/2/q": 1.5,
+    "eq/3/type": "PEQ",
+    "eq/3/f": 900,
+    "eq/3/g": 2,
+    "eq/3/q": 1.5,
+    "eq/4/type": "HShv",
+    "eq/4/f": 6000,
+    "eq/4/g": -2,
+    "eq/4/q": 2
+  },
+  "comp": {
+    "dyn/on": true,
+    "dyn/mode": "COMP",
+    "dyn/thr": -20,
+    "dyn/ratio": "4.0",
+    "dyn/knee": 2,
+    "dyn/attack": 20,
+    "dyn/hold": 10,
+    "dyn/release": 200,
+    "dyn/mgain": 3,
+    "dyn/mix": 100,
+    "dyn/det": "PEAK",
+    "dyn/env": "LOG",
+    "dyn/auto": false,
+    "dyn/pos": "POST"
+  }
+}

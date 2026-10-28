@@ -6,6 +6,13 @@ public struct EQBandState: Equatable, Sendable {
     public let gain: Double
     public let q: Double
 
+    public init(typeIndex: Int, frequency: Double, gain: Double, q: Double) {
+        self.typeIndex = typeIndex
+        self.frequency = frequency
+        self.gain = gain
+        self.q = q
+    }
+
     public var type: EQFilterType? { EQFilterType(rawValue: typeIndex) }
 }
 
@@ -140,6 +147,8 @@ struct Crossover {
 /// setting changes nothing (the user, 2026-10-22); 24 dB/oct is read off the desk's EQ screen, an estimate.
 public struct LowCutState: Equatable, Sendable {
     public let frequency: Double
+
+    public init(frequency: Double) { self.frequency = frequency }
 
     public func decibels(at hertz: Double) -> Double {
         -10 * log10(1 + pow(frequency / hertz, 2 * order))

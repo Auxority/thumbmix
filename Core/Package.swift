@@ -10,7 +10,7 @@ let package = Package(
         .library(name: "FakeM32", targets: ["FakeM32"]),
     ],
     targets: [
-        .target(name: "ThumbmixCore", resources: [.process("Resources")]),
+        .target(name: "ThumbmixCore", resources: [.process("Resources"), .copy("BuiltInPresets")]),
         .target(name: "FakeM32", dependencies: ["ThumbmixCore"]),
         .executableTarget(name: "fake-m32", dependencies: ["FakeM32"]),
         .executableTarget(name: "m32-probe", dependencies: ["ThumbmixCore"]),

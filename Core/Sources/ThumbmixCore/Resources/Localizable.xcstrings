@@ -11,6 +11,66 @@
         }
       }
     },
+    "%@ dB" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ dB"
+          }
+        }
+      }
+    },
+    "%@ has no control on this kind of strip." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ has no control on this kind of strip."
+          }
+        }
+      }
+    },
+    "%@ holds the wrong kind of value." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ holds the wrong kind of value."
+          }
+        }
+      }
+    },
+    "%@ is empty, too long or holds control characters." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is empty, too long or holds control characters."
+          }
+        }
+      }
+    },
+    "%@ is missing." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is missing."
+          }
+        }
+      }
+    },
+    "%@ is outside what the desk takes." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is outside what the desk takes."
+          }
+        }
+      }
+    },
     "%@ stay separate." : {
       "localizations" : {
         "en" : {
@@ -71,6 +131,16 @@
         }
       }
     },
+    "%@: the desk has no option %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: the desk has no option %2$@."
+          }
+        }
+      }
+    },
     "48V" : {
       "localizations" : {
         "en" : {
@@ -101,12 +171,32 @@
         }
       }
     },
+    "Also changes the gain of %@ (same input)." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Also changes the gain of %@ (same input)."
+          }
+        }
+      }
+    },
     "Also flips %@ (linked)." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Also flips %@ (linked)."
+          }
+        }
+      }
+    },
+    "Also powers %@ (same input)." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Also powers %@ (same input)."
           }
         }
       }
@@ -187,6 +277,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Average level"
+          }
+        }
+      }
+    },
+    "Band %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Band %lld"
           }
         }
       }
@@ -693,6 +793,16 @@
         }
       }
     },
+    "Flipped" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flipped"
+          }
+        }
+      }
+    },
     "Follow LR pan" : {
       "localizations" : {
         "en" : {
@@ -924,12 +1034,62 @@
         }
       }
     },
+    "Keep" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep"
+          }
+        }
+      }
+    },
+    "Keep %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep %@"
+          }
+        }
+      }
+    },
+    "Keep 48V off" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep 48V off"
+          }
+        }
+      }
+    },
+    "Keep 48V on" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep 48V on"
+          }
+        }
+      }
+    },
     "Key" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Key"
+          }
+        }
+      }
+    },
+    "Key filter" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Key filter"
           }
         }
       }
@@ -1117,7 +1277,6 @@
       }
     },
     "Mix" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1133,6 +1292,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mode"
+          }
+        }
+      }
+    },
+    "Move" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move"
           }
         }
       }
@@ -1213,6 +1382,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "On"
+          }
+        }
+      }
+    },
+    "Only inputs have a gate." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only inputs have a gate."
           }
         }
       }
@@ -1367,6 +1546,36 @@
         }
       }
     },
+    "Raise" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raise"
+          }
+        }
+      }
+    },
+    "Raise the gain of %@ from %@ to %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Raise the gain of %1$@ from %2$@ to %3$@?"
+          }
+        }
+      }
+    },
+    "Raise the trim of %@ from %@ to %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Raise the trim of %1$@ from %2$@ to %3$@?"
+          }
+        }
+      }
+    },
     "Range" : {
       "localizations" : {
         "en" : {
@@ -1418,7 +1627,6 @@
       }
     },
     "Sends" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1569,6 +1777,106 @@
         }
       }
     },
+    "This EQ has %lld bands; this strip has %lld." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "This EQ has %1$lld bands; this strip has %2$lld."
+          }
+        }
+      }
+    },
+    "This file is too large for a preset." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This file is too large for a preset."
+          }
+        }
+      }
+    },
+    "This is not a Thumbmix preset file." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is not a Thumbmix preset file."
+          }
+        }
+      }
+    },
+    "This preset is version %lld; this app reads version 1." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This preset is version %lld; this app reads version 1."
+          }
+        }
+      }
+    },
+    "This strip has no compressor." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This strip has no compressor."
+          }
+        }
+      }
+    },
+    "This strip has no EQ." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This strip has no EQ."
+          }
+        }
+      }
+    },
+    "This strip has no Input tab." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This strip has no Input tab."
+          }
+        }
+      }
+    },
+    "This strip has no sends." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This strip has no sends."
+          }
+        }
+      }
+    },
+    "This strip lacks a setting the preset uses." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This strip lacks a setting the preset uses."
+          }
+        }
+      }
+    },
+    "This strip's sends go to other mixes." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This strip's sends go to other mixes."
+          }
+        }
+      }
+    },
     "Threshold" : {
       "localizations" : {
         "en" : {
@@ -1599,12 +1907,42 @@
         }
       }
     },
+    "Turn Off" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Off"
+          }
+        }
+      }
+    },
+    "Turn off 48V for %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off 48V for %@?"
+          }
+        }
+      }
+    },
     "Turn On" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Turn On"
+          }
+        }
+      }
+    },
+    "Turn on 48V for %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on 48V for %@?"
           }
         }
       }
