@@ -35,10 +35,16 @@ struct PresetIndex: Decodable {
     let presets: [Entry]
 
     func paths() throws -> [String] {
-        guard format == "thumbmix-source", version == 1, !name.isEmpty, name.count <= PresetValidation.maxNameLength
+        guard format == "thumbmix-source", version == 1,
+            PresetValidation.isPlain(name, maxLength: PresetValidation.maxNameLength)
         else { throw SourceError.notASource }
         guard presets.count <= SourceReader.maxPresets else { throw SourceError.tooMany }
-        return presets.map(\.path)
+        let paths = presets.map(\.path)
+        // One file twice would list a preset twice under one id.
+        if let twice = paths.first(where: { path in paths.filter { $0 == path }.count > 1 }) {
+            throw SourceError.badPath(twice)
+        }
+        return paths
     }
 }
 
@@ -73,33 +79,61 @@ extension SourceReader {
     /// read (`cache`); a bad preset is skipped and named.
     func readWeb(_ address: URL, cache: URL) async -> SourceResult {
         do {
-            let (result, files) = try await fetchSource(address)
-            writeCache(files, to: cache)
-            return result
+            let fetched = try await withDeadline { try await fetchSource(address) }
+            // A file lost to the network keeps its copy from the last good read: a flaky read must not empty the cache.
+            let kept = readCache(cache).filter { fetched.lost.contains($0.file) }
+            writeCache(fetched.files + kept, to: cache)
+            return fetched.result
         } catch {
             return fromCache(cache, because: Self.reason(error))
         }
     }
 
-    private func fetchSource(_ address: URL) async throws -> (SourceResult, [CachedFile]) {
+    /// The whole read, not only each request: a server dripping bytes would otherwise hold the Presets list for as
+    /// long as it likes (a request's own timeout only fires when nothing arrives).
+    private func withDeadline<T: Sendable>(_ work: @escaping @Sendable () async throws -> T) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask { try await work() }
+            group.addTask {
+                try await Task.sleep(for: deadline)
+                throw SourceError.unreachable(CoreStrings.text("it took too long"))
+            }
+            defer { group.cancelAll() }
+            guard let first = try await group.next() else { throw SourceError.notASource }
+            return first
+        }
+    }
+
+    private struct Fetched {
+        var result: SourceResult
+        var files: [CachedFile] = []
+        /// Paths whose file could not be fetched (not ones that were fetched and refused).
+        var lost: Set<String> = []
+    }
+
+    private func fetchSource(_ address: URL) async throws -> Fetched {
         guard Self.isAcceptable(address) else { throw SourceError.refusedAddress }
         let indexData = try await fetch(address, limit: PresetIndex.maxBytes)
         guard let index = try? JSONDecoder().decode(PresetIndex.self, from: indexData) else { throw SourceError.notASource }
         let paths = try index.paths()
         let urls = try paths.map { try Self.resolve($0, against: address) }
         let fetched = await fetchAll(urls)
-        var result = SourceResult(title: index.name)
-        var files: [CachedFile] = []
+        var read = Fetched(result: SourceResult(title: index.name))
         for (path, outcome) in zip(paths, fetched) {
-            do {
-                let data = try outcome.get()
-                result.presets.append(SourcedPreset(preset: try PresetValidation.decode(data), file: path))
-                files.append(CachedFile(file: path, data: data))
-            } catch {
-                result.skipped.append(SkippedFile(file: path, reason: Self.reason(error)))
+            switch outcome {
+            case .failure(let error):
+                read.result.skipped.append(SkippedFile(file: path, reason: Self.reason(error)))
+                read.lost.insert(path)
+            case .success(let data):
+                do {
+                    read.result.presets.append(SourcedPreset(preset: try PresetValidation.decode(data), file: path))
+                    read.files.append(CachedFile(file: path, data: data))
+                } catch {
+                    read.result.skipped.append(SkippedFile(file: path, reason: Self.reason(error)))
+                }
             }
         }
-        return (result, files)
+        return read
     }
 
     private func fetchAll(_ urls: [URL]) async -> [Result<Data, Error>] {
@@ -172,12 +206,13 @@ extension SourceReader {
         try? JSONEncoder().encode(Cache(files: files)).write(to: cache, options: .atomic)
     }
 
+    private func readCache(_ cache: URL) -> [CachedFile] {
+        (try? Data(contentsOf: cache)).flatMap { try? JSONDecoder().decode(Cache.self, from: $0) }?.files ?? []
+    }
+
     /// Checked again like a new file: the cache is the app's own copy, but a damaged one is not trusted either.
     private func fromCache(_ cache: URL, because reason: String) -> SourceResult {
-        guard let data = try? Data(contentsOf: cache), let saved = try? JSONDecoder().decode(Cache.self, from: data) else {
-            return .failed(reason)
-        }
-        let presets = saved.files.compactMap { file in
+        let presets = readCache(cache).compactMap { file in
             (try? PresetValidation.decode(file.data)).map { SourcedPreset(preset: $0, file: file.file) }
         }
         return presets.isEmpty ? .failed(reason) : SourceResult(presets: presets, status: .cached(reason))

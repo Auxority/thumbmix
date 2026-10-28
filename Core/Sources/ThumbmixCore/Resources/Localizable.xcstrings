@@ -1064,6 +1064,16 @@
         }
       }
     },
+    "it took too long" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "it took too long"
+          }
+        }
+      }
+    },
     "Keep" : {
       "localizations" : {
         "en" : {

@@ -10,6 +10,9 @@ struct LoadPresetSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var unticked: Set<PresetPart> = []
     @State private var run: LoadRun?
+    /// The pause between one alert and the next; a Cancel in it ends the load.
+    @State private var pause: Task<Void, Never>?
+    @State private var notice: String?
 
     var body: some View {
         NavigationStack {
@@ -26,14 +29,20 @@ struct LoadPresetSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }.buttonStyle(.darkCapsule)
+                    Button("Cancel") {
+                        pause?.cancel()
+                        run = nil
+                        dismiss()
+                    }
+                    .buttonStyle(.darkCapsule)
                 }
                 .sharedBackgroundVisibility(.hidden)
                 ToolbarItem(placement: .confirmationAction) {
                     // Always enabled: a button that changes while an alert is open would lose its action (CLAUDE.md).
                     Button("Load") { start() }
                         .fontWeight(.bold).buttonStyle(.darkCapsule)
-                        .disabled(!mirror.isLive || loadable.isEmpty).accessibilityIdentifier("preset-load-confirm")
+                        .disabled(!mirror.isLive || loadable.isEmpty || run != nil)
+                        .accessibilityIdentifier("preset-load-confirm")
                 }
                 .sharedBackgroundVisibility(.hidden)
             }
@@ -47,6 +56,7 @@ struct LoadPresetSheet: View {
                 if let message = question.message { Text(verbatim: message) }
             }
         }
+        .noticeAlert($notice)
         .environment(\.isEnabled, true)
     }
 
@@ -89,8 +99,9 @@ struct LoadPresetSheet: View {
         run?.answer(question, accepted: accepted)
         run?.current = nil
         // An alert ignores a new one while it still animates out (CLAUDE.md): the next waits 0.4 s.
-        Task {
+        pause = Task {
             try? await Task.sleep(for: .milliseconds(400))
+            guard !Task.isCancelled else { return }
             run?.advance()
             finishIfDone()
         }
@@ -98,8 +109,13 @@ struct LoadPresetSheet: View {
 
     private func finishIfDone() {
         guard let run, run.isDone else { return }
-        mirror.apply(run.plan, accepting: run.accepted)
-        dismiss()
+        self.run = nil
+        switch mirror.apply(run.plan, accepting: run.accepted) {
+        case .sent: dismiss()
+        case .notLive: notice = String(localized: "Contact with the desk was lost. Nothing was loaded.")
+        case .heldBack(let count):
+            notice = String(localized: "^[\(count) setting](inflect: true) were left as they are: the gain changed on the desk meanwhile.")
+        }
     }
 }
 

@@ -141,6 +141,18 @@ struct PresetValidationTests {
         #expect(error == .notForStrip(field: "input.delayOn"))
     }
 
+    /// "03" would pass as send 3 but load nothing: the key is the number as plain digits, once.
+    @Test func aSendKeyThatIsNotThePlainNumberIsRefused() throws {
+        for key in ["03", "+3", " 3"] {
+            let error = try refusal { $0["sends"] = [key: ["levelDb": 0, "on": true]] }
+            #expect(error == .outOfRange(field: "sends.\(key)"), "\(key)")
+        }
+    }
+
+    @Test func aMatchWordTwiceIsRefused() throws {
+        #expect(try refusal { $0["matchWords"] = ["kick", "kick"] } == .badText(field: "matchWords[2]"))
+    }
+
     @Test func theErrorSaysWhichFieldInWords() {
         #expect(PresetError.outOfRange(field: "gate.thresholdDb").message.contains("gate.thresholdDb"))
         #expect(PresetError.unknownOption(field: "gate.mode", value: "SQUASH").message.contains("SQUASH"))

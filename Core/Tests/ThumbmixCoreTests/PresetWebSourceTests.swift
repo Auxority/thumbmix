@@ -218,6 +218,54 @@ struct PresetWebSourceTests {
         #expect(again.presets.isEmpty, "a tampered cache gives nothing")
     }
 
+    /// A venue's flaky Wi-Fi gives the index but not every file: the offline copy keeps what it had.
+    @Test func aReadThatLostAFileKeepsThatFilesLastCopy() async throws {
+        let host = "partial.test"
+        let cache = try makeTemporaryFolder()
+        defer { try? FileManager.default.removeItem(at: cache) }
+        route(host, index: try indexData(paths: ["kick.json"]), files: ["kick.json": try presetData("Kick")])
+        let source = PresetSource(name: "U", kind: .url(url(host)))
+        let reader = try reader(cache: cache)
+        _ = await reader.read(source)
+
+        StubRoutes.shared.set(url(host, "kick.json").absoluteString, .status(503))
+        let flaky = await reader.read(source)
+        #expect(flaky.presets.isEmpty)
+
+        StubRoutes.shared.set(url(host).absoluteString, .status(500))
+        let offline = await reader.read(source)
+        #expect(offline.presets.map(\.preset.name) == ["Kick"], "the earlier good copy survived the flaky read")
+    }
+
+    @Test func anIndexListingAFileTwiceIsRefused() async throws {
+        let host = "twice.test"
+        route(host, index: try indexData(paths: ["kick.json", "kick.json"]), files: ["kick.json": try presetData("Kick")])
+
+        let result = try await reader().read(PresetSource(name: "U", kind: .url(url(host))))
+
+        guard case .failed = result.status else {
+            Issue.record("a repeated path must fail the index")
+            return
+        }
+    }
+
+    /// The 10 s a request waits for the next byte is not a limit on the whole read: a server dripping bytes would hold it.
+    @Test func aReadThatNeverEndsGivesUpAtItsDeadline() async throws {
+        let host = "hang.test"
+        StubRoutes.shared.set(url(host).absoluteString, .hangs)
+        let reader = SourceReader(
+            session: StubRoutes.session(), cacheDirectory: try makeTemporaryFolder(), deadline: .milliseconds(300))
+
+        let started = ContinuousClock.now
+        let result = await reader.read(PresetSource(name: "U", kind: .url(url(host))))
+
+        #expect(ContinuousClock.now - started < .seconds(3))
+        guard case .failed = result.status else {
+            Issue.record("should fail: \(result.status)")
+            return
+        }
+    }
+
     @Test func aSourceNeverReadHasNothingToFallBackOn() async throws {
         let host = "nocache.test"
         StubRoutes.shared.set(url(host).absoluteString, .status(404))

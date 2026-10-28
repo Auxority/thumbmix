@@ -9,15 +9,24 @@ extension EnvironmentValues {
 /// A message the engineer must read: what went wrong, or what just happened. One alert for all of a screen's.
 private struct NoticeAlert: ViewModifier {
     @Binding var notice: String?
+    @State private var isShowing = false
 
     func body(content: Content) -> some View {
-        content.alert(
-            "Presets", isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })
-        ) {
-            Button("OK") {}
-        } message: {
-            Text(verbatim: notice ?? "")
-        }
+        content
+            // An alert ignores a new one while it still animates out (CLAUDE.md), and most notices answer a button of
+            // another alert: the notice waits 0.4 s, or the engineer would see nothing happen.
+            .onChange(of: notice) {
+                guard notice != nil else { return }
+                Task {
+                    try? await Task.sleep(for: .milliseconds(400))
+                    isShowing = notice != nil
+                }
+            }
+            .alert("Presets", isPresented: $isShowing) {
+                Button("OK") { notice = nil }
+            } message: {
+                Text(verbatim: notice ?? "")
+            }
     }
 }
 

@@ -65,12 +65,14 @@ public enum PresetValidation {
     private static func validateText(_ preset: Preset) throws {
         guard isPlain(preset.name, maxLength: maxNameLength) else { throw PresetError.badText(field: "name") }
         guard preset.matchWords.count <= maxMatchWords else { throw PresetError.badText(field: "matchWords") }
-        for (index, word) in preset.matchWords.enumerated() where !isPlain(word, maxLength: maxMatchWordLength) {
+        var seen = Set<String>()
+        for (index, word) in preset.matchWords.enumerated()
+        where !isPlain(word, maxLength: maxMatchWordLength) || !seen.insert(word).inserted {
             throw PresetError.badText(field: "matchWords[\(index + 1)]")
         }
     }
 
-    private static func isPlain(_ text: String, maxLength: Int) -> Bool {
+    static func isPlain(_ text: String, maxLength: Int) -> Bool {
         !text.trimmingCharacters(in: .whitespaces).isEmpty && text.count <= maxLength
             && !text.unicodeScalars.contains { $0.properties.generalCategory == .control }
     }
@@ -83,7 +85,8 @@ public enum PresetValidation {
         if let eq = preset.eq, eq.bands.count != strip.eqBandCount { throw PresetError.outOfRange(field: "eq.bands") }
         guard let sends = preset.sends else { return }
         guard let target = strip.kind.sendTarget else { throw PresetError.notForStrip(field: "sends") }
-        for key in sends.keys.sorted() where !(Int(key).map { (1...target.count).contains($0) } ?? false) {
+        // The key is the number as plain digits: "03" would pass as 3 but never be found when loading.
+        for key in sends.keys.sorted() where !(Int(key).map { String($0) == key && (1...target.count).contains($0) } ?? false) {
             throw PresetError.outOfRange(field: "sends.\(key)")
         }
     }

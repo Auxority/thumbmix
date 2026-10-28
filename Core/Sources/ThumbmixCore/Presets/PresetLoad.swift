@@ -12,6 +12,18 @@ public enum PartFit: Equatable, Sendable {
 public struct PresetWrite: Equatable, Sendable {
     public let address: String
     public let argument: OSCArgument
+    /// The level this write sets, and the controls (a linked partner's too) whose level it must not raise unasked:
+    /// checked again when the write is sent, since the desk may have moved during the alerts.
+    let target: Double
+    let raisingGuards: [ParamSpec]
+}
+
+/// What `apply` did: a load that was not sent, or held a write back, says so rather than looking done.
+public enum LoadOutcome: Equatable, Sendable {
+    case sent
+    case notLive
+    /// Writes left out because the gain or trim they set had meanwhile been lowered on the desk.
+    case heldBack(Int)
 }
 
 /// What loading a preset would write. `questions` hold the writes that need the engineer's yes first: raising the gain
@@ -36,8 +48,11 @@ extension ConsoleMirror {
         for part in PresetPart.allCases where parts.contains(part) && fit(of: part, in: preset, onto: strip) == .fits {
             for field in preset.fields(of: part, on: strip, headamp: headamp(of: strip)) {
                 guard let spec = field.spec, let real = field.real else { continue }
+                let guards = raisingGuards(field, spec, strip)
                 let write = PresetWrite(
-                    address: spec.address, argument: Catalog.deskArguments([(spec, real)])[0].argument)
+                    address: spec.address, argument: Catalog.deskArguments([(spec, real)])[0].argument,
+                    target: spec.scale.value(fromNormalized: spec.scale.normalized(forValue: real)),
+                    raisingGuards: guards)
                 switch judge(field, spec, write, preset: preset, strip: strip, locale: locale) {
                 case .plain: plan.writes.append(write)
                 case .unchanged: continue
@@ -50,10 +65,36 @@ extension ConsoleMirror {
 
     /// Sends the writes that need no answer, and those of each question the engineer confirmed. A question left out
     /// is a "Keep": its writes are dropped and the rest loads.
-    public func apply(_ plan: LoadPlan, accepting accepted: Set<Int>) {
-        for write in plan.writes { set(write.address, write.argument) }
+    @discardableResult
+    public func apply(_ plan: LoadPlan, accepting accepted: Set<Int>) -> LoadOutcome {
+        guard isLive else { return .notLive }
+        var heldBack = 0
+        for write in plan.writes {
+            if wouldRaise(write) { heldBack += 1 } else { set(write.address, write.argument) }
+        }
         for question in plan.questions where accepted.contains(question.id) {
             for write in question.writes { set(write.address, write.argument) }
+        }
+        return heldBack == 0 ? .sent : .heldBack(heldBack)
+    }
+
+    /// A write judged "lower, no question" that the desk's own level has meanwhile fallen under.
+    private func wouldRaise(_ write: PresetWrite) -> Bool {
+        write.raisingGuards.contains { value($0).map { $0 < write.target } ?? false }
+    }
+
+    /// The gain or trim, and the same control on a linked partner, which the desk copies the write to.
+    private func raisingGuards(_ field: PresetField, _ spec: ParamSpec, _ strip: StripID) -> [ParamSpec] {
+        guard field.role == .gain || field.role == .trim else { return [] }
+        return [spec] + (partnerSpec(field.role, strip).map { [$0] } ?? [])
+    }
+
+    private func partnerSpec(_ role: PresetField.Role?, _ strip: StripID) -> ParamSpec? {
+        guard let partner = gainDelayPartner(of: strip) else { return nil }
+        switch role {
+        case .gain: return headamp(of: partner).map(Catalog.headampGain)
+        case .trim: return Catalog.trim(partner)
+        default: return nil
         }
     }
 
@@ -111,8 +152,11 @@ extension ConsoleMirror {
         guard let role = field.role, let current = value(spec), let new = field.real else { return .plain }
         // The desk holds the value on its own grid: that is what the engineer would end up with.
         let snapped = spec.scale.value(fromNormalized: spec.scale.normalized(forValue: new))
-        guard snapped != current else { return .unchanged }
-        let change = PresetChange(role: role, from: current, to: snapped, writes: [write])
+        // The desk copies a gain or trim to a linked partner, so the lower of the two sides is what would rise most.
+        let sides = [current] + (partnerSpec(role, strip).flatMap { value($0) }.map { [$0] } ?? [])
+        guard sides.contains(where: { $0 != snapped }) else { return .unchanged }
+        let from = role == .gain || role == .trim ? sides.min() ?? current : current
+        let change = PresetChange(role: role, from: from, to: snapped, writes: [write])
         let who = PresetWho(self, strip, locale: locale)
         let mixes = role == .compPosition ? mixesChangedByMovingComp(of: strip) ?? [] : []
         return change.question(who, mixes: mixes).map { .ask($0) } ?? .plain

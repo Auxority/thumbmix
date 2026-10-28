@@ -27,8 +27,11 @@ public enum LibraryError: Error, Equatable, Sendable {
 public final class PresetLibrary {
     public private(set) var sources: [PresetSource]
     public private(set) var results: [UUID: SourceResult] = [:]
-    public private(set) var isRefreshing = false
+    public var isRefreshing: Bool { refreshes > 0 }
 
+    private var refreshes = 0
+    /// Counts the reads of On this iPhone: only the newest may set its result, so an older read can't undo a save.
+    @ObservationIgnored private var ownReads = 0
     @ObservationIgnored private let store: PresetSourceStore
     @ObservationIgnored private let reader: SourceReader
     @ObservationIgnored private let ownFolder: URL
@@ -37,31 +40,33 @@ public final class PresetLibrary {
     /// `includesDefaultSource` is false in UI tests: no network there.
     public init(
         supportDirectory: URL, ownFolder: URL, cacheDirectory: URL, session: URLSession = .shared,
-        includesDefaultSource: Bool = true
+        includesDefaultSource: Bool = true, webDeadline: Duration = .seconds(30)
     ) {
         store = PresetSourceStore(
             file: supportDirectory.appendingPathComponent("sources.json"), includesDefaultSource: includesDefaultSource)
-        reader = SourceReader(session: session, cacheDirectory: cacheDirectory, ownFolder: ownFolder)
+        reader = SourceReader(
+            session: session, cacheDirectory: cacheDirectory, ownFolder: ownFolder, deadline: webDeadline)
         self.ownFolder = ownFolder
         sources = store.load()
     }
 
     // MARK: Reading
 
-    /// Reads every source at once. One that fails keeps its place with its reason; the rest are not held up.
+    /// Reads every source at once, each result shown as it arrives: On this iPhone first, so a web source that never
+    /// answers holds nothing up. One that fails keeps its place with its reason.
     public func refresh() async {
-        isRefreshing = true
-        defer { isRefreshing = false }
+        refreshes += 1
+        defer { refreshes -= 1 }
         let reader = reader
-        let read = await withTaskGroup(of: (UUID, SourceResult).self) { group in
-            for source in sources { group.addTask { (source.id, await reader.read(source)) } }
-            var all: [UUID: SourceResult] = [:]
-            for await (id, result) in group { all[id] = result }
-            return all
-        }
-        results = read.filter { id, _ in sources.contains { $0.id == id } }
-        for (id, result) in results {
-            if case .failed(let reason) = result.status { log.notice("source \(id, privacy: .public): \(reason, privacy: .public)") }
+        await refreshOwn()
+        await withTaskGroup(of: (PresetSource, SourceResult).self) { group in
+            for source in sources where source.isRemovable { group.addTask { (source, await reader.read(source)) } }
+            for await (source, result) in group where sources.contains(where: { $0.id == source.id }) {
+                results[source.id] = result
+                if case .failed(let reason) = result.status {
+                    log.notice("source \(source.id, privacy: .public): \(reason, privacy: .public)")
+                }
+            }
         }
     }
 
@@ -110,6 +115,7 @@ public final class PresetLibrary {
         guard source.isRemovable else { return }
         sources.removeAll { $0.id == source.id }
         results[source.id] = nil
+        reader.forgetCache(of: source)
         persist()
     }
 
@@ -145,15 +151,15 @@ public final class PresetLibrary {
     public func replace(_ entry: LibraryEntry, with preset: Preset) async throws -> LibraryEntry {
         guard entry.source.isWritable else { throw LibraryError.readOnly }
         try PresetValidation.validate(preset)
-        guard preset.name != entry.preset.name else {
-            try write(preset, to: entry.file)
-            await refreshOwn()
-            return LibraryEntry(source: entry.source, file: entry.file, preset: preset)
-        }
         var renamed = preset
-        let file = uniqueFile(for: &renamed.name)
-        try write(renamed, to: file)
-        try FileManager.default.removeItem(at: ownFolder.appendingPathComponent(entry.file))
+        let file = preset.name == entry.preset.name ? entry.file : uniqueFile(for: &renamed.name, except: entry.file)
+        try write(renamed, to: entry.file)
+        // A move, not a second file: on a case-insensitive disk "kick" and "Kick" are one file, which a write and a
+        // delete would remove.
+        if file != entry.file {
+            try FileManager.default.moveItem(
+                at: ownFolder.appendingPathComponent(entry.file), to: ownFolder.appendingPathComponent(file))
+        }
         await refreshOwn()
         return LibraryEntry(source: entry.source, file: file, preset: renamed)
     }
@@ -181,7 +187,10 @@ public final class PresetLibrary {
     }
 
     private func refreshOwn() async {
-        results[PresetSource.onThisIPhone.id] = await reader.read(.onThisIPhone)
+        ownReads += 1
+        let mine = ownReads
+        let result = await reader.read(.onThisIPhone)
+        if mine == ownReads { results[PresetSource.onThisIPhone.id] = result }
     }
 
     private func write(_ preset: Preset, to file: String) throws {
@@ -190,20 +199,26 @@ public final class PresetLibrary {
     }
 
     /// The first free file name for `name`, which becomes the name with its number.
-    private func uniqueFile(for name: inout String) -> String {
-        let taken = Set(((try? FileManager.default.contentsOfDirectory(atPath: ownFolder.path)) ?? []).map { $0.lowercased() })
+    /// `except` is the file being renamed: its own old name is not a clash.
+    private func uniqueFile(for name: inout String, except own: String? = nil) -> String {
+        let listed = (try? FileManager.default.contentsOfDirectory(atPath: ownFolder.path)) ?? []
+        let taken = Set(listed.filter { $0 != own }.map { $0.lowercased() })
         var candidate = name
         var number = 1
         while taken.contains(Self.fileName(for: candidate).lowercased()) {
             number += 1
-            candidate = "\(name) \(number)"
+            // Cut the name, not the number: a numbered name must still be a name the app accepts.
+            let suffix = " \(number)"
+            candidate = String(name.prefix(PresetValidation.maxNameLength - suffix.count)) + suffix
         }
         name = candidate
         return Self.fileName(for: candidate)
     }
 
     private static func fileName(for name: String) -> String {
-        let cleaned = String(name.map { "/\\:*?\"<>|".contains($0) ? "-" : $0 }).trimmingCharacters(in: .whitespaces)
+        // No leading dot: a hidden file is never listed.
+        let replaced = String(name.map { "/\\:*?\"<>|".contains($0) ? "-" : $0 })
+        let cleaned = String(replaced.drop { $0 == "." }).trimmingCharacters(in: .whitespaces)
         return (cleaned.isEmpty ? "Preset" : cleaned) + ".json"
     }
 }

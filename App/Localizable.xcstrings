@@ -146,6 +146,9 @@
     "^[%lld preset](inflect: true)" : {
 
     },
+    "^[%lld setting](inflect: true) were left as they are: the gain changed on the desk meanwhile." : {
+
+    },
     "^[%lld strip](inflect: true)" : {
 
     },
@@ -231,6 +234,9 @@
 
     },
     "Consoles" : {
+
+    },
+    "Contact with the desk was lost. Nothing was loaded." : {
 
     },
     "Cyan" : {

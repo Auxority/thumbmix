@@ -6,7 +6,9 @@ import UniformTypeIdentifiers
 struct SourcesPage: View {
     let library: PresetLibrary
     let mirror: ConsoleMirror
-    @State private var picking: Pick?
+    /// What the picker was opened for, set before it opens: the completion can run after the sheet's own state reset.
+    @State private var pick = Pick.folder
+    @State private var isPicking = false
     @State private var isAskingForAddress = false
     @State private var address = ""
     @State private var notice: String?
@@ -44,19 +46,16 @@ struct SourcesPage: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu("Add", systemImage: "plus") {
-                    Button("Folder…", systemImage: "folder") { picking = .folder }
-                    Button("File…", systemImage: "doc") { picking = .file }
+                    Button("Folder…", systemImage: "folder") { open(.folder) }
+                    Button("File…", systemImage: "doc") { open(.file) }
                     Button("Web address…", systemImage: "network") { isAskingForAddress = true }
                 }
                 .accessibilityIdentifier("sources-add")
             }
         }
         .refreshable { await library.refresh() }
-        .fileImporter(
-            isPresented: Binding(get: { picking != nil }, set: { if !$0 { picking = nil } }),
-            allowedContentTypes: picking?.types ?? [.json]
-        ) { result in
-            add(result, as: picking)
+        .fileImporter(isPresented: $isPicking, allowedContentTypes: pick.types) { result in
+            add(result, as: pick)
         }
         .alert("Add a web address", isPresented: $isAskingForAddress) {
             TextField("https://…/index.json", text: $address).textInputAutocapitalization(.never).keyboardType(.URL)
@@ -72,7 +71,12 @@ struct SourcesPage: View {
         Button("Remove", role: .destructive) { library.remove(source) }
     }
 
-    private func add(_ result: Result<URL, Error>, as pick: Pick?) {
+    private func open(_ kind: Pick) {
+        pick = kind
+        isPicking = true
+    }
+
+    private func add(_ result: Result<URL, Error>, as pick: Pick) {
         do {
             let url = try result.get()
             if pick == .folder { try library.addFolder(url) } else { try library.addFile(url) }
@@ -105,7 +109,7 @@ private struct SourceRow: View {
             }
             if let result = library.results[source.id] {
                 Text(verbatim: status(result)).font(.footnote).foregroundStyle(color(result))
-                ForEach(result.skipped, id: \.file) { skipped in
+                ForEach(Array(result.skipped.enumerated()), id: \.offset) { _, skipped in
                     Text(verbatim: "\(skipped.file): \(skipped.reason)").font(.footnote).foregroundStyle(.orange)
                 }
             }

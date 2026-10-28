@@ -207,7 +207,7 @@ private struct MatchWordsSheet: View {
         NavigationStack {
             List {
                 Section {
-                    ForEach(words, id: \.self) { word in
+                    ForEach(Array(words.enumerated()), id: \.offset) { _, word in
                         HStack {
                             Text(verbatim: word)
                             Spacer()

@@ -40,11 +40,21 @@ public struct SourceReader: Sendable {
     let cacheDirectory: URL
     /// Where On this iPhone keeps its files.
     let ownFolder: URL?
+    /// How long a whole web read may take, however many requests it makes.
+    let deadline: Duration
 
-    public init(session: URLSession = .shared, cacheDirectory: URL, ownFolder: URL? = nil) {
+    public init(
+        session: URLSession = .shared, cacheDirectory: URL, ownFolder: URL? = nil, deadline: Duration = .seconds(30)
+    ) {
         self.session = session
         self.cacheDirectory = cacheDirectory
         self.ownFolder = ownFolder
+        self.deadline = deadline
+    }
+
+    /// Forgets a removed source's last good read: a source added again starts from nothing.
+    func forgetCache(of source: PresetSource) {
+        try? FileManager.default.removeItem(at: cacheFile(for: source))
     }
 
     public func read(_ source: PresetSource) async -> SourceResult {
