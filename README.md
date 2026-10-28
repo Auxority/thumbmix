@@ -36,6 +36,12 @@ Join the console's Wi-Fi and open Thumbmix. It scans the network and lists every
 
 No console nearby? **Try a demo console** runs a demo M32 inside the app, so every screen works without a mixer. A DEMO pill at the top of the screen shows it isn't a real desk, and each visit starts from a fresh demo desk.
 
+## Presets
+
+Save a strip's settings (input, EQ, gate, comp, and if you like fader and sends) and load them onto any strip that can take them. Tap the strip's name, then **Presets**. A strip whose name contains a preset's match words lists it first. Loading asks before it raises the gain, switches 48V or flips polarity; saying Keep skips only that one setting.
+
+Presets come from **sources** (Presets → Sources): the folder on this iPhone where Save writes (it shows in the Files app under Thumbmix, so you can edit or share the `.json` files), any folder or file you pick in Files, or a web address of an index like a SideStore source. The default web source is this repo's [`presets/`](presets): add your own by sending a pull request, or host a folder of your own with an `index.json` (`"format": "thumbmix-source"`, `"version": 1`, `"name"`, and `"presets": [{"path": "kick.json"}]` with plain relative paths). A preset file is JSON in real units (`"format": "thumbmix-preset"`, `"version": 1`); anything the desk couldn't take is refused and named, never clamped.
+
 ## Report a problem
 
 Saw something go wrong? Shake the phone while Thumbmix is open, tap **Share**, and attach the file to a [new issue](../../issues/new) with what you did and what you expected. The file holds what Thumbmix logged since it opened: desk and channel names and network addresses, nothing about you. Share it before closing the app; a fresh start begins a new log.
