@@ -36,7 +36,7 @@ struct SourcesPage: View {
             isPresented: Binding(get: { picking != nil }, set: { if !$0 { picking = nil } }),
             allowedContentTypes: picking == .file ? [.json] : [.folder]
         ) { result in
-            add(result, as: picking)
+            add(result)
         }
         .alert("Add a web source", isPresented: $isAskingForAddress) {
             TextField("https://…/index.json", text: $address).textInputAutocapitalization(.never).keyboardType(.URL)
@@ -65,11 +65,11 @@ struct SourcesPage: View {
         .background(Theme.background)
     }
 
-    /// The bookmark is made here, while the picker's URL still grants access.
-    private func add(_ result: Result<URL, Error>, as kind: PickedKind?) {
+    /// The bookmark is made here, while the picker's URL still grants access. `picking` is already cleared by now
+    /// (the importer closes first), so Core tells a folder from a file by the item itself.
+    private func add(_ result: Result<URL, Error>) {
         do {
-            let url = try result.get()
-            let added = kind == .file ? try library.addFile(url) : try library.addFolder(url)
+            let added = try library.addPicked(try result.get())
             Task { await library.refreshSources([added]) }
         } catch {
             notice = error.localizedDescription

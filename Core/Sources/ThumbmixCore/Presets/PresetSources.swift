@@ -15,6 +15,8 @@ public struct SourceResult: Equatable, Sendable {
     public var status: SourceStatus = .ok
     /// The name a web source's index gives itself.
     public var title: String?
+    /// A folder's or file's new bookmark, when the one it had was stale: the library keeps it.
+    var freshBookmark: Data?
 
     static func failed(_ reason: String) -> SourceResult { SourceResult(status: .failed(reason)) }
 }

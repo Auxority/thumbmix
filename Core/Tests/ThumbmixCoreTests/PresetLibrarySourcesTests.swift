@@ -152,7 +152,7 @@ struct PresetLibrarySourcesTests {
         try presetData("Snare").write(to: picked.appendingPathComponent("snare.json"))
         let library = library()
         try library.addSource(sourceURL("mixed.test").absoluteString)
-        let folder = try library.addFolder(picked)
+        let folder = try library.addPicked(picked)
 
         await library.refreshSources()
 
@@ -172,13 +172,61 @@ struct PresetLibrarySourcesTests {
         try presetData("Tom").write(to: file)
         let library = library()
 
-        let source = try library.addFile(file)
+        let source = try library.addPicked(file)
         await library.refreshSources()
 
         let entry = try #require(library.entries.first)
         #expect(entry.preset.name == "Tom")
         #expect(library.title(of: source.id) == "tom.json")
         #expect(throws: LibraryError.readOnly) { try library.remove(entry) }
+    }
+
+    /// The Files picker's callback can't be trusted to say which button opened it: the URL says what was picked.
+    @Test func aPickedURLIsAFolderOrAFileByWhatItIs() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        let picked = root.appendingPathComponent("Kit")
+        try FileManager.default.createDirectory(at: picked, withIntermediateDirectories: true)
+        try presetData("Snare").write(to: picked.appendingPathComponent("snare.json"))
+        let file = root.appendingPathComponent("tom.json")
+        try presetData("Tom").write(to: file)
+        let library = library()
+
+        let folder = try library.addPicked(picked)
+        let single = try library.addPicked(file)
+        await library.refreshSources()
+
+        guard case .folder = folder.kind, case .file = single.kind else {
+            Issue.record("a folder and a file, got \(folder.kind) and \(single.kind)")
+            return
+        }
+        #expect(library.entries.map(\.preset.name).sorted() == ["Snare", "Tom"])
+    }
+
+    /// A moved folder leaves a stale bookmark that still opens it: read through it and keep a fresh one, so the folder
+    /// stays live instead of falling back to its copy and asking to be picked again.
+    @Test func aMovedFolderIsStillReadAndKeepsAFreshBookmark() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        let picked = root.appendingPathComponent("Before")
+        try FileManager.default.createDirectory(at: picked, withIntermediateDirectories: true)
+        try presetData("Snare").write(to: picked.appendingPathComponent("snare.json"))
+        let library = library()
+        let folder = try library.addPicked(picked)
+        await library.refreshSources()
+
+        try FileManager.default.moveItem(at: picked, to: root.appendingPathComponent("After"))
+        await library.refreshSources()
+
+        #expect(library.results[folder]?.status == .ok)
+        #expect(library.entries.map(\.preset.name) == ["Snare"])
+        let next = self.library()
+        #expect(next.sources.map(\.id) == [folder.id], "the same source, so its copy and status stay")
+        guard case .folder(let old) = folder.kind, case .folder(let kept)? = next.sources.first?.kind else {
+            Issue.record("still a folder source")
+            return
+        }
+        #expect(kept != old, "the fresh bookmark was kept")
+        await next.refreshSources()
+        #expect(next.results[folder]?.status == .ok)
     }
 
     @Test func aFolderOrFilePickedTwiceIsOneSource() throws {
@@ -189,11 +237,11 @@ struct PresetLibrarySourcesTests {
         try presetData("Tom").write(to: file)
         let library = library()
 
-        let folder = try library.addFolder(picked)
+        let folder = try library.addPicked(picked)
         // The picker may hand back the same folder by another spelling.
-        #expect(try library.addFolder(URL(fileURLWithPath: picked.path + "/")) == folder)
-        let single = try library.addFile(file)
-        #expect(try library.addFile(file) == single)
+        #expect(try library.addPicked(URL(fileURLWithPath: picked.path + "/")) == folder)
+        let single = try library.addPicked(file)
+        #expect(try library.addPicked(file) == single)
 
         #expect(library.sources == [folder, single])
     }

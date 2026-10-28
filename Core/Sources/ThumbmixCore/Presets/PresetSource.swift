@@ -35,6 +35,19 @@ public struct PresetSource: Codable, Hashable, Identifiable, Sendable {
 
     private static func newID() -> String { "picked-" + UUID().uuidString }
 
+    /// The same source, kept by a fresh bookmark: its id, and with it its offline copy and status, stay.
+    func withBookmark(_ bookmark: Data) -> PresetSource {
+        switch kind {
+        case .web: self
+        case .folder: PresetSource(kind: .folder(bookmark: bookmark), name: name, id: id)
+        case .file: PresetSource(kind: .file(bookmark: bookmark), name: name, id: id)
+        }
+    }
+
+    /// One source by its id: a refreshed bookmark is still the source the list, its result and its copy know.
+    public static func == (lhs: PresetSource, rhs: PresetSource) -> Bool { lhs.id == rhs.id }
+    public func hash(into hasher: inout Hasher) { hasher.combine(id) }
+
     public var webAddress: URL? {
         if case .web(let url) = kind { return url }
         return nil
@@ -66,6 +79,13 @@ enum BookmarkAccess {
         return try url.bookmarkData(options: creation, includingResourceValuesForKeys: nil, relativeTo: nil)
     }
 
+    /// What was picked, from the item itself: the picker's URL may or may not end in "/" for a folder.
+    static func isFolder(_ url: URL) -> Bool {
+        let opened = url.startAccessingSecurityScopedResource()
+        defer { if opened { url.stopAccessingSecurityScopedResource() } }
+        return (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? url.hasDirectoryPath
+    }
+
     /// Where a URL or bookmark points, spelled one way: the picker may give one folder as "/a/b" and "/private/a/b/".
     static func path(of url: URL) -> String { url.resolvingSymlinksInPath().standardizedFileURL.path }
 
@@ -75,15 +95,17 @@ enum BookmarkAccess {
         return url.map(path(of:))
     }
 
-    /// Access is held only while `body` runs: an unbalanced start leaks kernel resources.
-    static func withAccess<T>(_ bookmark: Data, _ body: (URL) -> T) throws -> T {
+    /// Access is held only while `body` runs: an unbalanced start leaks kernel resources. `fresh` is a new bookmark
+    /// when this one was stale (the item moved): it still opens the item, and the new one keeps opening it.
+    static func withAccess<T>(_ bookmark: Data, _ body: (URL) -> T) throws -> (value: T, fresh: Data?) {
         var stale = false
         let url = try URL(resolvingBookmarkData: bookmark, options: resolution, relativeTo: nil, bookmarkDataIsStale: &stale)
-        // A stale bookmark means the item moved or the access lapsed: the engineer picks it again.
-        guard !stale, FileManager.default.fileExists(atPath: url.path) else { throw CocoaError(.fileNoSuchFile) }
         let opened = url.startAccessingSecurityScopedResource()
         defer { if opened { url.stopAccessingSecurityScopedResource() } }
-        return body(url)
+        // Checked inside the access: the sandbox may refuse even a look at another provider's item without it.
+        guard FileManager.default.fileExists(atPath: url.path) else { throw CocoaError(.fileNoSuchFile) }
+        let fresh = stale ? try? url.bookmarkData(options: creation, includingResourceValuesForKeys: nil, relativeTo: nil) : nil
+        return (body(url), fresh)
     }
 }
 
@@ -93,10 +115,19 @@ enum PresetFiles {
     typealias Fetched = PresetSources.Fetched
 
     static var notFoundText: String { CoreStrings.text("Not found. Pick it again.") }
+    static var stillDownloadingText: String { CoreStrings.text("Still downloading from iCloud. Refresh in a moment.") }
+
+    /// A file iCloud keeps elsewhere: a coordinated read would wait for the download, offline for good.
+    struct StillDownloading: LocalizedError {
+        var errorDescription: String? { PresetFiles.stillDownloadingText }
+    }
 
     /// nil when the bookmark no longer opens the folder or file.
     static func read(_ bookmark: Data, of source: PresetSource, _ read: (URL, String) -> Fetched?) -> Fetched? {
-        (try? BookmarkAccess.withAccess(bookmark) { read($0, source.id) }) ?? nil
+        guard let opened = try? BookmarkAccess.withAccess(bookmark, { read($0, source.id) }), var fetched = opened.value
+        else { return nil }
+        fetched.result.freshBookmark = opened.fresh
+        return fetched
     }
 
     /// One file: a refused one fails the source with its reason.
@@ -142,9 +173,10 @@ enum PresetFiles {
     /// A file iCloud Drive hasn't downloaded shows as ".name.json.icloud": ask for it now, it is there on the next read.
     private static func iCloudPlaceholders(in names: [String], _ folder: URL) -> [SkippedFile] {
         names.filter { $0.hasPrefix(".") && $0.lowercased().hasSuffix(".json.icloud") }.sorted().map { placeholder in
-            try? FileManager.default.startDownloadingUbiquitousItem(at: folder.appendingPathComponent(placeholder))
             let real = String(placeholder.dropFirst().dropLast(".icloud".count))
-            return SkippedFile(file: real, reason: CoreStrings.text("Still downloading from iCloud. Refresh in a moment."))
+            // The real item's URL, not the placeholder's: the placeholder is only how the folder lists it.
+            try? FileManager.default.startDownloadingUbiquitousItem(at: folder.appendingPathComponent(real))
+            return SkippedFile(file: real, reason: stillDownloadingText)
         }
     }
 
@@ -152,8 +184,12 @@ enum PresetFiles {
 
     /// The size is checked before the file is read: a huge file never fills memory.
     private static func data(at url: URL) throws -> Data {
-        let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-        guard size <= PresetValidation.maxBytes else { throw PresetError.tooLarge }
+        let values = try url.resourceValues(forKeys: [.fileSizeKey, .isUbiquitousItemKey, .ubiquitousItemDownloadingStatusKey])
+        if values.isUbiquitousItem == true, values.ubiquitousItemDownloadingStatus != .current {
+            try? FileManager.default.startDownloadingUbiquitousItem(at: url)
+            throw StillDownloading()
+        }
+        guard values.fileSize ?? 0 <= PresetValidation.maxBytes else { throw PresetError.tooLarge }
         return try coordinatedData(url)
     }
 

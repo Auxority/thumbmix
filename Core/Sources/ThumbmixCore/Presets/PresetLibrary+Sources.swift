@@ -26,6 +26,10 @@ extension PresetLibrary {
         guard sources.contains(source) else { return web.forgetCache(of: source) }
         guard !Task.isCancelled else { return }
         results[source] = result
+        if let fresh = result.freshBookmark, let index = sources.firstIndex(of: source) {
+            sources[index] = sources[index].withBookmark(fresh)
+            persist()
+        }
         if case .failed(let reason) = result.status {
             Self.log.notice("source \(source.id, privacy: .private) failed: \(reason, privacy: .public)")
         }
@@ -48,23 +52,19 @@ extension PresetLibrary {
         return source
     }
 
-    /// A folder picked in Files: call it inside the picker's callback, while the URL still grants access. One picked
-    /// before is that source.
+    /// A folder or file picked in Files, by what the item is: the picker's callback can't say which button opened it.
+    /// Call it inside the callback, while the URL still grants access. One picked before is that source, kept by the
+    /// new bookmark, which also mends a source whose old bookmark went stale.
     @discardableResult
-    public func addFolder(_ url: URL) throws -> PresetSource {
-        if let picked = sources.first(where: { $0.isPicked(url) }) { return picked }
-        let source = try PresetSource.folder(url)
-        add(source)
-        return source
-    }
-
-    /// A single preset file picked in Files, as `addFolder`.
-    @discardableResult
-    public func addFile(_ url: URL) throws -> PresetSource {
-        if let picked = sources.first(where: { $0.isPicked(url) }) { return picked }
-        let source = try PresetSource.file(url)
-        add(source)
-        return source
+    public func addPicked(_ url: URL) throws -> PresetSource {
+        let picked = try BookmarkAccess.isFolder(url) ? PresetSource.folder(url) : PresetSource.file(url)
+        guard let index = sources.firstIndex(where: { $0.isPicked(url) }) else {
+            add(picked)
+            return picked
+        }
+        sources[index] = PresetSource(kind: picked.kind, name: picked.name, id: sources[index].id)
+        persist()
+        return sources[index]
     }
 
     /// Its presets go with it, and its offline copy too.
