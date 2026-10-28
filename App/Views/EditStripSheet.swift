@@ -42,6 +42,7 @@ struct EditStripSheet: View {
                             name: $partnerName, identifier: "strip-name-partner")
                     }
                     StripColorPicker(color: $color)
+                    if strip.kind != .dca { PresetsRow(strip: strip, mirror: mirror) }
                     GroupSections(strip: strip, sides: typedSides, mirror: mirror, draft: $groups)
                 }
                 .padding(16)

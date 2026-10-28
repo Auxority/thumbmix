@@ -114,6 +114,16 @@
     "%lld" : {
 
     },
+    "%lld fit “%@”" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld fit “%2$@”"
+          }
+        }
+      }
+    },
     "%lld soloed" : {
 
     },
@@ -130,10 +140,22 @@
         }
       }
     },
+    "^[%lld setting](inflect: true) were left as they are: the desk changed meanwhile." : {
+
+    },
     "^[%lld strip](inflect: true)" : {
 
     },
+    "48V changes and a higher gain ask first." : {
+
+    },
     "192.168.1.62" : {
+
+    },
+    "A strip fits when its name contains one of these words, whatever the case." : {
+
+    },
+    "Add" : {
 
     },
     "Also changes the gain of %@ (same input)." : {
@@ -158,6 +180,12 @@
 
     },
     "Blue" : {
+
+    },
+    "Built-in" : {
+
+    },
+    "Built-in · read-only" : {
 
     },
     "Can't reach %@" : {
@@ -199,6 +227,9 @@
     "Consoles" : {
 
     },
+    "Contact with the desk was lost. Nothing was loaded." : {
+
+    },
     "Cyan" : {
 
     },
@@ -236,6 +267,9 @@
     "Each can be set on its own again." : {
 
     },
+    "Edit match words" : {
+
+    },
     "Edit name, colour and icon" : {
 
     },
@@ -261,6 +295,12 @@
 
     },
     "Fader and mute aren't linked on the desk." : {
+
+    },
+    "Fits" : {
+
+    },
+    "Fits “%@”" : {
 
     },
     "Flipped" : {
@@ -309,6 +349,12 @@
 
     },
     "Icon" : {
+
+    },
+    "Import a preset file…" : {
+
+    },
+    "Imported “%@” to this iPhone." : {
 
     },
     "In this mix" : {
@@ -375,6 +421,15 @@
     "Listens to" : {
 
     },
+    "Load" : {
+
+    },
+    "Load onto %@" : {
+
+    },
+    "Load onto %@…" : {
+
+    },
     "Low cut off" : {
 
     },
@@ -388,6 +443,12 @@
 
     },
     "Make this send a subgroup?" : {
+
+    },
+    "Match words" : {
+
+    },
+    "Match words, separated by commas" : {
 
     },
     "Move" : {
@@ -437,6 +498,9 @@
     "Name · %@" : {
 
     },
+    "New word" : {
+
+    },
     "No colour" : {
 
     },
@@ -446,7 +510,13 @@
     "No preamp: this channel reads from an internal source." : {
 
     },
+    "No presets yet. Save this strip as one, or import a file." : {
+
+    },
     "No slot picked on the desk" : {
+
+    },
+    "No strip on this desk is named like this." : {
 
     },
     "No Wi-Fi. Join the desk's Wi-Fi, then scan again." : {
@@ -479,6 +549,9 @@
     "On" : {
 
     },
+    "On this iPhone" : {
+
+    },
     "Online" : {
 
     },
@@ -488,13 +561,40 @@
     "Other consoles" : {
 
     },
+    "Others" : {
+
+    },
     "Polarity" : {
+
+    },
+    "Presets" : {
 
     },
     "R only" : {
 
     },
+    "reading…" : {
+
+    },
     "Red" : {
+
+    },
+    "Remove" : {
+
+    },
+    "Remove “%@”?" : {
+
+    },
+    "Remove %@" : {
+
+    },
+    "Remove preset" : {
+
+    },
+    "Rename" : {
+
+    },
+    "Rename preset" : {
 
     },
     "Reset" : {
@@ -544,6 +644,21 @@
 
     },
     "RTA: waiting for the desk…" : {
+
+    },
+    "Save" : {
+
+    },
+    "Save a copy" : {
+
+    },
+    "Save as preset" : {
+
+    },
+    "Save this strip as a preset…" : {
+
+    },
+    "Saved “%@” on this iPhone." : {
 
     },
     "Scan again" : {
@@ -606,6 +721,12 @@
     "Stereo link %@" : {
 
     },
+    "Strips named %@" : {
+
+    },
+    "Strips whose names contain a match word list this preset first." : {
+
+    },
     "Syncing %lld%%" : {
 
     },
@@ -630,7 +751,13 @@
     "The demo didn't start" : {
 
     },
+    "The desk hasn't sent every value yet. Try again in a moment." : {
+
+    },
     "The desk keeps one solo at a time. Turn it off?" : {
+
+    },
+    "The file is deleted from this iPhone." : {
 
     },
     "They'll work as one stereo channel." : {
@@ -640,6 +767,9 @@
 
     },
     "Thumbmix only works with the Midas M32." : {
+
+    },
+    "Tick at least one part to keep." : {
 
     },
     "To attach to a GitHub issue about a problem you just saw." : {
