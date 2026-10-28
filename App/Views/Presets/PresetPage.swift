@@ -55,11 +55,16 @@ struct PresetPage: View {
         Section {
             HStack {
                 Text(verbatim: preset.name).font(.title2.bold())
-                Button("Rename", systemImage: "pencil") {
-                    newName = preset.name
-                    isRenaming = true
+                if entry.isOwn {
+                    Button("Rename", systemImage: "pencil") {
+                        newName = preset.name
+                        isRenaming = true
+                    }
+                    .labelStyle(.iconOnly).accessibilityIdentifier("preset-rename")
                 }
-                .labelStyle(.iconOnly).accessibilityIdentifier("preset-rename")
+            }
+            if let source = entry.source {
+                Text("From \(library.title(of: source)) · read-only").foregroundStyle(Theme.secondaryText)
             }
         }
         .listRowBackground(Color.clear)
@@ -78,7 +83,9 @@ struct PresetPage: View {
                 Text("Strips named \(preset.matchWords.formatted(.list(type: .or)))").font(.footnote)
                     .foregroundStyle(Theme.secondaryText)
             }
-            Button("Edit match words") { isEditingWords = true }.accessibilityIdentifier("preset-edit-words")
+            if entry.isOwn {
+                Button("Edit match words") { isEditingWords = true }.accessibilityIdentifier("preset-edit-words")
+            }
         }
         .listRowBackground(Theme.track)
     }
@@ -98,7 +105,11 @@ struct PresetPage: View {
             Button("Load onto \(mirror.name(strip))…") { isLoading = true }
                 .buttonStyle(.wideProminentDarkCapsule)
                 .disabled(!mirror.isLive).accessibilityIdentifier("preset-load")
-            Button("Remove preset", role: .destructive) { isConfirmingRemove = true }
+            if entry.isOwn {
+                Button("Remove preset", role: .destructive) { isConfirmingRemove = true }
+            } else {
+                Button("Save a copy") { saveCopy() }
+            }
         }
         .padding(16)
         .background(Theme.background)
@@ -117,6 +128,16 @@ struct PresetPage: View {
         renamed.name = newName.trimmingCharacters(in: .whitespaces)
         do {
             entry = try library.replace(entry, with: renamed)
+        } catch {
+            notice = error.localizedDescription
+        }
+    }
+
+    /// A source's preset changes only as a copy On this iPhone.
+    private func saveCopy() {
+        do {
+            let copy = try library.save(preset)
+            notice = String(localized: "Saved “\(copy.preset.name)” to this iPhone.")
         } catch {
             notice = error.localizedDescription
         }

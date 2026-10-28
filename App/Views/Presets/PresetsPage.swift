@@ -32,7 +32,7 @@ struct PresetsRow: View {
     private var summary: String? {
         let name = mirror.rawName(strip)
         guard let library, !name.isEmpty else { return nil }
-        let fitting = library.own.filter { PresetMatching.fits($0.preset, name: name) }.count
+        let fitting = library.entries.filter { PresetMatching.fits($0.preset, name: name) }.count
         return fitting == 0 ? nil : String(localized: "\(fitting) fit “\(name)”")
     }
 }
@@ -77,8 +77,17 @@ private struct PresetsList: View {
         .presetPage(mirror)
         .navigationTitle("Presets")
         .navigationBarTitleDisplayMode(.inline)
-        .task(id: mirror.isLive) { open() }
-        .refreshable { library.refresh() }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                NavigationLink("Sources") { SourcesPage(library: library, mirror: mirror) }
+                    .accessibilityIdentifier("presets-sources")
+            }
+        }
+        .task(id: mirror.isLive) { await open() }
+        .refreshable {
+            library.refresh()
+            await library.refreshSources()
+        }
         .sheet(isPresented: $isSaving) { SavePresetSheet(strip: strip, mirror: mirror, library: library) }
         .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
             importFile(result)
@@ -92,7 +101,7 @@ private struct PresetsList: View {
                 NavigationLink {
                     PresetPage(entry: entry, strip: strip, mirror: mirror, library: library)
                 } label: {
-                    PresetListRow(entry: entry)
+                    PresetListRow(entry: entry, source: entry.source.map(library.title(of:)))
                 }
                 .accessibilityIdentifier("preset-row-" + entry.preset.name)
             }
@@ -100,11 +109,12 @@ private struct PresetsList: View {
         .listRowBackground(Theme.track)
     }
 
-    /// Reads every tab of the strip, so the load and save sheets find their values read, and the files again, so an
-    /// edit made in Files shows up.
-    private func open() {
+    /// Reads every tab of the strip, so the load and save sheets find their values read, and the presets again, so an
+    /// edit made in Files or on the web shows up.
+    private func open() async {
         for tab in ChannelTab.presetTabs(for: strip.kind) { mirror.read(tab, of: strip) }
         library.refresh()
+        await library.refreshSources()
     }
 
     /// Files in the Presets folder the app doesn't take, each with why: whoever edited one in Files can fix it.
@@ -129,11 +139,13 @@ private struct PresetsList: View {
 
 private struct PresetListRow: View {
     let entry: LibraryEntry
+    /// The web source's name; nil On this iPhone.
+    let source: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(verbatim: entry.preset.name).font(.headline)
-            Text(verbatim: entry.preset.parts.map(\.title).joined(separator: " · "))
+            Text(verbatim: ([source].compactMap { $0 } + entry.preset.parts.map(\.title)).joined(separator: " · "))
                 .font(.subheadline).foregroundStyle(Theme.secondaryText)
         }
         .padding(.vertical, 2)
