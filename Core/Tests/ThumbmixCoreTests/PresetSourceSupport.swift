@@ -2,13 +2,6 @@ import Foundation
 
 @testable import ThumbmixCore
 
-/// A fresh folder in the temporary directory, removed by the test's `defer`.
-func makeTemporaryFolder() throws -> URL {
-    let url = FileManager.default.temporaryDirectory.appendingPathComponent("thumbmix-test-" + UUID().uuidString)
-    try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-    return url
-}
-
 func presetData(_ name: String) throws -> Data {
     try PresetJSON.encode(.kick.named(name))
 }
