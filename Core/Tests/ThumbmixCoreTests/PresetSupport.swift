@@ -1,3 +1,4 @@
+import FakeM32
 import Foundation
 import Testing
 
@@ -37,4 +38,40 @@ func kickJSON(_ edit: (inout [String: Any]) -> Void = { _ in }) throws -> Data {
     var object = try #require(try JSONSerialization.jsonObject(with: PresetJSON.encode(.kick)) as? [String: Any])
     edit(&object)
     return try JSONSerialization.data(withJSONObject: object)
+}
+
+// MARK: A live desk for the save and load tests
+
+/// Reads every tab a preset touches, as the Presets page does on opening.
+@MainActor
+func readTabs(_ mirror: ConsoleMirror, _ strips: StripID...) async {
+    for strip in strips {
+        for tab in ChannelTab.tabs(for: strip.kind) where tab != .fedBy && tab != .members {
+            await openTab(tab, of: strip, in: mirror)
+        }
+    }
+}
+
+func setOnDesk(_ fake: FakeM32, _ spec: ParamSpec, _ value: Double) {
+    fake.deskChange(spec.address, spec.scale.argument(fromNormalized: spec.scale.normalized(forValue: value)))
+}
+
+/// A live desk whose `settings` (real units) were set before the mirror connected.
+@MainActor
+func withDesk(_ settings: [(ParamSpec, Double)], body: (FakeM32, ConsoleMirror) async throws -> Void) async throws {
+    try await withLiveDesk(
+        before: { fake in for (spec, value) in settings { setOnDesk(fake, spec, value) } }, body: body)
+}
+
+/// What the console holds, in real units to 3 decimals: the 32-bit float on the wire leaves noise beyond that.
+func deskValue(_ fake: FakeM32, _ spec: ParamSpec) -> Double? {
+    fake.value(at: spec.address).flatMap(spec.scale.normalized(from:)).map(spec.scale.value(fromNormalized:))
+        .map { ($0 * 1000).rounded() / 1000 }
+}
+
+@MainActor
+func savePreset(
+    _ strip: StripID, _ mirror: ConsoleMirror, parts: Set<PresetPart> = Set(PresetPart.allCases)
+) throws -> Preset {
+    try #require(mirror.capture(strip, parts: parts, name: "Test", matchWords: ["test"]))
 }

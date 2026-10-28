@@ -35,16 +35,15 @@ struct PresetMatchingTests {
     }
 
     @MainActor @Test func theMirrorListsTheStripsWhoseNamesFit() async throws {
+        let names = [
+            "/ch/01/config/name": "Kick In", "/ch/02/config/name": "Kick Out", "/bus/03/config/name": "Kick wedge",
+            "/ch/03/config/name": "Snare",
+        ]
         try await withLiveDesk(
-            before: { fake in
-                fake.deskChange("/ch/01/config/name", .string("Kick In"))
-                fake.deskChange("/ch/02/config/name", .string("Kick Out"))
-                fake.deskChange("/bus/03/config/name", .string("Kick wedge"))
-                fake.deskChange("/ch/03/config/name", .string("Snare"))
-            }
-        ) { _, mirror in
-            let fits = mirror.fittingStrips(Preset.kick)
-            #expect(fits == [StripID(.input, 1), StripID(.input, 2), StripID(.bus, 3)])
-        }
+            before: { fake in for (address, name) in names { fake.deskChange(address, .string(name)) } },
+            body: { _, mirror in
+                let fits = mirror.fittingStrips(Preset.kick)
+                #expect(fits == [StripID(.input, 1), StripID(.input, 2), StripID(.bus, 3)])
+            })
     }
 }

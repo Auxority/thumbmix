@@ -14,11 +14,16 @@ struct PresetField {
     /// nil where the strip has no such control. Validation refuses that; a load leaves the value out.
     let spec: ParamSpec?
     let value: PresetValue
+    /// Set on the values a load asks about before it writes them.
+    let role: Role?
 
-    init(_ path: String, _ spec: ParamSpec?, _ value: PresetValue) {
+    enum Role { case gain, trim, phantom, polarity, compPosition }
+
+    init(_ path: String, _ spec: ParamSpec?, _ value: PresetValue, role: Role? = nil) {
         self.path = path
         self.spec = spec
         self.value = value
+        self.role = role
     }
 
     /// `value` as the number the spec's scale speaks (a switch is 0 or 1, a choice its index); nil for a choice that
@@ -60,10 +65,14 @@ extension InputPart {
     func fields(on strip: StripID, headamp: Int?) -> [PresetField] {
         let delay = Catalog.delay(strip)
         return [
-            gainDb.map { PresetField("input.gainDb", headamp.map(Catalog.headampGain), .number($0)) },
-            phantom.map { PresetField("input.phantom", headamp.map(Catalog.headampPhantom), .flag($0)) },
-            trimDb.map { PresetField("input.trimDb", Catalog.trim(strip), .number($0)) },
-            polarityFlipped.map { PresetField("input.polarityFlipped", Catalog.invert(strip), .flag($0)) },
+            gainDb.map { PresetField("input.gainDb", headamp.map(Catalog.headampGain), .number($0), role: .gain) },
+            phantom.map {
+                PresetField("input.phantom", headamp.map(Catalog.headampPhantom), .flag($0), role: .phantom)
+            },
+            trimDb.map { PresetField("input.trimDb", Catalog.trim(strip), .number($0), role: .trim) },
+            polarityFlipped.map {
+                PresetField("input.polarityFlipped", Catalog.invert(strip), .flag($0), role: .polarity)
+            },
             delayOn.map { PresetField("input.delayOn", delay?.on, .flag($0)) },
             delayMs.map { PresetField("input.delayMs", delay?.time, .number($0)) },
         ].compactMap { $0 }
@@ -140,7 +149,7 @@ extension CompPart {
             PresetField("comp.detector", specs?.detector, .option(detector)),
             PresetField("comp.envelope", specs?.envelope, .option(envelope)),
             PresetField("comp.auto", specs?.auto, .flag(auto)),
-            PresetField("comp.position", Catalog.dynamicsPosition(strip), .option(position)),
+            PresetField("comp.position", Catalog.dynamicsPosition(strip), .option(position), role: .compPosition),
         ]
         return main + (keyFilter?.fields(Catalog.dynamicsKey(strip), path: "comp.keyFilter") ?? [])
     }
