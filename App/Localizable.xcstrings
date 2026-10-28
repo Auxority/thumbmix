@@ -114,6 +114,19 @@
     "%lld" : {
 
     },
+    "%lld fit “%@”" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld fit “%2$@”"
+          }
+        }
+      }
+    },
+    "%lld need a look" : {
+
+    },
     "%lld soloed" : {
 
     },
@@ -130,10 +143,28 @@
         }
       }
     },
+    "^[%lld preset](inflect: true)" : {
+
+    },
     "^[%lld strip](inflect: true)" : {
 
     },
+    "48V changes and a higher gain ask first." : {
+
+    },
     "192.168.1.62" : {
+
+    },
+    "A strip fits when its name contains one of these words, whatever the case." : {
+
+    },
+    "Add" : {
+
+    },
+    "Add a web address" : {
+
+    },
+    "Add the Thumbmix source" : {
 
     },
     "Also changes the gain of %@ (same input)." : {
@@ -146,6 +177,9 @@
 
     },
     "An assigned strip follows this DCA's fader and mute at once." : {
+
+    },
+    "An https:// address of a Thumbmix source's index.json." : {
 
     },
     "Assigned" : {
@@ -236,6 +270,9 @@
     "Each can be set on its own again." : {
 
     },
+    "Edit match words" : {
+
+    },
     "Edit name, colour and icon" : {
 
     },
@@ -263,13 +300,28 @@
     "Fader and mute aren't linked on the desk." : {
 
     },
+    "File…" : {
+
+    },
+    "Fits" : {
+
+    },
+    "Fits “%@”" : {
+
+    },
     "Flipped" : {
+
+    },
+    "Folder…" : {
 
     },
     "Follow LR pan" : {
 
     },
     "Forget" : {
+
+    },
+    "From %@ · read-only" : {
 
     },
     "Gain and delay aren't linked on the desk." : {
@@ -308,7 +360,16 @@
     "Hold a name to solo it. Keep holding and drag to solo more." : {
 
     },
+    "https://…/index.json" : {
+
+    },
     "Icon" : {
+
+    },
+    "Import a preset file…" : {
+
+    },
+    "Imported “%@” to this iPhone." : {
 
     },
     "In this mix" : {
@@ -375,6 +436,15 @@
     "Listens to" : {
 
     },
+    "Load" : {
+
+    },
+    "Load onto %@" : {
+
+    },
+    "Load onto %@…" : {
+
+    },
     "Low cut off" : {
 
     },
@@ -388,6 +458,12 @@
 
     },
     "Make this send a subgroup?" : {
+
+    },
+    "Match words" : {
+
+    },
+    "Match words, separated by commas" : {
 
     },
     "Move" : {
@@ -437,6 +513,9 @@
     "Name · %@" : {
 
     },
+    "New word" : {
+
+    },
     "No colour" : {
 
     },
@@ -446,7 +525,13 @@
     "No preamp: this channel reads from an internal source." : {
 
     },
+    "No presets yet. Save this strip as one, or add a source." : {
+
+    },
     "No slot picked on the desk" : {
+
+    },
+    "No strip on this desk is named like this." : {
 
     },
     "No Wi-Fi. Join the desk's Wi-Fi, then scan again." : {
@@ -488,13 +573,43 @@
     "Other consoles" : {
 
     },
+    "Others" : {
+
+    },
     "Polarity" : {
+
+    },
+    "Presets" : {
+
+    },
+    "Presets from these sources are read again each time you open the list. Swipe to remove one." : {
 
     },
     "R only" : {
 
     },
+    "reading…" : {
+
+    },
     "Red" : {
+
+    },
+    "Remove" : {
+
+    },
+    "Remove “%@”?" : {
+
+    },
+    "Remove %@" : {
+
+    },
+    "Remove preset" : {
+
+    },
+    "Rename" : {
+
+    },
+    "Rename preset" : {
 
     },
     "Reset" : {
@@ -546,6 +661,21 @@
     "RTA: waiting for the desk…" : {
 
     },
+    "Save" : {
+
+    },
+    "Save a copy" : {
+
+    },
+    "Save as preset" : {
+
+    },
+    "Save this strip as a preset…" : {
+
+    },
+    "Saved “%@” on this iPhone." : {
+
+    },
     "Scan again" : {
 
     },
@@ -591,6 +721,9 @@
     "Show unused" : {
 
     },
+    "Showing the last read: %@" : {
+
+    },
     "Solo" : {
 
     },
@@ -600,10 +733,19 @@
     "Solo several at once" : {
 
     },
+    "Sources" : {
+
+    },
     "Stereo link" : {
 
     },
     "Stereo link %@" : {
+
+    },
+    "Strips named %@" : {
+
+    },
+    "Strips whose names contain a match word list this preset first." : {
 
     },
     "Syncing %lld%%" : {
@@ -630,7 +772,13 @@
     "The demo didn't start" : {
 
     },
+    "The desk hasn't sent every value yet. Try again in a moment." : {
+
+    },
     "The desk keeps one solo at a time. Turn it off?" : {
+
+    },
+    "The file is deleted from this iPhone." : {
 
     },
     "They'll work as one stereo channel." : {
@@ -640,6 +788,9 @@
 
     },
     "Thumbmix only works with the Midas M32." : {
+
+    },
+    "Tick at least one part to keep." : {
 
     },
     "To attach to a GitHub issue about a problem you just saw." : {
@@ -689,6 +840,9 @@
 
     },
     "Unsolo %@" : {
+
+    },
+    "Web address…" : {
 
     },
     "While the group is on, a strip you add mutes at once." : {

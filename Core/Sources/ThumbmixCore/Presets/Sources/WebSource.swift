@@ -1,6 +1,6 @@
 import Foundation
 
-enum SourceError: Error, Equatable {
+public enum SourceError: Error, Equatable, Sendable {
     case refusedAddress
     case unreachable(String)
     case notASource
@@ -9,7 +9,7 @@ enum SourceError: Error, Equatable {
     case badPath(String)
     case tooMany
 
-    var message: String {
+    public var message: String {
         switch self {
         case .refusedAddress: CoreStrings.text("The address must be https:// with no name, password or query.")
         case .unreachable(let why): CoreStrings.text("Couldn't read it: \(why)")

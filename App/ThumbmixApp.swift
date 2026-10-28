@@ -57,6 +57,7 @@ struct RootView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
+        .environment(\.presetLibrary, model.presets)
         #if DEBUG
             .task { model.connectOnLaunch() }
             .onOpenURL(perform: model.openTestURL)

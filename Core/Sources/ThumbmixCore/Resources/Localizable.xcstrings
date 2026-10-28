@@ -281,6 +281,16 @@
         }
       }
     },
+    "Band %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Band %lld"
+          }
+        }
+      }
+    },
     "Band-pass, Q 1" : {
       "localizations" : {
         "en" : {
@@ -803,6 +813,16 @@
         }
       }
     },
+    "Flipped" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flipped"
+          }
+        }
+      }
+    },
     "Folder" : {
       "localizations" : {
         "en" : {
@@ -1090,6 +1110,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Key"
+          }
+        }
+      }
+    },
+    "Key filter" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Key filter"
           }
         }
       }

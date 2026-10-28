@@ -18,6 +18,8 @@ final class AppModel {
     /// as the next show may want the hunt (2026-10-19).
     private var keptExclusiveSolo: Set<String> = []
     private var deskKey: String?
+    /// Every preset source, whatever desk is connected: the engineer's presets outlive a connection.
+    let presets = AppModel.makePresetLibrary()
 
     var isOffline: Bool { demoConsole != nil }
 
@@ -30,6 +32,26 @@ final class AppModel {
             if (1...65535).contains(port) { return UInt16(port) }
         #endif
         return 10023
+    }
+
+    /// Presets live in Documents (the Files app shows them), the source list in Application Support, each source's
+    /// last good read in Caches. UI tests pass `-isolatedPresets YES`: folders of their own and no web source, so no
+    /// test sees another's presets or the network.
+    private static func makePresetLibrary() -> PresetLibrary {
+        let files = FileManager.default
+        var support = files.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appending(path: "Thumbmix")
+        var own = files.urls(for: .documentDirectory, in: .userDomainMask)[0].appending(path: "Presets")
+        var caches = files.urls(for: .cachesDirectory, in: .userDomainMask)[0].appending(path: "Thumbmix")
+        var includesDefaultSource = true
+        #if DEBUG
+            if UserDefaults.standard.bool(forKey: "isolatedPresets") {
+                let root = files.temporaryDirectory.appending(path: "thumbmix-presets-" + UUID().uuidString)
+                (support, own, caches) = (root.appending(path: "support"), root.appending(path: "own"), root.appending(path: "cache"))
+                includesDefaultSource = false
+            }
+        #endif
+        return PresetLibrary(
+            supportDirectory: support, ownFolder: own, cacheDirectory: caches, includesDefaultSource: includesDefaultSource)
     }
 
     /// A console that answers as an M32 is remembered under the name set on the desk; the demo never is.

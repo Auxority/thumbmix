@@ -42,6 +42,10 @@ targets:
         CFBundleURLTypes: [{CFBundleURLName: dev.thumbmix.app.uitest, CFBundleURLSchemes: [thumbmix-test]}]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIUserInterfaceStyle: Dark
+        # The Presets folder (Documents/Presets) shows in the Files app under "On My iPhone", so the engineer's own
+        # preset files can be copied out, edited or shared by hand.
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.thumbmix.app
