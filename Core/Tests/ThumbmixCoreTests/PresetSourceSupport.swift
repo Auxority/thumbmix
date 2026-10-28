@@ -42,12 +42,16 @@ func makeSources(
 }
 
 /// Answers every request of a test's session from `StubRoutes`, so no test touches the network.
-final class StubProtocol: URLProtocol {
+/// `@unchecked Sendable`: a slow reply finishes on another queue, and the URL loading system allows a protocol's client
+/// to be called from any thread.
+final class StubProtocol: URLProtocol, @unchecked Sendable {
     enum Reply: Sendable {
         case ok(Data, contentType: String)
         case status(Int)
         case redirect(URL)
         case hangs
+        /// `.ok` after a while: a read still in flight when the test acts.
+        case slow(Data, Duration)
     }
 
     override class func canInit(with request: URLRequest) -> Bool { true }
@@ -72,6 +76,15 @@ final class StubProtocol: URLProtocol {
             client?.urlProtocolDidFinishLoading(self)
         case .hangs:
             break
+        case .slow(let data, let delay):
+            let client = client
+            DispatchQueue.global().asyncAfter(deadline: .now() + Double(delay.components.attoseconds) / 1e18) {
+                let response = HTTPURLResponse(
+                    url: url, statusCode: 200, httpVersion: nil, headerFields: ["Content-Type": "application/json"])!
+                client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+                client?.urlProtocol(self, didLoad: data)
+                client?.urlProtocolDidFinishLoading(self)
+            }
         }
     }
 
@@ -89,14 +102,20 @@ final class StubRoutes: @unchecked Sendable {
     static let shared = StubRoutes()
     private let lock = NSLock()
     private var routes: [URL: StubProtocol.Reply] = [:]
+    private var counts: [URL: Int] = [:]
 
     func set(_ url: URL, _ reply: StubProtocol.Reply) {
         lock.withLock { routes[url] = reply }
     }
 
     func reply(for url: URL) -> StubProtocol.Reply? {
-        lock.withLock { routes[url] }
+        lock.withLock {
+            counts[url, default: 0] += 1
+            return routes[url]
+        }
     }
+
+    func requests(to url: URL) -> Int { lock.withLock { counts[url] ?? 0 } }
 
     /// A session whose requests all end at the stub.
     static func session() -> URLSession {

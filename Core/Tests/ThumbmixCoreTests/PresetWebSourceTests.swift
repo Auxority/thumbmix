@@ -66,6 +66,18 @@ struct PresetWebSourceTests {
         #expect(result.presets.map(\.preset.name) == ["Kick"])
     }
 
+    @Test func aRedirectToAnotherHostFailsThatFile() async throws {
+        defer { try? FileManager.default.removeItem(at: folder) }
+        route("pinned.test", index: try indexData(paths: ["kick.json"]))
+        StubRoutes.shared.set(sourceURL("pinned.test", "kick.json"), .redirect(sourceURL("elsewhere.test", "kick.json")))
+        route("elsewhere.test", index: Data(), files: ["kick.json": try presetData("Kick")])
+
+        let result = await read(sourceURL("pinned.test"))
+
+        #expect(result.presets.isEmpty, "a source can't reach further than its index's host")
+        #expect(result.skipped.map(\.file) == ["kick.json"])
+    }
+
     @Test(arguments: [
         "http://plain.test/index.json", "https://user:pw@info.test/index.json", "https://query.test/index.json?token=1",
     ])
@@ -113,6 +125,7 @@ struct PresetWebSourceTests {
         let again = await read(sourceURL("cache.test"))
 
         #expect(again.presets.map(\.preset.name) == ["Kick"], "the cache stands in")
+        #expect(again.title == "Test source", "under the name its index gave")
         guard case .cached = again.status else {
             Issue.record("should say it is the cache: \(again.status)")
             return
@@ -139,7 +152,9 @@ struct PresetWebSourceTests {
         _ = await read(sourceURL("partial.test"))
 
         StubRoutes.shared.set(sourceURL("partial.test", "kick.json"), .status(503))
-        #expect(await read(sourceURL("partial.test")).presets.isEmpty)
+        let flaky = await read(sourceURL("partial.test"))
+        #expect(flaky.presets.map(\.preset.name) == ["Kick"], "no fewer presets than with no Wi-Fi at all")
+        #expect(flaky.skipped.map(\.file) == ["kick.json"], "named, so the engineer sees its copy is older")
 
         StubRoutes.shared.set(sourceURL("partial.test"), .status(500))
         let offline = await read(sourceURL("partial.test"))

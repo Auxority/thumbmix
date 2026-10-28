@@ -43,6 +43,8 @@ public final class PresetLibrary {
 
     @ObservationIgnored private let ownFolder: URL
     @ObservationIgnored let web: PresetSources?
+    /// Sources whose read is in flight: a second refresh leaves them to it.
+    @ObservationIgnored var reading: Set<URL> = []
 
     /// Without `sources` the library has no web sources: the tests of own presets need no network.
     public init(ownFolder: URL, sources: PresetSources? = nil) {

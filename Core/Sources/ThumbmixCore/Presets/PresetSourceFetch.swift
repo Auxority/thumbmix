@@ -48,10 +48,14 @@ struct PresetIndex: Decodable {
     }
 }
 
-/// Lets a redirect through only to an address `isAcceptable` takes, and remembers one it stopped.
+/// Lets a redirect through only to an address `isAcceptable` takes on the requested host and port (a source can't
+/// reach further than its index), and remembers one it stopped.
 private final class RedirectGuard: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+    private let origin: URL
     private let lock = NSLock()
     private var stopped = false
+
+    init(origin: URL) { self.origin = origin }
 
     var didStopRedirect: Bool { lock.withLock { stopped } }
 
@@ -59,7 +63,7 @@ private final class RedirectGuard: NSObject, URLSessionTaskDelegate, @unchecked 
         _ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
         newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void
     ) {
-        if let url = request.url, PresetSources.isAcceptable(url) {
+        if let url = request.url, PresetSources.isAcceptable(url), url.host == origin.host, url.port == origin.port {
             completionHandler(request)
         } else {
             lock.withLock { stopped = true }
@@ -151,7 +155,7 @@ extension PresetSources {
     private func request(_ url: URL) async throws -> (URLSession.AsyncBytes, HTTPURLResponse) {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         request.httpShouldHandleCookies = false
-        let redirects = RedirectGuard()
+        let redirects = RedirectGuard(origin: url)
         let answer: (URLSession.AsyncBytes, URLResponse)
         do {
             answer = try await session.bytes(for: request, delegate: redirects)

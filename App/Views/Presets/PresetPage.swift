@@ -64,7 +64,9 @@ struct PresetPage: View {
                 }
             }
             if let source = entry.source {
-                Text("From \(library.title(of: source)) · read-only").foregroundStyle(Theme.secondaryText)
+                // Verbatim: the name comes from the source's index, never read as markup.
+                Text(verbatim: String(localized: "From \(library.title(of: source)) · read-only"))
+                    .foregroundStyle(Theme.secondaryText)
             }
         }
         .listRowBackground(Color.clear)

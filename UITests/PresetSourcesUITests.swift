@@ -1,7 +1,8 @@
 import XCTest
 
 /// The Sources page: adding a web address, refusing one that isn't plain HTTPS, and removing one. Reading a source
-/// stays in Core tests (a stubbed session); `-isolatedPresets` starts with no sources, so nothing here needs the web.
+/// stays in Core tests (a stubbed session); `-isolatedPresets` starts with no sources, and the one added here is on
+/// `.invalid`, which never resolves, so nothing here depends on the web.
 @MainActor
 final class PresetSourcesUITests: DeskUITestCase {
     func testAnAddressIsAddedRefusedOrRemoved() {

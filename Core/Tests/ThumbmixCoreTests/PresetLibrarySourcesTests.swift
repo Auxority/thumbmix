@@ -79,6 +79,56 @@ struct PresetLibrarySourcesTests {
         #expect(library.entries.isEmpty, "added again, it starts from nothing")
     }
 
+    /// The page's read is cancelled when the desk link blips or the page goes: that is no news about the source.
+    @Test func aCancelledRefreshLeavesTheLastResult() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        route("cancel.test", index: try indexData(paths: ["kick.json"]), files: ["kick.json": try presetData("Kick")])
+        let library = library()
+        try library.addSource(sourceURL("cancel.test").absoluteString)
+        await library.refreshSources()
+
+        StubRoutes.shared.set(sourceURL("cancel.test"), .hangs)
+        let refresh = Task { await library.refreshSources() }
+        refresh.cancel()
+        await refresh.value
+
+        #expect(library.results[sourceURL("cancel.test")]?.status == .ok)
+        #expect(library.entries.count == 1)
+    }
+
+    @Test func aSourceRemovedWhileItIsReadKeepsNoOfflineCopy() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        route("inflight.test", index: Data(), files: ["kick.json": try presetData("Kick")])
+        StubRoutes.shared.set(sourceURL("inflight.test"), .slow(try indexData(paths: ["kick.json"]), .milliseconds(300)))
+        let library = library()
+        try library.addSource(sourceURL("inflight.test").absoluteString)
+
+        let refresh = Task { await library.refreshSources() }
+        try await Task.sleep(for: .milliseconds(50))
+        library.removeSource(sourceURL("inflight.test"))
+        await refresh.value
+
+        let left = try FileManager.default.contentsOfDirectory(atPath: root.appendingPathComponent("sources").path)
+        #expect(left.filter { $0.hasPrefix("cache-") }.isEmpty)
+    }
+
+    /// Pull to refresh while the page's own read runs: one read per source, not two racing for its offline copy.
+    @Test func aSourceAlreadyBeingReadIsNotReadTwice() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        route("once.test", index: Data(), files: ["kick.json": try presetData("Kick")])
+        StubRoutes.shared.set(sourceURL("once.test"), .slow(try indexData(paths: ["kick.json"]), .milliseconds(300)))
+        let library = library()
+        try library.addSource(sourceURL("once.test").absoluteString)
+
+        let first = Task { await library.refreshSources() }
+        try await Task.sleep(for: .milliseconds(50))
+        await library.refreshSources()
+        await first.value
+
+        #expect(StubRoutes.shared.requests(to: sourceURL("once.test")) == 1)
+        #expect(library.entries.count == 1)
+    }
+
     @Test func aSourcesPresetIsReadOnlyAndSavingItMakesAnOwnCopy() async throws {
         defer { try? FileManager.default.removeItem(at: root) }
         route("ro.test", index: try indexData(paths: ["kick.json"]), files: ["kick.json": try presetData("Kick")])

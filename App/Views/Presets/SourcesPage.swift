@@ -28,8 +28,8 @@ struct SourcesPage: View {
             if library.lacksDefaultSource {
                 Section {
                     Button("Add the Thumbmix source") {
-                        library.addDefaultSources()
-                        Task { await library.refreshSources() }
+                        let added = library.addDefaultSources()
+                        Task { await library.refreshSources(added) }
                     }
                     .accessibilityIdentifier("sources-add-default")
                 }
@@ -58,8 +58,8 @@ struct SourcesPage: View {
     private func addAddress() {
         defer { address = "" }
         do {
-            try library.addSource(address)
-            Task { await library.refreshSources() }
+            let added = try library.addSource(address)
+            Task { await library.refreshSources([added]) }
         } catch {
             notice = error.localizedDescription
         }

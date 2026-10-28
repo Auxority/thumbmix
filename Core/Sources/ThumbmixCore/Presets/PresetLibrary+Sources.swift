@@ -5,18 +5,29 @@ import os
 extension PresetLibrary {
     private static let log = Logger(subsystem: "thumbmix", category: "presets")
 
-    /// Reads every source at once, each result shown as it arrives: one that never answers holds nothing up. A source
-    /// removed meanwhile gets no result.
-    public func refreshSources() async {
+    /// Reads `only` these sources, or every one, at once, each result shown as it arrives: one that never answers holds
+    /// nothing up. A source already being read is left to that read, so two never race for its offline copy.
+    public func refreshSources(_ only: [URL]? = nil) async {
         guard let web else { return }
+        let due = (only ?? sources).filter { !reading.contains($0) }
+        reading.formUnion(due)
         await withTaskGroup(of: (URL, SourceResult).self) { group in
-            for source in sources { group.addTask { (source, await web.read(source)) } }
-            for await (source, result) in group where sources.contains(source) {
-                results[source] = result
-                if case .failed(let reason) = result.status {
-                    Self.log.notice("source \(source.host ?? "", privacy: .private) failed: \(reason, privacy: .public)")
-                }
+            for source in due { group.addTask { (source, await web.read(source)) } }
+            for await (source, result) in group {
+                reading.remove(source)
+                take(result, of: source, web)
             }
+        }
+    }
+
+    /// A cancelled read (the page went, the desk link blipped) is no news about the source; a source removed meanwhile
+    /// loses the offline copy its read just wrote.
+    private func take(_ result: SourceResult, of source: URL, _ web: PresetSources) {
+        guard sources.contains(source) else { return web.forgetCache(of: source) }
+        guard !Task.isCancelled else { return }
+        results[source] = result
+        if case .failed(let reason) = result.status {
+            Self.log.notice("source \(source.host ?? "", privacy: .private) failed: \(reason, privacy: .public)")
         }
     }
 
@@ -26,9 +37,13 @@ extension PresetLibrary {
     /// The engineer removed the Thumbmix source: the Sources page offers it back.
     public var lacksDefaultSource: Bool { !(web?.defaults ?? []).allSatisfy(sources.contains) }
 
-    public func addDefaultSources() {
-        for source in web?.defaults ?? [] where !sources.contains(source) { sources.append(source) }
+    /// The defaults it added, to be read.
+    @discardableResult
+    public func addDefaultSources() -> [URL] {
+        let added = (web?.defaults ?? []).filter { !sources.contains($0) }
+        sources += added
         persist()
+        return added
     }
 
     /// Only HTTPS, with no name, password or query. The same address twice is one source.

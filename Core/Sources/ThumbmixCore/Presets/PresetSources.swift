@@ -66,10 +66,14 @@ public struct PresetSources: Sendable {
     public func read(_ source: URL) async -> SourceResult {
         let cache = cacheFile(for: source)
         do {
-            let fetched = try await withDeadline { try await fetchSource(source) }
-            // A file lost to the network keeps its copy from the last good read: a flaky read must not empty the cache.
-            let kept = readCache(cache).filter { fetched.lost.contains($0.file) }
-            writeCache(fetched.files + kept, to: cache)
+            var fetched = try await withDeadline { try await fetchSource(source) }
+            // A cancelled read only lost its files to the cancel: the copy stays as it was.
+            try Task.checkCancellation()
+            // A file lost to the network keeps, and shows, its copy from the last good read: flaky Wi-Fi must not show
+            // fewer presets than none at all. It stays named in `skipped`.
+            let kept = readCache(cache).files.filter { fetched.lost.contains($0.file) }
+            fetched.result.presets += entries(kept, of: source)
+            writeCache(Cache(title: fetched.result.title, files: fetched.files + kept), to: cache)
             return fetched.result
         } catch {
             return fromCache(source, because: error.localizedDescription)
@@ -98,7 +102,11 @@ public struct PresetSources: Sendable {
         let data: Data
     }
 
-    private struct Cache: Codable { let files: [CachedFile] }
+    private struct Cache: Codable {
+        /// The index's name, so a source read offline keeps it.
+        var title: String?
+        var files: [CachedFile] = []
+    }
 
     /// Named by a hash: an address can hold anything a file name can't.
     private func cacheFile(for source: URL) -> URL {
@@ -111,20 +119,26 @@ public struct PresetSources: Sendable {
         try? FileManager.default.removeItem(at: cacheFile(for: source))
     }
 
-    private func writeCache(_ files: [CachedFile], to cache: URL) {
+    private func writeCache(_ cached: Cache, to cache: URL) {
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        try? JSONEncoder().encode(Cache(files: files)).write(to: cache, options: .atomic)
+        try? JSONEncoder().encode(cached).write(to: cache, options: .atomic)
     }
 
-    private func readCache(_ cache: URL) -> [CachedFile] {
-        (try? Data(contentsOf: cache)).flatMap { try? JSONDecoder().decode(Cache.self, from: $0) }?.files ?? []
+    private func readCache(_ cache: URL) -> Cache {
+        (try? Data(contentsOf: cache)).flatMap { try? JSONDecoder().decode(Cache.self, from: $0) } ?? Cache()
     }
 
     /// Checked again like a new file: the cache is the app's own copy, but a damaged one is not trusted either.
-    private func fromCache(_ source: URL, because reason: String) -> SourceResult {
-        let presets = readCache(cacheFile(for: source)).compactMap { file in
+    private func entries(_ files: [CachedFile], of source: URL) -> [LibraryEntry] {
+        files.compactMap { file in
             (try? PresetValidation.decode(file.data)).map { LibraryEntry(source: source, file: file.file, preset: $0) }
         }
-        return presets.isEmpty ? .failed(reason) : SourceResult(presets: presets, status: .cached(reason))
+    }
+
+    private func fromCache(_ source: URL, because reason: String) -> SourceResult {
+        let cached = readCache(cacheFile(for: source))
+        let presets = entries(cached.files, of: source)
+        return presets.isEmpty
+            ? .failed(reason) : SourceResult(presets: presets, status: .cached(reason), title: cached.title)
     }
 }
