@@ -151,6 +151,16 @@
         }
       }
     },
+    "%lld on" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld on"
+          }
+        }
+      }
+    },
     "48V" : {
       "localizations" : {
         "en" : {
@@ -177,6 +187,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "After fader"
+          }
+        }
+      }
+    },
+    "All buses" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All buses"
           }
         }
       }
@@ -227,6 +247,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Attack"
+          }
+        }
+      }
+    },
+    "Auto" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto"
           }
         }
       }
@@ -292,6 +322,7 @@
       }
     },
     "Band %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1003,6 +1034,16 @@
         }
       }
     },
+    "How it listens" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How it listens"
+          }
+        }
+      }
+    },
     "In" : {
       "localizations" : {
         "en" : {
@@ -1144,6 +1185,16 @@
         }
       }
     },
+    "Level" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Level"
+          }
+        }
+      }
+    },
     "Linear" : {
       "localizations" : {
         "en" : {
@@ -1190,6 +1241,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Low cut"
+          }
+        }
+      }
+    },
+    "Low cut and EQ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low cut and EQ"
           }
         }
       }
@@ -1251,6 +1312,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Main M"
+          }
+        }
+      }
+    },
+    "Makeup" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Makeup"
           }
         }
       }
@@ -1456,6 +1527,16 @@
         }
       }
     },
+    "Other buses" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other buses"
+          }
+        }
+      }
+    },
     "outboard" : {
       "localizations" : {
         "en" : {
@@ -1562,6 +1643,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pre-fader"
+          }
+        }
+      }
+    },
+    "Preamp" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preamp"
           }
         }
       }
@@ -2003,6 +2094,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Time"
+          }
+        }
+      }
+    },
+    "Timing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timing"
           }
         }
       }
