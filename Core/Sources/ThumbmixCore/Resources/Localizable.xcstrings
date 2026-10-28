@@ -1426,6 +1426,16 @@
         }
       }
     },
+    "Only presets on this iPhone can be changed." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only presets on this iPhone can be changed."
+          }
+        }
+      }
+    },
     "Only the raw input reaches this mix: your %@ don’t." : {
       "localizations" : {
         "en" : {
