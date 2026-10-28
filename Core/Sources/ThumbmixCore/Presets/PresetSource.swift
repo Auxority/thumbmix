@@ -39,6 +39,14 @@ public struct PresetSource: Codable, Hashable, Identifiable, Sendable {
         if case .web(let url) = kind { return url }
         return nil
     }
+
+    /// Whether this source is the folder or file at `url`, so a second pick of it adds nothing.
+    func isPicked(_ url: URL) -> Bool {
+        switch kind {
+        case .web: false
+        case .folder(let bookmark), .file(let bookmark): BookmarkAccess.path(of: bookmark) == BookmarkAccess.path(of: url)
+        }
+    }
 }
 
 /// Security-scoped bookmarks for folders and files picked in Files. An iOS picker's URL carries the access, and a
@@ -58,6 +66,15 @@ enum BookmarkAccess {
         return try url.bookmarkData(options: creation, includingResourceValuesForKeys: nil, relativeTo: nil)
     }
 
+    /// Where a URL or bookmark points, spelled one way: the picker may give one folder as "/a/b" and "/private/a/b/".
+    static func path(of url: URL) -> String { url.resolvingSymlinksInPath().standardizedFileURL.path }
+
+    static func path(of bookmark: Data) -> String? {
+        var stale = false
+        let url = try? URL(resolvingBookmarkData: bookmark, options: resolution, relativeTo: nil, bookmarkDataIsStale: &stale)
+        return url.map(path(of:))
+    }
+
     /// Access is held only while `body` runs: an unbalanced start leaks kernel resources.
     static func withAccess<T>(_ bookmark: Data, _ body: (URL) -> T) throws -> T {
         var stale = false
@@ -70,46 +87,56 @@ enum BookmarkAccess {
     }
 }
 
-/// Folder and file sources: read in place each time, so an edit made in Files shows. They keep no offline copy: the
-/// files are on the iPhone already, or iCloud downloads them.
+/// Folder and file sources: read in place each time, so an edit made in Files shows. A file that can't be read now (iCloud
+/// hasn't downloaded it, the disk said no) is lost, not refused: `PresetSources` keeps its last good copy.
 enum PresetFiles {
+    typealias Fetched = PresetSources.Fetched
+
     static var notFoundText: String { CoreStrings.text("Not found. Pick it again.") }
 
-    static func read(_ bookmark: Data, of source: PresetSource, _ read: (URL, String) -> SourceResult) -> SourceResult {
-        do {
-            return try BookmarkAccess.withAccess(bookmark) { read($0, source.id) }
-        } catch {
-            return .failed(notFoundText)
-        }
+    /// nil when the bookmark no longer opens the folder or file.
+    static func read(_ bookmark: Data, of source: PresetSource, _ read: (URL, String) -> Fetched?) -> Fetched? {
+        (try? BookmarkAccess.withAccess(bookmark) { read($0, source.id) }) ?? nil
     }
 
-    static func readFile(_ url: URL, source: String) -> SourceResult {
-        do {
-            return SourceResult(presets: [LibraryEntry(source: source, file: url.lastPathComponent, preset: try preset(at: url))])
-        } catch {
-            return .failed(error.localizedDescription)
+    /// One file: a refused one fails the source with its reason.
+    static func readFile(_ url: URL, source: String) -> Fetched? {
+        var fetched = Fetched(result: SourceResult())
+        take(url.lastPathComponent, at: url, of: source, into: &fetched)
+        if let skipped = fetched.result.skipped.first {
+            fetched.result.status = .failed(skipped.reason)
+            if fetched.lost.isEmpty { fetched.result.skipped = [] }
         }
+        return fetched
     }
 
-    static func readFolder(_ folder: URL, source: String) -> SourceResult {
-        guard let names = try? FileManager.default.contentsOfDirectory(atPath: folder.path) else { return .failed(notFoundText) }
-        var result = SourceResult()
+    static func readFolder(_ folder: URL, source: String) -> Fetched? {
+        guard let names = try? FileManager.default.contentsOfDirectory(atPath: folder.path) else { return nil }
+        var fetched = Fetched(result: SourceResult())
         let files = names.filter { $0.lowercased().hasSuffix(".json") && !$0.hasPrefix(".") }
             .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
         for name in files {
-            guard result.presets.count + result.skipped.count < PresetSources.maxPresets else {
-                result.skipped.append(SkippedFile(file: name, reason: CoreStrings.text("More than 200 files.")))
+            guard fetched.result.presets.count + fetched.result.skipped.count < PresetSources.maxPresets else {
+                fetched.result.skipped.append(SkippedFile(file: name, reason: CoreStrings.text("More than 200 files.")))
                 continue
             }
-            do {
-                let preset = try preset(at: folder.appendingPathComponent(name))
-                result.presets.append(LibraryEntry(source: source, file: name, preset: preset))
-            } catch {
-                result.skipped.append(SkippedFile(file: name, reason: error.localizedDescription))
-            }
+            take(name, at: folder.appendingPathComponent(name), of: source, into: &fetched)
         }
-        result.skipped += iCloudPlaceholders(in: names, folder)
-        return result
+        let placeholders = iCloudPlaceholders(in: names, folder)
+        fetched.result.skipped += placeholders
+        fetched.lost.formUnion(placeholders.map(\.file))
+        return fetched
+    }
+
+    private static func take(_ name: String, at url: URL, of source: String, into fetched: inout Fetched) {
+        do {
+            let data = try data(at: url)
+            fetched.result.presets.append(LibraryEntry(source: source, file: name, preset: try PresetValidation.decode(data)))
+            fetched.files.append(PresetSources.CachedFile(file: name, data: data))
+        } catch {
+            fetched.result.skipped.append(SkippedFile(file: name, reason: error.localizedDescription))
+            if !(error is PresetError) { fetched.lost.insert(name) }
+        }
     }
 
     /// A file iCloud Drive hasn't downloaded shows as ".name.json.icloud": ask for it now, it is there on the next read.
@@ -121,11 +148,13 @@ enum PresetFiles {
         }
     }
 
+    static func preset(at url: URL) throws -> Preset { try PresetValidation.decode(data(at: url)) }
+
     /// The size is checked before the file is read: a huge file never fills memory.
-    static func preset(at url: URL) throws -> Preset {
+    private static func data(at url: URL) throws -> Data {
         let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
         guard size <= PresetValidation.maxBytes else { throw PresetError.tooLarge }
-        return try PresetValidation.decode(coordinatedData(url))
+        return try coordinatedData(url)
     }
 
     /// Coordinated, so a file iCloud keeps elsewhere is downloaded first and one being written is read whole.

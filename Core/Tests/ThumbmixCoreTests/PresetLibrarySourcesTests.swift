@@ -182,6 +182,23 @@ struct PresetLibrarySourcesTests {
         #expect(throws: LibraryError.readOnly) { try library.remove(entry) }
     }
 
+    @Test func aFolderOrFilePickedTwiceIsOneSource() throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        let picked = root.appendingPathComponent("Twice")
+        try FileManager.default.createDirectory(at: picked, withIntermediateDirectories: true)
+        let file = picked.appendingPathComponent("tom.json")
+        try presetData("Tom").write(to: file)
+        let library = library()
+
+        let folder = try library.addFolder(picked)
+        // The picker may hand back the same folder by another spelling.
+        #expect(try library.addFolder(URL(fileURLWithPath: picked.path + "/")) == folder)
+        let single = try library.addFile(file)
+        #expect(try library.addFile(file) == single)
+
+        #expect(library.sources == [folder, single])
+    }
+
     /// 0.57 kept the sources as a list of addresses: they stay, as web sources.
     @Test func aListOfAddressesFromBeforeFoldersStillLoads() throws {
         defer { try? FileManager.default.removeItem(at: root) }

@@ -133,4 +133,54 @@ struct PresetFileSourceTests {
 
         #expect(result.status == .failed("Not found. Pick it again."))
     }
+
+    // MARK: The last good read
+
+    /// iCloud evicted a file the folder gave before: its copy stays, and the status says why.
+    @Test func aFileStillDownloadingKeepsItsLastGoodRead() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        let folder = try folder()
+        try presetData("Kick").write(to: folder.appendingPathComponent("kick.json"))
+        try presetData("Snare").write(to: folder.appendingPathComponent("snare.json"))
+        let source = try PresetSource.folder(folder)
+        #expect(await read(source).presets.count == 2)
+        try FileManager.default.removeItem(at: folder.appendingPathComponent("kick.json"))
+        try Data("placeholder".utf8).write(to: folder.appendingPathComponent(".kick.json.icloud"))
+
+        let result = await read(source)
+
+        #expect(result.presets.map(\.preset.name).sorted() == ["Kick", "Snare"])
+        #expect(result.status == .cached("Still downloading from iCloud. Refresh in a moment."))
+        #expect(result.skipped.map(\.file) == ["kick.json"], "still named")
+    }
+
+    @Test func aFolderThatIsGoneShowsItsLastGoodRead() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        let folder = try folder()
+        try presetData("Kick").write(to: folder.appendingPathComponent("kick.json"))
+        let source = try PresetSource.folder(folder)
+        #expect(await read(source).presets.count == 1)
+        try FileManager.default.removeItem(at: folder)
+
+        let result = await read(source)
+
+        #expect(result.presets.map(\.preset.name) == ["Kick"])
+        #expect(result.status == .cached("Not found. Pick it again."))
+    }
+
+    /// Deleted in Files is gone, not lost: no copy brings it back.
+    @Test func aFileDeletedFromTheFolderLeavesTheList() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        let folder = try folder()
+        try presetData("Kick").write(to: folder.appendingPathComponent("kick.json"))
+        try presetData("Snare").write(to: folder.appendingPathComponent("snare.json"))
+        let source = try PresetSource.folder(folder)
+        _ = await read(source)
+        try FileManager.default.removeItem(at: folder.appendingPathComponent("kick.json"))
+
+        let result = await read(source)
+
+        #expect(result.presets.map(\.preset.name) == ["Snare"])
+        #expect(result.status == .ok)
+    }
 }

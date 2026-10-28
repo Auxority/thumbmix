@@ -60,9 +60,11 @@ extension PresetLibrary {
         return source
     }
 
-    /// A folder picked in Files: call it inside the picker's callback, while the URL still grants access.
+    /// A folder picked in Files: call it inside the picker's callback, while the URL still grants access. One picked
+    /// before is that source.
     @discardableResult
     public func addFolder(_ url: URL) throws -> PresetSource {
+        if let picked = sources.first(where: { $0.isPicked(url) }) { return picked }
         let source = try PresetSource.folder(url)
         add(source)
         return source
@@ -71,6 +73,7 @@ extension PresetLibrary {
     /// A single preset file picked in Files, as `addFolder`.
     @discardableResult
     public func addFile(_ url: URL) throws -> PresetSource {
+        if let picked = sources.first(where: { $0.isPicked(url) }) { return picked }
         let source = try PresetSource.file(url)
         add(source)
         return source
