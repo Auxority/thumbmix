@@ -16,21 +16,6 @@ public struct Preset: Equatable, Sendable {
     /// By the target's number as text ("3" = bus 3 for an input, matrix 3 for a bus).
     public var sends: [String: SendPart]?
 
-    public init(
-        name: String, matchWords: [String], stripKind: StripKind, input: InputPart? = nil, eq: EQPart? = nil,
-        gate: GatePart? = nil, comp: CompPart? = nil, mix: MixPart? = nil, sends: [String: SendPart]? = nil
-    ) {
-        self.name = name
-        self.matchWords = matchWords
-        self.stripKind = stripKind
-        self.input = input
-        self.eq = eq
-        self.gate = gate
-        self.comp = comp
-        self.mix = mix
-        self.sends = sends
-    }
-
     /// The parts it holds, in the order the app lists them.
     public var parts: [PresetPart] { PresetPart.allCases.filter(holds) }
 
@@ -72,18 +57,6 @@ public struct InputPart: Equatable, Sendable, Codable {
     public var polarityFlipped: Bool?
     public var delayOn: Bool?
     public var delayMs: Double?
-
-    public init(
-        gainDb: Double? = nil, phantom: Bool? = nil, trimDb: Double? = nil, polarityFlipped: Bool? = nil,
-        delayOn: Bool? = nil, delayMs: Double? = nil
-    ) {
-        self.gainDb = gainDb
-        self.phantom = phantom
-        self.trimDb = trimDb
-        self.polarityFlipped = polarityFlipped
-        self.delayOn = delayOn
-        self.delayMs = delayMs
-    }
 }
 
 public struct EQPart: Equatable, Sendable, Codable {
@@ -91,22 +64,11 @@ public struct EQPart: Equatable, Sendable, Codable {
     /// Inputs only.
     public var lowCut: LowCutPart?
     public var bands: [BandPart]
-
-    public init(on: Bool, lowCut: LowCutPart?, bands: [BandPart]) {
-        self.on = on
-        self.lowCut = lowCut
-        self.bands = bands
-    }
 }
 
 public struct LowCutPart: Equatable, Sendable, Codable {
     public var on: Bool
     public var hz: Double
-
-    public init(on: Bool, hz: Double) {
-        self.on = on
-        self.hz = hz
-    }
 }
 
 public struct BandPart: Equatable, Sendable, Codable {
@@ -115,13 +77,6 @@ public struct BandPart: Equatable, Sendable, Codable {
     public var hz: Double
     public var db: Double
     public var q: Double
-
-    public init(type: String, hz: Double, db: Double, q: Double) {
-        self.type = type
-        self.hz = hz
-        self.db = db
-        self.q = q
-    }
 }
 
 /// The key filter only: the key source names another strip on this desk, so it stays out.
@@ -129,12 +84,6 @@ public struct KeyFilterPart: Equatable, Sendable, Codable {
     public var on: Bool
     public var type: String
     public var hz: Double
-
-    public init(on: Bool, type: String, hz: Double) {
-        self.on = on
-        self.type = type
-        self.hz = hz
-    }
 }
 
 public struct GatePart: Equatable, Sendable, Codable {
@@ -146,20 +95,6 @@ public struct GatePart: Equatable, Sendable, Codable {
     public var holdMs: Double
     public var releaseMs: Double
     public var keyFilter: KeyFilterPart?
-
-    public init(
-        on: Bool, mode: String, thresholdDb: Double, rangeDb: Double, attackMs: Double, holdMs: Double,
-        releaseMs: Double, keyFilter: KeyFilterPart?
-    ) {
-        self.on = on
-        self.mode = mode
-        self.thresholdDb = thresholdDb
-        self.rangeDb = rangeDb
-        self.attackMs = attackMs
-        self.holdMs = holdMs
-        self.releaseMs = releaseMs
-        self.keyFilter = keyFilter
-    }
 }
 
 public struct CompPart: Equatable, Sendable, Codable {
@@ -179,39 +114,12 @@ public struct CompPart: Equatable, Sendable, Codable {
     /// "PRE" or "POST": before or after the EQ.
     public var position: String
     public var keyFilter: KeyFilterPart?
-
-    public init(
-        on: Bool, mode: String, thresholdDb: Double, ratio: String, knee: Double, attackMs: Double, holdMs: Double,
-        releaseMs: Double, makeupDb: Double, mixPercent: Double, detector: String, envelope: String, auto: Bool,
-        position: String, keyFilter: KeyFilterPart?
-    ) {
-        self.on = on
-        self.mode = mode
-        self.thresholdDb = thresholdDb
-        self.ratio = ratio
-        self.knee = knee
-        self.attackMs = attackMs
-        self.holdMs = holdMs
-        self.releaseMs = releaseMs
-        self.makeupDb = makeupDb
-        self.mixPercent = mixPercent
-        self.detector = detector
-        self.envelope = envelope
-        self.auto = auto
-        self.position = position
-        self.keyFilter = keyFilter
-    }
 }
 
 /// `faderDb` is -∞ when the fader is all the way down (written "-inf").
 public struct MixPart: Equatable, Sendable {
     public var faderDb: Double
     public var pan: Double?
-
-    public init(faderDb: Double, pan: Double?) {
-        self.faderDb = faderDb
-        self.pan = pan
-    }
 }
 
 public struct SendPart: Equatable, Sendable {
@@ -219,10 +127,4 @@ public struct SendPart: Equatable, Sendable {
     public var on: Bool
     /// Odd sends only: where the send is taken from the strip, by the desk's name ("POST", "EQ->").
     public var tap: String?
-
-    public init(levelDb: Double, on: Bool, tap: String?) {
-        self.levelDb = levelDb
-        self.on = on
-        self.tap = tap
-    }
 }
