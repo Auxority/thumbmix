@@ -8,7 +8,7 @@ struct PresetWebSourceTests {
     private let folder = FileManager.default.temporaryDirectory.appendingPathComponent("thumbmix-test-" + UUID().uuidString)
 
     private func read(_ url: URL, deadline: Duration = .seconds(30)) async -> SourceResult {
-        await makeSources(in: folder, deadline: deadline).read(url)
+        await makeSources(in: folder, deadline: deadline).read(.web(url))
     }
 
     private func isFailed(_ result: SourceResult) -> Bool {
@@ -25,7 +25,7 @@ struct PresetWebSourceTests {
         let result = await read(sourceURL("list.test"))
 
         #expect(result.presets.map(\.preset.name) == ["Kick", "Snare"], "in the index's order")
-        #expect(result.presets.map(\.source) == [sourceURL("list.test"), sourceURL("list.test")])
+        #expect(result.presets.map(\.source) == [sourceURL("list.test").absoluteString, sourceURL("list.test").absoluteString])
         #expect(result.status == .ok)
         #expect(result.title == "Ours")
     }

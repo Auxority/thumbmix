@@ -114,7 +114,7 @@ extension PresetSources {
             case .success(let data):
                 do {
                     read.result.presets.append(
-                        LibraryEntry(source: address, file: path, preset: try PresetValidation.decode(data)))
+                        LibraryEntry(source: address.absoluteString, file: path, preset: try PresetValidation.decode(data)))
                     read.files.append(CachedFile(file: path, data: data))
                 } catch {
                     read.result.skipped.append(SkippedFile(file: path, reason: error.localizedDescription))

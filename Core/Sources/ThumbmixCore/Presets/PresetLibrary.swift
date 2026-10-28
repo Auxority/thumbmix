@@ -1,16 +1,16 @@
 import Foundation
 import Observation
 
-/// A preset as listed: its file On this iPhone, or its path in a web source's index.
+/// A preset as listed: its file On this iPhone or in a picked folder, or its path in a web source's index.
 public struct LibraryEntry: Identifiable, Equatable, Sendable {
-    /// The web source's index; nil On this iPhone, the only place presets are written.
-    public let source: URL?
+    /// The id of its `PresetSource`; nil On this iPhone, the only place presets are written.
+    public let source: PresetSource.ID?
     public let file: String
     public let preset: Preset
-    public var id: String { (source?.absoluteString ?? "") + "\n" + file }
+    public var id: String { (source ?? "") + "\n" + file }
     public var isOwn: Bool { source == nil }
 
-    init(source: URL? = nil, file: String, preset: Preset) {
+    init(source: PresetSource.ID? = nil, file: String, preset: Preset) {
         self.source = source
         self.file = file
         self.preset = preset
@@ -31,20 +31,20 @@ public enum LibraryError: LocalizedError, Equatable, Sendable {
 }
 
 /// The presets On this iPhone (`Documents/Presets`, shown in the Files app, so files can be copied in and out by hand),
-/// and those of the web sources (`PresetSources`). The app ships none of its own (DECISIONS). Both are read again when
+/// and those of the sources (`PresetSources`). The app ships none of its own (DECISIONS). Both are read again when
 /// the Presets page opens, so an edit made in Files or on the web shows up.
 @MainActor @Observable
 public final class PresetLibrary {
     public private(set) var own: [LibraryEntry] = []
     public private(set) var skipped: [SkippedFile] = []
-    /// The web sources, in the order they were added, and the last read of each.
-    public internal(set) var sources: [URL] = []
-    public internal(set) var results: [URL: SourceResult] = [:]
+    /// The sources, in the order they were added, and the last read of each.
+    public internal(set) var sources: [PresetSource] = []
+    public internal(set) var results: [PresetSource: SourceResult] = [:]
 
     @ObservationIgnored private let ownFolder: URL
     @ObservationIgnored let web: PresetSources?
     /// Sources whose read is in flight: a second refresh leaves them to it.
-    @ObservationIgnored var reading: Set<URL> = []
+    @ObservationIgnored var reading: Set<PresetSource> = []
 
     /// Without `sources` the library has no web sources: the tests of own presets need no network.
     public init(ownFolder: URL, sources: PresetSources? = nil) {
@@ -64,7 +64,7 @@ public final class PresetLibrary {
         var skipped: [SkippedFile] = []
         for name in names where name.lowercased().hasSuffix(".json") && !name.hasPrefix(".") {
             do {
-                own.append(LibraryEntry(file: name, preset: try Self.preset(at: ownFolder.appendingPathComponent(name))))
+                own.append(LibraryEntry(file: name, preset: try PresetFiles.preset(at: ownFolder.appendingPathComponent(name))))
             } catch {
                 skipped.append(SkippedFile(file: name, reason: error.localizedDescription))
             }
@@ -159,12 +159,5 @@ public final class PresetLibrary {
         let replaced = String(name.map { "/\\:*?\"<>|".contains($0) ? "-" : $0 })
         let cleaned = String(replaced.drop { $0 == "." || $0.isWhitespace }).trimmingCharacters(in: .whitespaces)
         return (cleaned.isEmpty ? "Preset" : cleaned) + ".json"
-    }
-
-    /// The size is checked before the file is read: a huge file never fills memory.
-    private static func preset(at url: URL) throws -> Preset {
-        let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-        guard size <= PresetValidation.maxBytes else { throw PresetError.tooLarge }
-        return try PresetValidation.decode(Data(contentsOf: url))
     }
 }

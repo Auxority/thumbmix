@@ -1397,6 +1397,16 @@
         }
       }
     },
+    "More than 200 files." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More than 200 files."
+          }
+        }
+      }
+    },
     "Move" : {
       "localizations" : {
         "en" : {
@@ -1463,6 +1473,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Normal"
+          }
+        }
+      }
+    },
+    "Not found. Pick it again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not found. Pick it again."
           }
         }
       }
@@ -1824,6 +1844,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Speakers & routing"
+          }
+        }
+      }
+    },
+    "Still downloading from iCloud. Refresh in a moment." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still downloading from iCloud. Refresh in a moment."
           }
         }
       }

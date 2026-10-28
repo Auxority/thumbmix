@@ -42,7 +42,13 @@ Save a strip's settings (input, EQ, gate, comp, and if you like fader and sends)
 
 Your presets live on the iPhone in the Files app (On My iPhone › Thumbmix › Presets), so you can copy, edit or share the `.json` files; **Share** on a preset sends it by AirDrop or Messages, and **Import a preset file…** takes one in. A preset file holds each part's values by the desk's own address under the strip (`"gate": {"gate/thr": -40, "gate/mode": "GATE"}`), in real units; anything the desk couldn't take is refused and named, never clamped.
 
-**Sources** on the Presets page adds presets from the web: an `https://` address of an `index.json` that lists preset files by relative path (`{"format": "thumbmix-source", "version": 1, "name": "…", "presets": [{"path": "kick.json"}]}`). This repo's [`presets/`](presets) folder is the default source; remove it there, or add it back. A source's presets are read-only and kept for use offline; **Save a copy** puts one on the iPhone to change it.
+**Sources** on the Presets page adds presets from a folder or a single file picked in Files (iCloud Drive, On My iPhone, a USB stick), or from the web: an `https://` address of an `index.json` that lists preset files by relative path (`{"format": "thumbmix-source", "version": 1, "name": "…", "presets": [{"path": "kick.json"}]}`). A folder source reads every `.json` in it, up to 200. A source's presets are read-only and kept for use offline; **Save a copy** puts one on the iPhone to change it.
+
+This repo's [`presets/`](presets) folder is the default source, there on first launch. To add it back after removing it, choose **Add a source → Web address…** and paste:
+
+```
+https://raw.githubusercontent.com/Auxority/thumbmix/main/presets/index.json
+```
 
 ## Report a problem
 
