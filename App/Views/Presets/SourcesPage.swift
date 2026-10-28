@@ -17,7 +17,7 @@ struct SourcesPage: View {
                     Text("On this iPhone").font(.headline)
                     Text("^[\(library.own.count) preset](inflect: true)").font(.footnote).foregroundStyle(.green)
                 }
-                ForEach(library.sources, id: \.self) { source in
+                ForEach(library.sources) { source in
                     SourceRow(source: source, library: library)
                         .swipeActions { Button("Remove", role: .destructive) { library.removeSource(source) } }
                 }
@@ -67,14 +67,16 @@ struct SourcesPage: View {
 }
 
 private struct SourceRow: View {
-    let source: URL
+    let source: PresetSource
     let library: PresetLibrary
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(verbatim: library.title(of: source)).font(.headline)
-            // Shown as text, never as a link: the address came from whoever runs the source.
-            Text(verbatim: source.absoluteString).font(.subheadline).foregroundStyle(Theme.secondaryText).lineLimit(1)
+            Text(verbatim: library.title(of: source.id)).font(.headline)
+            if let address = source.webAddress {
+                // Shown as text, never as a link: the address came from whoever runs the source.
+                Text(verbatim: address.absoluteString).font(.subheadline).foregroundStyle(Theme.secondaryText).lineLimit(1)
+            }
             if let result = library.results[source] {
                 Text(verbatim: status(result)).font(.footnote).foregroundStyle(result.status == .ok ? .green : .orange)
                 ForEach(result.skipped, id: \.file) { skipped in
@@ -84,7 +86,7 @@ private struct SourceRow: View {
         }
         .padding(.vertical, 2)
         .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("source-" + (source.host ?? source.absoluteString))
+        .accessibilityIdentifier("source-" + (source.webAddress?.host ?? source.id))
     }
 
     private func status(_ result: SourceResult) -> String {

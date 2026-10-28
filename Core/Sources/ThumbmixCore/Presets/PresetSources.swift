@@ -8,19 +8,19 @@ public enum SourceStatus: Equatable, Sendable {
     case failed(String)
 }
 
-/// One read of a web source: its presets, the files it lists that the app refused, and how the read went.
+/// One read of a source: its presets, the files it holds or lists that the app refused, and how the read went.
 public struct SourceResult: Equatable, Sendable {
     public var presets: [LibraryEntry] = []
     public var skipped: [SkippedFile] = []
     public var status: SourceStatus = .ok
-    /// The name the source's index gives itself.
+    /// The name a web source's index gives itself.
     public var title: String?
 
     static func failed(_ reason: String) -> SourceResult { SourceResult(status: .failed(reason)) }
 }
 
-/// The web sources the engineer added, as in SideStore: an HTTPS index that lists preset files. The list and each
-/// source's last good read live in one folder in Application Support, not Caches: the offline copy must still be there
+/// The sources the engineer added: web ones as in SideStore (an HTTPS index that lists preset files), and folders and
+/// files picked in Files (`PresetFiles`). The list and each web source's last good read live in one folder in Application Support, not Caches: the offline copy must still be there
 /// at the show, after iOS cleared its caches.
 public struct PresetSources: Sendable {
     /// The repo's `presets/` folder: present on first launch, removable, and added back from the Sources page.
@@ -47,23 +47,35 @@ public struct PresetSources: Sendable {
 
     private var listFile: URL { folder.appendingPathComponent("sources.json") }
 
-    /// A missing list is a first launch; after that the list decides, so a removed default stays removed.
-    func load() -> [URL] {
-        guard let data = try? Data(contentsOf: listFile), let saved = try? JSONDecoder().decode([URL].self, from: data)
-        else { return defaults }
-        return saved.filter(Self.isAcceptable)
+    /// A missing list is a first launch; after that the list decides, so a removed default stays removed. A list of
+    /// addresses (0.57) is read as web sources.
+    func load() -> [PresetSource] {
+        guard let data = try? Data(contentsOf: listFile) else { return defaults.map(PresetSource.web) }
+        let saved =
+            (try? JSONDecoder().decode([PresetSource].self, from: data))
+            ?? (try? JSONDecoder().decode([URL].self, from: data))?.map(PresetSource.web)
+        guard let saved else { return defaults.map(PresetSource.web) }
+        return saved.filter { $0.webAddress.map(Self.isAcceptable) ?? true }
     }
 
-    func save(_ sources: [URL]) throws {
+    func save(_ sources: [PresetSource]) throws {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try JSONEncoder().encode(sources).write(to: listFile, options: .atomic)
     }
 
     // MARK: Reading
 
+    public func read(_ source: PresetSource) async -> SourceResult {
+        switch source.kind {
+        case .web(let url): await readWeb(url)
+        case .folder(let bookmark): PresetFiles.read(bookmark, of: source, PresetFiles.readFolder)
+        case .file(let bookmark): PresetFiles.read(bookmark, of: source, PresetFiles.readFile)
+        }
+    }
+
     /// Reads the index and every preset it lists. A bad index, or an address that can't be read, gives the last good
     /// read; a bad preset is skipped and named.
-    public func read(_ source: URL) async -> SourceResult {
+    private func readWeb(_ source: URL) async -> SourceResult {
         let cache = cacheFile(for: source)
         do {
             var fetched = try await withDeadline { try await fetchSource(source) }
@@ -115,8 +127,9 @@ public struct PresetSources: Sendable {
     }
 
     /// A removed source's last good read goes with it: one added again starts from nothing.
-    func forgetCache(of source: URL) {
-        try? FileManager.default.removeItem(at: cacheFile(for: source))
+    func forgetCache(of source: PresetSource) {
+        guard let address = source.webAddress else { return }
+        try? FileManager.default.removeItem(at: cacheFile(for: address))
     }
 
     private func writeCache(_ cached: Cache, to cache: URL) {
@@ -131,7 +144,7 @@ public struct PresetSources: Sendable {
     /// Checked again like a new file: the cache is the app's own copy, but a damaged one is not trusted either.
     private func entries(_ files: [CachedFile], of source: URL) -> [LibraryEntry] {
         files.compactMap { file in
-            (try? PresetValidation.decode(file.data)).map { LibraryEntry(source: source, file: file.file, preset: $0) }
+            (try? PresetValidation.decode(file.data)).map { LibraryEntry(source: source.absoluteString, file: file.file, preset: $0) }
         }
     }
 

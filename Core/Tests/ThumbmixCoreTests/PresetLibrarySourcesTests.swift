@@ -18,16 +18,16 @@ struct PresetLibrarySourcesTests {
     @Test func aFirstLaunchListsTheDefaultAndARemovedOneStaysRemoved() throws {
         defer { try? FileManager.default.removeItem(at: root) }
         let first = library(defaults: [PresetSources.thumbmix])
-        #expect(first.sources == [PresetSources.thumbmix])
+        #expect(first.sources == [.web(PresetSources.thumbmix)])
         #expect(!first.lacksDefaultSource)
 
-        first.removeSource(PresetSources.thumbmix)
+        first.removeSource(.web(PresetSources.thumbmix))
 
         let next = library(defaults: [PresetSources.thumbmix])
         #expect(next.sources.isEmpty, "the next launch keeps it removed")
         #expect(next.lacksDefaultSource)
         next.addDefaultSources()
-        #expect(library(defaults: [PresetSources.thumbmix]).sources == [PresetSources.thumbmix])
+        #expect(library(defaults: [PresetSources.thumbmix]).sources == [.web(PresetSources.thumbmix)])
     }
 
     @Test func anAddedAddressIsKeptOnceAndOnlyPlainHTTPSIsTaken() throws {
@@ -37,11 +37,11 @@ struct PresetLibrarySourcesTests {
         try library.addSource("  https://added.test/presets/index.json \n")
         try library.addSource("https://added.test/presets/index.json")
 
-        #expect(library.sources == [sourceURL("added.test")])
+        #expect(library.sources == [.web(sourceURL("added.test"))])
         for refused in ["http://added.test/index.json", "https://added.test/i.json?token=1", "not an address"] {
             #expect(throws: SourceError.refusedAddress) { try library.addSource(refused) }
         }
-        #expect(self.library().sources == [sourceURL("added.test")], "kept across launches")
+        #expect(self.library().sources == [.web(sourceURL("added.test"))], "kept across launches")
     }
 
     @Test func aSourcesPresetsJoinTheOwnOnesByFitThenName() async throws {
@@ -59,7 +59,7 @@ struct PresetLibrarySourcesTests {
         #expect(fits.map(\.preset.name) == ["Bass drum", "Kick"])
         #expect(others.map(\.preset.name) == ["Snare"])
         #expect(fits.map(\.isOwn) == [false, true])
-        #expect(library.title(of: sourceURL("join.test")) == "Join")
+        #expect(library.title(of: sourceURL("join.test").absoluteString) == "Join")
     }
 
     @Test func aRemovedSourceTakesItsPresetsAndItsOfflineCopy() async throws {
@@ -70,7 +70,7 @@ struct PresetLibrarySourcesTests {
         await library.refreshSources()
         #expect(library.entries.count == 1)
 
-        library.removeSource(sourceURL("gone.test"))
+        library.removeSource(.web(sourceURL("gone.test")))
         #expect(library.entries.isEmpty)
 
         StubRoutes.shared.set(sourceURL("gone.test"), .status(500))
@@ -92,7 +92,7 @@ struct PresetLibrarySourcesTests {
         refresh.cancel()
         await refresh.value
 
-        #expect(library.results[sourceURL("cancel.test")]?.status == .ok)
+        #expect(library.results[.web(sourceURL("cancel.test"))]?.status == .ok)
         #expect(library.entries.count == 1)
     }
 
@@ -105,7 +105,7 @@ struct PresetLibrarySourcesTests {
 
         let refresh = Task { await library.refreshSources() }
         try await Task.sleep(for: .milliseconds(50))
-        library.removeSource(sourceURL("inflight.test"))
+        library.removeSource(.web(sourceURL("inflight.test")))
         await refresh.value
 
         let left = try FileManager.default.contentsOfDirectory(atPath: root.appendingPathComponent("sources").path)
@@ -143,5 +143,52 @@ struct PresetLibrarySourcesTests {
 
         #expect(copy.isOwn)
         #expect(library.own.map(\.preset.name) == ["Kick"])
+    }
+
+    @Test func folderAndWebSourcesJoinTheListAndTheFolderIsKeptAcrossLaunches() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        route("mixed.test", index: try indexData(name: "Web", paths: ["kick.json"]), files: ["kick.json": try presetData("Kick")])
+        let picked = root.appendingPathComponent("Picked")
+        try FileManager.default.createDirectory(at: picked, withIntermediateDirectories: true)
+        try presetData("Snare").write(to: picked.appendingPathComponent("snare.json"))
+        let library = library()
+        try library.addSource(sourceURL("mixed.test").absoluteString)
+        let folder = try library.addFolder(picked)
+
+        await library.refreshSources()
+
+        #expect(library.entries.map(\.preset.name).sorted() == ["Kick", "Snare"])
+        #expect(library.entries.allSatisfy { !$0.isOwn })
+        #expect(library.title(of: folder.id) == "Picked")
+        let next = self.library()
+        await next.refreshSources()
+        #expect(next.sources.map(\.id) == [sourceURL("mixed.test").absoluteString, folder.id])
+        #expect(next.entries.count == 2, "the bookmark still opens the folder")
+    }
+
+    @Test func aPickedFileIsAReadOnlySourceNamedAfterTheFile() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let file = root.appendingPathComponent("tom.json")
+        try presetData("Tom").write(to: file)
+        let library = library()
+
+        let source = try library.addFile(file)
+        await library.refreshSources()
+
+        let entry = try #require(library.entries.first)
+        #expect(entry.preset.name == "Tom")
+        #expect(library.title(of: source.id) == "tom.json")
+        #expect(throws: LibraryError.readOnly) { try library.remove(entry) }
+    }
+
+    /// 0.57 kept the sources as a list of addresses: they stay, as web sources.
+    @Test func aListOfAddressesFromBeforeFoldersStillLoads() throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        let folder = root.appendingPathComponent("sources")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try JSONEncoder().encode([sourceURL("old.test"), PresetSources.thumbmix]).write(to: folder.appendingPathComponent("sources.json"))
+
+        #expect(library(defaults: [PresetSources.thumbmix]).sources == [.web(sourceURL("old.test")), .web(PresetSources.thumbmix)])
     }
 }
