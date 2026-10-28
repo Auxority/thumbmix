@@ -61,6 +61,16 @@
         }
       }
     },
+    "%@ is not part of a preset." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is not part of a preset."
+          }
+        }
+      }
+    },
     "%@ is outside what the desk takes." : {
       "localizations" : {
         "en" : {

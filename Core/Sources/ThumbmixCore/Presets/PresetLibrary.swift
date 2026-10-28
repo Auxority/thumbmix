@@ -134,9 +134,9 @@ public final class PresetLibrary {
     }
 
     private static func fileName(for name: String) -> String {
-        // No leading dot: a hidden file is never listed.
+        // No leading dot, also behind spaces: a hidden file is never listed.
         let replaced = String(name.map { "/\\:*?\"<>|".contains($0) ? "-" : $0 })
-        let cleaned = String(replaced.drop { $0 == "." }).trimmingCharacters(in: .whitespaces)
+        let cleaned = String(replaced.drop { $0 == "." || $0.isWhitespace }).trimmingCharacters(in: .whitespaces)
         return (cleaned.isEmpty ? "Preset" : cleaned) + ".json"
     }
 

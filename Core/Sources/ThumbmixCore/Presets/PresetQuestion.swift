@@ -18,8 +18,8 @@ public struct PresetQuestion: Equatable, Sendable, Identifiable {
     public let keep: String
     let write: PresetWrite
 
-    /// Answers are given by the control they hold back: one question per control.
-    public var id: String { write.address }
+    /// The control and what the alert said ("from 28 dB to 30 dB"): a yes holds only for the change the engineer read.
+    public var id: String { write.address + "\n" + title }
 
     static func raise(isGain: Bool, who: PresetWho, from: Double, to: Double, write: PresetWrite) -> Self {
         let (low, high) = (decibels(from, who.locale), decibels(to, who.locale))

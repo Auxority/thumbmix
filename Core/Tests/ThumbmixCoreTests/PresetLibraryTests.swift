@@ -58,6 +58,15 @@ struct PresetLibraryTests {
         #expect(names(library) == [".kick", "A/B: C"])
     }
 
+    /// An imported name may start with spaces before its dot: the file still must not be hidden.
+    @Test func aNameOfSpacesAndDotsStillShowsInTheList() throws {
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let library = library()
+        let entry = try library.save(.kick.named(" .kick"))
+        #expect(entry.file == "kick.json")
+        #expect(names(library) == [" .kick"])
+    }
+
     @Test func aPresetTheDeskWouldRefuseIsNotSaved() throws {
         defer { try? FileManager.default.removeItem(at: folder) }
         #expect(throws: PresetError.badText(field: "name")) { try library().save(.kick.named(String(repeating: "a", count: 41))) }

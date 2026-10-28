@@ -80,6 +80,47 @@ struct PresetLoadSafetyTests {
         }
     }
 
+    /// The desk copies the gain to a partner linked after the page opened: until that side's gain is read, a raise
+    /// there can't be told apart from a drop, so Input waits.
+    @Test func aPartnerLinkedLaterWaitsUntilItsGainIsRead() async throws {
+        let guitarL = StripID(.input, 9)
+        try await withLiveDesk(
+            before: { fake in
+                fake.deskChange("/config/chlink/9-10", .int(0))
+                setOnDesk(fake, Catalog.headampGain(32), 25)
+                setOnDesk(fake, Catalog.headampGain(40), 30)
+                setOnDesk(fake, Catalog.headampGain(41), 0)
+                setOnDesk(fake, Catalog.fader(StripID(.input, 10)), -.infinity)  // so the background fill skips it
+            },
+            body: { fake, mirror in
+                await readTabs(mirror, kick, guitarL)
+                let preset = try savePreset(kick, mirror, parts: [.input])
+                #expect(mirror.cell(Catalog.headampGain(41).address).argument == nil, "the other side was never opened")
+
+                fake.deskChange("/config/chlink/9-10", .int(1))
+                #expect(await eventually { mirror.gainDelayPartner(of: guitarL) != nil })
+
+                #expect(mirror.fit(of: .input, in: preset, onto: guitarL) == .reading)
+            })
+    }
+
+    /// A yes answers the change the alert named: if the desk moved meanwhile, that is another change, held back.
+    @Test func aRaiseSaidYesToIsHeldBackWhenTheDeskMovedMeanwhile() async throws {
+        try await withDesk([(Catalog.headampGain(32), 30), (Catalog.headampGain(33), 28)]) { fake, mirror in
+            await readTabs(mirror, kick, snare)
+            let preset = try savePreset(kick, mirror, parts: [.input])
+            let plan = mirror.loadPlan(preset, parts: [.input], onto: snare)
+            let question = try #require(plan.questions.first { $0.kind == .gain })
+
+            setOnDesk(fake, Catalog.headampGain(33), -12)
+            #expect(await eventually { abs((mirror.value(Catalog.headampGain(33)) ?? 0) + 12) < 0.01 })
+            #expect(mirror.apply(plan, answers: [question.id: true]) == .heldBack(1))
+
+            try await Task.sleep(for: .milliseconds(200))
+            #expect(deskValue(fake, Catalog.headampGain(33)) == -12, "not raised by 42 dB on a yes to 2 dB")
+        }
+    }
+
     @Test func aCleanLoadReportsItWasSent() async throws {
         try await withDesk([(Catalog.headampGain(32), 20), (Catalog.headampGain(33), 30)]) { _, mirror in
             await readTabs(mirror, kick, snare)

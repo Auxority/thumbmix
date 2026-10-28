@@ -12,6 +12,8 @@ public enum PresetError: LocalizedError, Equatable, Sendable {
     case badText(field: String)
     /// The strip type the preset was saved from has no such control.
     case notForStrip(field: String)
+    /// A key a preset file has no use for, such as a misspelt part.
+    case unknownField(String)
 
     public var errorDescription: String? {
         switch self {
@@ -24,6 +26,7 @@ public enum PresetError: LocalizedError, Equatable, Sendable {
         case .unknownOption(let field, let value): CoreStrings.text("\(field): the desk has no option \(value).")
         case .badText(let field): CoreStrings.text("\(field) is empty, too long or holds control characters.")
         case .notForStrip(let field): CoreStrings.text("\(field) has no control on this kind of strip.")
+        case .unknownField(let field): CoreStrings.text("\(field) is not part of a preset.")
         }
     }
 }

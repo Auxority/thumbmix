@@ -34,8 +34,17 @@ extension Preset: Codable {
         name = try container.decode(String.self, forKey: .name)
         matchWords = try container.decode([String].self, forKey: .matchWords)
         stripKind = try container.decode(StripKind.self, forKey: .stripKind)
+        // A misspelt or empty part would load nothing without a word: it is refused and named.
+        let known =
+            [Key.format, .version, .name, .matchWords, .stripKind].map(\.stringValue)
+            + PresetPart.allCases.map(\.rawValue)
+        if let unknown = container.allKeys.map(\.stringValue).sorted().first(where: { !known.contains($0) }) {
+            throw PresetError.unknownField(unknown)
+        }
         for part in PresetPart.allCases {
-            values[part] = try container.decodeIfPresent([String: PresetValue].self, forKey: Key(stringValue: part.rawValue))
+            let key = Key(stringValue: part.rawValue)
+            if container.contains(key), try container.decodeNil(forKey: key) { throw PresetError.wrongType(field: part.rawValue) }
+            values[part] = try container.decodeIfPresent([String: PresetValue].self, forKey: key)
         }
     }
 

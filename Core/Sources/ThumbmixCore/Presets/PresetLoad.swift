@@ -29,6 +29,8 @@ public struct LoadPlan: Equatable, Sendable {
     let preset: Preset
     let parts: Set<PresetPart>
     let strip: StripID
+    /// The alerts' words, which identify each answer.
+    let locale: Locale
     public var writes: [PresetWrite] = []
     public var questions: [PresetQuestion] = []
 }
@@ -44,7 +46,7 @@ extension ConsoleMirror {
     public func loadPlan(
         _ preset: Preset, parts: Set<PresetPart>, onto strip: StripID, locale: Locale = .current
     ) -> LoadPlan {
-        var plan = LoadPlan(preset: preset, parts: parts, strip: strip)
+        var plan = LoadPlan(preset: preset, parts: parts, strip: strip, locale: locale)
         for part in PresetPart.allCases where parts.contains(part) && fit(of: part, in: preset, onto: strip) == .fits {
             for field in preset.fields(of: part, on: strip, headamp: headamp(of: strip)) {
                 guard let spec = field.spec, let real = field.real else { continue }
@@ -60,17 +62,17 @@ extension ConsoleMirror {
     }
 
     /// Plans again against the desk as it is now, so `judge` alone decides what asks, also after the desk moved during
-    /// the alerts. Sends the writes that need no answer and those answered yes; an address answered "Keep" is never
-    /// written, and a question nobody was asked holds its write back.
+    /// the alerts. A control answered "Keep" is never written, whatever the desk did since; a yes holds only for the
+    /// change its alert named. A question that changed or arose meanwhile holds its write back.
     @discardableResult
     public func apply(_ plan: LoadPlan, answers: [String: Bool]) -> LoadOutcome {
         guard isLive else { return .notLive }
-        let now = loadPlan(plan.preset, parts: plan.parts, onto: plan.strip)
-        for write in now.writes where answers[write.address] != false { set(write.address, write.argument) }
-        for question in now.questions where answers[question.id] == true {
-            set(question.write.address, question.write.argument)
-        }
-        let heldBack = now.questions.filter { answers[$0.id] == nil }.count
+        let kept = Set(plan.questions.filter { answers[$0.id] == false }.map(\.write.address))
+        let now = loadPlan(plan.preset, parts: plan.parts, onto: plan.strip, locale: plan.locale)
+        for write in now.writes where !kept.contains(write.address) { set(write.address, write.argument) }
+        let asked = now.questions.filter { !kept.contains($0.write.address) }
+        for question in asked where answers[question.id] == true { set(question.write.address, question.write.argument) }
+        let heldBack = asked.filter { answers[$0.id] != true }.count
         return heldBack == 0 ? .sent : .heldBack(heldBack)
     }
 
@@ -119,8 +121,18 @@ extension ConsoleMirror {
     private func isReadToLoad(_ part: PresetPart, _ preset: Preset, onto strip: StripID) -> Bool {
         let specs = preset.fields(of: part, on: strip, headamp: headamp(of: strip)).compactMap(\.spec)
         guard specs.allSatisfy({ cell($0.address).argument != nil }) else { return false }
+        if part == .input, !isPartnerRead(strip) { return false }
         // The comp's question needs every send's switch and tap, which the Comp tab reads.
         return part != .comp || mixesChangedByMovingComp(of: strip) != nil
+    }
+
+    /// The desk copies a gain or trim to a linked partner: until that side is read, a raise there can't be told from a
+    /// drop, as when the pair was linked after the page opened.
+    private func isPartnerRead(_ strip: StripID) -> Bool {
+        guard let partner = gainDelayPartner(of: strip) else { return true }
+        let preamp = Catalog.headampIndex(partner).map { cell($0).argument != nil } ?? true
+        let levels = [partnerSpec(.gain, strip), partnerSpec(.trim, strip)].compactMap { $0 }
+        return preamp && levels.allSatisfy { cell($0.address).argument != nil }
     }
 
     // MARK: Questions

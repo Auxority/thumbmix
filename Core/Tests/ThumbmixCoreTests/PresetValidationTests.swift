@@ -63,6 +63,12 @@ struct PresetValidationTests {
         #expect(mainsType == .unknownOption(field: "eq/1/type", value: "BU12"), "an input lacks the crossovers")
     }
 
+    /// A misspelt or empty part would load nothing without a word: it is refused and named instead.
+    @Test func anUnknownOrNullPartIsRefusedAndNamed() throws {
+        #expect(try refusal { $0["Gate"] = ["gate/thr": -50] } == .unknownField("Gate"))
+        #expect(try refusal { $0["eq"] = NSNull() } == .wrongType(field: "eq"))
+    }
+
     @Test func aFormatOrVersionWeDontKnowIsRefused() throws {
         #expect(try refusal { $0["format"] = "other" } == .notAPreset)
         #expect(try refusal { $0["version"] = 2 } == .unknownVersion(2))
