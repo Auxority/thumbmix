@@ -12,23 +12,23 @@ public enum PartFit: Equatable, Sendable {
 public struct PresetWrite: Equatable, Sendable {
     public let address: String
     public let argument: OSCArgument
-    /// The level this write sets, and the controls (a linked partner's too) whose level it must not raise unasked:
-    /// checked again when the write is sent, since the desk may have moved during the alerts.
-    let target: Double
-    let raisingGuards: [ParamSpec]
 }
 
 /// What `apply` did: a load that was not sent, or held a write back, says so rather than looking done.
 public enum LoadOutcome: Equatable, Sendable {
     case sent
     case notLive
-    /// Writes left out because the gain or trim they set had meanwhile been lowered on the desk.
+    /// Writes left out because the desk moved during the alerts, so they now need a question nobody was asked.
     case heldBack(Int)
 }
 
 /// What loading a preset would write. `questions` hold the writes that need the engineer's yes first: raising the gain
 /// or trim, switching 48V, flipping polarity, moving the comp past mixes that hear it. Whatever the source.
 public struct LoadPlan: Equatable, Sendable {
+    /// What the plan was made from: `apply` plans again from these against the desk as it is then.
+    let preset: Preset
+    let parts: Set<PresetPart>
+    let strip: StripID
     public var writes: [PresetWrite] = []
     public var questions: [PresetQuestion] = []
 }
@@ -44,49 +44,34 @@ extension ConsoleMirror {
     public func loadPlan(
         _ preset: Preset, parts: Set<PresetPart>, onto strip: StripID, locale: Locale = .current
     ) -> LoadPlan {
-        var plan = LoadPlan()
+        var plan = LoadPlan(preset: preset, parts: parts, strip: strip)
         for part in PresetPart.allCases where parts.contains(part) && fit(of: part, in: preset, onto: strip) == .fits {
             for field in preset.fields(of: part, on: strip, headamp: headamp(of: strip)) {
                 guard let spec = field.spec, let real = field.real else { continue }
-                let guards = raisingGuards(field, spec, strip)
-                let write = PresetWrite(
-                    address: spec.address, argument: Catalog.deskArguments([(spec, real)])[0].argument,
-                    target: spec.scale.value(fromNormalized: spec.scale.normalized(forValue: real)),
-                    raisingGuards: guards)
-                switch judge(field, spec, write, preset: preset, strip: strip, locale: locale) {
+                let write = PresetWrite(address: spec.address, argument: Catalog.deskArguments([(spec, real)])[0].argument)
+                switch judge(field, spec, write, strip: strip, locale: locale) {
                 case .plain: plan.writes.append(write)
                 case .unchanged: continue
-                case .ask(let make): plan.questions.append(make(plan.questions.count))
+                case .ask(let question): plan.questions.append(question)
                 }
             }
         }
         return plan
     }
 
-    /// Sends the writes that need no answer, and those of each question the engineer confirmed. A question left out
-    /// is a "Keep": its writes are dropped and the rest loads.
+    /// Plans again against the desk as it is now, so `judge` alone decides what asks, also after the desk moved during
+    /// the alerts. Sends the writes that need no answer and those answered yes; an address answered "Keep" is never
+    /// written, and a question nobody was asked holds its write back.
     @discardableResult
-    public func apply(_ plan: LoadPlan, accepting accepted: Set<Int>) -> LoadOutcome {
+    public func apply(_ plan: LoadPlan, answers: [String: Bool]) -> LoadOutcome {
         guard isLive else { return .notLive }
-        var heldBack = 0
-        for write in plan.writes {
-            if wouldRaise(write) { heldBack += 1 } else { set(write.address, write.argument) }
+        let now = loadPlan(plan.preset, parts: plan.parts, onto: plan.strip)
+        for write in now.writes where answers[write.address] != false { set(write.address, write.argument) }
+        for question in now.questions where answers[question.id] == true {
+            set(question.write.address, question.write.argument)
         }
-        for question in plan.questions where accepted.contains(question.id) {
-            for write in question.writes { set(write.address, write.argument) }
-        }
+        let heldBack = now.questions.filter { answers[$0.id] == nil }.count
         return heldBack == 0 ? .sent : .heldBack(heldBack)
-    }
-
-    /// A write judged "lower, no question" that the desk's own level has meanwhile fallen under.
-    private func wouldRaise(_ write: PresetWrite) -> Bool {
-        write.raisingGuards.contains { value($0).map { $0 < write.target } ?? false }
-    }
-
-    /// The gain or trim, and the same control on a linked partner, which the desk copies the write to.
-    private func raisingGuards(_ field: PresetField, _ spec: ParamSpec, _ strip: StripID) -> [ParamSpec] {
-        guard field.role == .gain || field.role == .trim else { return [] }
-        return [spec] + (partnerSpec(field.role, strip).map { [$0] } ?? [])
     }
 
     private func partnerSpec(_ role: PresetField.Role?, _ strip: StripID) -> ParamSpec? {
@@ -143,12 +128,12 @@ extension ConsoleMirror {
     private enum Judgement {
         case plain
         case unchanged
-        case ask((Int) -> PresetQuestion)
+        case ask(PresetQuestion)
     }
 
-    private func judge(
-        _ field: PresetField, _ spec: ParamSpec, _ write: PresetWrite, preset: Preset, strip: StripID, locale: Locale
-    ) -> Judgement {
+    private func judge(_ field: PresetField, _ spec: ParamSpec, _ write: PresetWrite, strip: StripID, locale: Locale)
+        -> Judgement
+    {
         guard let role = field.role, let current = value(spec), let new = field.real else { return .plain }
         // The desk holds the value on its own grid: that is what the engineer would end up with.
         let snapped = spec.scale.value(fromNormalized: spec.scale.normalized(forValue: new))
@@ -156,7 +141,7 @@ extension ConsoleMirror {
         let sides = [current] + (partnerSpec(role, strip).flatMap { value($0) }.map { [$0] } ?? [])
         guard sides.contains(where: { $0 != snapped }) else { return .unchanged }
         let from = role == .gain || role == .trim ? sides.min() ?? current : current
-        let change = PresetChange(role: role, from: from, to: snapped, writes: [write])
+        let change = PresetChange(role: role, from: from, to: snapped, write: write)
         let who = PresetWho(self, strip, locale: locale)
         let mixes = role == .compPosition ? mixesChangedByMovingComp(of: strip) ?? [] : []
         return change.question(who, mixes: mixes).map { .ask($0) } ?? .plain
@@ -168,24 +153,16 @@ struct PresetChange {
     let role: PresetField.Role
     let from: Double
     let to: Double
-    let writes: [PresetWrite]
+    let write: PresetWrite
 
     /// nil where the change needs no question: a lower gain or trim, a comp move no mix hears.
-    func question(_ who: PresetWho, mixes: [String]) -> ((Int) -> PresetQuestion)? {
+    func question(_ who: PresetWho, mixes: [String]) -> PresetQuestion? {
         switch role {
-        case .gain, .trim: return to > from ? { raise($0, who) } : nil
-        case .phantom: return { PresetQuestion.phantom(id: $0, on: to == 1, who: who, writes: writes) }
-        case .polarity: return { PresetQuestion.polarity(id: $0, isFlipped: from == 1, who: who, writes: writes) }
-        case .compPosition: return mixes.isEmpty ? nil : { compMove($0, mixes) }
+        case .gain, .trim: to > from ? .raise(isGain: role == .gain, who: who, from: from, to: to, write: write) : nil
+        case .phantom: .phantom(on: to == 1, who: who, write: write)
+        case .polarity: .polarity(isFlipped: from == 1, who: who, write: write)
+        case .compPosition: mixes.isEmpty ? nil : .compMove(movesBeforeEQ: to == 0, mixes: mixes, write: write)
         }
-    }
-
-    private func raise(_ id: Int, _ who: PresetWho) -> PresetQuestion {
-        PresetQuestion.raise(id: id, isGain: role == .gain, who: who, from: from, to: to, writes: writes)
-    }
-
-    private func compMove(_ id: Int, _ mixes: [String]) -> PresetQuestion {
-        PresetQuestion.compMove(id: id, movesBeforeEQ: to == 0, mixes: mixes, writes: writes)
     }
 }
 
@@ -193,7 +170,6 @@ struct PresetChange {
 /// alert's title says what the answer reaches; else the strip.
 struct PresetWho {
     let name: String
-    let partnerName: String?
     /// Other strips on the same preamp, besides a linked partner the name already covers.
     let sameInput: String?
     let locale: Locale
@@ -201,7 +177,6 @@ struct PresetWho {
     @MainActor init(_ mirror: ConsoleMirror, _ strip: StripID, locale: Locale) {
         let partner = mirror.gainDelayPartner(of: strip)
         name = partner == nil ? mirror.name(strip) : mirror.pairName(strip)
-        partnerName = partner.map { mirror.name($0) }
         sameInput = mirror.namesSharingHeadamp(with: strip, besides: partner, locale: locale)
         self.locale = locale
     }

@@ -146,7 +146,7 @@
     "^[%lld preset](inflect: true)" : {
 
     },
-    "^[%lld setting](inflect: true) were left as they are: the gain changed on the desk meanwhile." : {
+    "^[%lld setting](inflect: true) were left as they are: the desk changed meanwhile." : {
 
     },
     "^[%lld strip](inflect: true)" : {

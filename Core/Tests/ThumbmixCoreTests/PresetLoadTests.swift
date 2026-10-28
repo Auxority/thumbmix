@@ -21,7 +21,7 @@ struct PresetLoadTests {
             let plan = mirror.loadPlan(preset, parts: preset.parts.reduce(into: []) { $0.insert($1) }, onto: snare)
             #expect(plan.questions.isEmpty, "gain goes down, 48V, polarity and comp position stay")
 
-            mirror.apply(plan, accepting: [])
+            mirror.apply(plan, answers: [:])
 
             #expect(await eventually { deskValue(fake, Catalog.gate(snare).threshold) == -33 })
             #expect(await eventually { deskValue(fake, Catalog.eqBand(snare, 3).gain) == 4.5 })
@@ -41,7 +41,7 @@ struct PresetLoadTests {
             #expect(question.kind == .gain)
             #expect(question.title.contains("10") && question.title.contains("30"))
 
-            mirror.apply(plan, accepting: [])
+            mirror.apply(plan, answers: [question.id: false])
 
             #expect(await eventually { deskValue(fake, Catalog.gate(snare).threshold) == -50 }, "the rest still loads")
             try await Task.sleep(for: .milliseconds(200))
@@ -56,7 +56,7 @@ struct PresetLoadTests {
             let plan = mirror.loadPlan(preset, parts: [.input], onto: snare)
             let question = try #require(plan.questions.first { $0.kind == .gain })
 
-            mirror.apply(plan, accepting: [question.id])
+            mirror.apply(plan, answers: [question.id: true])
 
             #expect(await eventually { deskValue(fake, Catalog.headampGain(33)) == 30 })
         }
@@ -79,7 +79,7 @@ struct PresetLoadTests {
             let preset = try savePreset(kick, mirror, parts: [.input])
             let plan = mirror.loadPlan(preset, parts: [.input], onto: snare)
             let question = try #require(plan.questions.first { $0.kind == .trim })
-            mirror.apply(plan, accepting: [question.id])
+            mirror.apply(plan, answers: [question.id: true])
             #expect(await eventually { deskValue(fake, Catalog.trim(snare)) == 6 })
         }
     }
@@ -91,7 +91,7 @@ struct PresetLoadTests {
             let on = try savePreset(kick, mirror, parts: [.input])
             let plan = mirror.loadPlan(on, parts: [.input], onto: snare)
             let question = try #require(plan.questions.first { $0.kind == .phantom(on: true) })
-            mirror.apply(plan, accepting: [])
+            mirror.apply(plan, answers: [question.id: false])
             try await Task.sleep(for: .milliseconds(200))
             #expect(fake.value(at: Catalog.headampPhantom(33).address) == .int(0), "Keep 48V off")
             #expect(question.keep.contains("48V"))
@@ -108,7 +108,7 @@ struct PresetLoadTests {
             let plan = mirror.loadPlan(preset, parts: [.input], onto: snare, locale: .testEnglish)
             let question = try #require(plan.questions.first { $0.kind == .polarity })
             #expect(question.title == PolarityPrompt(name: "Snare", isFlipped: false, partner: nil).title)
-            mirror.apply(plan, accepting: [question.id])
+            mirror.apply(plan, answers: [question.id: true])
             #expect(await eventually { fake.value(at: Catalog.invert(snare)!.address) == .int(1) })
         }
     }
@@ -128,7 +128,7 @@ struct PresetLoadTests {
             let plan = mirror.loadPlan(preset, parts: [.comp], onto: snare)
             let question = try #require(plan.questions.first { $0.kind == .compMove })
             #expect(question.message?.contains("Mon 1") == true)
-            mirror.apply(plan, accepting: [])
+            mirror.apply(plan, answers: [question.id: false])
             try await Task.sleep(for: .milliseconds(200))
             #expect(fake.value(at: Catalog.dynamicsPosition(snare)!.address) == .int(0), "kept before the EQ")
             #expect(await eventually { deskValue(fake, Catalog.dynamics(snare).ratio) == deskValue(fake, Catalog.dynamics(kick).ratio) })
@@ -147,7 +147,7 @@ struct PresetLoadTests {
             let plan = mirror.loadPlan(preset, parts: [.input, .gate], onto: guitarL, locale: .testEnglish)
             #expect(plan.questions.isEmpty, "10 dB is lower than 30")
 
-            mirror.apply(plan, accepting: [])
+            mirror.apply(plan, answers: [:])
 
             #expect(await eventually { deskValue(fake, Catalog.gate(guitarR).threshold) == -45 }, "the partner follows")
 
@@ -169,7 +169,7 @@ struct PresetLoadTests {
             #expect(preset.sends?.count == 16)
 
             let plan = mirror.loadPlan(preset, parts: [.sends], onto: snare)
-            mirror.apply(plan, accepting: [])
+            mirror.apply(plan, answers: [:])
 
             #expect(await eventually { deskValue(fake, Catalog.sendLevel(from: snare, to: StripID(.bus, 3))) == -6 })
         }
@@ -180,7 +180,7 @@ struct PresetLoadTests {
             await readTabs(mirror, kick, snare)
             let preset = try savePreset(kick, mirror)
             let before = deskValue(fake, Catalog.dynamics(snare).threshold)
-            mirror.apply(mirror.loadPlan(preset, parts: [.gate], onto: snare), accepting: [])
+            mirror.apply(mirror.loadPlan(preset, parts: [.gate], onto: snare), answers: [:])
             #expect(await eventually { deskValue(fake, Catalog.gate(snare).threshold) == -45 })
             try await Task.sleep(for: .milliseconds(200))
             #expect(deskValue(fake, Catalog.dynamics(snare).threshold) == before)
@@ -192,7 +192,7 @@ struct PresetLoadTests {
             await readTabs(mirror, kick)
             let preset = try savePreset(kick, mirror, parts: [.gate])
             let unopened = StripID(.input, 22)
-            mirror.apply(mirror.loadPlan(preset, parts: [.gate], onto: unopened), accepting: [])
+            mirror.apply(mirror.loadPlan(preset, parts: [.gate], onto: unopened), answers: [:])
             try await Task.sleep(for: .milliseconds(200))
             #expect(fake.receivedSets.allSatisfy { !$0.address.hasPrefix("/ch/22/") })
         }

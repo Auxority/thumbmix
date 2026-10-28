@@ -110,19 +110,19 @@ struct LoadPresetSheet: View {
     private func finishIfDone() {
         guard let run, run.isDone else { return }
         self.run = nil
-        switch mirror.apply(run.plan, accepting: run.accepted) {
+        switch mirror.apply(run.plan, answers: run.answers) {
         case .sent: dismiss()
         case .notLive: notice = String(localized: "Contact with the desk was lost. Nothing was loaded.")
         case .heldBack(let count):
-            notice = String(localized: "^[\(count) setting](inflect: true) were left as they are: the gain changed on the desk meanwhile.")
+            notice = String(localized: "^[\(count) setting](inflect: true) were left as they are: the desk changed meanwhile.")
         }
     }
 }
 
-/// A load in progress: the questions still to ask, one at a time, and what was said yes to.
+/// A load in progress: the questions still to ask, one at a time, and how each was answered.
 private struct LoadRun {
     let plan: LoadPlan
-    private(set) var accepted: Set<Int> = []
+    private(set) var answers: [String: Bool] = [:]
     private var waiting: [PresetQuestion]
     var current: PresetQuestion?
 
@@ -135,7 +135,7 @@ private struct LoadRun {
     var isDone: Bool { current == nil && waiting.isEmpty }
 
     mutating func answer(_ question: PresetQuestion, accepted isAccepted: Bool) {
-        if isAccepted { accepted.insert(question.id) }
+        answers[question.id] = isAccepted
     }
 
     mutating func advance() {

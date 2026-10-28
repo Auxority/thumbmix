@@ -9,7 +9,6 @@ public struct PresetQuestion: Equatable, Sendable, Identifiable {
         case polarity, compMove
     }
 
-    public let id: Int
     public let kind: Kind
     public let title: String
     public let message: String?
@@ -17,42 +16,45 @@ public struct PresetQuestion: Equatable, Sendable, Identifiable {
     public let confirm: String
     /// The cancel button, which names what stays.
     public let keep: String
-    let writes: [PresetWrite]
+    let write: PresetWrite
 
-    static func raise(id: Int, isGain: Bool, who: PresetWho, from: Double, to: Double, writes: [PresetWrite]) -> Self {
+    /// Answers are given by the control they hold back: one question per control.
+    public var id: String { write.address }
+
+    static func raise(isGain: Bool, who: PresetWho, from: Double, to: Double, write: PresetWrite) -> Self {
         let (low, high) = (decibels(from, who.locale), decibels(to, who.locale))
         let name = who.name
         return PresetQuestion(
-            id: id, kind: isGain ? .gain : .trim,
+            kind: isGain ? .gain : .trim,
             title: isGain
                 ? CoreStrings.text("Raise the gain of \(name) from \(low) to \(high)?")
                 : CoreStrings.text("Raise the trim of \(name) from \(low) to \(high)?"),
             message: isGain ? who.sameInput.map { CoreStrings.text("Also changes the gain of \($0) (same input).") } : nil,
-            confirm: CoreStrings.text("Raise"), keep: CoreStrings.text("Keep \(low)"), writes: writes)
+            confirm: CoreStrings.text("Raise"), keep: CoreStrings.text("Keep \(low)"), write: write)
     }
 
-    static func phantom(id: Int, on: Bool, who: PresetWho, writes: [PresetWrite]) -> Self {
+    static func phantom(on: Bool, who: PresetWho, write: PresetWrite) -> Self {
         let name = who.name
         return PresetQuestion(
-            id: id, kind: .phantom(on: on),
+            kind: .phantom(on: on),
             title: on ? CoreStrings.text("Turn on 48V for \(name)?") : CoreStrings.text("Turn off 48V for \(name)?"),
             message: who.sameInput.map { CoreStrings.text("Also powers \($0) (same input).") },
             confirm: on ? CoreStrings.text("Turn On") : CoreStrings.text("Turn Off"),
-            keep: on ? CoreStrings.text("Keep 48V off") : CoreStrings.text("Keep 48V on"), writes: writes)
+            keep: on ? CoreStrings.text("Keep 48V off") : CoreStrings.text("Keep 48V on"), write: write)
     }
 
-    static func polarity(id: Int, isFlipped: Bool, who: PresetWho, writes: [PresetWrite]) -> Self {
+    static func polarity(isFlipped: Bool, who: PresetWho, write: PresetWrite) -> Self {
         let prompt = PolarityPrompt(name: who.name, isFlipped: isFlipped, partner: nil)
         return PresetQuestion(
-            id: id, kind: .polarity, title: prompt.title, message: prompt.message, confirm: prompt.confirm,
-            keep: CoreStrings.text("Keep"), writes: writes)
+            kind: .polarity, title: prompt.title, message: prompt.message, confirm: prompt.confirm,
+            keep: CoreStrings.text("Keep"), write: write)
     }
 
-    static func compMove(id: Int, movesBeforeEQ: Bool, mixes: [String], writes: [PresetWrite]) -> Self {
+    static func compMove(movesBeforeEQ: Bool, mixes: [String], write: PresetWrite) -> Self {
         let prompt = CompMovePrompt(movesBeforeEQ: movesBeforeEQ, mixes: mixes)
         return PresetQuestion(
-            id: id, kind: .compMove, title: prompt.title, message: prompt.message, confirm: CoreStrings.text("Move"),
-            keep: CoreStrings.text("Keep"), writes: writes)
+            kind: .compMove, title: prompt.title, message: prompt.message, confirm: CoreStrings.text("Move"),
+            keep: CoreStrings.text("Keep"), write: write)
     }
 
     private static func decibels(_ value: Double, _ locale: Locale) -> String {
