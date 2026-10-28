@@ -1,0 +1,33 @@
+{
+  "format": "thumbmix-preset",
+  "version": 1,
+  "name": "Bass guitar",
+  "matchWords": ["bass", "bg"],
+  "stripKind": "input",
+  "eq": {
+    "on": true,
+    "lowCut": { "on": true, "hz": 30 },
+    "bands": [
+      { "type": "PEQ", "hz": 80, "db": 2, "q": 1.5 },
+      { "type": "PEQ", "hz": 250, "db": -3, "q": 1.5 },
+      { "type": "PEQ", "hz": 900, "db": 2, "q": 1.5 },
+      { "type": "HShv", "hz": 6000, "db": -2, "q": 2 }
+    ]
+  },
+  "comp": {
+    "on": true,
+    "mode": "COMP",
+    "thresholdDb": -20,
+    "ratio": "4.0",
+    "knee": 2,
+    "attackMs": 20,
+    "holdMs": 10,
+    "releaseMs": 200,
+    "makeupDb": 3,
+    "mixPercent": 100,
+    "detector": "PEAK",
+    "envelope": "LOG",
+    "auto": false,
+    "position": "POST"
+  }
+}

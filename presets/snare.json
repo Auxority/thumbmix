@@ -1,0 +1,42 @@
+{
+  "format": "thumbmix-preset",
+  "version": 1,
+  "name": "Snare",
+  "matchWords": ["snare", "sd"],
+  "stripKind": "input",
+  "eq": {
+    "on": true,
+    "lowCut": { "on": true, "hz": 80 },
+    "bands": [
+      { "type": "PEQ", "hz": 200, "db": 2, "q": 2 },
+      { "type": "PEQ", "hz": 500, "db": -3, "q": 2 },
+      { "type": "PEQ", "hz": 5000, "db": 3, "q": 1 },
+      { "type": "HShv", "hz": 10000, "db": 1.5, "q": 2 }
+    ]
+  },
+  "gate": {
+    "on": true,
+    "mode": "GATE",
+    "thresholdDb": -40,
+    "rangeDb": 25,
+    "attackMs": 0,
+    "holdMs": 40,
+    "releaseMs": 100
+  },
+  "comp": {
+    "on": true,
+    "mode": "COMP",
+    "thresholdDb": -15,
+    "ratio": "4.0",
+    "knee": 1,
+    "attackMs": 8,
+    "holdMs": 10,
+    "releaseMs": 100,
+    "makeupDb": 2,
+    "mixPercent": 100,
+    "detector": "PEAK",
+    "envelope": "LOG",
+    "auto": false,
+    "position": "POST"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "format": "thumbmix-preset",
+  "version": 1,
+  "name": "Lead vocal",
+  "matchWords": ["vox", "vocal", "lead"],
+  "stripKind": "input",
+  "eq": {
+    "on": true,
+    "lowCut": { "on": true, "hz": 100 },
+    "bands": [
+      { "type": "PEQ", "hz": 250, "db": -2, "q": 1.5 },
+      { "type": "PEQ", "hz": 1000, "db": 0, "q": 1.5 },
+      { "type": "PEQ", "hz": 3500, "db": 2, "q": 1 },
+      { "type": "HShv", "hz": 12000, "db": 2, "q": 2 }
+    ]
+  },
+  "comp": {
+    "on": true,
+    "mode": "COMP",
+    "thresholdDb": -20,
+    "ratio": "3.0",
+    "knee": 3,
+    "attackMs": 10,
+    "holdMs": 10,
+    "releaseMs": 150,
+    "makeupDb": 3,
+    "mixPercent": 100,
+    "detector": "RMS",
+    "envelope": "LOG",
+    "auto": false,
+    "position": "POST"
+  }
+}

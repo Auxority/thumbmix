@@ -1,0 +1,11 @@
+{
+  "format": "thumbmix-source",
+  "version": 1,
+  "name": "Thumbmix",
+  "presets": [
+    { "path": "kick.json" },
+    { "path": "snare.json" },
+    { "path": "lead-vocal.json" },
+    { "path": "bass-guitar.json" }
+  ]
+}

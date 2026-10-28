@@ -1,0 +1,42 @@
+{
+  "format": "thumbmix-preset",
+  "version": 1,
+  "name": "Kick",
+  "matchWords": ["kick", "bass drum", "bd"],
+  "stripKind": "input",
+  "eq": {
+    "on": true,
+    "lowCut": { "on": true, "hz": 35 },
+    "bands": [
+      { "type": "PEQ", "hz": 60, "db": 2, "q": 2 },
+      { "type": "PEQ", "hz": 350, "db": -4, "q": 1.5 },
+      { "type": "PEQ", "hz": 3000, "db": 2.5, "q": 1.5 },
+      { "type": "HShv", "hz": 10000, "db": 0, "q": 2 }
+    ]
+  },
+  "gate": {
+    "on": true,
+    "mode": "GATE",
+    "thresholdDb": -45,
+    "rangeDb": 30,
+    "attackMs": 1,
+    "holdMs": 50,
+    "releaseMs": 150
+  },
+  "comp": {
+    "on": true,
+    "mode": "COMP",
+    "thresholdDb": -18,
+    "ratio": "4.0",
+    "knee": 2,
+    "attackMs": 15,
+    "holdMs": 10,
+    "releaseMs": 120,
+    "makeupDb": 3,
+    "mixPercent": 100,
+    "detector": "PEAK",
+    "envelope": "LOG",
+    "auto": false,
+    "position": "POST"
+  }
+}
