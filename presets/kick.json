@@ -1,0 +1,57 @@
+{
+  "format": "thumbmix-preset",
+  "version": 1,
+  "name": "Kick",
+  "matchWords": [
+    "kick",
+    "bass drum",
+    "bd"
+  ],
+  "stripKind": "input",
+  "eq": {
+    "eq/on": true,
+    "preamp/hpon": true,
+    "preamp/hpf": 35,
+    "eq/1/type": "PEQ",
+    "eq/1/f": 60,
+    "eq/1/g": 2,
+    "eq/1/q": 2,
+    "eq/2/type": "PEQ",
+    "eq/2/f": 350,
+    "eq/2/g": -4,
+    "eq/2/q": 1.5,
+    "eq/3/type": "PEQ",
+    "eq/3/f": 3000,
+    "eq/3/g": 2.5,
+    "eq/3/q": 1.5,
+    "eq/4/type": "HShv",
+    "eq/4/f": 10000,
+    "eq/4/g": 0,
+    "eq/4/q": 2
+  },
+  "gate": {
+    "gate/on": true,
+    "gate/mode": "GATE",
+    "gate/thr": -45,
+    "gate/range": 30,
+    "gate/attack": 1,
+    "gate/hold": 50,
+    "gate/release": 150
+  },
+  "comp": {
+    "dyn/on": true,
+    "dyn/mode": "COMP",
+    "dyn/thr": -18,
+    "dyn/ratio": "4.0",
+    "dyn/knee": 2,
+    "dyn/attack": 15,
+    "dyn/hold": 10,
+    "dyn/release": 120,
+    "dyn/mgain": 3,
+    "dyn/mix": 100,
+    "dyn/det": "PEAK",
+    "dyn/env": "LOG",
+    "dyn/auto": false,
+    "dyn/pos": "POST"
+  }
+}
