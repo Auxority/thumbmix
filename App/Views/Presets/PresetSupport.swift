@@ -43,11 +43,6 @@ extension View {
     }
 }
 
-/// The error as words for the engineer: a refused file names its field.
-func presetErrorText(_ error: Error) -> String {
-    (error as? PresetError)?.message ?? (error as? SourceError)?.message ?? error.localizedDescription
-}
-
 struct SharedPreset: Identifiable {
     let url: URL
     var id: URL { url }

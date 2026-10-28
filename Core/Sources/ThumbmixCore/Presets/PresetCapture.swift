@@ -15,6 +15,13 @@ extension PresetPart {
     }
 }
 
+extension ChannelTab {
+    /// The tabs whose values a preset saves or loads: all but the lists of who feeds the strip.
+    public static func presetTabs(for kind: StripKind) -> [ChannelTab] {
+        tabs(for: kind).filter { $0 != .fedBy && $0 != .members }
+    }
+}
+
 /// An unread value: the preset is not saved from a guess (the safety rule).
 private struct Unread: Error {}
 

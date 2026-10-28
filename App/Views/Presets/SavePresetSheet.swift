@@ -92,7 +92,7 @@ struct SavePresetSheet: View {
             try await library.save(preset)
             dismiss()
         } catch {
-            notice = presetErrorText(error)
+            notice = error.localizedDescription
         }
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-public enum SourceError: Error, Equatable, Sendable {
+public enum SourceError: LocalizedError, Equatable, Sendable {
     case refusedAddress
     case unreachable(String)
     case notASource
@@ -9,7 +9,7 @@ public enum SourceError: Error, Equatable, Sendable {
     case badPath(String)
     case tooMany
 
-    public var message: String {
+    public var errorDescription: String? {
         switch self {
         case .refusedAddress: CoreStrings.text("The address must be https:// with no name, password or query.")
         case .unreachable(let why): CoreStrings.text("Couldn't read it: \(why)")
@@ -85,7 +85,7 @@ extension SourceReader {
             writeCache(fetched.files + kept, to: cache)
             return fetched.result
         } catch {
-            return fromCache(cache, because: Self.reason(error))
+            return fromCache(cache, because: error.localizedDescription)
         }
     }
 
@@ -122,14 +122,14 @@ extension SourceReader {
         for (path, outcome) in zip(paths, fetched) {
             switch outcome {
             case .failure(let error):
-                read.result.skipped.append(SkippedFile(file: path, reason: Self.reason(error)))
+                read.result.skipped.append(SkippedFile(file: path, reason: error.localizedDescription))
                 read.lost.insert(path)
             case .success(let data):
                 do {
                     read.result.presets.append(SourcedPreset(preset: try PresetValidation.decode(data), file: path))
                     read.files.append(CachedFile(file: path, data: data))
                 } catch {
-                    read.result.skipped.append(SkippedFile(file: path, reason: Self.reason(error)))
+                    read.result.skipped.append(SkippedFile(file: path, reason: error.localizedDescription))
                 }
             }
         }

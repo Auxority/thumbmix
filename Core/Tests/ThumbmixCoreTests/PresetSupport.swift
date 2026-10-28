@@ -46,7 +46,7 @@ func kickJSON(_ edit: (inout [String: Any]) -> Void = { _ in }) throws -> Data {
 @MainActor
 func readTabs(_ mirror: ConsoleMirror, _ strips: StripID...) async {
     for strip in strips {
-        for tab in ChannelTab.tabs(for: strip.kind) where tab != .fedBy && tab != .members {
+        for tab in ChannelTab.presetTabs(for: strip.kind) {
             await openTab(tab, of: strip, in: mirror)
         }
     }

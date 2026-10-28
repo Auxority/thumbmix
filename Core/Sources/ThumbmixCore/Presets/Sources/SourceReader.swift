@@ -83,7 +83,7 @@ public struct SourceReader: Sendable {
             let preset = try Self.preset(at: url)
             return SourceResult(presets: [SourcedPreset(preset: preset, file: url.lastPathComponent)])
         } catch {
-            return .failed(Self.reason(error))
+            return .failed(error.localizedDescription)
         }
     }
 
@@ -105,7 +105,7 @@ public struct SourceReader: Sendable {
                 let preset = try Self.preset(at: folder.appendingPathComponent(name))
                 result.presets.append(SourcedPreset(preset: preset, file: name))
             } catch {
-                result.skipped.append(SkippedFile(file: name, reason: Self.reason(error)))
+                result.skipped.append(SkippedFile(file: name, reason: error.localizedDescription))
             }
         }
         result.skipped += iCloudPlaceholders(in: names, folder)
@@ -137,10 +137,6 @@ public struct SourceReader: Sendable {
         }
         if let coordinationError { throw coordinationError }
         return try result.get()
-    }
-
-    static func reason(_ error: Error) -> String {
-        (error as? PresetError)?.message ?? (error as? SourceError)?.message ?? error.localizedDescription
     }
 
     func cacheFile(for source: PresetSource) -> URL {

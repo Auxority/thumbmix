@@ -123,7 +123,7 @@ struct PresetPage: View {
         do {
             shared = SharedPreset(url: try library.exportFile(preset))
         } catch {
-            notice = presetErrorText(error)
+            notice = error.localizedDescription
         }
     }
 
@@ -133,7 +133,7 @@ struct PresetPage: View {
         do {
             entry = try await library.replace(entry, with: renamed)
         } catch {
-            notice = presetErrorText(error)
+            notice = error.localizedDescription
         }
     }
 
@@ -142,7 +142,7 @@ struct PresetPage: View {
             try await library.remove(entry)
             dismiss()
         } catch {
-            notice = presetErrorText(error)
+            notice = error.localizedDescription
         }
     }
 
@@ -151,7 +151,7 @@ struct PresetPage: View {
             let copy = try await library.save(preset)
             notice = String(localized: "Saved “\(copy.preset.name)” on this iPhone.")
         } catch {
-            notice = presetErrorText(error)
+            notice = error.localizedDescription
         }
     }
 }
@@ -164,10 +164,10 @@ private struct PresetEQCurve: View {
     var body: some View {
         Canvas { context, size in
             EQGraphGrid.draw(in: context, size: size)
-            context.stroke(curve(in: size, upTo: 20_000, lowCut: lowCut), with: .color(.white), lineWidth: 2)
+            context.stroke(EQGraphGrid.curve(bands, lowCut, in: size), with: .color(.white), lineWidth: 2)
             if let lowCut {
                 context.stroke(
-                    curve(in: size, upTo: lowCut.frequency * 2, lowCut: lowCut), with: .color(EQGraph.lowCutColor),
+                    EQGraphGrid.curve(bands, lowCut, in: size, upTo: lowCut.frequency * 2), with: .color(EQGraph.lowCutColor),
                     lineWidth: 3)
             }
         }
@@ -175,17 +175,6 @@ private struct PresetEQCurve: View {
         .accessibilityHidden(true)
     }
 
-    private func curve(in size: CGSize, upTo maxHertz: Double, lowCut: LowCutState?) -> Path {
-        var path = Path()
-        let lastX = min(EQAxis.position(hertz: maxHertz), 1)
-        for step in 0...120 {
-            let x = Double(step) / 120 * lastX
-            let decibels = EQReading.decibels(at: EQAxis.hertz(at: x), bands: bands, lowCut: lowCut)
-            let point = CGPoint(x: x * size.width, y: EQGraphGrid.y(decibels: decibels) * size.height)
-            if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
-        }
-        return path
-    }
 }
 
 /// The words a strip's name is matched against: tap × to drop one, type to add one.
@@ -255,7 +244,7 @@ private struct MatchWordsSheet: View {
             entry = try await library.replace(entry, with: changed)
             dismiss()
         } catch {
-            notice = presetErrorText(error)
+            notice = error.localizedDescription
         }
     }
 }

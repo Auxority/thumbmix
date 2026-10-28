@@ -26,7 +26,7 @@ public enum PresetSummary {
     public static func eqCurve(_ preset: Preset) -> (bands: [EQBandState], lowCut: LowCutState?)? {
         guard let eq = preset.eq else { return nil }
         let bands = eq.bands.compactMap { band in
-            EQFilterType.allCases.first { $0.deskName == band.type }.map {
+            filterType(band.type).map {
                 EQBandState(typeIndex: $0.rawValue, frequency: band.hz, gain: band.db, q: band.q)
             }
         }
@@ -76,13 +76,18 @@ public enum PresetSummary {
         for (index, band) in eq.bands.enumerated() where band.db != 0 || isCut(band.type) {
             let hertz = ValueText.format(specs.frequency.scale.normalized(forValue: band.hz), specs.frequency, locale: locale)
             let gain = isCut(band.type) ? "" : " · " + ValueText.decibels(band.db, locale: locale)
-            rows.append(PresetRow(label: CoreStrings.text("Band \(index + 1)"), value: "\(band.type) · \(hertz)\(gain)"))
+            let type = filterType(band.type)?.name ?? band.type
+            rows.append(PresetRow(label: CoreStrings.text("Band \(index + 1)"), value: "\(type) · \(hertz)\(gain)"))
         }
         return rows
     }
 
+    private static func filterType(_ deskName: String) -> EQFilterType? {
+        EQFilterType.allCases.first { $0.deskName == deskName }
+    }
+
     private static func isCut(_ type: String) -> Bool {
-        EQFilterType.allCases.first { $0.deskName == type }.map { !$0.shapesLevel } ?? false
+        filterType(type).map { !$0.shapesLevel } ?? false
     }
 
     private static func sendRows(_ preset: Preset, _ strip: StripID, _ locale: Locale) -> [PresetRow] {

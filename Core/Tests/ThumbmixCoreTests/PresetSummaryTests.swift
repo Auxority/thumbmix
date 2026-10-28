@@ -26,7 +26,7 @@ struct PresetSummaryTests {
     @Test func theEQListsTheLowCutAndOnlyBandsThatDoSomething() {
         let eq = rows(.eq)
         #expect(eq["Low cut"] == "35.3 Hz")
-        #expect(eq["Band 1"]?.hasPrefix("PEQ") == true)
+        #expect(eq["Band 1"]?.hasPrefix("Parametric EQ · ") == true, "the name the EQ tab shows")
         #expect(eq["Band 4"] == nil, "the flat high shelf is left out")
     }
 

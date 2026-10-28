@@ -5,58 +5,42 @@ import Testing
 
 @MainActor
 struct PresetLibraryTests {
-    /// A library in folders of its own, removed with the test's `defer`.
-    private struct Folders {
-        let root: URL
-        var support: URL { root.appendingPathComponent("support") }
-        var own: URL { root.appendingPathComponent("own") }
-        var cache: URL { root.appendingPathComponent("cache") }
-    }
-
-    private func folders() throws -> Folders { Folders(root: try makeTemporaryFolder()) }
-
-    private func library(_ folders: Folders, defaultSource: Bool = false) -> PresetLibrary {
-        PresetLibrary(
-            supportDirectory: folders.support, ownFolder: folders.own, cacheDirectory: folders.cache,
-            session: StubRoutes.session(), includesDefaultSource: defaultSource)
-    }
-
     @Test func firstLaunchHasOnThisIPhoneAndTheThumbmixSource() throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
 
-        let library = library(folders, defaultSource: true)
+        let library = makeLibrary(folders, defaultSource: true)
 
         #expect(library.sources.map(\.id) == [PresetSource.onThisIPhone.id, PresetSource.thumbmix.id])
     }
 
     @Test func aRemovedDefaultSourceStaysRemovedAndComesBackOnRequest() throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let first = library(folders, defaultSource: true)
+        let first = makeLibrary(folders, defaultSource: true)
         first.remove(.thumbmix)
         #expect(!first.sources.contains(.thumbmix))
 
-        let second = library(folders, defaultSource: true)
+        let second = makeLibrary(folders, defaultSource: true)
         #expect(!second.sources.contains(.thumbmix), "the saved list decides after the first launch")
         #expect(!second.hasThumbmixSource)
 
         second.addThumbmixSource()
-        #expect(library(folders, defaultSource: true).hasThumbmixSource)
+        #expect(makeLibrary(folders, defaultSource: true).hasThumbmixSource)
     }
 
     @Test func onThisIPhoneCannotBeRemoved() throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
         library.remove(.onThisIPhone)
         #expect(library.sources == [.onThisIPhone])
     }
 
     @Test func aSavedPresetIsAJSONFileInTheOwnFolderAndListed() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
 
         let entry = try await library.save(.kick.named("Kick test"))
 
@@ -68,9 +52,9 @@ struct PresetLibraryTests {
     }
 
     @Test func aNameAlreadyTakenGetsANumber() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
 
         _ = try await library.save(.kick.named("Kick"))
         let second = try await library.save(.kick.named("Kick"))
@@ -82,26 +66,26 @@ struct PresetLibraryTests {
     }
 
     @Test func aNameThatIsNotAFileNameIsCleaned() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let entry = try await library(folders).save(.kick.named("A/B: C"))
+        let entry = try await makeLibrary(folders).save(.kick.named("A/B: C"))
         #expect(entry.file == "A-B- C.json")
         #expect(entry.preset.name == "A/B: C", "the name inside is as typed")
     }
 
     @Test func aPresetTheDeskWouldRefuseIsNotSaved() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
         var preset = Preset.kick
         preset.name = String(repeating: "a", count: 41)
 
-        await #expect(throws: PresetError.badText(field: "name")) { try await library(folders).save(preset) }
+        await #expect(throws: PresetError.badText(field: "name")) { try await makeLibrary(folders).save(preset) }
     }
 
     @Test func editingMatchWordsRewritesTheFileAndRenamingMovesIt() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
         let entry = try await library.save(.kick.named("Kick"))
 
         var edited = entry.preset
@@ -118,9 +102,9 @@ struct PresetLibraryTests {
     }
 
     @Test func removingAPresetDeletesItsFile() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
         let entry = try await library.save(.kick)
 
         try await library.remove(entry)
@@ -130,9 +114,9 @@ struct PresetLibraryTests {
     }
 
     @Test func aPresetFromAnotherSourceCannotBeChangedOrRemoved() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
         let foreign = LibraryEntry(source: .thumbmix, file: "kick.json", preset: .kick)
 
         await #expect(throws: LibraryError.readOnly) { try await library.remove(foreign) }
@@ -140,9 +124,9 @@ struct PresetLibraryTests {
     }
 
     @Test func savingACopyOfAForeignPresetPutsItOnThisIPhone() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
 
         let copy = try await library.save(.kick)
 
@@ -150,9 +134,9 @@ struct PresetLibraryTests {
     }
 
     @Test func importingAFileCopiesItAndANameAlreadyTakenGetsANumber() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
         let data = try presetData("Imported")
 
         let first = try await library.importPreset(data)
@@ -163,9 +147,9 @@ struct PresetLibraryTests {
     }
 
     @Test func importingAFileTheDeskWouldRefuseStoresNothing() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
 
         await #expect(throws: PresetError.outOfRange(field: "gate.thresholdDb")) {
             try await library.importPreset(brokenPresetData("Broken"))
@@ -174,9 +158,9 @@ struct PresetLibraryTests {
     }
 
     @Test func aSharedFileIsThePresetAsJSONUnderItsName() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let url = try library(folders).exportFile(.kick.named("Kick"))
+        let url = try makeLibrary(folders).exportFile(.kick.named("Kick"))
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
 
         #expect(url.lastPathComponent == "Kick.json")
@@ -184,27 +168,27 @@ struct PresetLibraryTests {
     }
 
     @Test func aFolderSourceIsAddedKeptAndItsPresetsListedOnRefresh() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         let shared = try makeTemporaryFolder()
         defer {
             try? FileManager.default.removeItem(at: folders.root)
             try? FileManager.default.removeItem(at: shared)
         }
         try presetData("Shared").write(to: shared.appendingPathComponent("shared.json"))
-        let library = library(folders)
+        let library = makeLibrary(folders)
 
         try library.addFolder(shared)
         await library.refresh()
 
         #expect(library.entries.map(\.preset.name) == ["Shared"])
         #expect(library.entries.first?.source.isWritable == false)
-        #expect(self.library(folders).sources.count == 2, "kept across launches")
+        #expect(makeLibrary(folders).sources.count == 2, "kept across launches")
     }
 
     @Test func aWebAddressMustBeHTTPS() throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
 
         #expect(throws: SourceError.refusedAddress) { try library.addWebAddress("http://example.com/index.json") }
         #expect(throws: SourceError.refusedAddress) { try library.addWebAddress("not an address") }
@@ -215,14 +199,14 @@ struct PresetLibraryTests {
     }
 
     @Test func aRemovedSourcesPresetsDisappear() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         let shared = try makeTemporaryFolder()
         defer {
             try? FileManager.default.removeItem(at: folders.root)
             try? FileManager.default.removeItem(at: shared)
         }
         try presetData("Shared").write(to: shared.appendingPathComponent("shared.json"))
-        let library = library(folders)
+        let library = makeLibrary(folders)
         try library.addFolder(shared)
         await library.refresh()
 
@@ -232,9 +216,9 @@ struct PresetLibraryTests {
     }
 
     @Test func presetsThatFitComeFirstThenTheOthersEachByName() async throws {
-        let folders = try folders()
+        let folders = try LibraryFolders()
         defer { try? FileManager.default.removeItem(at: folders.root) }
-        let library = library(folders)
+        let library = makeLibrary(folders)
         for name in ["Zed", "Alpha", "Kick B", "Kick A"] {
             var preset = Preset.kick.named(name)
             preset.matchWords = name.hasPrefix("Kick") ? ["kick"] : ["other"]

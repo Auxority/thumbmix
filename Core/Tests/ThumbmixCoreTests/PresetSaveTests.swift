@@ -11,6 +11,13 @@ struct PresetSaveTests {
 
     // MARK: Saving
 
+    /// The Presets page reads these on opening; the lists of who feeds a strip hold nothing a preset saves.
+    @Test func aPresetReadsEveryTabButTheFeedLists() {
+        #expect(ChannelTab.presetTabs(for: .input) == [.mix, .input, .gate, .eq, .comp, .sends])
+        #expect(ChannelTab.presetTabs(for: .bus) == [.mix, .eq, .comp, .sends])
+        #expect(ChannelTab.presetTabs(for: .dca) == [.mix])
+    }
+
     @Test func savingWaitsUntilEveryTickedPartIsRead() async throws {
         try await withLiveDesk { _, mirror in
             let unopened = StripID(.input, 20)

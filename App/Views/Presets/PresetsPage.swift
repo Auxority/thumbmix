@@ -110,9 +110,7 @@ private struct PresetsList: View {
 
     /// Reads every tab of the strip, so the load and save sheets find their values read, then every source.
     private func open() async {
-        for tab in ChannelTab.tabs(for: strip.kind) where tab != .fedBy && tab != .members {
-            mirror.read(tab, of: strip)
-        }
+        for tab in ChannelTab.presetTabs(for: strip.kind) { mirror.read(tab, of: strip) }
         await library.refresh()
     }
 
@@ -131,7 +129,7 @@ private struct PresetsList: View {
             let entry = try await library.importPreset(Data(contentsOf: url))
             notice = String(localized: "Imported “\(entry.preset.name)” to this iPhone.")
         } catch {
-            notice = presetErrorText(error)
+            notice = error.localizedDescription
         }
     }
 }

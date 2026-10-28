@@ -101,3 +101,20 @@ final class StubRoutes: @unchecked Sendable {
         return URLSession(configuration: configuration)
     }
 }
+
+/// A library in folders of its own, removed with the test's `defer`.
+struct LibraryFolders {
+    let root: URL
+    var support: URL { root.appendingPathComponent("support") }
+    var own: URL { root.appendingPathComponent("own") }
+    var cache: URL { root.appendingPathComponent("cache") }
+
+    init() throws { root = try makeTemporaryFolder() }
+}
+
+@MainActor
+func makeLibrary(_ folders: LibraryFolders, defaultSource: Bool = false) -> PresetLibrary {
+    PresetLibrary(
+        supportDirectory: folders.support, ownFolder: folders.own, cacheDirectory: folders.cache,
+        session: StubRoutes.session(), includesDefaultSource: defaultSource)
+}

@@ -82,7 +82,7 @@ struct SourcesPage: View {
             if pick == .folder { try library.addFolder(url) } else { try library.addFile(url) }
             Task { await library.refresh() }
         } catch {
-            notice = presetErrorText(error)
+            notice = error.localizedDescription
         }
     }
 
@@ -92,7 +92,7 @@ struct SourcesPage: View {
             try library.addWebAddress(address)
             Task { await library.refresh() }
         } catch {
-            notice = presetErrorText(error)
+            notice = error.localizedDescription
         }
     }
 }

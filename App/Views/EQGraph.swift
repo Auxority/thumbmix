@@ -48,23 +48,23 @@ struct EQGraph: View {
                 SpectrumGlow(spectrum: mirror.spectrum, color: Theme.color(mirror.color(strip)))
                 Canvas { context, canvasSize in
                     if let ghostCurve {
-                        let path = curve(ghostCurve.bands, ghostCurve.lowCut, in: canvasSize)
+                        let path = EQGraphGrid.curve(ghostCurve.bands, ghostCurve.lowCut, in: canvasSize)
                         context.stroke(path, with: .color(.white.opacity(0.3)), lineWidth: 2)
                     }
                     context.stroke(
-                        curve(bands, lowCut, in: canvasSize), with: .color(isEQOn ? .white : Theme.secondaryText),
+                        EQGraphGrid.curve(bands, lowCut, in: canvasSize), with: .color(isEQOn ? .white : Theme.secondaryText),
                         style: StrokeStyle(lineWidth: 2, dash: isEQOn ? [] : [5, 4]))
                     if let lowCut {
                         // Solid yellow means live: with the EQ off it shows the cut alone, never an unheard band.
                         let heard = isEQOn ? bands : []
-                        let cutPart = curve(heard, lowCut, in: canvasSize, upTo: lowCut.frequency * 2)
+                        let cutPart = EQGraphGrid.curve(heard, lowCut, in: canvasSize, upTo: lowCut.frequency * 2)
                         context.stroke(cutPart, with: .color(Self.lowCutColor), lineWidth: 3)
                     } else if isLowCutOff, let lowCutAsSet {
                         // Off, the cut as set is dashed like unheard bands, and ends where it would barely show, so it
                         // never runs on top of the curve (2026-10-17).
                         let end = lowCutAsSet.hertz(whereCutIs: -0.5)
                         context.stroke(
-                            curve(bands, lowCutAsSet, in: canvasSize, upTo: end), with: .color(Theme.secondaryText),
+                            EQGraphGrid.curve(bands, lowCutAsSet, in: canvasSize, upTo: end), with: .color(Theme.secondaryText),
                             style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
                     }
                 }
@@ -159,22 +159,6 @@ struct EQGraph: View {
             return nil
         }
         return frequency.scale.value(fromNormalized: position)
-    }
-
-    private func curve(_ bands: [EQBandState], _ lowCut: LowCutState?, in size: CGSize, upTo maxHertz: Double = 20_000)
-        -> Path
-    {
-        var path = Path()
-        let lastX = min(EQAxis.position(hertz: maxHertz), 1)
-        for step in 0...120 {
-            let x = Double(step) / 120 * lastX
-            let hertz = EQAxis.hertz(at: x)
-            let decibels = EQReading.decibels(at: hertz, bands: bands, lowCut: lowCut)
-            let point = CGPoint(
-                x: x * size.width, y: EQGraphGrid.y(decibels: decibels) * size.height)
-            if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
-        }
-        return path
     }
 
     private func dragGesture(in size: CGSize) -> some Gesture {

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Why a preset file was refused. Every case names the field, so whoever edited the file can find it.
-public enum PresetError: Error, Equatable, Sendable {
+public enum PresetError: LocalizedError, Equatable, Sendable {
     case notAPreset
     case unknownVersion(Int)
     case tooLarge
@@ -13,7 +13,7 @@ public enum PresetError: Error, Equatable, Sendable {
     /// The strip type the preset was saved from has no such control.
     case notForStrip(field: String)
 
-    public var message: String {
+    public var errorDescription: String? {
         switch self {
         case .notAPreset: CoreStrings.text("This is not a Thumbmix preset file.")
         case .unknownVersion(let version): CoreStrings.text("This preset is version \(version); this app reads version 1.")

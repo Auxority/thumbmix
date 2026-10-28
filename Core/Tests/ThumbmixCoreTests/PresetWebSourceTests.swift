@@ -50,7 +50,7 @@ struct PresetWebSourceTests {
 
         let result = try await reader().read(PresetSource(name: "U", kind: .url(url(host))))
 
-        #expect(result.status == .failed(SourceError.refusedAddress.message), "the redirect is what stopped it")
+        #expect(result.status == .failed(SourceError.refusedAddress.localizedDescription), "the redirect is what stopped it")
         #expect(result.presets.isEmpty)
     }
 

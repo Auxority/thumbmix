@@ -154,7 +154,7 @@ struct PresetValidationTests {
     }
 
     @Test func theErrorSaysWhichFieldInWords() {
-        #expect(PresetError.outOfRange(field: "gate.thresholdDb").message.contains("gate.thresholdDb"))
-        #expect(PresetError.unknownOption(field: "gate.mode", value: "SQUASH").message.contains("SQUASH"))
+        #expect(PresetError.outOfRange(field: "gate.thresholdDb").localizedDescription.contains("gate.thresholdDb"))
+        #expect(PresetError.unknownOption(field: "gate.mode", value: "SQUASH").localizedDescription.contains("SQUASH"))
     }
 }
