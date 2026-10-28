@@ -18,6 +18,8 @@ final class AppModel {
     /// as the next show may want the hunt (2026-10-19).
     private var keptExclusiveSolo: Set<String> = []
     private var deskKey: String?
+    /// The engineer's presets, whatever desk is connected: presets outlive a connection.
+    let presets = AppModel.makePresetLibrary()
 
     var isOffline: Bool { demoConsole != nil }
 
@@ -30,6 +32,18 @@ final class AppModel {
             if (1...65535).contains(port) { return UInt16(port) }
         #endif
         return 10023
+    }
+
+    /// Presets live in Documents, which the Files app shows. UI tests pass `-isolatedPresets YES`: a folder of their
+    /// own, so no test sees another's presets.
+    private static func makePresetLibrary() -> PresetLibrary {
+        var own = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appending(path: "Presets")
+        #if DEBUG
+            if UserDefaults.standard.bool(forKey: "isolatedPresets") {
+                own = FileManager.default.temporaryDirectory.appending(path: "thumbmix-presets-" + UUID().uuidString)
+            }
+        #endif
+        return PresetLibrary(ownFolder: own)
     }
 
     /// A console that answers as an M32 is remembered under the name set on the desk; the demo never is.

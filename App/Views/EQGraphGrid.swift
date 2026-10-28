@@ -24,6 +24,21 @@ enum EQGraphGrid {
         context.stroke(grid, with: .color(Theme.raised), lineWidth: 1)
     }
 
+    /// The response of `bands` and `lowCut` from the left edge up to `maxHertz`, in the grid's scale.
+    static func curve(_ bands: [EQBandState], _ lowCut: LowCutState?, in size: CGSize, upTo maxHertz: Double = 20_000)
+        -> Path
+    {
+        var path = Path()
+        let lastX = min(EQAxis.position(hertz: maxHertz), 1)
+        for step in 0...120 {
+            let x = Double(step) / 120 * lastX
+            let decibels = EQReading.decibels(at: EQAxis.hertz(at: x), bands: bands, lowCut: lowCut)
+            let point = CGPoint(x: x * size.width, y: y(decibels: decibels) * size.height)
+            if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
+        }
+        return path
+    }
+
     private static func number(_ text: String) -> Text {
         Text(verbatim: text).font(.system(size: 10, weight: .semibold)).foregroundStyle(Theme.secondaryText)
     }
