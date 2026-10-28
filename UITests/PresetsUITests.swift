@@ -92,7 +92,6 @@ final class PresetsUITests: DeskUITestCase {
         openPresets()
         XCTAssertTrue(element("preset-row-Kick test").appears(within: 3), "listed under Others: no strip here is named kick")
         saveScreenshot("presets-list")
-        XCTAssertTrue(element("preset-row-Kick").exists, "the built-in presets are listed too")
         element("preset-row-Kick test").tap()
         let load = element("preset-load")
         XCTAssertTrue(load.appears(within: 3))

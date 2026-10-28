@@ -1,13 +1,11 @@
 import Foundation
 import Observation
 
-/// A preset as listed: the engineer's own, a file On this iPhone, or one that ships with the app.
+/// A preset as listed: its file On this iPhone.
 public struct LibraryEntry: Identifiable, Equatable, Sendable {
-    /// nil for a built-in preset, which can't be changed: "Save a copy" makes it the engineer's own.
-    public let file: String?
+    public let file: String
     public let preset: Preset
-    public var isOwn: Bool { file != nil }
-    public var id: String { file ?? "built-in/" + preset.name }
+    public var id: String { file }
 }
 
 /// A file On this iPhone that isn't a preset the app takes, named so whoever edited it in Files can find it.
@@ -16,24 +14,18 @@ public struct SkippedFile: Equatable, Sendable {
     public let reason: String
 }
 
-public enum LibraryError: Error, Equatable, Sendable {
-    /// Only the engineer's own presets can be changed or removed.
-    case readOnly
-}
-
-/// The presets On this iPhone (`Documents/Presets`, shown in the Files app, so files can be copied in and out by hand)
-/// and the built-in ones. Own files are read again when the Presets page opens, so an edit made in Files shows up.
+/// The presets On this iPhone (`Documents/Presets`, shown in the Files app, so files can be copied in and out by hand).
+/// The app ships none of its own (DECISIONS). The files are read again when the Presets page opens, so an edit made in
+/// Files shows up.
 @MainActor @Observable
 public final class PresetLibrary {
     public private(set) var own: [LibraryEntry] = []
     public private(set) var skipped: [SkippedFile] = []
-    public let builtIn: [LibraryEntry]
 
     @ObservationIgnored private let ownFolder: URL
 
-    public init(ownFolder: URL, builtIn: [Preset] = BuiltInPresets.all) {
+    public init(ownFolder: URL) {
         self.ownFolder = ownFolder
-        self.builtIn = builtIn.map { LibraryEntry(file: nil, preset: $0) }
         refresh()
     }
 
@@ -52,16 +44,16 @@ public final class PresetLibrary {
         (self.own, self.skipped) = (own, skipped)
     }
 
-    /// The presets whose match words fit first, then the others, each by name; own before built-in on a tie.
+    /// The presets whose match words fit first, then the others, each by name.
     public func ordered(fitting fits: (Preset) -> Bool) -> (fits: [LibraryEntry], others: [LibraryEntry]) {
-        let sorted = (own + builtIn).sorted { $0.preset.name.localizedStandardCompare($1.preset.name) == .orderedAscending }
+        let sorted = own.sorted { $0.preset.name.localizedStandardCompare($1.preset.name) == .orderedAscending }
         return (sorted.filter { fits($0.preset) }, sorted.filter { !fits($0.preset) })
     }
 
     // MARK: Own presets
 
     /// Writes a preset On this iPhone as `<name>.json`. A name already taken gets " 2", " 3"... and the preset carries
-    /// that name too. Saving a copy of a built-in preset is saving it.
+    /// that name too.
     @discardableResult
     public func save(_ preset: Preset) throws -> LibraryEntry {
         try PresetValidation.validate(preset)
@@ -75,7 +67,7 @@ public final class PresetLibrary {
     /// A changed preset replaces the old file; a changed name moves it.
     @discardableResult
     public func replace(_ entry: LibraryEntry, with preset: Preset) throws -> LibraryEntry {
-        guard let old = entry.file else { throw LibraryError.readOnly }
+        let old = entry.file
         try PresetValidation.validate(preset)
         var renamed = preset
         let file = preset.name == entry.preset.name ? old : uniqueFile(for: &renamed.name, except: old)
@@ -90,8 +82,7 @@ public final class PresetLibrary {
     }
 
     public func remove(_ entry: LibraryEntry) throws {
-        guard let file = entry.file else { throw LibraryError.readOnly }
-        try FileManager.default.removeItem(at: ownFolder.appendingPathComponent(file))
+        try FileManager.default.removeItem(at: ownFolder.appendingPathComponent(entry.file))
         refresh()
     }
 
@@ -141,23 +132,9 @@ public final class PresetLibrary {
     }
 
     /// The size is checked before the file is read: a huge file never fills memory.
-    nonisolated static func preset(at url: URL) throws -> Preset {
+    private static func preset(at url: URL) throws -> Preset {
         let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
         guard size <= PresetValidation.maxBytes else { throw PresetError.tooLarge }
         return try PresetValidation.decode(Data(contentsOf: url))
     }
-}
-
-/// The presets that ship with the app (`BuiltInPresets/`), checked like any other; `BuiltInPresetsTests` keeps every
-/// file valid, so none is dropped here in practice.
-public enum BuiltInPresets {
-    static let folder = Bundle.module.url(forResource: "BuiltInPresets", withExtension: nil)
-
-    public static let all: [Preset] = {
-        guard let folder,
-            let files = try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
-        else { return [] }
-        return files.filter { $0.pathExtension == "json" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
-            .compactMap { try? PresetLibrary.preset(at: $0) }
-    }()
 }

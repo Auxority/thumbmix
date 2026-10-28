@@ -3,12 +3,12 @@ import Testing
 
 @testable import ThumbmixCore
 
-/// The presets On this iPhone, in a folder of each test's own, and the built-in ones next to them.
+/// The presets On this iPhone, in a folder of each test's own.
 @MainActor
 struct PresetLibraryTests {
     private let folder = FileManager.default.temporaryDirectory.appendingPathComponent("thumbmix-test-" + UUID().uuidString)
 
-    private func library(builtIn: [Preset] = []) -> PresetLibrary { PresetLibrary(ownFolder: folder, builtIn: builtIn) }
+    private func library() -> PresetLibrary { PresetLibrary(ownFolder: folder) }
 
     private func names(_ library: PresetLibrary) -> [String] { library.own.map(\.preset.name).sorted() }
 
@@ -110,17 +110,6 @@ struct PresetLibraryTests {
         #expect(try FileManager.default.contentsOfDirectory(atPath: folder.path).isEmpty)
     }
 
-    @Test func aBuiltInPresetCannotBeChangedOrRemovedButCopied() throws {
-        defer { try? FileManager.default.removeItem(at: folder) }
-        let library = library(builtIn: [.kick])
-        let builtIn = try #require(library.builtIn.first)
-        #expect(!builtIn.isOwn)
-
-        #expect(throws: LibraryError.readOnly) { try library.remove(builtIn) }
-        #expect(throws: LibraryError.readOnly) { try library.replace(builtIn, with: .kick) }
-        #expect(try library.save(builtIn.preset).isOwn, "Save a copy")
-    }
-
     @Test func importingCopiesAFileAndRefusesOneTheDeskWouldRefuse() throws {
         defer { try? FileManager.default.removeItem(at: folder) }
         let library = library()
@@ -158,8 +147,8 @@ struct PresetLibraryTests {
 
     @Test func presetsThatFitComeFirstThenTheOthersEachByName() throws {
         defer { try? FileManager.default.removeItem(at: folder) }
-        let library = library(builtIn: [.kick.named("Kick B")])
-        for name in ["Zed", "Alpha", "Kick A"] {
+        let library = library()
+        for name in ["Zed", "Alpha", "Kick B", "Kick A"] {
             var preset = Preset.kick.named(name)
             preset.matchWords = name.hasPrefix("Kick") ? ["kick"] : ["other"]
             try library.save(preset)

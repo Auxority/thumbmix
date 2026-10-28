@@ -18,7 +18,7 @@ final class AppModel {
     /// as the next show may want the hunt (2026-10-19).
     private var keptExclusiveSolo: Set<String> = []
     private var deskKey: String?
-    /// The engineer's presets and the built-in ones, whatever desk is connected: presets outlive a connection.
+    /// The engineer's presets, whatever desk is connected: presets outlive a connection.
     let presets = AppModel.makePresetLibrary()
 
     var isOffline: Bool { demoConsole != nil }

@@ -1,8 +1,8 @@
 import SwiftUI
 import ThumbmixCore
 
-/// One preset as a Settings-style list (option 2, 2026-10-28): the name and where it came from, which strips it
-/// fits, then a section per part it holds. Load and Save a copy / Remove sit pinned at the bottom.
+/// One preset as a Settings-style list (option 2, 2026-10-28): the name, which strips it fits, then a section per part
+/// it holds. Load and Remove sit pinned at the bottom.
 struct PresetPage: View {
     @State var entry: LibraryEntry
     let strip: StripID
@@ -18,7 +18,6 @@ struct PresetPage: View {
     @State private var notice: String?
 
     private var preset: Preset { entry.preset }
-    private var isOwn: Bool { entry.isOwn }
 
     var body: some View {
         List {
@@ -56,21 +55,14 @@ struct PresetPage: View {
         Section {
             HStack {
                 Text(verbatim: preset.name).font(.title2.bold())
-                if isOwn {
-                    Button("Rename", systemImage: "pencil") {
-                        newName = preset.name
-                        isRenaming = true
-                    }
-                    .labelStyle(.iconOnly).accessibilityIdentifier("preset-rename")
+                Button("Rename", systemImage: "pencil") {
+                    newName = preset.name
+                    isRenaming = true
                 }
+                .labelStyle(.iconOnly).accessibilityIdentifier("preset-rename")
             }
-            Text(verbatim: originLine).font(.subheadline).foregroundStyle(Theme.secondaryText)
         }
         .listRowBackground(Color.clear)
-    }
-
-    private var originLine: String {
-        isOwn ? String(localized: "On this iPhone") : String(localized: "Built-in · read-only")
     }
 
     private var fits: some View {
@@ -86,9 +78,7 @@ struct PresetPage: View {
                 Text("Strips named \(preset.matchWords.formatted(.list(type: .or)))").font(.footnote)
                     .foregroundStyle(Theme.secondaryText)
             }
-            if isOwn {
-                Button("Edit match words") { isEditingWords = true }.accessibilityIdentifier("preset-edit-words")
-            }
+            Button("Edit match words") { isEditingWords = true }.accessibilityIdentifier("preset-edit-words")
         }
         .listRowBackground(Theme.track)
     }
@@ -108,11 +98,7 @@ struct PresetPage: View {
             Button("Load onto \(mirror.name(strip))…") { isLoading = true }
                 .buttonStyle(.wideProminentDarkCapsule)
                 .disabled(!mirror.isLive).accessibilityIdentifier("preset-load")
-            if isOwn {
-                Button("Remove preset", role: .destructive) { isConfirmingRemove = true }
-            } else {
-                Button("Save a copy") { saveCopy() }.accessibilityIdentifier("preset-copy")
-            }
+            Button("Remove preset", role: .destructive) { isConfirmingRemove = true }
         }
         .padding(16)
         .background(Theme.background)
@@ -140,15 +126,6 @@ struct PresetPage: View {
         do {
             try library.remove(entry)
             dismiss()
-        } catch {
-            notice = error.localizedDescription
-        }
-    }
-
-    private func saveCopy() {
-        do {
-            let copy = try library.save(preset)
-            notice = String(localized: "Saved “\(copy.preset.name)” on this iPhone.")
         } catch {
             notice = error.localizedDescription
         }

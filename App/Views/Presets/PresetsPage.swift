@@ -32,12 +32,12 @@ struct PresetsRow: View {
     private var summary: String? {
         let name = mirror.rawName(strip)
         guard let library, !name.isEmpty else { return nil }
-        let fitting = (library.own + library.builtIn).filter { PresetMatching.fits($0.preset, name: name) }.count
+        let fitting = library.own.filter { PresetMatching.fits($0.preset, name: name) }.count
         return fitting == 0 ? nil : String(localized: "\(fitting) fit “\(name)”")
     }
 }
 
-/// The engineer's presets and the built-in ones: those fitting the strip's name first, then the others.
+/// The presets on this iPhone: those fitting the strip's name first, then the others.
 struct PresetsPage: View {
     let strip: StripID
     let mirror: ConsoleMirror
@@ -135,7 +135,6 @@ private struct PresetListRow: View {
             Text(verbatim: entry.preset.name).font(.headline)
             Text(verbatim: entry.preset.parts.map(\.title).joined(separator: " · "))
                 .font(.subheadline).foregroundStyle(Theme.secondaryText)
-            Text(entry.isOwn ? "On this iPhone" : "Built-in").font(.footnote).foregroundStyle(Theme.secondaryText)
         }
         .padding(.vertical, 2)
     }

@@ -182,12 +182,6 @@
     "Blue" : {
 
     },
-    "Built-in" : {
-
-    },
-    "Built-in · read-only" : {
-
-    },
     "Can't reach %@" : {
 
     },
@@ -549,9 +543,6 @@
     "On" : {
 
     },
-    "On this iPhone" : {
-
-    },
     "Online" : {
 
     },
@@ -649,16 +640,10 @@
     "Save" : {
 
     },
-    "Save a copy" : {
-
-    },
     "Save as preset" : {
 
     },
     "Save this strip as a preset…" : {
-
-    },
-    "Saved “%@” on this iPhone." : {
 
     },
     "Scan again" : {
