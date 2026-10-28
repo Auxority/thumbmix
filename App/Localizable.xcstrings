@@ -140,6 +140,9 @@
         }
       }
     },
+    "^[%lld preset](inflect: true)" : {
+
+    },
     "^[%lld setting](inflect: true) were left as they are: the desk changed meanwhile." : {
 
     },
@@ -156,6 +159,12 @@
 
     },
     "Add" : {
+
+    },
+    "Add a web source" : {
+
+    },
+    "Add the Thumbmix source" : {
 
     },
     "Also changes the gain of %@ (same input)." : {
@@ -306,6 +315,9 @@
     "Forget" : {
 
     },
+    "From %@ · read-only" : {
+
+    },
     "Gain and delay aren't linked on the desk." : {
 
     },
@@ -340,6 +352,9 @@
 
     },
     "Hold a name to solo it. Keep holding and drag to solo more." : {
+
+    },
+    "https://…/index.json" : {
 
     },
     "Icon" : {
@@ -543,6 +558,9 @@
     "On" : {
 
     },
+    "On this iPhone" : {
+
+    },
     "Online" : {
 
     },
@@ -640,10 +658,16 @@
     "Save" : {
 
     },
+    "Save a copy" : {
+
+    },
     "Save as preset" : {
 
     },
     "Save this strip as a preset…" : {
+
+    },
+    "Saved “%@” to this iPhone." : {
 
     },
     "Scan again" : {
@@ -691,6 +715,9 @@
     "Show unused" : {
 
     },
+    "Showing the last good read: %@" : {
+
+    },
     "Solo" : {
 
     },
@@ -698,6 +725,9 @@
 
     },
     "Solo several at once" : {
+
+    },
+    "Sources" : {
 
     },
     "Stereo link" : {
@@ -743,6 +773,9 @@
 
     },
     "The file is deleted from this iPhone." : {
+
+    },
+    "The https:// address of a Thumbmix source's index.json." : {
 
     },
     "They'll work as one stereo channel." : {
@@ -804,6 +837,9 @@
 
     },
     "Unsolo %@" : {
+
+    },
+    "Web sources are read again each time you open the presets, and kept for use offline. Swipe to remove one." : {
 
     },
     "While the group is on, a strip you add mutes at once." : {

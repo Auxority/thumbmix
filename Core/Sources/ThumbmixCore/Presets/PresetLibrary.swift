@@ -1,11 +1,20 @@
 import Foundation
 import Observation
 
-/// A preset as listed: its file On this iPhone.
+/// A preset as listed: its file On this iPhone, or its path in a web source's index.
 public struct LibraryEntry: Identifiable, Equatable, Sendable {
+    /// The web source's index; nil On this iPhone, the only place presets are written.
+    public let source: URL?
     public let file: String
     public let preset: Preset
-    public var id: String { file }
+    public var id: String { (source?.absoluteString ?? "") + "\n" + file }
+    public var isOwn: Bool { source == nil }
+
+    init(source: URL? = nil, file: String, preset: Preset) {
+        self.source = source
+        self.file = file
+        self.preset = preset
+    }
 }
 
 /// A file On this iPhone that isn't a preset the app takes, named so whoever edited it in Files can find it.
@@ -14,20 +23,39 @@ public struct SkippedFile: Equatable, Sendable {
     public let reason: String
 }
 
-/// The presets On this iPhone (`Documents/Presets`, shown in the Files app, so files can be copied in and out by hand).
-/// The app ships none of its own (DECISIONS). The files are read again when the Presets page opens, so an edit made in
-/// Files shows up.
+public enum LibraryError: LocalizedError, Equatable, Sendable {
+    /// Only presets On this iPhone can be changed or removed; "Save a copy" brings one here.
+    case readOnly
+
+    public var errorDescription: String? { CoreStrings.text("Only presets on this iPhone can be changed.") }
+}
+
+/// The presets On this iPhone (`Documents/Presets`, shown in the Files app, so files can be copied in and out by hand),
+/// and those of the web sources (`PresetSources`). The app ships none of its own (DECISIONS). Both are read again when
+/// the Presets page opens, so an edit made in Files or on the web shows up.
 @MainActor @Observable
 public final class PresetLibrary {
     public private(set) var own: [LibraryEntry] = []
     public private(set) var skipped: [SkippedFile] = []
+    /// The web sources, in the order they were added, and the last read of each.
+    public internal(set) var sources: [URL] = []
+    public internal(set) var results: [URL: SourceResult] = [:]
 
     @ObservationIgnored private let ownFolder: URL
+    @ObservationIgnored let web: PresetSources?
+    /// Sources whose read is in flight: a second refresh leaves them to it.
+    @ObservationIgnored var reading: Set<URL> = []
 
-    public init(ownFolder: URL) {
+    /// Without `sources` the library has no web sources: the tests of own presets need no network.
+    public init(ownFolder: URL, sources: PresetSources? = nil) {
         self.ownFolder = ownFolder
+        web = sources
+        self.sources = sources?.load() ?? []
         refresh()
     }
+
+    /// Own presets, then each source's, in the order of the sources.
+    public var entries: [LibraryEntry] { own + sources.flatMap { results[$0]?.presets ?? [] } }
 
     /// Every own file the app takes, each checked as an imported one is. A file it refuses is listed with its reason.
     public func refresh() {
@@ -46,7 +74,7 @@ public final class PresetLibrary {
 
     /// The presets whose match words fit first, then the others, each by name.
     public func ordered(fitting fits: (Preset) -> Bool) -> (fits: [LibraryEntry], others: [LibraryEntry]) {
-        let sorted = own.sorted { $0.preset.name.localizedStandardCompare($1.preset.name) == .orderedAscending }
+        let sorted = entries.sorted { $0.preset.name.localizedStandardCompare($1.preset.name) == .orderedAscending }
         return (sorted.filter { fits($0.preset) }, sorted.filter { !fits($0.preset) })
     }
 
@@ -67,6 +95,7 @@ public final class PresetLibrary {
     /// A changed preset replaces the old file; a changed name moves it.
     @discardableResult
     public func replace(_ entry: LibraryEntry, with preset: Preset) throws -> LibraryEntry {
+        guard entry.isOwn else { throw LibraryError.readOnly }
         let old = entry.file
         try PresetValidation.validate(preset)
         var renamed = preset
@@ -82,6 +111,7 @@ public final class PresetLibrary {
     }
 
     public func remove(_ entry: LibraryEntry) throws {
+        guard entry.isOwn else { throw LibraryError.readOnly }
         try FileManager.default.removeItem(at: ownFolder.appendingPathComponent(entry.file))
         refresh()
     }

@@ -34,16 +34,22 @@ final class AppModel {
         return 10023
     }
 
-    /// Presets live in Documents, which the Files app shows. UI tests pass `-isolatedPresets YES`: a folder of their
-    /// own, so no test sees another's presets.
+    /// Presets live in Documents, which the Files app shows; the web sources and their offline copies in Application
+    /// Support. UI tests pass `-isolatedPresets YES`: folders of their own and no default source, so no test sees
+    /// another's presets or needs the web.
     private static func makePresetLibrary() -> PresetLibrary {
-        var own = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appending(path: "Presets")
+        let files = FileManager.default
+        var own = files.urls(for: .documentDirectory, in: .userDomainMask)[0].appending(path: "Presets")
+        var sources = PresetSources(
+            folder: files.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appending(path: "PresetSources"))
         #if DEBUG
             if UserDefaults.standard.bool(forKey: "isolatedPresets") {
-                own = FileManager.default.temporaryDirectory.appending(path: "thumbmix-presets-" + UUID().uuidString)
+                let root = files.temporaryDirectory.appending(path: "thumbmix-presets-" + UUID().uuidString)
+                own = root.appending(path: "own")
+                sources = PresetSources(folder: root.appending(path: "sources"), defaults: [])
             }
         #endif
-        return PresetLibrary(ownFolder: own)
+        return PresetLibrary(ownFolder: own, sources: sources)
     }
 
     /// A console that answers as an M32 is remembered under the name set on the desk; the demo never is.
