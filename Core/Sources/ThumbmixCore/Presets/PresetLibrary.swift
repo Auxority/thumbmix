@@ -1,11 +1,20 @@
 import Foundation
 import Observation
 
-/// A preset as listed: its file On this iPhone.
+/// A preset as listed: its file On this iPhone, or its path in a web source's index.
 public struct LibraryEntry: Identifiable, Equatable, Sendable {
+    /// The web source's index; nil On this iPhone, the only place presets are written.
+    public let source: URL?
     public let file: String
     public let preset: Preset
-    public var id: String { file }
+    public var id: String { (source?.absoluteString ?? "") + "\n" + file }
+    public var isOwn: Bool { source == nil }
+
+    init(source: URL? = nil, file: String, preset: Preset) {
+        self.source = source
+        self.file = file
+        self.preset = preset
+    }
 }
 
 /// A file On this iPhone that isn't a preset the app takes, named so whoever edited it in Files can find it.
