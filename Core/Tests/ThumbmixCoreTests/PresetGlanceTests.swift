@@ -212,6 +212,38 @@ struct PresetGlanceTests {
         #expect(shown.sorted() == held)
     }
 
+    /// A bus has six bands, sends to matrices and no low cut: its page leaves nothing out either.
+    @MainActor @Test func aBusPresetShowsEveryValueExactlyOnce() async throws {
+        let bus = StripID(.bus, 1)
+        try await withLiveDesk { _, mirror in
+            await readTabs(mirror, bus)
+            let parts = Set(PresetPart.allCases.filter { $0.exists(on: bus) })
+            let preset = try #require(mirror.capture(bus, parts: parts, name: "Mon", matchWords: []))
+            #expect(preset.parts.count == parts.count)
+            for part in preset.parts {
+                let shown =
+                    PresetSummary.groups(preset, part, locale: .testEnglish).flatMap(\.cells).flatMap(\.paths)
+                    + (part == .eq ? PresetSummary.bands(preset, locale: .testEnglish).flatMap(\.paths) : [])
+                #expect(shown.sorted() == preset.values[part]?.keys.sorted(), "\(part)")
+            }
+            #expect(PresetSummary.bands(preset, locale: .testEnglish).count == 6)
+        }
+    }
+
+    /// A hand-written file may switch the delay on without a time: it reads On, never Off.
+    @Test func aDelayOnWithoutATimeReadsOn() {
+        var preset = Preset.kick
+        preset.values[.input]?["delay/time"] = nil
+        #expect(lines(.input, preset).last == "Delay=On")
+    }
+
+    /// With no send sending, one line says so for every bus, not "Other buses" with nothing before it.
+    @Test func noSendSendingReadsAllBusesOff() {
+        var preset = Preset.kick
+        preset.values[.sends]?["mix/03/on"] = .flag(false)
+        #expect(lines(.sends, preset) == ["All buses=Off"])
+    }
+
     @Test func theRepoPresetsReadWithoutAnyLeftOver() throws {
         for name in ["kick", "lead-vocal"] {
             let preset = try PresetValidation.decode(Data(contentsOf: repoPreset(name)))

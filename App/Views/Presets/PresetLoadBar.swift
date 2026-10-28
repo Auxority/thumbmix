@@ -2,9 +2,11 @@ import SwiftUI
 import ThumbmixCore
 
 /// Which parts the engineer left out, shared by the preset page's bar and each part page's, so a chip tapped on one
-/// shows on the other.
+/// shows on the other. `isLoading` holds the pages still from Load to the last alert's answer: a card or Back in the
+/// 0.4 s between alerts would open a second bar with a load of its own, or leave this one's alerts with no page.
 @Observable final class LoadChoice {
     var unticked: Set<PresetPart> = []
+    var isLoading = false
 }
 
 /// The parts to load as chips above Load (pick F, 2026-10-28), pinned under the preset page and each part's page: a
@@ -21,16 +23,16 @@ struct PresetLoadBar<Secondary: View>: View {
     @State private var pause: Task<Void, Never>?
     /// Load reads "Loaded" for a moment after a load went out: the page stays, so the engineer sees it happened.
     @State private var justLoaded = false
+    @State private var loadedReset: Task<Void, Never>?
     @State private var notice: String?
 
     var body: some View {
         VStack(spacing: 8) {
             HStack(spacing: 5) { ForEach(preset.parts) { chip($0) } }
             ForEach(reasons, id: \.self) { Text(verbatim: $0).font(.footnote).foregroundStyle(Theme.secondaryText) }
-            // Always enabled while an alert is open: a button that changes then would lose its action (CLAUDE.md).
             Button(loadTitle) { start() }
                 .buttonStyle(.wideProminentDarkCapsule)
-                .disabled(!mirror.isLive || loadable.isEmpty || run != nil)
+                .disabled(!mirror.isLive || loadable.isEmpty || choice.isLoading || justLoaded)
                 .accessibilityIdentifier("preset-load")
             secondary
         }
@@ -46,6 +48,8 @@ struct PresetLoadBar<Secondary: View>: View {
             if let message = question.message { Text(verbatim: message) }
         }
         .noticeAlert($notice)
+        // A page that goes anyway (the scene closed it) ends its load: nothing is sent unasked.
+        .onDisappear(perform: abandon)
     }
 
     /// Green while it will load; a tap leaves it out. One that can't load is greyed and disabled.
@@ -92,8 +96,16 @@ struct PresetLoadBar<Secondary: View>: View {
     }
 
     private func start() {
+        choice.isLoading = true
         run = LoadRun(plan: mirror.loadPlan(preset, parts: loadable, onto: strip))
         finishIfDone()
+    }
+
+    private func abandon() {
+        pause?.cancel()
+        guard run != nil else { return }
+        run = nil
+        choice.isLoading = false
     }
 
     private func answer(_ question: PresetQuestion, accepted: Bool) {
@@ -111,6 +123,7 @@ struct PresetLoadBar<Secondary: View>: View {
     private func finishIfDone() {
         guard let run, run.isDone else { return }
         self.run = nil
+        choice.isLoading = false
         switch mirror.apply(run.plan, answers: run.answers) {
         case .sent: showLoaded()
         case .notLive: notice = String(localized: "Contact with the desk was lost. Nothing was loaded.")
@@ -125,8 +138,10 @@ struct PresetLoadBar<Secondary: View>: View {
 
     private func showLoaded() {
         justLoaded = true
-        Task {
+        loadedReset?.cancel()
+        loadedReset = Task {
             try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
             justLoaded = false
         }
     }

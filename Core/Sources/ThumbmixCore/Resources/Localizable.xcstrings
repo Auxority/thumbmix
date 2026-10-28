@@ -191,6 +191,16 @@
         }
       }
     },
+    "All buses" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All buses"
+          }
+        }
+      }
+    },
     "Also changes the gain of %@ (same input)." : {
       "localizations" : {
         "en" : {

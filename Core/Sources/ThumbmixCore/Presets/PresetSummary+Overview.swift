@@ -41,6 +41,9 @@ extension PresetSummary {
         let lines = shown.map { PresetLine($0.bus.defaultName, $0.text, bus: $0.bus) }
         let rest = sends.filter { send in !shown.contains { $0.bus == send.bus } }
         guard !rest.isEmpty else { return lines }
+        if shown.isEmpty {
+            return [PresetLine(CoreStrings.text("All buses"), CoreStrings.text("Off"))]
+        }
         let on = rest.filter(\.isSending).count
         return lines + [PresetLine(CoreStrings.text("Other buses"), on == 0 ? CoreStrings.text("Off") : CoreStrings.text("\(on) on"))]
     }
@@ -58,8 +61,8 @@ extension PresetReader {
 
     func delayLine() -> [PresetLine] {
         guard let on = flag("delay/on") else { return lines(["delay/time"]) }
-        guard on, let time = parts("delay/time") else { return [PresetLine(label("delay/on"), CoreStrings.text("Off"))] }
-        return [PresetLine(label("delay/on"), time.text)]
+        guard on else { return [PresetLine(label("delay/on"), CoreStrings.text("Off"))] }
+        return [PresetLine(label("delay/on"), parts("delay/time")?.text ?? CoreStrings.text("On"))]
     }
 
     func lowCutLine() -> [PresetLine] {

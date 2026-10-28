@@ -27,11 +27,14 @@ struct PresetPage: View {
                 header
                 ForEach(preset.parts) { part in
                     NavigationLink {
-                        PresetPartPage(preset: preset, part: part, mirror: mirror) { loadBar(withSecondary: false) }
+                        PresetPartPage(preset: preset, part: part, mirror: mirror, choice: choice) {
+                            loadBar(withSecondary: false)
+                        }
                     } label: {
                         PresetCard(preset: preset, part: part, mirror: mirror)
                     }
                     .buttonStyle(.plain)
+                    .disabled(choice.isLoading)
                 }
             }
             .padding(.horizontal, 16)

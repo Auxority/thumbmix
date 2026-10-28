@@ -8,6 +8,8 @@ struct PresetPartPage<Bar: View>: View {
     let preset: Preset
     let part: PresetPart
     let mirror: ConsoleMirror
+    /// While its load runs the page stays: Back in the pause between alerts would leave them with no page.
+    let choice: LoadChoice
     @ViewBuilder let bar: Bar
 
     var body: some View {
@@ -27,6 +29,7 @@ struct PresetPartPage<Bar: View>: View {
         .navigationTitle(part.title)
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) { bar }
+        .navigationBarBackButtonHidden(choice.isLoading)
     }
 
     @ViewBuilder private var bands: some View {
