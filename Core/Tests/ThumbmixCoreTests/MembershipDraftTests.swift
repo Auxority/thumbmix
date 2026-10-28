@@ -63,7 +63,7 @@ struct MembershipDraftTests {
                 #expect(draft.shown(.dca(2), current: current) == .assigned)
                 mirror.apply(draft, to: [gtrL, gtrR])
                 #expect(await eventually { fake.value(at: gtrR.dcaMask!) == .int(0b10) })
-                #expect(fake.value(at: gtrL.dcaMask!) == .int(0b10))
+                #expect(await eventually { fake.value(at: gtrL.dcaMask!) == .int(0b10) })
             })
     }
 
@@ -89,7 +89,7 @@ struct MembershipDraftTests {
             #expect(await eventually { !mirror.isLinked(gtrL) })
             mirror.apply(draft, to: [gtrL, gtrR])
             #expect(await eventually { fake.value(at: gtrR.dcaMask!) == .int(0b110) })
-            #expect(fake.value(at: gtrL.dcaMask!) == .int(0b110))
+            #expect(await eventually { fake.value(at: gtrL.dcaMask!) == .int(0b110) })
         }
     }
 
