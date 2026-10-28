@@ -19,14 +19,13 @@ struct PresetLibrarySourcesTests {
         defer { try? FileManager.default.removeItem(at: root) }
         let first = library(defaults: [PresetSources.thumbmix])
         #expect(first.sources == [.web(PresetSources.thumbmix)])
-        #expect(!first.lacksDefaultSource)
 
         first.removeSource(.web(PresetSources.thumbmix))
 
         let next = library(defaults: [PresetSources.thumbmix])
         #expect(next.sources.isEmpty, "the next launch keeps it removed")
-        #expect(next.lacksDefaultSource)
-        next.addDefaultSources()
+        // Added again by its address, which the README gives.
+        try next.addSource(PresetSources.thumbmix.absoluteString)
         #expect(library(defaults: [PresetSources.thumbmix]).sources == [.web(PresetSources.thumbmix)])
     }
 

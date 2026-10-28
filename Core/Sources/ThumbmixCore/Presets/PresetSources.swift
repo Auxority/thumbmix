@@ -20,10 +20,11 @@ public struct SourceResult: Equatable, Sendable {
 }
 
 /// The sources the engineer added: web ones as in SideStore (an HTTPS index that lists preset files), and folders and
-/// files picked in Files (`PresetFiles`). The list and each web source's last good read live in one folder in Application Support, not Caches: the offline copy must still be there
-/// at the show, after iOS cleared its caches.
+/// files picked in Files (`PresetFiles`). The list and each source's last good read live in one folder in Application
+/// Support, not Caches: the offline copy must still be there at the show, after iOS cleared its caches.
 public struct PresetSources: Sendable {
-    /// The repo's `presets/` folder: present on first launch, removable, and added back from the Sources page.
+    /// The repo's `presets/` folder: present on first launch and removable. The README gives its address, to add again
+    /// like any web source.
     public static let thumbmix = URL(string: "https://raw.githubusercontent.com/Auxority/thumbmix/main/presets/index.json")!
     static let maxPresets = 200
 

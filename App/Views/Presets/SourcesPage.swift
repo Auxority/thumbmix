@@ -1,20 +1,21 @@
 import SwiftUI
 import ThumbmixCore
+import UniformTypeIdentifiers
 
-/// Where presets come from: On this iPhone, then each web source with how its last read went, and a way to add or
-/// remove one.
+/// Where presets come from: On this iPhone, then each source with how its last read went. Add sits pinned at the
+/// bottom, in thumb reach (pick C, 2026-10-28); swipe a source to remove it.
 struct SourcesPage: View {
     let library: PresetLibrary
     let mirror: ConsoleMirror
     @State private var isAskingForAddress = false
     @State private var address = ""
+    @State private var picking: PickedKind?
     @State private var notice: String?
 
     var body: some View {
         List {
             Section {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("On this iPhone").font(.headline)
+                SourceLabel(icon: "iphone", title: Text("On this iPhone")) {
                     Text("^[\(library.own.count) preset](inflect: true)").font(.footnote).foregroundStyle(.green)
                 }
                 ForEach(library.sources) { source in
@@ -22,29 +23,21 @@ struct SourcesPage: View {
                         .swipeActions { Button("Remove", role: .destructive) { library.removeSource(source) } }
                 }
             } footer: {
-                Text("Web sources are read again each time you open the presets, and kept for use offline. Swipe to remove one.")
+                Text("Sources are read again each time you open the presets, and kept for use offline. Swipe to remove one.")
             }
             .listRowBackground(Theme.track)
-            if library.lacksDefaultSource {
-                Section {
-                    Button("Add the Thumbmix source") {
-                        let added = library.addDefaultSources()
-                        Task { await library.refreshSources(added) }
-                    }
-                    .accessibilityIdentifier("sources-add-default")
-                }
-                .listRowBackground(Theme.track)
-            }
         }
         .presetPage(mirror)
         .navigationTitle("Sources")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button("Add", systemImage: "plus") { isAskingForAddress = true }.accessibilityIdentifier("sources-add")
-            }
-        }
+        .safeAreaInset(edge: .bottom, spacing: 0) { addMenu }
         .refreshable { await library.refreshSources() }
+        .fileImporter(
+            isPresented: Binding(get: { picking != nil }, set: { if !$0 { picking = nil } }),
+            allowedContentTypes: picking == .file ? [.json] : [.folder]
+        ) { result in
+            add(result, as: picking)
+        }
         .alert("Add a web source", isPresented: $isAskingForAddress) {
             TextField("https://…/index.json", text: $address).textInputAutocapitalization(.never).keyboardType(.URL)
             Button("Cancel", role: .cancel) { address = "" }
@@ -53,6 +46,34 @@ struct SourcesPage: View {
             Text("The https:// address of a Thumbmix source's index.json.")
         }
         .noticeAlert($notice)
+    }
+
+    /// Opens upward from the bottom edge; `.fixed` keeps Folder on top, as listed.
+    private var addMenu: some View {
+        Menu {
+            Button("Folder…", systemImage: "folder") { picking = .folder }.accessibilityIdentifier("sources-add-folder")
+            Button("File…", systemImage: "doc") { picking = .file }.accessibilityIdentifier("sources-add-file")
+            Button("Web address…", systemImage: "globe") { isAskingForAddress = true }
+                .accessibilityIdentifier("sources-add-web")
+        } label: {
+            Label("Add a source", systemImage: "plus").fontWeight(.semibold)
+        }
+        .menuOrder(.fixed)
+        .buttonStyle(.wideProminentDarkCapsule)
+        .accessibilityIdentifier("sources-add")
+        .padding(16)
+        .background(Theme.background)
+    }
+
+    /// The bookmark is made here, while the picker's URL still grants access.
+    private func add(_ result: Result<URL, Error>, as kind: PickedKind?) {
+        do {
+            let url = try result.get()
+            let added = kind == .file ? try library.addFile(url) : try library.addFolder(url)
+            Task { await library.refreshSources([added]) }
+        } catch {
+            notice = error.localizedDescription
+        }
     }
 
     private func addAddress() {
@@ -66,13 +87,34 @@ struct SourcesPage: View {
     }
 }
 
+private enum PickedKind { case folder, file }
+
+/// A source's kind as an icon beside its name, and what's known about it under that.
+private struct SourceLabel<Detail: View>: View {
+    let icon: String
+    let title: Text
+    @ViewBuilder let detail: Detail
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon).font(.body).foregroundStyle(Theme.secondaryText).frame(width: 28, height: 28)
+                .background(Theme.raised, in: RoundedRectangle(cornerRadius: 7)).accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                title.font(.headline)
+                detail
+            }
+        }
+        .padding(.vertical, 2)
+    }
+}
+
 private struct SourceRow: View {
     let source: PresetSource
     let library: PresetLibrary
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(verbatim: library.title(of: source.id)).font(.headline)
+        // Verbatim: a web source names itself in its index, and a folder's name is the engineer's.
+        SourceLabel(icon: icon, title: Text(verbatim: library.title(of: source.id))) {
             if let address = source.webAddress {
                 // Shown as text, never as a link: the address came from whoever runs the source.
                 Text(verbatim: address.absoluteString).font(.subheadline).foregroundStyle(Theme.secondaryText).lineLimit(1)
@@ -84,9 +126,16 @@ private struct SourceRow: View {
                 }
             }
         }
-        .padding(.vertical, 2)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("source-" + (source.webAddress?.host ?? source.id))
+    }
+
+    private var icon: String {
+        switch source.kind {
+        case .web: "globe"
+        case .folder: "folder"
+        case .file: "doc"
+        }
     }
 
     private func status(_ result: SourceResult) -> String {

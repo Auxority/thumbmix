@@ -161,10 +161,10 @@
     "Add" : {
 
     },
-    "Add a web source" : {
+    "Add a source" : {
 
     },
-    "Add the Thumbmix source" : {
+    "Add a web source" : {
 
     },
     "Also changes the gain of %@ (same input)." : {
@@ -300,6 +300,9 @@
     "Fader and mute aren't linked on the desk." : {
 
     },
+    "File…" : {
+
+    },
     "Fits" : {
 
     },
@@ -307,6 +310,9 @@
 
     },
     "Flipped" : {
+
+    },
+    "Folder…" : {
 
     },
     "Follow LR pan" : {
@@ -730,6 +736,9 @@
     "Sources" : {
 
     },
+    "Sources are read again each time you open the presets, and kept for use offline. Swipe to remove one." : {
+
+    },
     "Stereo link" : {
 
     },
@@ -839,7 +848,7 @@
     "Unsolo %@" : {
 
     },
-    "Web sources are read again each time you open the presets, and kept for use offline. Swipe to remove one." : {
+    "Web address…" : {
 
     },
     "While the group is on, a strip you add mutes at once." : {

@@ -38,18 +38,6 @@ extension PresetLibrary {
         return source.name ?? source.webAddress?.host ?? id
     }
 
-    /// The engineer removed the Thumbmix source: the Sources page offers it back.
-    public var lacksDefaultSource: Bool { !(web?.defaults ?? []).map(PresetSource.web).allSatisfy(sources.contains) }
-
-    /// The defaults it added, to be read.
-    @discardableResult
-    public func addDefaultSources() -> [PresetSource] {
-        let added = (web?.defaults ?? []).map(PresetSource.web).filter { !sources.contains($0) }
-        sources += added
-        persist()
-        return added
-    }
-
     /// Only HTTPS, with no name, password or query. The same address twice is one source.
     @discardableResult
     public func addSource(_ text: String) throws -> PresetSource {
