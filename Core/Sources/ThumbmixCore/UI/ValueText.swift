@@ -77,3 +77,72 @@ public enum ValueText {
         return position == 0 ? "C" : position < 0 ? "L\(-position)" : "R\(position)"
     }
 }
+
+/// A value as the preset page shows it: the number, and its unit apart so the page can set it small and grey.
+public struct ValueParts: Equatable, Sendable {
+    public let number: String
+    public let unit: String
+
+    public init(number: String, unit: String = "") {
+        self.number = number
+        self.unit = unit
+    }
+
+    public var text: String { unit.isEmpty ? number : number + " " + unit }
+}
+
+/// The preset page's compact text (2026-10-28): "−18 dB", "4:1", "3 kHz", with no trailing zeros, so a page of values
+/// reads at a glance. A control's own row keeps `format`, whose fixed decimals don't jump while a finger drags.
+extension ValueText {
+    public static func parts(_ normalized: Float?, _ spec: ParamSpec, locale: Locale = .current) -> ValueParts {
+        guard let normalized else { return ValueParts(number: "—") }
+        let value = spec.scale.value(fromNormalized: normalized)
+        switch spec.scale {
+        case .fader: return signed(FaderLaw.shownDecibels(fromWire: Double(normalized)), locale)
+        case .choice(let options): return ValueParts(number: option(options, spec, index: value, locale))
+        case .toggle: return ValueParts(number: value >= 1 ? CoreStrings.text("On") : CoreStrings.text("Off"))
+        default: return compactMeasurement(value, unit: spec.unit, locale: locale)
+        }
+    }
+
+    /// A ratio's option ("4.0") as a number of the phone's locale: "4:1", "1,1:1" on a Dutch phone.
+    private static func option(_ options: [String], _ spec: ParamSpec, index: Double, _ locale: Locale) -> String {
+        let position = Swift.min(Swift.max(Int(index), 0), options.count - 1)
+        guard spec.unit == .ratio else { return spec.optionNames?[position] ?? options[position] }
+        let ratio = Double(options[position]).map { compact($0, digits: 1, locale) } ?? options[position]
+        return ratio + ":1"
+    }
+
+    private static func compactMeasurement(_ value: Double, unit: ParamUnit, locale: Locale) -> ValueParts {
+        switch unit {
+        case .decibels: return signed(value, locale)
+        case .decibelAmount: return ValueParts(number: compact(value, digits: 1, locale), unit: "dB")
+        case .hertz: return compactHertz(value, locale)
+        case .milliseconds, .delayTime:
+            let digits = value < 10 ? 2 : value < 100 ? 1 : 0
+            return ValueParts(number: compact(value, digits: digits, locale), unit: "ms")
+        case .pan: return ValueParts(number: pan(value))
+        case .percent: return ValueParts(number: compact(value, digits: 0, locale), unit: "%")
+        case .ratio, .plain: return ValueParts(number: compact(value, digits: 1, locale))
+        }
+    }
+
+    /// As `decibels`: rounded before the sign is chosen, so the desk's 0 dB never reads "−0".
+    private static func signed(_ value: Double, _ locale: Locale) -> ValueParts {
+        guard value.isFinite else { return ValueParts(number: "−∞", unit: "dB") }
+        let rounded = (value * 10).rounded() / 10
+        let sign = rounded > 0 ? "+" : rounded < 0 ? "−" : ""
+        return ValueParts(number: sign + compact(abs(rounded), digits: 1, locale), unit: "dB")
+    }
+
+    /// The desk's kHz text cut to two decimals as `hertz` does, then its trailing zeros dropped: "10.02 kHz", "3 kHz".
+    private static func compactHertz(_ value: Double, _ locale: Locale) -> ValueParts {
+        if value < 1000 { return ValueParts(number: compact(value, digits: 1, locale), unit: "Hz") }
+        let kilohertz = ((value + 0.02) / 10).rounded(.down) / 100
+        return ValueParts(number: compact(kilohertz, digits: 2, locale), unit: "kHz")
+    }
+
+    private static func compact(_ value: Double, digits: Int, _ locale: Locale) -> String {
+        value.formatted(.number.precision(.fractionLength(0...digits)).grouping(.never).locale(locale))
+    }
+}

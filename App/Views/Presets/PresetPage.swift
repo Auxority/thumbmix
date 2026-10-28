@@ -1,15 +1,17 @@
 import SwiftUI
 import ThumbmixCore
 
-/// One preset as a Settings-style list (option 2, 2026-10-28): the name, which strips it fits, then a section per part
-/// it holds. Load and Remove sit pinned at the bottom.
+/// One preset at a glance (rounds 4 and 5, 2026-10-28): its name and where it fits, then a card per part it holds,
+/// each its picture beside a few values; a card opens every value. The parts to load are chips above Load, pinned at
+/// the bottom with Save a copy or Remove.
 struct PresetPage: View {
     @State var entry: LibraryEntry
     let strip: StripID
     let mirror: ConsoleMirror
     let library: PresetLibrary
     @Environment(\.dismiss) private var dismiss
-    @State private var isLoading = false
+    /// Shared with each part's page, so a part left out there stays out here.
+    @State private var choice = LoadChoice()
     @State private var isRenaming = false
     @State private var isEditingWords = false
     @State private var isConfirmingRemove = false
@@ -20,10 +22,23 @@ struct PresetPage: View {
     private var preset: Preset { entry.preset }
 
     var body: some View {
-        List {
-            header
-            fits
-            ForEach(preset.parts) { part in section(part) }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                header
+                ForEach(preset.parts) { part in
+                    NavigationLink {
+                        PresetPartPage(preset: preset, part: part, mirror: mirror, choice: choice) {
+                            loadBar(withSecondary: false)
+                        }
+                    } label: {
+                        PresetCard(preset: preset, part: part, mirror: mirror)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(choice.isLoading)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
         }
         .presetPage(mirror)
         .navigationTitle(preset.name)
@@ -33,8 +48,7 @@ struct PresetPage: View {
                 Button("Share", systemImage: "square.and.arrow.up") { share() }.accessibilityIdentifier("preset-share")
             }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) { actions }
-        .sheet(isPresented: $isLoading) { LoadPresetSheet(preset: preset, strip: strip, mirror: mirror) }
+        .safeAreaInset(edge: .bottom, spacing: 0) { loadBar(withSecondary: true) }
         .sheet(isPresented: $isEditingWords) { MatchWordsSheet(entry: $entry, library: library) }
         .sheet(item: $shared) { ShareSheet(url: $0.url) }
         .alert("Rename preset", isPresented: $isRenaming) {
@@ -52,7 +66,7 @@ struct PresetPage: View {
     }
 
     private var header: some View {
-        Section {
+        VStack(alignment: .leading, spacing: 3) {
             HStack {
                 Text(verbatim: preset.name).font(.title2.bold())
                 if entry.isOwn {
@@ -63,58 +77,46 @@ struct PresetPage: View {
                     .labelStyle(.iconOnly).accessibilityIdentifier("preset-rename")
                 }
             }
-            if let source = entry.source {
-                // Verbatim: the name comes from the source's index, never read as markup.
-                Text(verbatim: String(localized: "From \(library.title(of: source)) · read-only"))
-                    .foregroundStyle(Theme.secondaryText)
+            // Verbatim: a source's name comes from its index, never read as markup.
+            Text(verbatim: [origin, fits].joined(separator: " · ")).font(.subheadline)
+                .foregroundStyle(Theme.secondaryText).accessibilityIdentifier("preset-fits")
+            if entry.isOwn {
+                Button("Edit match words") { isEditingWords = true }.font(.subheadline)
+                    .accessibilityIdentifier("preset-edit-words")
             }
         }
-        .listRowBackground(Color.clear)
+        .padding(.vertical, 4)
     }
 
-    private var fits: some View {
+    private var origin: String {
+        guard let source = entry.source else { return String(localized: "On this iPhone") }
+        return String(localized: "From \(library.title(of: source)) · read-only")
+    }
+
+    /// The strips on this desk whose names fit, or the words a name would need.
+    private var fits: String {
         let strips = mirror.fittingStrips(preset)
-        return Section("Fits") {
-            if strips.isEmpty {
-                Text("No strip on this desk is named like this.").foregroundStyle(Theme.secondaryText)
-            } else {
-                Text(verbatim: strips.map { "\(mirror.name($0)) (\($0.defaultName))" }.joined(separator: ", "))
-                    .accessibilityIdentifier("preset-fits")
-            }
-            if !preset.matchWords.isEmpty {
-                Text("Strips named \(preset.matchWords.formatted(.list(type: .or)))").font(.footnote)
-                    .foregroundStyle(Theme.secondaryText)
-            }
-            if entry.isOwn {
-                Button("Edit match words") { isEditingWords = true }.accessibilityIdentifier("preset-edit-words")
-            }
+        guard strips.isEmpty else {
+            let names = strips.map { "\(mirror.name($0)) (\($0.defaultName))" }.joined(separator: ", ")
+            return String(localized: "fits \(names)")
         }
-        .listRowBackground(Theme.track)
+        guard !preset.matchWords.isEmpty else { return String(localized: "fits no strip on this desk") }
+        return String(localized: "fits strips named \(preset.matchWords.formatted(.list(type: .or)))")
     }
 
-    private func section(_ part: PresetPart) -> some View {
-        Section(part.title) {
-            if part == .eq, let curve = PresetSummary.eqCurve(preset) { PresetEQCurve(bands: curve.bands, lowCut: curve.lowCut) }
-            ForEach(PresetSummary.rows(preset, part)) { row in
-                LabeledContent(row.label) { Text(verbatim: row.value) }
-            }
+    private func loadBar(withSecondary: Bool) -> some View {
+        PresetLoadBar(preset: preset, strip: strip, mirror: mirror, choice: choice) {
+            if withSecondary { secondaryAction }
         }
-        .listRowBackground(Theme.track)
     }
 
-    private var actions: some View {
-        VStack(spacing: 8) {
-            Button("Load onto \(mirror.name(strip))…") { isLoading = true }
-                .buttonStyle(.wideProminentDarkCapsule)
-                .disabled(!mirror.isLive).accessibilityIdentifier("preset-load")
-            if entry.isOwn {
-                Button("Remove preset", role: .destructive) { isConfirmingRemove = true }
-            } else {
-                Button("Save a copy") { saveCopy() }
-            }
+    @ViewBuilder private var secondaryAction: some View {
+        if entry.isOwn {
+            Button("Remove preset", role: .destructive) { isConfirmingRemove = true }
+                .buttonStyle(.wideDarkCapsule)
+        } else {
+            Button("Save a copy") { saveCopy() }.buttonStyle(.wideDarkCapsule)
         }
-        .padding(16)
-        .background(Theme.background)
     }
 
     private func share() {
@@ -153,27 +155,6 @@ struct PresetPage: View {
             notice = error.localizedDescription
         }
     }
-}
-
-/// The EQ curve of a preset, read-only: the same grid and axis as the EQ tab's graph, the low cut in yellow.
-private struct PresetEQCurve: View {
-    let bands: [EQBandState]
-    let lowCut: LowCutState?
-
-    var body: some View {
-        Canvas { context, size in
-            EQGraphGrid.draw(in: context, size: size)
-            context.stroke(EQGraphGrid.curve(bands, lowCut, in: size), with: .color(.white), lineWidth: 2)
-            if let lowCut {
-                context.stroke(
-                    EQGraphGrid.curve(bands, lowCut, in: size, upTo: lowCut.frequency * 2), with: .color(EQGraph.lowCutColor),
-                    lineWidth: 3)
-            }
-        }
-        .frame(height: 140)
-        .accessibilityHidden(true)
-    }
-
 }
 
 /// The words a strip's name is matched against: tap × to drop one, type to add one.

@@ -14,10 +14,15 @@ struct DarkCapsuleStyle: ButtonStyle {
             .frame(maxWidth: fillsWidth ? .infinity : nil)
             .padding(.horizontal, 16)
             .frame(minHeight: fillsWidth ? 48 : 40)
-            .foregroundStyle(isFilled ? Color.black : isEnabled ? Color.white : Theme.secondaryText)
+            .foregroundStyle(isFilled ? Color.black : isEnabled ? enabledText(configuration) : Theme.secondaryText)
             .glassEffect(.regular.tint(isFilled ? .white : .black).interactive(), in: Capsule())
             // iOS 27's bar measured the capsule too narrow ("D…" for Disconnect), as it did the DEMO pill.
             .fixedSize(horizontal: !fillsWidth, vertical: true)
+    }
+
+    /// A destructive one (Remove preset) keeps its red.
+    private func enabledText(_ configuration: Configuration) -> Color {
+        configuration.role == .destructive ? .red : .white
     }
 }
 

@@ -149,9 +149,6 @@
     "^[%lld strip](inflect: true)" : {
 
     },
-    "48V changes and a higher gain ask first." : {
-
-    },
     "192.168.1.62" : {
 
     },
@@ -186,6 +183,12 @@
 
     },
     "Band" : {
+
+    },
+    "Band %lld" : {
+
+    },
+    "Bands" : {
 
     },
     "Blue" : {
@@ -303,10 +306,16 @@
     "File…" : {
 
     },
-    "Fits" : {
+    "Fits “%@”" : {
 
     },
-    "Fits “%@”" : {
+    "fits %@" : {
+
+    },
+    "fits no strip on this desk" : {
+
+    },
+    "fits strips named %@" : {
 
     },
     "Flipped" : {
@@ -436,13 +445,20 @@
     "Listens to" : {
 
     },
-    "Load" : {
-
+    "Load ^[%lld part](inflect: true) onto %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Load ^[%1$lld part](inflect: true) onto %2$@"
+          }
+        }
+      }
     },
     "Load onto %@" : {
 
     },
-    "Load onto %@…" : {
+    "Loaded" : {
 
     },
     "Low cut off" : {
@@ -529,9 +545,6 @@
 
     },
     "No slot picked on the desk" : {
-
-    },
-    "No strip on this desk is named like this." : {
 
     },
     "No Wi-Fi. Join the desk's Wi-Fi, then scan again." : {
@@ -743,9 +756,6 @@
 
     },
     "Stereo link %@" : {
-
-    },
-    "Strips named %@" : {
 
     },
     "Strips whose names contain a match word list this preset first." : {

@@ -7,16 +7,7 @@ import ThumbmixCore
 /// Where the curve leaves the straight 1:1 line it forks (F1, 2026-10-17): what you hear is solid white, the
 /// other state grey and dashed, so switching Gate or Comp swaps the two and nothing else moves.
 struct TransferGraph: View {
-    static let floor = -80.0
-
-    struct Curve {
-        let output: (Double) -> Double
-        let threshold: Double
-        let isOn: Bool
-
-        /// Off, the signal passes untouched: out = in.
-        var heard: (Double) -> Double { isOn ? output : { $0 } }
-    }
+    typealias Curve = TransferPlot.Curve
 
     /// nil until the desk sent every value the curve needs: the card keeps its place, so nothing below it moves.
     let curve: Curve?
@@ -29,14 +20,7 @@ struct TransferGraph: View {
 
     var body: some View {
         ZStack {
-            Canvas { context, size in
-                guard let curve else { return drawUnity(in: context, size: size) }
-                drawThreshold(curve.threshold, in: context, size: size)
-                if let ghostOutput {
-                    context.stroke(path(ghostOutput, in: size), with: .color(.white.opacity(0.3)), lineWidth: 2)
-                }
-                drawFork(curve, in: context, size: size)
-            }
+            TransferPlot(curve: curve, ghostOutput: ghostOutput)
             if let curve { LevelDot(meter: meter, output: curve.heard) }
         }
         .frame(height: Theme.graphHeight)
@@ -51,6 +35,35 @@ struct TransferGraph: View {
         }
         .background(Theme.track, in: RoundedRectangle(cornerRadius: 12))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+/// The curve alone, with no meter: the strip's Gate and Comp graphs draw it under their level dot, a preset's page on
+/// its own.
+struct TransferPlot: View {
+    static let floor = -80.0
+
+    struct Curve {
+        let output: (Double) -> Double
+        let threshold: Double
+        let isOn: Bool
+
+        /// Off, the signal passes untouched: out = in.
+        var heard: (Double) -> Double { isOn ? output : { $0 } }
+    }
+
+    let curve: Curve?
+    var ghostOutput: ((Double) -> Double)?
+
+    var body: some View {
+        Canvas { context, size in
+            guard let curve else { return drawUnity(in: context, size: size) }
+            drawThreshold(curve.threshold, in: context, size: size)
+            if let ghostOutput {
+                context.stroke(path(ghostOutput, in: size), with: .color(.white.opacity(0.3)), lineWidth: 2)
+            }
+            drawFork(curve, in: context, size: size)
+        }
     }
 
     private func drawFork(_ curve: Curve, in context: GraphicsContext, size: CGSize) {
@@ -127,12 +140,12 @@ private struct LevelDot: View {
     let output: (Double) -> Double
 
     var body: some View {
-        let input = max(MeterScale.decibels(meter.level), TransferGraph.floor)
+        let input = max(MeterScale.decibels(meter.level), TransferPlot.floor)
         GeometryReader { geometry in
             Circle()
                 .fill(.green)
                 .frame(width: 10, height: 10)
-                .position(TransferGraph.point(input: input, output: output(input), in: geometry.size))
+                .position(TransferPlot.point(input: input, output: output(input), in: geometry.size))
         }
     }
 }
