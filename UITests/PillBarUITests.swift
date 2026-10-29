@@ -36,26 +36,25 @@ final class PillBarUITests: DeskUITestCase {
         XCTAssertTrue(lastMute.isHittable)
     }
 
-    /// A strip's tabs are the same pills as the overview's groups. The white pill slides over solid, the same on every
-    /// tap, quick or held: it is never grey on the way. Grey came from a fade on some taps only (the Button's own
-    /// animation), the press dim, and two crossfading pills.
-    func testStripTabsArePillsThatAreNeverGrey() {
+    /// A strip's tabs are the same native segmented control as the overview's groups (2026-10-29): a tap opens a tab,
+    /// and a thumb sliding across them carries iOS's glass lens and opens the tab it's released on.
+    func testStripTabsOpenByTapOrSlide() {
         launchAndOpen("Kick")
         assertEqualPills(["Mix", "Input", "Gate", "EQ", "Comp", "Sends"])
         saveScreenshot("pills-channel")
-        for (label, held) in [("EQ", false), ("Comp", true), ("Mix", false), ("Sends", true)] {
-            // The lowest button so named: the EQ and Comp tabs have an on/off chip of the same name.
-            let pill = app.buttons.matching(identifier: label).allElementsBoundByIndex.max { $0.frame.minY < $1.frame.minY }!
-            // Inside the pill's capsule, above its text.
-            let inside = CGPoint(x: pill.frame.midX, y: pill.frame.minY + 6)
-            if held { pill.press(forDuration: 0.3) } else { pill.tap() }
-            var samples: [CGFloat] = []
-            let end = Date.now + 0.6
-            while Date.now < end { samples.append(screenBrightness(at: inside)) }
-            let grey = samples.filter { (0.25...0.95).contains($0) }
-            XCTAssertTrue(grey.isEmpty, "\(label) went grey: \(samples.map { String(format: "%.2f", $0) })")
-            XCTAssertGreaterThan(samples.last ?? 0, 0.95, "\(label) ends white")
-        }
+        tabPill("EQ").tap()
+        XCTAssertTrue(eventually(within: 2) { self.tabPill("EQ").isSelected }, "a tap opens EQ")
+        tabPill("Mix").tap()
+        XCTAssertTrue(eventually(within: 2) { self.tabPill("Mix").isSelected })
+
+        tabPill("Mix").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .press(forDuration: 0.3, thenDragTo: tabPill("Comp").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
+        XCTAssertTrue(eventually(within: 2) { self.tabPill("Comp").isSelected }, "a slide released on Comp opens it")
+    }
+
+    /// The lowest button so named: the EQ and Comp tabs have an on/off chip of the same name.
+    private func tabPill(_ label: String) -> XCUIElement {
+        app.buttons.matching(identifier: label).allElementsBoundByIndex.max { $0.frame.minY < $1.frame.minY }!
     }
 
     /// All on screen, equally wide and at least 44 pt tall (Apple's smallest touch target): 36 pt pills got missed.
