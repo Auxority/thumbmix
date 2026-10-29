@@ -30,13 +30,24 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **What the key graph shows** (2026-10-20): key a gate on another channel and on itself, and a comp on another channel. Does the desk's key hear that channel before or after its EQ, and a gate keyed on itself before its EQ? (The app's glow assumes before, `ConsoleMirror.keyRTA`.) And does the RTA's PRE/POST tap sit before or after the gate and comp? If PRE comes after the gate, a gate keyed on itself shows a glow that drops out when the gate closes, not what its detector hears. Then set each key filter type on the desk (LC6, LC12, HC6, HC12, BP Q 1-10) and compare its key screen with the app's curve: drawn as first-order and Butterworth cuts and second-order band-passes, an assumption (`KeyFilterState`).
 - [ ] **Compressor knee width per step.** The app draws 6 dB per knee step (knee 5 = 30 dB), a guess: no source gives the unit, and `m32-probe` can't read it. Set knee 0 and 5 on the desk and compare its dynamics screen with the app's curve, or measure: a test tone at the threshold, 4:1, and the gain reduction meter at each knee step. Then set `TransferCurve.kneeDecibelsPerStep`.
 - [ ] Does the desk show a channel's delay as a distance too (m or ft)? If it does, match its speed of sound; the app assumes 343 m/s.
+- [ ] **Does Auto time freeze Hold too?** (2026-10-29, the user: "Auto doesn't grey out Hold time".) DECISIONS (2026-10-15) says the desk ignores only Attack and Release while Auto is on and Hold stays live. Switch Auto on at the desk and turn Hold: does the sound or the desk's screen change? If Hold is ignored too, add it to `ParamSpec.autoTimed`.
 - [ ] Walk the acceptance checklist in `README.md`.
+
+## Fixes and polish (2026-10-29, the user's list)
+
+- [ ] **Swipe to remove a source looks broken** (screenshot on the phone, Sources page): swiping the web source's row slides its text off the card's left edge and shows a blank white box where Remove should be. `SourcesPage` uses `.swipeActions` inside a card that isn't a `List` row. Fix it so it looks native; the Connect screen's console rows (`ConnectView`) swipe properly.
+- [ ] **Loading a preset closes its page** (the user): replaces DECISIONS' "after a load the page stays" (A preset reads at a glance). Ask where it lands: the edit sheet's Presets row, or back on the strip.
+- [ ] **Remove "Import a preset file…"** from the Presets page (the user): a file source on Sources (#203) does the same job. Ask whether Import goes everywhere (incl. the empty state's "or import a file") and what happens to DECISIONS "Importing a file copies it" and the AirDrop/Mail TODO there.
+- [ ] **Review and redesign a strip's preset page and its load flow** (the user). Look at it on the phone with the user first, then mocks; folds in the two items above.
+- [ ] **Use liquid glass consistently, where it fits** (the user; reference: SideStore's tab bar, where the selected tab sits in a glass lens that slides between tabs). Ask which Thumbmix controls the user means ("things like this": the bottom pills, `PillBar`, are the closest match) and compare real iOS 27 sim screenshots, since HTML can't render glass. Today only the toolbar buttons and Connect are glass (DECISIONS, `DarkCapsuleStyle`).
+- [ ] **Names for mute groups** (the user): stored per console on the iPhone? The doc gives a mute group no name on the desk (DCAs have one). Decide where the name is kept (by the remembered console, as Connect keeps desks), where it is edited, and where it shows (the Main page's groups, the red-bordered M).
 
 ## Performance
 
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
   - **Meters only for the strips in view?** Draw (or update) meters only for the rows on screen, not every strip. Measure first; if it saves only 1–2 % CPU, it isn't worth it and this sub-item goes.
   - **Fed by and Sends lists during a resync** (2026-10-25): they still rebuild for each value arriving after a lost contact; the overview holds its list until live since #191 (`overviewList`). Hold them the same way if a resync on those tabs feels slow on the desk.
+- [ ] **Reconnect as fast as connect** (2026-10-29, the user): measure a reconnect (desk lost and back, app back from the background) against a fresh connect (from the app's `thumbmix` log, `log stream --predicate 'subsystem == "thumbmix"'`), and find what makes the difference before changing anything.
 
 ## Features
 
