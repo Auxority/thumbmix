@@ -30,6 +30,15 @@ func screenBrightness(at point: CGPoint) -> CGFloat {
     return CGFloat(Int(pixel[0]) + Int(pixel[1]) + Int(pixel[2])) / (3 * 255)
 }
 
+/// A swipe action's destructive button shows red: the app's white tint once made it a blank white box (2026-10-29).
+/// Sampled near the top edge, clear of the white label.
+@MainActor
+func assertDestructiveColour(_ button: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
+    let point = CGPoint(x: button.frame.midX, y: button.frame.minY + 10)
+    XCTAssertLessThan(
+        screenBrightness(at: point), 0.75, "\(button.label) shows as a white box", file: file, line: line)
+}
+
 /// Assertions compare English, dot-decimal text, so the app runs in en_US whatever the Mac's region is.
 let fixedLocale = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
 

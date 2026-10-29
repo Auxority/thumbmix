@@ -103,7 +103,8 @@ private struct ConsoleList: View {
         .disabled(presence == .notAnM32)
         .swipeActions {
             if isRemembered {
-                Button("Forget", role: .destructive) { model.forget(console) }
+                // Red, not the app's white tint, which made it a blank white box.
+                Button("Forget", role: .destructive) { model.forget(console) }.tint(.red)
             }
         }
         .listRowBackground(Theme.track)

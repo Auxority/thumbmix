@@ -20,7 +20,10 @@ struct SourcesPage: View {
                 }
                 ForEach(library.sources) { source in
                     SourceRow(source: source, library: library)
-                        .swipeActions { Button("Remove", role: .destructive) { library.removeSource(source) } }
+                        .swipeActions {
+                            // Red, not the app's white tint, which made it a blank white box.
+                            Button("Remove", role: .destructive) { library.removeSource(source) }.tint(.red)
+                        }
                 }
             } footer: {
                 Text("Sources are read again each time you open the presets, and kept for use offline. Swipe to remove one.")
