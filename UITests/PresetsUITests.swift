@@ -25,6 +25,13 @@ final class PresetsUITests: DeskUITestCase {
         XCTAssertTrue(eventually(within: 3) { self.desk.value(self.bandGain) == .float(0.5) }, "the band came back")
         XCTAssertTrue(eventually(within: 3) { self.desk.value(self.phantom) == .int(0) }, "48V turned off, as confirmed")
         XCTAssertEqual(desk.value(gain), .float(0.3), "Keep left the gain where it was")
+        // A load closes the presets and the edit sheet: the strip shows what loaded (the user, 2026-10-29).
+        XCTAssertTrue(eventually(within: 3) { !self.element("presets-row").exists }, "the edit sheet closed")
+        XCTAssertTrue(app.buttons["edit-strip"].isHittable, "back on the strip")
+
+        openPresets()
+        element("preset-row-Kick test").tap()
+        XCTAssertTrue(element("preset-fits").appears(within: 3))
         XCTAssertTrue(element("preset-fits").label.contains("Kick (Ch 1)"), "the strips whose names fit")
         saveScreenshot("preset-page")
         allValuesOpenFromACard()
@@ -60,6 +67,22 @@ final class PresetsUITests: DeskUITestCase {
         element("preset-part-comp").tap()
         XCTAssertTrue(element("preset-group-0").appears(within: 3))
         saveScreenshot("preset-values-comp")
+        app.navigationBars.buttons.firstMatch.tap()
+        app.navigationBars.buttons.firstMatch.tap()
+        app.navigationBars.buttons.firstMatch.tap()
+
+        // A colour picked but not yet sent with Done: a load goes back to the edit sheet, so the pick isn't lost.
+        // Green: Kick is red on the fake desk, and picking its own colour again is no change.
+        let green = app.buttons["color-green"]
+        XCTAssertTrue(green.appears(within: 3))
+        green.tap()
+        element("presets-row").tap()
+        element("preset-row-Kick").tap()
+        let load = element("preset-load")
+        XCTAssertTrue(eventually(within: 5) { load.exists && load.isEnabled })
+        load.tap()
+        XCTAssertTrue(element("presets-row").appears(within: 5), "back on the edit sheet")
+        XCTAssertTrue(green.isSelected, "the unsent colour is still picked")
     }
 
     private func openPresets() {

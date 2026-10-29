@@ -21,9 +21,7 @@ struct PresetLoadBar<Secondary: View>: View {
     @State private var run: LoadRun?
     /// The pause between one alert and the next; a Cancel in it ends the load.
     @State private var pause: Task<Void, Never>?
-    /// Load reads "Loaded" for a moment after a load went out: the page stays, so the engineer sees it happened.
-    @State private var justLoaded = false
-    @State private var loadedReset: Task<Void, Never>?
+    @Environment(\.presetLoaded) private var loaded
     @State private var notice: String?
 
     var body: some View {
@@ -32,7 +30,7 @@ struct PresetLoadBar<Secondary: View>: View {
             ForEach(reasons, id: \.self) { Text(verbatim: $0).font(.footnote).foregroundStyle(Theme.secondaryText) }
             Button(loadTitle) { start() }
                 .buttonStyle(.wideProminentDarkCapsule)
-                .disabled(!mirror.isLive || loadable.isEmpty || choice.isLoading || justLoaded)
+                .disabled(!mirror.isLive || loadable.isEmpty || choice.isLoading)
                 .accessibilityIdentifier("preset-load")
             secondary
         }
@@ -83,7 +81,6 @@ struct PresetLoadBar<Secondary: View>: View {
     }
 
     private var loadTitle: String {
-        if justLoaded { return String(localized: "Loaded") }
         let name = mirror.name(strip)
         let count = loadable.count
         guard count > 0, count < preset.parts.count else { return String(localized: "Load onto \(name)") }
@@ -125,7 +122,7 @@ struct PresetLoadBar<Secondary: View>: View {
         self.run = nil
         choice.isLoading = false
         switch mirror.apply(run.plan, answers: run.answers) {
-        case .sent: showLoaded()
+        case .sent: loaded()
         case .notLive: notice = String(localized: "Contact with the desk was lost. Nothing was loaded.")
         case .heldBack(let count):
             notice = Self.inflected(
@@ -135,16 +132,6 @@ struct PresetLoadBar<Secondary: View>: View {
 
     /// `String(localized:)` leaves "^[2 part](inflect: true)" as it is: only an attributed string inflects.
     private static func inflected(_ text: AttributedString) -> String { String(text.characters) }
-
-    private func showLoaded() {
-        justLoaded = true
-        loadedReset?.cancel()
-        loadedReset = Task {
-            try? await Task.sleep(for: .seconds(2))
-            guard !Task.isCancelled else { return }
-            justLoaded = false
-        }
-    }
 }
 
 /// A load in progress: the questions still to ask, one at a time, and how each was answered.
