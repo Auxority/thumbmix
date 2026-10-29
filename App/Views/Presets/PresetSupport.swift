@@ -4,6 +4,8 @@ import ThumbmixCore
 extension EnvironmentValues {
     /// Set once by the root, so every screen reaches the one library. nil only where nothing sets it (a preview).
     @Entry var presetLibrary: PresetLibrary?
+    /// What a load that went out does next: the edit sheet closes onto the strip, where the result shows.
+    @Entry var presetLoaded: () -> Void = {}
 }
 
 /// A message the engineer must read: what went wrong, or what just happened. One alert for all of a screen's.

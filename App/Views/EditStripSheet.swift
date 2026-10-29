@@ -14,6 +14,7 @@ struct EditStripSheet: View {
     @State private var icon: Int
     /// The DCAs and mute groups ticked here, sent on Done with the name.
     @State private var groups = MembershipDraft()
+    @State private var showsPresets = false
     private let partner: StripID?
 
     init(strip: StripID, mirror: ConsoleMirror) {
@@ -42,7 +43,7 @@ struct EditStripSheet: View {
                             name: $partnerName, identifier: "strip-name-partner")
                     }
                     StripColorPicker(color: $color)
-                    if strip.kind != .dca { PresetsRow(strip: strip, mirror: mirror) }
+                    if strip.kind != .dca { PresetsRow(strip: strip, mirror: mirror, isOpen: $showsPresets) }
                     GroupSections(strip: strip, sides: typedSides, mirror: mirror, draft: $groups)
                 }
                 .padding(16)
@@ -69,6 +70,10 @@ struct EditStripSheet: View {
                 .sharedBackgroundVisibility(.hidden)
             }
         }
+        // A load closes onto the strip, where its result shows; with a name, colour, icon or group not yet sent with
+        // Done, it goes back to this sheet instead, so nothing typed is lost (2026-10-29). On the stack: its pushed
+        // pages take their environment from here.
+        .environment(\.presetLoaded) { if hasDraft { showsPresets = false } else { dismiss() } }
     }
 
     /// The sides as the sheet opened (a pair stays one even if the desk unlinks it meanwhile), each with the name typed
@@ -79,6 +84,11 @@ struct EditStripSheet: View {
         guard let partner else { return [own] }
         let partnerTyped = StripName.sanitized(partnerName)
         return [own, (partner, partnerTyped.isEmpty ? partner.defaultName : partnerTyped)]
+    }
+
+    private var hasDraft: Bool {
+        name != mirror.rawName(strip) || partner.map { partnerName != mirror.rawName($0) } == true
+            || color != mirror.color(strip) || icon != mirror.icon(strip).number || !groups.isEmpty
     }
 
     /// A pair's first field names its odd side; the even side's goes under the icon and this one.

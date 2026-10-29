@@ -5,11 +5,13 @@ import ThumbmixCore
 struct PresetsRow: View {
     let strip: StripID
     let mirror: ConsoleMirror
+    /// The sheet's, so a load can close the presets and every page on top of them at once.
+    @Binding var isOpen: Bool
     @Environment(\.presetLibrary) private var library
 
     var body: some View {
-        NavigationLink {
-            PresetsPage(strip: strip, mirror: mirror)
+        Button {
+            isOpen = true
         } label: {
             HStack {
                 Text("Presets").font(.headline)
@@ -22,6 +24,7 @@ struct PresetsRow: View {
             .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
+        .navigationDestination(isPresented: $isOpen) { PresetsPage(strip: strip, mirror: mirror) }
         .accessibilityIdentifier("presets-row")
         // The page works without a desk; only loading and saving need one.
         .environment(\.isEnabled, true)
