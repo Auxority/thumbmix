@@ -15,15 +15,14 @@ struct PillBar<Item: Identifiable & Hashable>: View {
         picker(\.title)
             // A segment's own `.accessibilityLabel` held only on some launches ("In" for Inputs, 2026-10-29).
             .accessibilityRepresentation { picker(\.label) }
-        // 49 pt, past Apple's 44 pt touch target: 36 pt pills got missed.
-        .controlSize(.extraLarge)
-        // The control's own track is see-through: the list scrolling under it made the titles hard to read.
-        // Behind it, not on it: on the picker itself the glass hid its segments from VoiceOver.
-        .background { Color.clear.glassEffect(.regular.tint(.black), in: Capsule()) }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        // Past xLarge the overview's seven segments would truncate.
-        .dynamicTypeSize(...DynamicTypeSize.xLarge)
+            // 49 pt, past Apple's 44 pt touch target: 36 pt pills got missed.
+            .controlSize(.extraLarge)
+            // The control's own track is see-through: the list scrolling under it made the titles hard to read.
+            .background { Color.clear.glassEffect(.regular.tint(.black), in: Capsule()) }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            // Past xLarge the overview's seven segments would truncate.
+            .dynamicTypeSize(...DynamicTypeSize.xLarge)
     }
 
     private func picker(_ name: KeyPath<Self, KeyPath<Item, String>>) -> some View {
