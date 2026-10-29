@@ -1,7 +1,7 @@
 import XCTest
 
 /// Save a strip's settings as a preset, load them back after the desk changed, and see what a strip can't take.
-/// Importing a file stays in Core tests: no Files picker here. `-isolatedPresets` gives each run its own folder.
+/// A file comes in as a source on Sources (`PresetSourcesUITests`), not by an Import button. `-isolatedPresets` gives each run its own folder.
 @MainActor
 final class PresetsUITests: DeskUITestCase {
     private let gain = "/headamp/032/gain"
@@ -91,6 +91,7 @@ final class PresetsUITests: DeskUITestCase {
         XCTAssertTrue(row.appears(within: 3))
         row.tap()
         XCTAssertTrue(element("presets-save").appears(within: 3))
+        XCTAssertFalse(app.buttons["Import a preset file…"].exists, "a file comes in as a source")
     }
 
     private func saveKickTest() {

@@ -375,12 +375,6 @@
     "Icon" : {
 
     },
-    "Import a preset file…" : {
-
-    },
-    "Imported “%@” to this iPhone." : {
-
-    },
     "In this mix" : {
 
     },
@@ -538,7 +532,7 @@
     "No preamp: this channel reads from an internal source." : {
 
     },
-    "No presets yet. Save this strip as one, or import a file." : {
+    "No presets yet. Save this strip as one, or add a source." : {
 
     },
     "No slot picked on the desk" : {

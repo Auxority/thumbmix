@@ -1,6 +1,5 @@
 import SwiftUI
 import ThumbmixCore
-import UniformTypeIdentifiers
 
 /// The edit sheet's Presets row: how many presets fit the strip's name, pushing the page.
 struct PresetsRow: View {
@@ -56,8 +55,6 @@ private struct PresetsList: View {
     let mirror: ConsoleMirror
     let library: PresetLibrary
     @State private var isSaving = false
-    @State private var isImporting = false
-    @State private var notice: String?
 
     var body: some View {
         let (fits, others) = library.ordered { PresetMatching.fits($0, name: mirror.rawName(strip)) }
@@ -65,13 +62,12 @@ private struct PresetsList: View {
             if !fits.isEmpty { section(String(localized: "Fits “\(mirror.name(strip))”"), fits) }
             if !others.isEmpty { section(String(localized: "Others"), others) }
             if fits.isEmpty && others.isEmpty {
-                Text("No presets yet. Save this strip as one, or import a file.").foregroundStyle(Theme.secondaryText)
+                Text("No presets yet. Save this strip as one, or add a source.").foregroundStyle(Theme.secondaryText)
                     .listRowBackground(Theme.track)
             }
             Section {
                 Button("Save this strip as a preset…") { isSaving = true }
                     .disabled(!mirror.isLive).accessibilityIdentifier("presets-save")
-                Button("Import a preset file…") { isImporting = true }
             } footer: {
                 if !library.skipped.isEmpty { Text(verbatim: skippedText) }
             }
@@ -92,10 +88,6 @@ private struct PresetsList: View {
             await library.refreshSources()
         }
         .sheet(isPresented: $isSaving) { SavePresetSheet(strip: strip, mirror: mirror, library: library) }
-        .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
-            importFile(result)
-        }
-        .noticeAlert($notice)
     }
 
     private func section(_ title: String, _ entries: [LibraryEntry]) -> some View {
@@ -123,20 +115,6 @@ private struct PresetsList: View {
     /// Files in the Presets folder the app doesn't take, each with why: whoever edited one in Files can fix it.
     private var skippedText: String {
         library.skipped.map { "\($0.file): \($0.reason)" }.joined(separator: "\n")
-    }
-
-    private func importFile(_ result: Result<URL, Error>) {
-        do {
-            let url = try result.get()
-            let opened = url.startAccessingSecurityScopedResource()
-            defer { if opened { url.stopAccessingSecurityScopedResource() } }
-            let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-            guard size <= PresetValidation.maxBytes else { throw PresetError.tooLarge }
-            let entry = try library.importPreset(Data(contentsOf: url))
-            notice = String(localized: "Imported “\(entry.preset.name)” to this iPhone.")
-        } catch {
-            notice = error.localizedDescription
-        }
     }
 }
 

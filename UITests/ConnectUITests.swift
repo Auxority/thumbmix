@@ -88,7 +88,10 @@ final class ConnectUITests: XCTestCase {
         XCTAssertTrue(row.appears(within: 5))
         XCTAssertTrue(row.isHittable)
         row.swipeLeft()
-        app.buttons["Forget"].tap()
+        let forget = app.buttons["Forget"]
+        XCTAssertTrue(forget.appears(within: 3))
+        assertDestructiveColour(forget)
+        forget.tap()
         XCTAssertTrue(eventually(within: 3) { !row.exists }, "the row is forgotten")
         XCTAssertTrue(app.staticTexts["Fake M32"].exists, "the card stays")
     }

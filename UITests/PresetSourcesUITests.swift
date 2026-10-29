@@ -31,7 +31,11 @@ final class PresetSourcesUITests: DeskUITestCase {
         XCTAssertTrue(source.appears(within: 3))
         saveScreenshot("preset-sources")
         source.swipeLeft()
-        app.buttons["Remove"].tap()
+        let remove = app.buttons["Remove"]
+        XCTAssertTrue(remove.appears(within: 3))
+        assertDestructiveColour(remove)
+        saveScreenshot("preset-sources-swiped")
+        remove.tap()
         XCTAssertTrue(eventually(within: 3) { !source.exists }, "removed")
     }
 
