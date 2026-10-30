@@ -70,6 +70,8 @@ struct EditStripSheet: View {
                 .sharedBackgroundVisibility(.hidden)
             }
         }
+        // Only Cancel, Done and a load close it (2026-10-30): a swipe down on a preset page closed it all.
+        .interactiveDismissDisabled()
         // A load closes onto the strip, where its result shows; with a name, colour, icon or group not yet sent with
         // Done, it goes back to this sheet instead, so nothing typed is lost (2026-10-29). On the stack: its pushed
         // pages take their environment from here.
