@@ -15,6 +15,7 @@ struct EditStripSheet: View {
     /// The DCAs and mute groups ticked here, sent on Done with the name.
     @State private var groups = MembershipDraft()
     @State private var showsPresets = false
+    @State private var loads = PresetLoads()
     private let partner: StripID?
 
     init(strip: StripID, mirror: ConsoleMirror) {
@@ -72,10 +73,9 @@ struct EditStripSheet: View {
         }
         // Only Cancel, Done and a load close it (2026-10-30): a swipe down on a preset page closed it all.
         .interactiveDismissDisabled()
-        // A load closes onto the strip, where its result shows; with a name, colour, icon or group not yet sent with
-        // Done, it goes back to this sheet instead, so nothing typed is lost (2026-10-29). On the stack: its pushed
-        // pages take their environment from here.
-        .environment(\.presetLoaded) { if hasDraft { showsPresets = false } else { dismiss() } }
+        // A load closes onto the strip, or back here while a draft awaits Done (2026-10-29); pushed pages read it from the stack.
+        .environment(\.presetLoads, loads)
+        .onChange(of: loads.count) { if hasDraft { showsPresets = false } else { dismiss() } }
     }
 
     /// The sides as the sheet opened (a pair stays one even if the desk unlinks it meanwhile), each with the name typed

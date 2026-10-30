@@ -4,8 +4,15 @@ import ThumbmixCore
 extension EnvironmentValues {
     /// Set once by the root, so every screen reaches the one library. nil only where nothing sets it (a preview).
     @Entry var presetLibrary: PresetLibrary?
-    /// What a load that went out does next: the edit sheet closes onto the strip, where the result shows.
-    @Entry var presetLoaded: () -> Void = {}
+    /// Where a load that went out is told, so the edit sheet can close onto the strip. The sheet's own object, not a
+    /// closure: a new closure on every redraw of the sheet would redraw every page reading it.
+    @Entry var presetLoads: PresetLoads?
+}
+
+/// Counts the loads that went out; the edit sheet closes on a change.
+@Observable final class PresetLoads {
+    private(set) var count = 0
+    func loaded() { count += 1 }
 }
 
 /// A message the engineer must read: what went wrong, or what just happened. One alert for all of a screen's.

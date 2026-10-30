@@ -35,9 +35,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Fixes and polish (2026-10-29, the user's list)
 
-- [ ] **Swipe to remove a source looks broken** (screenshot on the phone, Sources page): swiping the web source's row slides its text off the card's left edge and shows a blank white box where Remove should be. `SourcesPage` uses `.swipeActions` inside a card that isn't a `List` row. Fix it so it looks native; the Connect screen's console rows (`ConnectView`) swipe properly.
 - [ ] **Review and redesign a strip's preset page and its load flow** (the user). Look at it on the phone with the user first, then mocks. Sources too (the user, 2026-10-29: "it doesn't really feel easy yet"): how a preset someone sends is kept, and what a deleted original does (today a file deleted from a folder source leaves the list, while a lost or moved one shows its last good read; the user asked for a copy that follows the original and says when it was removed).
-- [ ] **Use liquid glass consistently, where it fits** (the user; reference: SideStore's tab bar, where the selected tab sits in a glass lens that slides between tabs). Ask which Thumbmix controls the user means ("things like this": the bottom pills, `PillBar`, are the closest match) and compare real iOS 27 sim screenshots, since HTML can't render glass. Today only the toolbar buttons and Connect are glass (DECISIONS, `DarkCapsuleStyle`).
 - [ ] **Names for mute groups** (the user): stored per console on the iPhone? The doc gives a mute group no name on the desk (DCAs have one). Decide where the name is kept (by the remembered console, as Connect keeps desks), where it is edited, and where it shows (the Main page's groups, the red-bordered M).
 
 ## Performance
