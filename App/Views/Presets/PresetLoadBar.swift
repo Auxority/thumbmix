@@ -21,7 +21,7 @@ struct PresetLoadBar<Secondary: View>: View {
     @State private var run: LoadRun?
     /// The pause between one alert and the next; a Cancel in it ends the load.
     @State private var pause: Task<Void, Never>?
-    @Environment(\.presetLoaded) private var loaded
+    @Environment(\.presetLoads) private var loads
     @State private var notice: String?
 
     var body: some View {
@@ -122,7 +122,7 @@ struct PresetLoadBar<Secondary: View>: View {
         self.run = nil
         choice.isLoading = false
         switch mirror.apply(run.plan, answers: run.answers) {
-        case .sent: loaded()
+        case .sent: loads?.loaded()
         case .notLive: notice = String(localized: "Contact with the desk was lost. Nothing was loaded.")
         case .heldBack(let count):
             notice = Self.inflected(
