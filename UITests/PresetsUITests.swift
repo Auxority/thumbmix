@@ -56,6 +56,7 @@ final class PresetsUITests: DeskUITestCase {
         let row = element("preset-row-Kick")
         XCTAssertTrue(row.appears(within: 3))
         row.tap()
+        swipeDownLeavesTheEditSheetOpen()
 
         for part in ["input", "eq", "gate", "comp", "mix", "sends"] {
             XCTAssertTrue(element("preset-part-" + part).appears(within: 3), part)
@@ -83,6 +84,16 @@ final class PresetsUITests: DeskUITestCase {
         load.tap()
         XCTAssertTrue(element("presets-row").appears(within: 5), "back on the edit sheet")
         XCTAssertTrue(green.isSelected, "the unsent colour is still picked")
+    }
+
+    /// Only Cancel, Done and a load close the edit sheet (the user, 2026-10-30): a swipe down on a preset closed it all.
+    private func swipeDownLeavesTheEditSheetOpen() {
+        let card = element("preset-part-input")
+        XCTAssertTrue(card.appears(within: 3))
+        card.swipeDown()
+        // Long enough for a dismissal to finish, so the check below can't pass mid-animation.
+        Thread.sleep(forTimeInterval: 1)
+        XCTAssertTrue(card.isHittable, "a swipe down left the preset open")
     }
 
     private func openPresets() {
