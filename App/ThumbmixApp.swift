@@ -58,9 +58,9 @@ struct RootView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .environment(\.presetLibrary, model.presets)
+        .onOpenURL(perform: model.open)
         #if DEBUG
             .task { model.connectOnLaunch() }
-            .onOpenURL(perform: model.openTestURL)
         #endif
         .onChange(of: scenePhase) { old, new in
             if old == .background, new != .background { model.wake() }

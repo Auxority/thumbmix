@@ -111,6 +111,16 @@
         }
       }
     },
+    "%@ was not added: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ was not added: %2$@"
+          }
+        }
+      }
+    },
     "%@ will play only what comes back from the gear on %@. If nothing is connected there, %@ goes silent." : {
       "localizations" : {
         "en" : {
@@ -167,6 +177,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "48V"
+          }
+        }
+      }
+    },
+    "Added “%@” to your presets On this iPhone. Open a strip's Presets to use it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Added “%@” to your presets On this iPhone. Open a strip's Presets to use it."
           }
         }
       }
