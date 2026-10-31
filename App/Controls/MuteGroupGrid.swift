@@ -21,7 +21,8 @@ struct MuteGroupGrid: View {
 }
 
 /// A tap switches the group at once, as the desk's own key does; a hold opens who's in it instead, so a press a bit
-/// too slow changes nothing on the desk. A desk group has no name: the button names its strips.
+/// too slow changes nothing on the desk. A desk group has no name: the button shows the one kept on this iPhone, else
+/// it names its strips.
 struct MuteGroupButton: View {
     let group: Int
     let mirror: ConsoleMirror
@@ -45,7 +46,7 @@ struct MuteGroupButton: View {
             .dimmedUntilRead(isOn != nil)
             .accessibilityAddTraits(.isButton)
             .accessibilityIdentifier(wide ? "mute-group-header" : "mute-group-\(group)")
-            .accessibilityLabel(wide ? Text("Mute group \(group), ^[\(names.count) strip](inflect: true)") : accessibilityName(names))
+            .accessibilityLabel(accessibilityName(names))
             .accessibilityValue(isOn.map { $0 ? Text("On") : Text("Off") } ?? Text(verbatim: ""))
             .accessibilityAction { mirror.toggleMuteGroup(group) }
             .accessibilityActions {
@@ -54,25 +55,47 @@ struct MuteGroupButton: View {
     }
 
     @ViewBuilder private func label(isOn: Bool, names: [String]) -> some View {
-        let caption = names.isEmpty ? String(localized: "empty") : names.joined(separator: " · ")
         if wide {
             HStack {
-                Text(isOn ? "Group \(group) · On" : "Group \(group) · Off").font(.headline)
+                let title = mirror.muteGroupTitle(group)
+                Text(isOn ? "\(title) · On" : "\(title) · Off").font(.headline).lineLimit(1)
                 Spacer(minLength: 8)
                 Text("^[\(names.count) strip](inflect: true)").font(.caption)
             }
             .padding(.horizontal, 12)
         } else {
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(group)").font(.headline)
-                Text(caption).font(.caption2).lineLimit(1)
+                Text(verbatim: mirror.muteGroupName(group) ?? "\(group)").font(.headline).lineLimit(1)
+                caption(names: names)
             }
             .padding(.horizontal, 12)
         }
     }
 
+    /// A named group says how many strips it has; an unnamed one names them, or only counts them when the names don't
+    /// fit the button (the user, 2026-10-31).
+    @ViewBuilder private func caption(names: [String]) -> some View {
+        let count = Text("^[\(names.count) strip](inflect: true)")
+        if mirror.muteGroupName(group) != nil {
+            count.font(.caption2)
+        } else if names.isEmpty {
+            Text("empty").font(.caption2)
+        } else {
+            ViewThatFits(in: .horizontal) {
+                Text(names.joined(separator: " · ")).lineLimit(1).fixedSize(horizontal: true, vertical: false)
+                count
+            }
+            .font(.caption2)
+        }
+    }
+
     private func accessibilityName(_ names: [String]) -> Text {
-        names.isEmpty
+        let count = Text("^[\(names.count) strip](inflect: true)")
+        if let name = mirror.muteGroupName(group) {
+            return wide ? Text("Mute group \(group), \(name), \(count)") : Text("Mute group \(group): \(name), \(count)")
+        }
+        if wide { return Text("Mute group \(group), \(count)") }
+        return names.isEmpty
             ? Text("Mute group \(group), empty")
             : Text("Mute group \(group): \(names.formatted(.list(type: .and)))")
     }

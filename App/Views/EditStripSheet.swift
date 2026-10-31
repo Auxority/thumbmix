@@ -152,31 +152,6 @@ private struct IconPage: View {
     }
 }
 
-private struct NameField: View {
-    let title: LocalizedStringKey
-    let placeholder: String
-    @Binding var name: String
-    var identifier = "strip-name"
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            SectionLabel(title)
-            HStack {
-                TextField(placeholder, text: $name)
-                    .accessibilityIdentifier(identifier)
-                    .autocorrectionDisabled()
-                    .onChange(of: name) { _, typed in
-                        let allowed = StripName.typed(typed)
-                        if allowed != typed { name = allowed }
-                    }
-                Text("\(name.count)/\(StripName.maxLength)").font(.caption).foregroundStyle(Theme.secondaryText)
-            }
-            .padding(12)
-            .background(Theme.track, in: RoundedRectangle(cornerRadius: 10))
-        }
-    }
-}
-
 /// A sheet section's small grey caps title ("NAME", "DCAS").
 struct SectionLabel: View {
     let text: LocalizedStringKey

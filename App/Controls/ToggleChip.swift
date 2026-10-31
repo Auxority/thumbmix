@@ -62,7 +62,7 @@ struct MuteButton: View {
         .accessibilityIdentifier("mute-" + strip.on)
         // A list of plain "Mute"s doesn't say which strip each one mutes.
         .accessibilityLabel(muted ? "Unmute \(name)" : "Mute \(name)")
-        .accessibilityValue(look == .mutedByGroup ? Text("Muted by a mute group") : Text(verbatim: ""))
+        .accessibilityValue(Text(verbatim: look == .mutedByGroup ? mirror.mutedByText(of: strip) ?? "" : ""))
     }
 }
 

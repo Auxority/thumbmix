@@ -14,6 +14,9 @@ final class AppModel {
     private(set) var isStartingOffline = false
     private(set) var known = KnownConsoles(stored: UserDefaults.standard.array(forKey: AppModel.knownKey))
     private static let knownKey = "knownConsoles"
+    /// The mute groups' names per console: the desk has none, so they live here, as the known consoles do.
+    private var groupNames = MuteGroupNameBook(stored: UserDefaults.standard.dictionary(forKey: AppModel.groupNamesKey))
+    private static let groupNamesKey = "muteGroupNames"
     /// Desks ("host:port") whose Exclusive solo the engineer chose to keep. In memory only: the next launch asks again,
     /// as the next show may want the hunt (2026-10-19).
     private var keptExclusiveSolo: Set<String> = []
@@ -57,8 +60,10 @@ final class AppModel {
         guard Discovery.isUsableIPv4(host) else { return }
         disconnect()
         let mirror = ConsoleMirror(link: ConsoleLink(host: host, port: port))
-        mirror.onIdentified = { [weak self] info in
-            self?.remember(NetworkConsole(host: host, name: info.name, model: info.model))
+        mirror.onIdentified = { [weak self, weak mirror] info in
+            let console = NetworkConsole(host: host, name: info.name, model: info.model)
+            self?.remember(console)
+            self?.keepGroupNames(of: mirror, for: console)
         }
         let key = "\(host):\(port)"
         mirror.keepsExclusiveSolo = keptExclusiveSolo.contains(key)
@@ -76,6 +81,22 @@ final class AppModel {
     func forget(_ console: NetworkConsole) {
         known.forget(console)
         UserDefaults.standard.set(known.stored, forKey: Self.knownKey)
+        groupNames.forget(console.id)
+        saveGroupNames()
+    }
+
+    private func saveGroupNames() {
+        UserDefaults.standard.set(groupNames.stored, forKey: Self.groupNamesKey)
+    }
+
+    /// Once the desk has said who it is, its mirror shows the names kept for it, and keeps every rename.
+    private func keepGroupNames(of mirror: ConsoleMirror?, for console: NetworkConsole) {
+        mirror?.muteGroupNames = groupNames.names(of: console.id)
+        mirror?.onMuteGroupNamesChanged = { [weak self] names in
+            guard let self else { return }
+            groupNames.set(names, of: console.id)
+            saveGroupNames()
+        }
     }
 
     private func remember(_ console: NetworkConsole) {

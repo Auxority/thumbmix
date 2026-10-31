@@ -40,6 +40,12 @@
         }
       }
     },
+    "%@ · Off" : {
+
+    },
+    "%@ · On" : {
+
+    },
     "%@ %@ mute when you tap Done." : {
       "localizations" : {
         "en" : {
@@ -276,6 +282,9 @@
     "Edit match words" : {
 
     },
+    "Edit mute group name" : {
+
+    },
     "Edit name, colour and icon" : {
 
     },
@@ -349,12 +358,6 @@
 
     },
     "Group %lld" : {
-
-    },
-    "Group %lld · Off" : {
-
-    },
-    "Group %lld · On" : {
 
     },
     "Hide" : {
@@ -482,20 +485,27 @@
     "Mute group %lld" : {
 
     },
-    "Mute group %lld, ^[%lld strip](inflect: true)" : {
+    "Mute group %lld, %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Mute group %1$lld, ^[%2$lld strip](inflect: true)"
+            "value" : "Mute group %1$lld, %2$@"
+          }
+        }
+      }
+    },
+    "Mute group %lld, %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mute group %1$lld, %2$@, %3$@"
           }
         }
       }
     },
     "Mute group %lld, empty" : {
-
-    },
-    "Mute group %lld, on" : {
 
     },
     "Mute group %lld: %@" : {
@@ -508,10 +518,37 @@
         }
       }
     },
-    "Mute groups" : {
-
+    "Mute group %lld: %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mute group %1$lld: %2$@, %3$@"
+          }
+        }
+      }
     },
-    "Muted by a mute group" : {
+    "Mute group %lld%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mute group %1$lld%2$@"
+          }
+        }
+      }
+    },
+    "Mute group %lld%@, on" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mute group %1$lld%2$@, on"
+          }
+        }
+      }
+    },
+    "Mute groups" : {
 
     },
     "Name" : {

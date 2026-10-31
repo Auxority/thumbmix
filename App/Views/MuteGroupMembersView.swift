@@ -13,6 +13,7 @@ struct MuteGroupMembersView: View {
         ScrollView {
             let unused = mirror.unusedStrips(notIn: .muteGroup(group))
             VStack(spacing: 6) {
+                MuteGroupNameRow(group: group, mirror: mirror)
                 MuteGroupButton(group: group, mirror: mirror, wide: true)
                 MuteGroupNote()
                 ForEach(ConsoleMirror.muteGroupAssignableGroups) { stripGroup in

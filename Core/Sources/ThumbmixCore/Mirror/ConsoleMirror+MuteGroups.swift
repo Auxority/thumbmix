@@ -20,11 +20,7 @@ extension ConsoleMirror {
 
     /// In a group read as on, on either side of a linked pair: the pair's row shows one M for both. A group still
     /// unread counts neither way. Assumed: the group mute leaves the strip's own `mix/on` alone (m32-probe section 14).
-    public func isMutedByGroup(_ strip: StripID) -> Bool {
-        let sides = isLinked(strip) ? strip.pairSides : [strip]
-        let onGroups = (1...Catalog.muteGroupCount).filter { isMuteGroupOn($0) == true }
-        return sides.contains { side in onGroups.contains { isMember(side, of: .muteGroup($0)) } }
-    }
+    public func isMutedByGroup(_ strip: StripID) -> Bool { mutingGroup(of: strip) != nil }
 
     /// The group's members by the names their overview rows show, a linked pair once, in desk order.
     public func muteGroupMemberNames(_ group: Int) -> [String] {
