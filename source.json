@@ -1,0 +1,1195 @@
+{
+  "name": "Thumbmix",
+  "subtitle": "An iPhone remote for the Midas M32",
+  "website": "https://github.com/Auxority/thumbmix",
+  "nsfw": false,
+  "apps": [
+    {
+      "name": "Thumbmix",
+      "bundleIdentifier": "dev.thumbmix.app",
+      "developerName": "Auxority",
+      "subtitle": "An iPhone remote for the Midas M32",
+      "localizedDescription": "An open-source remote for the Midas M32, built for thumbs: horizontal fader rows you drag anywhere, every common action at most two taps deep.",
+      "iconURL": "https://raw.githubusercontent.com/Auxority/thumbmix/main/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+      "category": "utilities",
+      "screenshots": [
+        "https://raw.githubusercontent.com/Auxority/thumbmix/main/Design/store-screenshots/1-overview.png",
+        "https://raw.githubusercontent.com/Auxority/thumbmix/main/Design/store-screenshots/2-eq.png",
+        "https://raw.githubusercontent.com/Auxority/thumbmix/main/Design/store-screenshots/3-comp.png",
+        "https://raw.githubusercontent.com/Auxority/thumbmix/main/Design/store-screenshots/4-sends.png",
+        "https://raw.githubusercontent.com/Auxority/thumbmix/main/Design/store-screenshots/5-dca-members.png"
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSLocalNetworkUsageDescription": "Thumbmix talks to your M32 over the local network."
+        }
+      },
+      "versions": [
+        {
+          "version": "0.66.0",
+          "marketingVersion": "0.66.0",
+          "buildVersion": "223",
+          "date": "2026-10-31T19:33:42Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.66.0/Thumbmix.ipa",
+          "size": 1379323,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Screenshots in SideStore"
+        },
+        {
+          "version": "0.65.0",
+          "marketingVersion": "0.65.0",
+          "buildVersion": "222",
+          "date": "2026-10-31T18:59:42Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.65.0/Thumbmix.ipa",
+          "size": 1379326,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• The Key line says whether the key filter is on"
+        },
+        {
+          "version": "0.64.1",
+          "marketingVersion": "0.64.1",
+          "buildVersion": "217",
+          "date": "2026-10-31T17:13:38Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.64.1/Thumbmix.ipa",
+          "size": 1380129,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• An edit queued before an outage never reaches the desk after it"
+        },
+        {
+          "version": "0.64.0",
+          "marketingVersion": "0.64.0",
+          "buildVersion": "216",
+          "date": "2026-10-31T16:45:55Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.64.0/Thumbmix.ipa",
+          "size": 1379942,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Names for mute groups"
+        },
+        {
+          "version": "0.63.0",
+          "marketingVersion": "0.63.0",
+          "buildVersion": "214",
+          "date": "2026-10-31T16:07:06Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.63.0/Thumbmix.ipa",
+          "size": 1360740,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Open a preset file from AirDrop, Mail or Messages"
+        },
+        {
+          "version": "0.62.1",
+          "marketingVersion": "0.62.1",
+          "buildVersion": "212",
+          "date": "2026-10-30T15:20:02Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.62.1/Thumbmix.ipa",
+          "size": 1353661,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A swipe down no longer closes the edit sheet"
+        },
+        {
+          "version": "0.62.0",
+          "marketingVersion": "0.62.0",
+          "buildVersion": "211",
+          "date": "2026-10-29T13:08:56Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.62.0/Thumbmix.ipa",
+          "size": 1353893,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Native segmented control for the group and tab bars"
+        },
+        {
+          "version": "0.61.0",
+          "marketingVersion": "0.61.0",
+          "buildVersion": "210",
+          "date": "2026-10-29T12:52:17Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.61.0/Thumbmix.ipa",
+          "size": 1356659,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A preset load closes onto the strip"
+        },
+        {
+          "version": "0.60.0",
+          "marketingVersion": "0.60.0",
+          "buildVersion": "209",
+          "date": "2026-10-29T12:39:13Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.60.0/Thumbmix.ipa",
+          "size": 1354811,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Drop Import a preset file, a file source takes one in"
+        },
+        {
+          "version": "0.59.1",
+          "marketingVersion": "0.59.1",
+          "buildVersion": "208",
+          "date": "2026-10-29T12:37:16Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.59.1/Thumbmix.ipa",
+          "size": 1359611,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Swipe Remove and Forget show red, not a blank white box"
+        },
+        {
+          "version": "0.59.0",
+          "marketingVersion": "0.59.0",
+          "buildVersion": "206",
+          "date": "2026-10-28T18:02:48Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.59.0/Thumbmix.ipa",
+          "size": 1358763,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Folder and file preset sources"
+        },
+        {
+          "version": "0.58.0",
+          "marketingVersion": "0.58.0",
+          "buildVersion": "205",
+          "date": "2026-10-28T16:34:48Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.58.0/Thumbmix.ipa",
+          "size": 1335899,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Preset page and load that read at a glance"
+        },
+        {
+          "version": "0.57.0",
+          "marketingVersion": "0.57.0",
+          "buildVersion": "204",
+          "date": "2026-10-28T14:05:34Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.57.0/Thumbmix.ipa",
+          "size": 1277277,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Preset sources on the web, with the repo's presets as the default"
+        },
+        {
+          "version": "0.56.0",
+          "marketingVersion": "0.56.0",
+          "buildVersion": "202",
+          "date": "2026-10-28T13:01:06Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.56.0/Thumbmix.ipa",
+          "size": 1207301,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Named presets, saved on this iPhone"
+        },
+        {
+          "version": "0.55.0",
+          "marketingVersion": "0.55.0",
+          "buildVersion": "201",
+          "date": "2026-10-27T13:42:34Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.55.0/Thumbmix.ipa",
+          "size": 1051405,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Reset gate, Reset comp and Reset input"
+        },
+        {
+          "version": "0.54.0",
+          "marketingVersion": "0.54.0",
+          "buildVersion": "200",
+          "date": "2026-10-26T12:44:59Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.54.0/Thumbmix.ipa",
+          "size": 1043486,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Shake the phone to share this run's log"
+        },
+        {
+          "version": "0.53.3",
+          "marketingVersion": "0.53.3",
+          "buildVersion": "198",
+          "date": "2026-10-26T11:26:27Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.53.3/Thumbmix.ipa",
+          "size": 1031982,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• The Connect screen scans every 5 s, so a desk switched on later turns Online"
+        },
+        {
+          "version": "0.53.2",
+          "marketingVersion": "0.53.2",
+          "buildVersion": "194",
+          "date": "2026-10-25T07:12:19Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.53.2/Thumbmix.ipa",
+          "size": 1026895,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• The overview list holds still during a sync instead of rebuilding per value"
+        },
+        {
+          "version": "0.53.1",
+          "marketingVersion": "0.53.1",
+          "buildVersion": "191",
+          "date": "2026-10-23T14:23:20Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.53.1/Thumbmix.ipa",
+          "size": 1025312,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Connecting no longer waits 0.5 s, and the sync banner redraws only itself"
+        },
+        {
+          "version": "0.53.0",
+          "marketingVersion": "0.53.0",
+          "buildVersion": "189",
+          "date": "2026-10-22T11:34:43Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.53.0/Thumbmix.ipa",
+          "size": 1024981,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• EQ points are dots with number tags, the graph shows its numbers, and shelves have no Q"
+        },
+        {
+          "version": "0.52.5",
+          "marketingVersion": "0.52.5",
+          "buildVersion": "188",
+          "date": "2026-10-22T09:09:04Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.52.5/Thumbmix.ipa",
+          "size": 1011449,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• The low cut has no Slope, which changes nothing on the desk"
+        },
+        {
+          "version": "0.52.4",
+          "marketingVersion": "0.52.4",
+          "buildVersion": "182",
+          "date": "2026-10-21T09:07:11Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.52.4/Thumbmix.ipa",
+          "size": 1012306,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Frequencies read with the desk's digits"
+        },
+        {
+          "version": "0.52.3",
+          "marketingVersion": "0.52.3",
+          "buildVersion": "180",
+          "date": "2026-10-21T08:49:24Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.52.3/Thumbmix.ipa",
+          "size": 1012256,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Reset bands gives the desk's own EQ reset"
+        },
+        {
+          "version": "0.52.2",
+          "marketingVersion": "0.52.2",
+          "buildVersion": "177",
+          "date": "2026-10-20T13:48:59Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.52.2/Thumbmix.ipa",
+          "size": 1012171,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Core link tests sync a few at a time, so a busy CI runner can't time them out"
+        },
+        {
+          "version": "0.52.1",
+          "marketingVersion": "0.52.1",
+          "buildVersion": "165",
+          "date": "2026-10-20T11:07:16Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.52.1/Thumbmix.ipa",
+          "size": 1012171,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A send's sheet says when contact is lost, and Done still closes it"
+        },
+        {
+          "version": "0.52.0",
+          "marketingVersion": "0.52.0",
+          "buildVersion": "164",
+          "date": "2026-10-20T10:34:09Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.52.0/Thumbmix.ipa",
+          "size": 1011725,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• The key gets a graph: its filter over what the key listens to"
+        },
+        {
+          "version": "0.51.0",
+          "marketingVersion": "0.51.0",
+          "buildVersion": "162",
+          "date": "2026-10-20T07:24:31Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.51.0/Thumbmix.ipa",
+          "size": 992187,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Comp, Gate and Insert fold their set-once settings into a sheet"
+        },
+        {
+          "version": "0.50.1",
+          "marketingVersion": "0.50.1",
+          "buildVersion": "158",
+          "date": "2026-10-19T14:53:03Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.50.1/Thumbmix.ipa",
+          "size": 962860,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Twelve small follow-ups to mute groups and the strip edit sheet"
+        },
+        {
+          "version": "0.50.0",
+          "marketingVersion": "0.50.0",
+          "buildVersion": "157",
+          "date": "2026-10-19T14:38:45Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.50.0/Thumbmix.ipa",
+          "size": 959699,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• The EQ curve no longer jumps for a frame while a band moves\n• Mute groups on the Main page, and a red-bordered M on the strips they mute\n• A strip's DCAs and mute groups in its edit sheet"
+        },
+        {
+          "version": "0.49.0",
+          "marketingVersion": "0.49.0",
+          "buildVersion": "155",
+          "date": "2026-10-19T10:35:11Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.49.0/Thumbmix.ipa",
+          "size": 908150,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Solo runs of strips from the overview by holding and dragging their names"
+        },
+        {
+          "version": "0.48.1",
+          "marketingVersion": "0.48.1",
+          "buildVersion": "152",
+          "date": "2026-10-17T20:24:04Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.48.1/Thumbmix.ipa",
+          "size": 861696,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Dashed lines stay put while the threshold moves"
+        },
+        {
+          "version": "0.48.0",
+          "marketingVersion": "0.48.0",
+          "buildVersion": "147",
+          "date": "2026-10-17T18:56:47Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.48.0/Thumbmix.ipa",
+          "size": 861565,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Drop the ±1 dB buttons on the Mix tab"
+        },
+        {
+          "version": "0.47.0",
+          "marketingVersion": "0.47.0",
+          "buildVersion": "145",
+          "date": "2026-10-17T18:15:23Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.47.0/Thumbmix.ipa",
+          "size": 870871,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• DCA member rows look like overview rows, chip on the right"
+        },
+        {
+          "version": "0.46.0",
+          "marketingVersion": "0.46.0",
+          "buildVersion": "142",
+          "date": "2026-10-17T17:47:44Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.46.0/Thumbmix.ipa",
+          "size": 870776,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• One graph size, Gate/Comp off forks its curve, low cut off dashed, inverted colours"
+        },
+        {
+          "version": "0.45.0",
+          "marketingVersion": "0.45.0",
+          "buildVersion": "139",
+          "date": "2026-10-17T16:23:35Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.45.0/Thumbmix.ipa",
+          "size": 865533,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Assign and unassign a DCA's strips on its Members tab"
+        },
+        {
+          "version": "0.44.0",
+          "marketingVersion": "0.44.0",
+          "buildVersion": "137",
+          "date": "2026-10-16T12:44:38Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.44.0/Thumbmix.ipa",
+          "size": 854980,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Thumbmix's own strip icons replace the emoji"
+        },
+        {
+          "version": "0.43.0",
+          "marketingVersion": "0.43.0",
+          "buildVersion": "136",
+          "date": "2026-10-16T09:39:37Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.43.0/Thumbmix.ipa",
+          "size": 720918,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A Comp mix row for parallel compression, and the curve blends by it"
+        },
+        {
+          "version": "0.42.0",
+          "marketingVersion": "0.42.0",
+          "buildVersion": "135",
+          "date": "2026-10-16T09:29:28Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.42.0/Thumbmix.ipa",
+          "size": 720348,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• The white pill slides to the tapped one, the same on every tap"
+        },
+        {
+          "version": "0.41.1",
+          "marketingVersion": "0.41.1",
+          "buildVersion": "134",
+          "date": "2026-10-16T08:16:06Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.41.1/Thumbmix.ipa",
+          "size": 718319,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A tapped pill switches at once, never with a fade"
+        },
+        {
+          "version": "0.41.0",
+          "marketingVersion": "0.41.0",
+          "buildVersion": "133",
+          "date": "2026-10-16T07:41:25Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.41.0/Thumbmix.ipa",
+          "size": 718072,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• One glass pill bar for the overview's groups and a strip's tabs"
+        },
+        {
+          "version": "0.40.1",
+          "marketingVersion": "0.40.1",
+          "buildVersion": "129",
+          "date": "2026-10-16T05:48:57Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.40.1/Thumbmix.ipa",
+          "size": 717454,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A comma typed in the IP alert shows as a dot"
+        },
+        {
+          "version": "0.40.0",
+          "marketingVersion": "0.40.0",
+          "buildVersion": "127",
+          "date": "2026-10-16T05:22:04Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.40.0/Thumbmix.ipa",
+          "size": 717065,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Connect screen for one thumb: remembered consoles, Online from the scan, alerts for problems"
+        },
+        {
+          "version": "0.39.2",
+          "marketingVersion": "0.39.2",
+          "buildVersion": "124",
+          "date": "2026-10-15T12:50:43Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.39.2/Thumbmix.ipa",
+          "size": 696332,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A linked partner's answer is timed when it arrived, not when the main actor read it"
+        },
+        {
+          "version": "0.39.1",
+          "marketingVersion": "0.39.1",
+          "buildVersion": "118",
+          "date": "2026-10-15T09:29:46Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.39.1/Thumbmix.ipa",
+          "size": 699140,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Auto time dims the comp's Attack and Release"
+        },
+        {
+          "version": "0.39.0",
+          "marketingVersion": "0.39.0",
+          "buildVersion": "117",
+          "date": "2026-10-15T09:12:16Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.39.0/Thumbmix.ipa",
+          "size": 696105,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• EQ and key filter types in words, the desk's term under each"
+        },
+        {
+          "version": "0.38.4",
+          "marketingVersion": "0.38.4",
+          "buildVersion": "116",
+          "date": "2026-10-15T08:03:01Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.38.4/Thumbmix.ipa",
+          "size": 695594,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• The overview has no title; in Offline mode the DEMO pill stands alone"
+        },
+        {
+          "version": "0.38.3",
+          "marketingVersion": "0.38.3",
+          "buildVersion": "115",
+          "date": "2026-10-15T07:43:13Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.38.3/Thumbmix.ipa",
+          "size": 695540,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Gate and Comp put the graph first, and On never moves while it loads"
+        },
+        {
+          "version": "0.38.2",
+          "marketingVersion": "0.38.2",
+          "buildVersion": "114",
+          "date": "2026-10-14T17:49:34Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.38.2/Thumbmix.ipa",
+          "size": 695286,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A stale answer no longer splits a linked pair"
+        },
+        {
+          "version": "0.38.1",
+          "marketingVersion": "0.38.1",
+          "buildVersion": "111",
+          "date": "2026-10-14T15:10:58Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.38.1/Thumbmix.ipa",
+          "size": 694449,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• An on/off chip waits disabled and dimmed until the desk sends its value"
+        },
+        {
+          "version": "0.38.0",
+          "marketingVersion": "0.38.0",
+          "buildVersion": "110",
+          "date": "2026-10-14T15:01:50Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.38.0/Thumbmix.ipa",
+          "size": 691692,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• An Insert block on every strip's Mix tab\n• A drag started just as the desk links or unlinks a pair is no longer lost\n• An EQ that's off keeps its curve, dashed and grey"
+        },
+        {
+          "version": "0.37.0",
+          "marketingVersion": "0.37.0",
+          "buildVersion": "107",
+          "date": "2026-10-14T10:52:42Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.37.0/Thumbmix.ipa",
+          "size": 669804,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A Fed by row's › opens the send sheet, whose title links the source too\n• A main or matrix EQ draws its crossover types"
+        },
+        {
+          "version": "0.36.0",
+          "marketingVersion": "0.36.0",
+          "buildVersion": "104",
+          "date": "2026-10-14T09:03:09Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.36.0/Thumbmix.ipa",
+          "size": 664818,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Unused strips fold into one row at the end of each list"
+        },
+        {
+          "version": "0.35.0",
+          "marketingVersion": "0.35.0",
+          "buildVersion": "103",
+          "date": "2026-10-14T07:59:15Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.35.0/Thumbmix.ipa",
+          "size": 647560,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Comp position, Auto time and the gate and comp key"
+        },
+        {
+          "version": "0.34.0",
+          "marketingVersion": "0.34.0",
+          "buildVersion": "100",
+          "date": "2026-10-13T17:19:20Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.34.0/Thumbmix.ipa",
+          "size": 632095,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Main LR and Main M get a Fed by tab"
+        },
+        {
+          "version": "0.33.0",
+          "marketingVersion": "0.33.0",
+          "buildVersion": "99",
+          "date": "2026-10-13T16:08:39Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.33.0/Thumbmix.ipa",
+          "size": 625822,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• FX returns get the EQ and Sends tabs"
+        },
+        {
+          "version": "0.32.0",
+          "marketingVersion": "0.32.0",
+          "buildVersion": "98",
+          "date": "2026-10-13T14:34:37Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.32.0/Thumbmix.ipa",
+          "size": 625898,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• SideStore shows what's new in each version, from its release's PR titles"
+        },
+        {
+          "version": "0.31.0",
+          "marketingVersion": "0.31.0",
+          "buildVersion": "97",
+          "date": "2026-10-13T12:54:46Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.31.0/Thumbmix.ipa",
+          "size": 625900,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Sends and Fed by rows show each strip's number, and their On chips are tinted"
+        },
+        {
+          "version": "0.30.1",
+          "marketingVersion": "0.30.1",
+          "buildVersion": "95",
+          "date": "2026-10-13T11:59:40Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.30.1/Thumbmix.ipa",
+          "size": 624402,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A woken link drops the old socket's buffered replies, and a set is read back after its hold"
+        },
+        {
+          "version": "0.30.0",
+          "marketingVersion": "0.30.0",
+          "buildVersion": "94",
+          "date": "2026-10-13T09:55:39Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.30.0/Thumbmix.ipa",
+          "size": 624295,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A \"to Main LR\" pill on the Mix tab's name line, asking before each switch"
+        },
+        {
+          "version": "0.29.0",
+          "marketingVersion": "0.29.0",
+          "buildVersion": "93",
+          "date": "2026-10-13T09:48:39Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.29.0/Thumbmix.ipa",
+          "size": 616682,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• SOLO on the Mix tab and S beside the slim fader on every other tab"
+        },
+        {
+          "version": "0.28.5",
+          "marketingVersion": "0.28.5",
+          "buildVersion": "91",
+          "date": "2026-10-13T07:16:56Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.28.5/Thumbmix.ipa",
+          "size": 614012,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Fed by shows a linked source pair as one row, like the overview"
+        },
+        {
+          "version": "0.28.4",
+          "marketingVersion": "0.28.4",
+          "buildVersion": "90",
+          "date": "2026-10-13T05:58:07Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.28.4/Thumbmix.ipa",
+          "size": 612557,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• The compressor knee visibly bends the curve"
+        },
+        {
+          "version": "0.28.3",
+          "marketingVersion": "0.28.3",
+          "buildVersion": "89",
+          "date": "2026-10-13T05:52:59Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.28.3/Thumbmix.ipa",
+          "size": 612534,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Tapping Main or Matrix keeps the group chips bar where it was"
+        },
+        {
+          "version": "0.28.2",
+          "marketingVersion": "0.28.2",
+          "buildVersion": "87",
+          "date": "2026-10-12T19:43:22Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.28.2/Thumbmix.ipa",
+          "size": 612632,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• The background fill reads strips that are named and have their fader up"
+        },
+        {
+          "version": "0.28.1",
+          "marketingVersion": "0.28.1",
+          "buildVersion": "86",
+          "date": "2026-10-12T19:42:15Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.28.1/Thumbmix.ipa",
+          "size": 612740,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Connect reads only the overview; a tab is read when it opens, strips in use in the background\n• The address lists and the demo desk are built once, not per mirror and fake desk"
+        },
+        {
+          "version": "0.28.0",
+          "marketingVersion": "0.28.0",
+          "buildVersion": "82",
+          "date": "2026-10-12T18:01:04Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.28.0/Thumbmix.ipa",
+          "size": 600779,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A Ø button beside Trim flips an input's or aux in's polarity, and its alert explains it"
+        },
+        {
+          "version": "0.27.0",
+          "marketingVersion": "0.27.0",
+          "buildVersion": "81",
+          "date": "2026-10-12T17:33:48Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.27.0/Thumbmix.ipa",
+          "size": 595281,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Aux ins get the Input, EQ and Sends tabs, with Gain and 48V when an input's preamp feeds them"
+        },
+        {
+          "version": "0.26.0",
+          "marketingVersion": "0.26.0",
+          "buildVersion": "77",
+          "date": "2026-10-12T15:42:15Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.26.0/Thumbmix.ipa",
+          "size": 594669,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A bus name in a send's sheet opens that bus, on its Fed by tab"
+        },
+        {
+          "version": "0.25.0",
+          "marketingVersion": "0.25.0",
+          "buildVersion": "76",
+          "date": "2026-10-12T14:53:28Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.25.0/Thumbmix.ipa",
+          "size": 588788,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A pair of sends shares one › and one tap point, and the chain slides"
+        },
+        {
+          "version": "0.24.0",
+          "marketingVersion": "0.24.0",
+          "buildVersion": "75",
+          "date": "2026-10-12T14:29:59Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.24.0/Thumbmix.ipa",
+          "size": 584656,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A SideStore source, so SideStore offers each new version by itself"
+        },
+        {
+          "version": "0.23.0",
+          "marketingVersion": "0.23.0",
+          "buildVersion": "74",
+          "date": "2026-10-12T14:15:43Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.23.0/Thumbmix.ipa",
+          "size": 584656,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• A send's tap point, as a chain of its strip that says what reaches the mix"
+        },
+        {
+          "version": "0.22.0",
+          "marketingVersion": "0.22.0",
+          "buildVersion": "72",
+          "date": "2026-10-12T12:29:46Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.22.0/Thumbmix.ipa",
+          "size": 563622,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Send pan and Follow LR pan, in a sheet per linked send"
+        },
+        {
+          "version": "0.21.0",
+          "marketingVersion": "0.21.0",
+          "buildVersion": "71",
+          "date": "2026-10-12T12:28:03Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.21.0/Thumbmix.ipa",
+          "size": 547315,
+          "minOSVersion": "26.0",
+          "localizedDescription": "• Group chips in one dark glass bar along the bottom, in thumb reach"
+        },
+        {
+          "version": "0.20.0",
+          "marketingVersion": "0.20.0",
+          "buildVersion": "67",
+          "date": "2026-10-12T09:11:38Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.20.0/Thumbmix.ipa",
+          "size": 648380,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Dark toolbar buttons and Connect: glass tinted black on iOS 26+"
+        },
+        {
+          "version": "0.19.2",
+          "marketingVersion": "0.19.2",
+          "buildVersion": "65",
+          "date": "2026-10-12T07:14:46Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.19.2/Thumbmix.ipa",
+          "size": 642151,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Fed by lists every source, without a \"Show unused\" toggle"
+        },
+        {
+          "version": "0.19.1",
+          "marketingVersion": "0.19.1",
+          "buildVersion": "63",
+          "date": "2026-10-12T06:48:21Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.19.1/Thumbmix.ipa",
+          "size": 643273,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Refuse a typed value past either end instead of clamping it"
+        },
+        {
+          "version": "0.19.0",
+          "marketingVersion": "0.19.0",
+          "buildVersion": "58",
+          "date": "2026-10-09T13:32:09Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.19.0/Thumbmix.ipa",
+          "size": 642105,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• VoiceOver says which group and colour are selected and which strip a control belongs to\n• Hold a slider row to type its value, and drag finer away from the row"
+        },
+        {
+          "version": "0.18.3",
+          "marketingVersion": "0.18.3",
+          "buildVersion": "55",
+          "date": "2026-10-09T11:52:07Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.18.3/Thumbmix.ipa",
+          "size": 628028,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• EQ graph lets go on a cancelled touch, RTA follows L|R, one demo desk per tap, stopped links stay stopped"
+        },
+        {
+          "version": "0.18.2",
+          "marketingVersion": "0.18.2",
+          "buildVersion": "54",
+          "date": "2026-10-09T10:30:05Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.18.2/Thumbmix.ipa",
+          "size": 625738,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Meters scale instead of resizing, so they no longer re-run layout"
+        },
+        {
+          "version": "0.18.1",
+          "marketingVersion": "0.18.1",
+          "buildVersion": "53",
+          "date": "2026-10-09T09:17:23Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.18.1/Thumbmix.ipa",
+          "size": 625647,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• RTA after the background, Offline EQ defaults, Input meter, DEMO pill and the overview's Unused button"
+        },
+        {
+          "version": "0.18.0",
+          "marketingVersion": "0.18.0",
+          "buildVersion": "52",
+          "date": "2026-10-09T08:00:27Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.18.0/Thumbmix.ipa",
+          "size": 626649,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Comp and Gate dropdowns with detector and envelope, Comp and EQ double-tap resets, 6-band EQ defaults"
+        },
+        {
+          "version": "0.17.0",
+          "marketingVersion": "0.17.0",
+          "buildVersion": "50",
+          "date": "2026-10-08T14:43:26Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.17.0/Thumbmix.ipa",
+          "size": 623334,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Buses and mains get a Sends tab to the matrices"
+        },
+        {
+          "version": "0.16.0",
+          "marketingVersion": "0.16.0",
+          "buildVersion": "49",
+          "date": "2026-10-08T14:05:41Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.16.0/Thumbmix.ipa",
+          "size": 623338,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Delay per input channel, in ms and distance; gain and delay resets ask first"
+        },
+        {
+          "version": "0.15.0",
+          "marketingVersion": "0.15.0",
+          "buildVersion": "48",
+          "date": "2026-10-08T12:40:54Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.15.0/Thumbmix.ipa",
+          "size": 617077,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Reset bands asks with the system alert; the 48V alert names a linked partner"
+        },
+        {
+          "version": "0.14.0",
+          "marketingVersion": "0.14.0",
+          "buildVersion": "45",
+          "date": "2026-10-08T12:01:02Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.14.0/Thumbmix.ipa",
+          "size": 616216,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Nudges repeat while held and move exactly 1 dB; fader text follows the desk"
+        },
+        {
+          "version": "0.13.0",
+          "marketingVersion": "0.13.0",
+          "buildVersion": "44",
+          "date": "2026-10-08T09:53:10Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.13.0/Thumbmix.ipa",
+          "size": 608682,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Matrix 1-6 get a chip and a strip screen fed by the buses and mains"
+        },
+        {
+          "version": "0.12.0",
+          "marketingVersion": "0.12.0",
+          "buildVersion": "42",
+          "date": "2026-10-08T06:13:24Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.12.0/Thumbmix.ipa",
+          "size": 607262,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• 48V is a button beside the Gain row and asks before switching"
+        },
+        {
+          "version": "0.11.1",
+          "marketingVersion": "0.11.1",
+          "buildVersion": "40",
+          "date": "2026-10-07T18:09:56Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.11.1/Thumbmix.ipa",
+          "size": 602228,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Offline mode keeps a linked pair's gain linked"
+        },
+        {
+          "version": "0.11.0",
+          "marketingVersion": "0.11.0",
+          "buildVersion": "39",
+          "date": "2026-10-07T17:30:24Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.11.0/Thumbmix.ipa",
+          "size": 599848,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• m32-probe checks stereo link behaviour"
+        },
+        {
+          "version": "0.10.0",
+          "marketingVersion": "0.10.0",
+          "buildVersion": "38",
+          "date": "2026-10-07T17:26:00Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.10.0/Thumbmix.ipa",
+          "size": 599847,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Link and unlink a pair from the Mix tab"
+        },
+        {
+          "version": "0.9.0",
+          "marketingVersion": "0.9.0",
+          "buildVersion": "37",
+          "date": "2026-10-07T17:23:05Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.9.0/Thumbmix.ipa",
+          "size": 591882,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• A linked pair opens as one stereo strip that follows the desk's Link Preferences"
+        },
+        {
+          "version": "0.8.0",
+          "marketingVersion": "0.8.0",
+          "buildVersion": "35",
+          "date": "2026-10-07T17:09:38Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.8.0/Thumbmix.ipa",
+          "size": 580893,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• A linked pair is one overview row"
+        },
+        {
+          "version": "0.7.1",
+          "marketingVersion": "0.7.1",
+          "buildVersion": "34",
+          "date": "2026-10-07T16:51:01Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.7.1/Thumbmix.ipa",
+          "size": 572680,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• The offline demo's spectrum follows the EQ\n• The EQ tab's RTA line is always there, so nothing jumps when data arrives"
+        },
+        {
+          "version": "0.7.0",
+          "marketingVersion": "0.7.0",
+          "buildVersion": "31",
+          "date": "2026-10-07T15:59:10Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.7.0/Thumbmix.ipa",
+          "size": 568932,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• m32-probe shows what feeds each input, with its gain and trim"
+        },
+        {
+          "version": "0.6.0",
+          "marketingVersion": "0.6.0",
+          "buildVersion": "30",
+          "date": "2026-10-07T15:57:20Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.6.0/Thumbmix.ipa",
+          "size": 568927,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Stereo link model, pair names and partner re-reads"
+        },
+        {
+          "version": "0.5.0",
+          "marketingVersion": "0.5.0",
+          "buildVersion": "27",
+          "date": "2026-10-07T15:30:19Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.5.0/Thumbmix.ipa",
+          "size": 549558,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Channel numbers under each name in the overview"
+        },
+        {
+          "version": "0.4.0",
+          "marketingVersion": "0.4.0",
+          "buildVersion": "26",
+          "date": "2026-10-07T15:21:29Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.4.0/Thumbmix.ipa",
+          "size": 548988,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Trim on every input, alongside gain and 48V on preamp channels"
+        },
+        {
+          "version": "0.3.0",
+          "marketingVersion": "0.3.0",
+          "buildVersion": "23",
+          "date": "2026-10-06T10:36:14Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.3.0/Thumbmix.ipa",
+          "size": 548961,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• App icon, three faders with the pressed one lit red"
+        },
+        {
+          "version": "0.2.0",
+          "marketingVersion": "0.2.0",
+          "buildVersion": "19",
+          "date": "2026-10-06T07:23:42Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.2.0/Thumbmix.ipa",
+          "size": 342961,
+          "minOSVersion": "17.0"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-18",
+          "buildVersion": "18",
+          "date": "2026-10-06T06:57:18Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-18/Thumbmix.ipa",
+          "size": 342946,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Each overview list starts fresh instead of scrolling to an anchor"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-17",
+          "buildVersion": "17",
+          "date": "2026-10-06T06:40:03Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-17/Thumbmix.ipa",
+          "size": 343786,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Offline mode runs a demo console inside the app"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-16",
+          "buildVersion": "16",
+          "date": "2026-10-06T06:00:31Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-16/Thumbmix.ipa",
+          "size": 319919,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Mix tab and bottom tab chips free the strip screen for its tabs"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-15",
+          "buildVersion": "15",
+          "date": "2026-10-05T19:01:38Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-15/Thumbmix.ipa",
+          "size": 315300,
+          "minOSVersion": "17.0"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-14",
+          "buildVersion": "14",
+          "date": "2026-10-05T17:02:48Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-14/Thumbmix.ipa",
+          "size": 315300,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Live spectrum behind the EQ curve from the desk's RTA"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-13",
+          "buildVersion": "13",
+          "date": "2026-10-05T16:57:42Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-13/Thumbmix.ipa",
+          "size": 306162,
+          "minOSVersion": "17.0"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-12",
+          "buildVersion": "12",
+          "date": "2026-10-05T16:48:00Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-12/Thumbmix.ipa",
+          "size": 306161,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Low cut as LC in the EQ band picker"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-11",
+          "buildVersion": "11",
+          "date": "2026-10-05T16:18:21Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-11/Thumbmix.ipa",
+          "size": 296991,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Edit a strip's name, colour and icon"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-10",
+          "buildVersion": "10",
+          "date": "2026-10-05T15:50:51Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-10/Thumbmix.ipa",
+          "size": 267356,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Accept commas in the console IP field"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-9",
+          "buildVersion": "9",
+          "date": "2026-10-05T15:30:46Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-9/Thumbmix.ipa",
+          "size": 266904,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Show Gain or Trim depending on the channel's source"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-8",
+          "buildVersion": "8",
+          "date": "2026-10-05T15:27:09Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-8/Thumbmix.ipa",
+          "size": 266683,
+          "minOSVersion": "17.0"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-7",
+          "buildVersion": "7",
+          "date": "2026-10-05T15:24:18Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-7/Thumbmix.ipa",
+          "size": 266683,
+          "minOSVersion": "17.0"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-6",
+          "buildVersion": "6",
+          "date": "2026-10-05T15:18:50Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-6/Thumbmix.ipa",
+          "size": 266683,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• EQ tab usability, band resets and relative graph drags"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-5",
+          "buildVersion": "5",
+          "date": "2026-10-05T15:06:07Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-5/Thumbmix.ipa",
+          "size": 256137,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Overview list starts at its top after toggling Unused"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-4",
+          "buildVersion": "4",
+          "date": "2026-10-05T14:42:17Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-4/Thumbmix.ipa",
+          "size": 254366,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Gate and compressor transfer curves"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-3",
+          "buildVersion": "3",
+          "date": "2026-10-05T14:14:25Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-3/Thumbmix.ipa",
+          "size": 247838,
+          "minOSVersion": "17.0",
+          "localizedDescription": "• Keep the Connect label readable"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-2",
+          "buildVersion": "2",
+          "date": "2026-10-05T11:49:02Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-2/Thumbmix.ipa",
+          "size": 247602,
+          "minOSVersion": "17.0"
+        },
+        {
+          "version": "0.1.0",
+          "marketingVersion": "0.1.0-1",
+          "buildVersion": "1",
+          "date": "2026-10-05T11:31:55Z",
+          "downloadURL": "https://github.com/Auxority/thumbmix/releases/download/v0.1.0-1/Thumbmix.ipa",
+          "size": 247602,
+          "minOSVersion": "17.0"
+        }
+      ]
+    }
+  ]
+}
