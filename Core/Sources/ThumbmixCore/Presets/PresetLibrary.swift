@@ -41,7 +41,7 @@ public final class PresetLibrary {
     public internal(set) var sources: [PresetSource] = []
     public internal(set) var results: [PresetSource: SourceResult] = [:]
 
-    @ObservationIgnored private let ownFolder: URL
+    @ObservationIgnored let ownFolder: URL
     @ObservationIgnored let web: PresetSources?
     /// Sources whose read is in flight: a second refresh leaves them to it.
     @ObservationIgnored var reading: Set<PresetSource> = []

@@ -183,7 +183,7 @@ enum PresetFiles {
     static func preset(at url: URL) throws -> Preset { try PresetValidation.decode(data(at: url)) }
 
     /// The size is checked before the file is read: a huge file never fills memory.
-    private static func data(at url: URL) throws -> Data {
+    static func data(at url: URL) throws -> Data {
         let values = try url.resourceValues(forKeys: [.fileSizeKey, .isUbiquitousItemKey, .ubiquitousItemDownloadingStatusKey])
         if values.isUbiquitousItem == true, values.ubiquitousItemDownloadingStatus != .current {
             try? FileManager.default.startDownloadingUbiquitousItem(at: url)
