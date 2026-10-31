@@ -115,7 +115,7 @@ enum PresetFiles {
     typealias Fetched = PresetSources.Fetched
 
     static var notFoundText: String { CoreStrings.text("Not found. Pick it again.") }
-    static var stillDownloadingText: String { CoreStrings.text("Still downloading from iCloud. Refresh in a moment.") }
+    static var stillDownloadingText: String { CoreStrings.text("Still downloading from iCloud. Try again in a moment.") }
 
     /// A file iCloud keeps elsewhere: a coordinated read would wait for the download, offline for good.
     struct StillDownloading: LocalizedError {
@@ -183,7 +183,7 @@ enum PresetFiles {
     static func preset(at url: URL) throws -> Preset { try PresetValidation.decode(data(at: url)) }
 
     /// The size is checked before the file is read: a huge file never fills memory.
-    static func data(at url: URL) throws -> Data {
+    private static func data(at url: URL) throws -> Data {
         let values = try url.resourceValues(forKeys: [.fileSizeKey, .isUbiquitousItemKey, .ubiquitousItemDownloadingStatusKey])
         if values.isUbiquitousItem == true, values.ubiquitousItemDownloadingStatus != .current {
             try? FileManager.default.startDownloadingUbiquitousItem(at: url)

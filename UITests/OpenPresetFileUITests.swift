@@ -23,8 +23,8 @@ final class OpenPresetFileUITests: DeskUITestCase {
         share(try write(preset, as: "shared-kick.json"))
         let notice = app.alerts["Presets"]
         XCTAssertTrue(notice.appears(within: 5), "the alert shows over the edit sheet")
-        XCTAssertTrue(notice.staticTexts.element(boundBy: 1).label.contains("Shared kick"))
-        XCTAssertTrue(notice.staticTexts.element(boundBy: 1).label.contains("On this iPhone"))
+        let added = notice.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "“Shared kick” to your presets On this iPhone"))
+        XCTAssertTrue(added.firstMatch.exists, "names the preset and where it went")
         saveScreenshot("preset-file-added")
         notice.buttons["OK"].tap()
         XCTAssertTrue(element("preset-row-Shared kick").appears(within: 3), "listed on the presets page")

@@ -110,19 +110,6 @@ struct PresetLibraryTests {
         #expect(try FileManager.default.contentsOfDirectory(atPath: folder.path).isEmpty)
     }
 
-    @Test func importingCopiesAFileAndRefusesOneTheDeskWouldRefuse() throws {
-        defer { try? FileManager.default.removeItem(at: folder) }
-        let library = library()
-
-        let first = try library.importPreset(kickJSON())
-        let second = try library.importPreset(kickJSON())
-        #expect([first.preset.name, second.preset.name] == ["Kick", "Kick 2"])
-
-        let broken = try kickJSON { $0["gate"] = ["gate/thr": 5] }
-        #expect(throws: PresetError.outOfRange(field: "gate/thr")) { try library.importPreset(broken) }
-        #expect(library.own.count == 2)
-    }
-
     /// The folder shows in the Files app: a file edited there is read again, and one the app refuses is named.
     @Test func aFileEditedInFilesIsReadAgainAndABadOneNamed() throws {
         defer { try? FileManager.default.removeItem(at: folder) }

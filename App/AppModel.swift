@@ -39,17 +39,21 @@ final class AppModel {
     /// another's presets or needs the web.
     private static func makePresetLibrary() -> PresetLibrary {
         let files = FileManager.default
-        var own = files.urls(for: .documentDirectory, in: .userDomainMask)[0].appending(path: "Presets")
+        let documents = files.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        var own = documents.appending(path: "Presets")
+        // iOS puts the copy of a file opened from Mail or Messages here.
+        var inbox = documents.appending(path: "Inbox")
         var sources = PresetSources(
             folder: files.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appending(path: "PresetSources"))
         #if DEBUG
             if UserDefaults.standard.bool(forKey: "isolatedPresets") {
                 let root = files.temporaryDirectory.appending(path: "thumbmix-presets-" + UUID().uuidString)
                 own = root.appending(path: "own")
+                inbox = root.appending(path: "inbox")
                 sources = PresetSources(folder: root.appending(path: "sources"), defaults: [])
             }
         #endif
-        return PresetLibrary(ownFolder: own, sources: sources)
+        return PresetLibrary(ownFolder: own, inbox: inbox, sources: sources)
     }
 
     /// A console that answers as an M32 is remembered under the name set on the desk; the demo never is.
@@ -147,7 +151,7 @@ final class AppModel {
 
     private func openFile(_ url: URL) {
         let notice = presets.openFile(at: url)
-        Task { await SystemNotice.show(notice) }
+        Task { await SystemNotice.show(notice, title: String(localized: "Presets")) }
     }
 
     /// Coming back from the background: anything could have changed on the desk meanwhile.

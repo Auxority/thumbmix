@@ -1869,11 +1869,22 @@
       }
     },
     "Still downloading from iCloud. Refresh in a moment." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Still downloading from iCloud. Refresh in a moment."
+          }
+        }
+      }
+    },
+    "Still downloading from iCloud. Try again in a moment." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still downloading from iCloud. Try again in a moment."
           }
         }
       }

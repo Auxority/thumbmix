@@ -8,9 +8,10 @@ import Testing
 struct PresetOpenFileTests {
     private let root = FileManager.default.temporaryDirectory.appendingPathComponent("thumbmix-test-" + UUID().uuidString)
     private var ownFolder: URL { root.appendingPathComponent("Documents/Presets") }
-    private var inbox: URL { root.appendingPathComponent("Documents/Inbox") }
+    /// Not beside the own folder: the library deletes only from the inbox it was given.
+    private var inbox: URL { root.appendingPathComponent("Received/Inbox") }
 
-    private func library() -> PresetLibrary { PresetLibrary(ownFolder: ownFolder) }
+    private func library() -> PresetLibrary { PresetLibrary(ownFolder: ownFolder, inbox: inbox) }
 
     private func file(_ name: String, in folder: URL, _ data: Data) throws -> URL {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -35,7 +36,7 @@ struct PresetOpenFileTests {
         let library = library()
         let url = try file("kick.json", in: root, kickJSON())
 
-        library.openFile(at: url)
+        _ = library.openFile(at: url)
         let notice = library.openFile(at: url)
 
         #expect(library.own.map(\.preset.name).sorted() == ["Kick", "Kick 2"])
@@ -83,13 +84,22 @@ struct PresetOpenFileTests {
         let refused = try file("data.json", in: inbox, Data("{}".utf8))
         let elsewhere = try file("kick.json", in: root, kickJSON())
 
-        library.openFile(at: copy)
-        library.openFile(at: refused)
-        library.openFile(at: elsewhere)
+        _ = library.openFile(at: copy)
+        _ = library.openFile(at: refused)
+        _ = library.openFile(at: elsewhere)
 
         #expect(!FileManager.default.fileExists(atPath: copy.path))
         #expect(!FileManager.default.fileExists(atPath: refused.path))
         #expect(FileManager.default.fileExists(atPath: elsewhere.path), "Files' own copy is the engineer's")
+    }
+
+    @Test func withoutAnInboxNothingIsDeleted() throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        let copy = try file("kick.json", in: root.appendingPathComponent("Documents/Inbox"), kickJSON())
+
+        _ = PresetLibrary(ownFolder: ownFolder).openFile(at: copy)
+
+        #expect(FileManager.default.fileExists(atPath: copy.path), "no inbox was named, so no folder is the inbox")
     }
 
     @Test func aFileThatIsGoneIsToldNotSkipped() {

@@ -41,14 +41,17 @@ public final class PresetLibrary {
     public internal(set) var sources: [PresetSource] = []
     public internal(set) var results: [PresetSource: SourceResult] = [:]
 
-    @ObservationIgnored let ownFolder: URL
+    @ObservationIgnored private let ownFolder: URL
+    /// Where Mail and Messages leave the copies they hand the app; nil where nothing does (tests).
+    @ObservationIgnored let inbox: URL?
     @ObservationIgnored let web: PresetSources?
     /// Sources whose read is in flight: a second refresh leaves them to it.
     @ObservationIgnored var reading: Set<PresetSource> = []
 
     /// Without `sources` the library has no web sources: the tests of own presets need no network.
-    public init(ownFolder: URL, sources: PresetSources? = nil) {
+    public init(ownFolder: URL, inbox: URL? = nil, sources: PresetSources? = nil) {
         self.ownFolder = ownFolder
+        self.inbox = inbox
         web = sources
         self.sources = sources?.load() ?? []
         refresh()
@@ -114,13 +117,6 @@ public final class PresetLibrary {
         guard entry.isOwn else { throw LibraryError.readOnly }
         try FileManager.default.removeItem(at: ownFolder.appendingPathComponent(entry.file))
         refresh()
-    }
-
-    /// A file picked in Files or received by AirDrop is copied here, checked as any other. Nothing is asked on import:
-    /// asking happens on loading.
-    @discardableResult
-    public func importPreset(_ data: Data) throws -> LibraryEntry {
-        try save(PresetValidation.decode(data))
     }
 
     /// The preset as a `.json` file under its name, in a folder of its own in the temporary directory.

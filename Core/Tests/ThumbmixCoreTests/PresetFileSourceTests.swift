@@ -83,7 +83,7 @@ struct PresetFileSourceTests {
 
         #expect(result.presets.map(\.preset.name) == ["Kick"])
         #expect(result.skipped.map(\.file) == ["snare.json"])
-        #expect(result.skipped.first?.reason == "Still downloading from iCloud. Refresh in a moment.")
+        #expect(result.skipped.first?.reason == "Still downloading from iCloud. Try again in a moment.")
     }
 
     @Test func aSingleFileSourceGivesThatPreset() async throws {
@@ -150,7 +150,7 @@ struct PresetFileSourceTests {
         let result = await read(source)
 
         #expect(result.presets.map(\.preset.name).sorted() == ["Kick", "Snare"])
-        #expect(result.status == .cached("Still downloading from iCloud. Refresh in a moment."))
+        #expect(result.status == .cached("Still downloading from iCloud. Try again in a moment."))
         #expect(result.skipped.map(\.file) == ["kick.json"], "still named")
     }
 
