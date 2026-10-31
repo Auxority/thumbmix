@@ -42,7 +42,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
   - **Meters only for the strips in view?** Draw (or update) meters only for the rows on screen, not every strip. Measure first; if it saves only 1–2 % CPU, it isn't worth it and this sub-item goes.
   - **Fed by and Sends lists during a resync** (2026-10-25): they still rebuild for each value arriving after a lost contact; the overview holds its list until live since #191 (`overviewList`). Hold them the same way if a resync on those tabs feels slow on the desk.
-- [ ] **Reconnect as fast as connect** (2026-10-29, the user): measure a reconnect (desk lost and back, app back from the background) against a fresh connect (from the app's `thumbmix` log, `log stream --predicate 'subsystem == "thumbmix"'`), and find what makes the difference before changing anything.
 
 ## Features
 
