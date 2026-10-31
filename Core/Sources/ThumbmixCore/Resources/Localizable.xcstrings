@@ -844,6 +844,16 @@
         }
       }
     },
+    "Filter on" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter on"
+          }
+        }
+      }
+    },
     "Flip" : {
       "localizations" : {
         "en" : {

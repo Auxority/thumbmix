@@ -8,18 +8,35 @@ public struct FoldedLine: Equatable, Sendable {
     /// On or off after the values, one per side when a pair's sides differ (odd first): drawn as a green "On" or a
     /// grey "Off" (B, 2026-10-20), in words too so it reads without colour.
     public let states: [Bool]
+    public let subject: Subject
 
-    public init(names: String, values: String, states: [Bool] = []) {
+    /// What the state is about. A Key line's "On" would read as the key or the comp being on (Slim, 2026-10-31).
+    public enum Subject: Equatable, Sendable {
+        case block, keyFilter
+    }
+
+    public init(names: String, values: String, states: [Bool] = [], subject: Subject = .block) {
         self.names = names
         self.values = values
         self.states = states
+        self.subject = subject
     }
 
     public static func word(_ isOn: Bool) -> String { isOn ? CoreStrings.text("On") : CoreStrings.text("Off") }
 
+    /// "On", or "Filter on" on a Key line.
+    public func word(_ isOn: Bool) -> String {
+        switch subject {
+        case .block: Self.word(isOn)
+        case .keyFilter: isOn ? CoreStrings.text("Filter on") : CoreStrings.text("Filter off")
+        }
+    }
+
     /// The whole line as one text, for VoiceOver.
     public var text: String {
-        states.isEmpty ? values : values + " · " + states.map(Self.word).joined(separator: " / ")
+        guard !states.isEmpty else { return values }
+        let words = states.map(word).joined(separator: " / ")
+        return values.isEmpty ? words : values + " · " + words
     }
 }
 
@@ -27,19 +44,18 @@ extension ConsoleMirror {
     /// Detector, Envelope, Comp position and the key: the comp settings nobody rides.
     public func compFold(_ strip: StripID, locale: Locale = .current) -> FoldedLine {
         let dynamics = Catalog.dynamics(strip)
-        var parts = [
-            (CoreStrings.text("Detector"), shown(dynamics.detector, locale)),
-            (CoreStrings.text("Envelope"), shown(dynamics.envelope, locale)),
-        ]
+        var names = [CoreStrings.text("Detector"), CoreStrings.text("Envelope")]
+        var values = [shown(dynamics.detector, locale), shown(dynamics.envelope, locale)]
         if let position = Catalog.dynamicsPosition(strip) {
-            parts.append((CoreStrings.text("Position"), named(position, locale)))
+            names.append(CoreStrings.text("Position"))
+            values.append(named(position, locale))
         }
-        parts.append((CoreStrings.text("Key"), keyText(Catalog.dynamicsKey(strip), locale)))
-        return FoldedLine(names: parts.map(\.0).joined(separator: " · "), values: parts.map(\.1).joined(separator: " · "))
+        names.append(CoreStrings.text("Key"))
+        return keyFold(names: names, values: values, key: Catalog.dynamicsKey(strip), locale)
     }
 
     public func gateKeyFold(_ strip: StripID, locale: Locale = .current) -> FoldedLine {
-        FoldedLine(names: CoreStrings.text("Key"), values: keyText(Catalog.gateKey(strip), locale))
+        keyFold(names: [CoreStrings.text("Key")], values: [], key: Catalog.gateKey(strip), locale)
     }
 
     /// `blocks` as `insertBlocks(_:partner:)` gives them: one block, or one per side of a pair the desk doesn't link.
@@ -73,23 +89,16 @@ extension ConsoleMirror {
         return Set(texts).count == 1 ? texts[0] : texts.joined(separator: " / ")
     }
 
-    /// The source, then the filter while it's on. Without a source (a matrix's or main's comp) an off filter says so.
-    private func keyText(_ key: KeySpecs, _ locale: Locale) -> String {
-        var parts: [String] = []
-        if let source = key.sourceAddress { parts.append(shown(Catalog.keySource(source, rawName: rawName), locale)) }
-        switch normalized(key.filterOn).map({ $0 >= 0.5 }) {
-        case true?: parts.append(filterText(key, locale))
-        case false? where parts.isEmpty: parts.append(CoreStrings.text("Filter off"))
-        case false?: break
-        case nil: parts.append("—")
-        }
-        return parts.joined(separator: " · ")
-    }
-
-    /// "LC12 150 Hz"; one "—" while either is unread, not "— —".
-    private func filterText(_ key: KeySpecs, _ locale: Locale) -> String {
-        guard normalized(key.filterType) != nil, normalized(key.filterFrequency) != nil else { return "—" }
-        return shown(key.filterType, locale) + " " + shown(key.filterFrequency, locale)
+    /// The key's source (a matrix's or main's comp has none), then "Filter on" or "Filter off" as the line's state
+    /// (Slim, 2026-10-31): what changes when the gate or comp acts. The filter's type and frequency stay in the sheet.
+    private func keyFold(names: [String], values: [String], key: KeySpecs, _ locale: Locale) -> FoldedLine {
+        var values = values
+        if let source = key.sourceAddress { values.append(shown(Catalog.keySource(source, rawName: rawName), locale)) }
+        let isOn = normalized(key.filterOn).map { $0 >= 0.5 }
+        if isOn == nil { values.append("—") }
+        return FoldedLine(
+            names: names.joined(separator: " · "), values: values.joined(separator: " · "),
+            states: isOn.map { [$0] } ?? [], subject: .keyFilter)
     }
 
     /// As the closed control shows it; "—" until the desk sent it.

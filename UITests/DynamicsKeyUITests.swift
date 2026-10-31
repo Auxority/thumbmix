@@ -58,9 +58,12 @@ final class DynamicsKeyUITests: DeskUITestCase {
         XCTAssertTrue(app.buttons["Done"].isEnabled, "the sheet still closes")
     }
 
+    /// The Key line says what the key listens to and whether its filter is on, in words (Slim, 2026-10-31).
     func testTheGateListensToAnotherChannel() {
         launchAndOpen("Kick", tab: "Gate")
         XCTAssertFalse(element("/ch/01/gate/keysrc").exists, "the key lives in its sheet")
+        let line = element("gate-key")
+        XCTAssertTrue(eventually(within: 2) { line.value as? String == "Self · Filter off" }, "step 1: the line")
         openSheet("gate-key", title: "Gate key · Kick")
         let source = app.buttons["/ch/01/gate/keysrc"]
         XCTAssertTrue(eventually(within: 2) { source.isEnabled })
@@ -69,10 +72,12 @@ final class DynamicsKeyUITests: DeskUITestCase {
         XCTAssertTrue(snare.appears(within: 2))
         snare.tap()
         XCTAssertTrue(eventually(within: 2) { self.desk.value("/ch/01/gate/keysrc") == .int(2) })
+        tapToggle("/ch/01/gate/filter/on")
         saveScreenshot("gate-key")
         app.buttons["Done"].tap()
-        let line = element("gate-key")
-        XCTAssertTrue(eventually(within: 2) { (line.value as? String)?.hasPrefix("Ch 2 · Snare") == true })
+        XCTAssertTrue(
+            eventually(within: 2) { line.value as? String == "Ch 2 · Snare · Filter on" }, "step 2: the line follows")
+        saveScreenshot("gate-key-line")
     }
 
     /// The demo's sends are tapped before the fader: they hear the comp wherever it sits, so moving it asks nothing.

@@ -36,7 +36,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 ## Fixes and polish (2026-10-29, the user's list)
 
 - [ ] **Review and redesign a strip's preset page and its load flow** (the user). Look at it on the phone with the user first, then mocks. Sources too (the user, 2026-10-29: "it doesn't really feel easy yet"): how a preset someone sends is kept, and what a deleted original does (today a file deleted from a folder source leaves the list, while a lost or moved one shows its last good read; the user asked for a copy that follows the original and says when it was removed).
-- [ ] **The Key line could say whether the key filter is on** (2026-10-31, the user's note with a screenshot of the Gate tab: "Key · Self · HC12 632,5 Hz ›"). The line names the source and the filter but not whether the filter is on, unlike the Insert line's green "On" / grey "Off" (DECISIONS, folded lines). Check what the Comp's Key line shows too, then mock first.
 
 ## Performance
 
