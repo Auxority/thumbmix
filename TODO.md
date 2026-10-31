@@ -36,6 +36,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 ## Fixes and polish (2026-10-29, the user's list)
 
 - [ ] **Review and redesign a strip's preset page and its load flow** (the user). Look at it on the phone with the user first, then mocks. Sources too (the user, 2026-10-29: "it doesn't really feel easy yet"): how a preset someone sends is kept, and what a deleted original does (today a file deleted from a folder source leaves the list, while a lost or moved one shows its last good read; the user asked for a copy that follows the original and says when it was removed).
+- [ ] **The Key line could say whether the key filter is on** (2026-10-31, the user's note with a screenshot of the Gate tab: "Key · Self · HC12 632,5 Hz ›"). The line names the source and the filter but not whether the filter is on, unlike the Insert line's green "On" / grey "Off" (DECISIONS, folded lines). Check what the Comp's Key line shows too, then mock first.
 
 ## Performance
 
@@ -45,6 +46,8 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Features
 
+- [ ] **Talk to the desk through an MCP server and an HTTP/JSON API** (2026-10-31, the user: "Could you add some more bass to the bass guitar? Could you increase the compression of Headset 1?"; replaces "Long term: a lightweight API and an MCP server"). Decided in DECISIONS ("An MCP server and a JSON API as a standalone Mac tool"). Steps: the tools and `thumbmix-mcp` in Core, tested against the fake desk; then try it with Claude Code on the user's work laptop against the real desk (this session's Claude Code refused an HTTP MCP server by enterprise policy: check whether a stdio tool passes, else ask IT to allow it).
+- [ ] **Icon suggestions from the strip's name** (2026-10-31, the user's note: "just like presets"): the icon grid offers the icons that fit the name first, as the Presets row does with match words (`PresetMatching`), e.g. "Kick" → the kick drum. Decide where the words for each icon come from (the desk's icon names, plus a few per icon), then mock first.
 - [ ] **The key filter graph, closer to what the user had in mind** (2026-10-22): the Comp and Gate sheets now show two graphs (the key graph from #160 and the curve), and the user wants one. Ask what one graph should show, then mock first.
 - [ ] **Shortcuts** (2026-10-17): App Intents for the Shortcuts app, the Action button and Control Center, e.g. "Mute Vox 1", "Solo Kick", "Fader of Vox 1 to −5 dB". Not Siri voice (the user: unreliable next to a PA). Ask before mocking:
   - Which actions? Each one changes the desk without the engineer looking at the app.
@@ -84,7 +87,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 - [ ] **Long term: a landscape layout.**
 - [ ] **Long term: Low Power Mode** spends less (e.g. slower meters and spectrum), if that's simple.
 - [ ] **Long, long term: iPad.**
-- [ ] **Long term: a lightweight API and an MCP server** for the desk.
 - [ ] **Long term: effect controls** (reverb and the other FX).
 - [ ] Fold rarely used settings into one line that opens on tap, like "Delay · Off · 12.5 ms ›" (delay mock B). Worth it once the Input tab holds more than gain, trim and delay.
 - [ ] A linked pair's pan as one track with an L and an R handle (mock "B"): a picture of the stereo image. Today it's two rows, "Pan · Gtr L" and "Pan · Gtr R"; revisit if those feel clunky.
