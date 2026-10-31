@@ -96,12 +96,18 @@ struct DynamicsKeyTests {
             })
     }
 
+    /// Every fader is down so the background fill reads nothing: with the kick's fader up, the fill reads its comp tab
+    /// within ~20 ms of going live, and a busy runner let that land before this check (flake 2026-10-31).
     @Test func nothingIsNamedBeforeTheTapsAreRead() async throws {
-        try await withLiveDesk { _, mirror in
-            #expect(mirror.mixesChangedByMovingComp(of: vox) == nil, "unknown, not 'no mixes'")
-            await openTab(.comp, of: vox, in: mirror)
-            #expect(mirror.mixesChangedByMovingComp(of: vox) != nil)
-        }
+        try await withLiveDesk(
+            before: { fake in
+                for strip in StripKind.allCases.flatMap(StripID.all) { fake.deskChange(strip.fader, .float(0)) }
+            },
+            body: { _, mirror in
+                #expect(mirror.mixesChangedByMovingComp(of: vox) == nil, "unknown, not 'no mixes'")
+                await openTab(.comp, of: vox, in: mirror)
+                #expect(mirror.mixesChangedByMovingComp(of: vox) != nil)
+            })
     }
 
     @Test func aStripWithoutSendsChangesNoMix() async throws {
