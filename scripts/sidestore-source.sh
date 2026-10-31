@@ -7,8 +7,10 @@ repo=${GITHUB_REPOSITORY:-Auxority/thumbmix}
 
 # SideStore refuses an install whose permissions differ from the IPA's Info.plist: take the text from where it's built.
 local_network=$(sed -n 's/^ *NSLocalNetworkUsageDescription: //p' project.yml)
+# The files store-screenshots.sh takes, in their numbered order.
+screenshots=$(find Design/store-screenshots -name '*.png' | sort | jq -R . | jq -s .)
 
-jq --arg repo "$repo" --arg localNetwork "$local_network" '
+jq --arg repo "$repo" --arg localNetwork "$local_network" --argjson screenshots "$screenshots" '
   # The release title carries the build number: "Thumbmix 0.23.0 (build 74)".
   def build: capture("\\(build (?<n>[0-9]+)\\)").n;
   def semver: ltrimstr("v") | split("-")[0] | split(".") | map(tonumber);
@@ -35,6 +37,8 @@ jq --arg repo "$repo" --arg localNetwork "$local_network" '
       localizedDescription: "An open-source remote for the Midas M32, built for thumbs: horizontal fader rows you drag anywhere, every common action at most two taps deep.",
       iconURL: "https://raw.githubusercontent.com/\($repo)/main/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
       category: "utilities",
+      # Face ID iPhone shots (9:19.5): plain URLs, which SideStore sizes and rounds by itself.
+      screenshots: [$screenshots[] | "https://raw.githubusercontent.com/\($repo)/main/\(.)"],
       # Unsigned, so the IPA carries no entitlements; SideStore adds its own when it signs.
       appPermissions: { entitlements: [], privacy: { NSLocalNetworkUsageDescription: $localNetwork } },
       versions: [

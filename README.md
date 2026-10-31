@@ -66,11 +66,12 @@ scripts/ui-test.sh                          # the UI suite, each test against it
 scripts/strings.sh                          # refresh both String Catalogs (App and Core) after changing text
 scripts/render-icon.sh                      # render Design/AppIcon.svg into the app icon (brew install librsvg imagemagick)
 scripts/render-strip-icons.sh               # render Design/strip-icons into the picker's icons (--sheet out.html to review)
+scripts/store-screenshots.sh                # retake SideStore's screenshots (Design/store-screenshots) on the iPhone 17
 swift run --package-path Core fake-m32      # a fake M32 on 127.0.0.1:10023 (or the port you pass) for the simulator
 xcodegen generate && open Thumbmix.xcodeproj
 ```
 
-The fake M32 keeps every set it receives, so restart it for a clean desk. CI also runs `scripts/test-next-version.sh` and `scripts/test-sidestore-source.sh`: run them after changing the release scripts.
+The fake M32 keeps every set it receives, so restart it for a clean desk. CI also runs `scripts/test-next-version.sh` and `scripts/test-sidestore-source.sh`: run them after changing the release scripts. The SideStore check also wants each store screenshot in place, at the iPhone 17's 1206 × 2622.
 
 `scripts/ui-test.sh` runs the UI tests on an iPhone SE (3rd generation) simulator on iOS 26 or newer, which is 375 pt wide like the iPhone 11 Pro. It runs three test classes at a time on clones of that simulator, and each test starts its own fake desk inside the test runner, so a `fake-m32` you have running doesn't matter. `UI_TEST_WORKERS` sets how many clones (default 3). Name tests or classes to run only those, one at a time on the simulator itself: `scripts/ui-test.sh ChannelUITests EQBandUITests/testBusResetsAllSixBands`. `--serial` runs the whole suite that way, for when cloning fails. Other arguments starting with `-` go to `xcodebuild`; `UI_TEST_DESTINATION` (an `xcodebuild -destination` value) picks another simulator. A run whose first test hasn't started 2 minutes after the build has hung, and the script stops it (exit 2). The full log lands in `build/ui-test.log`, the result bundle in `build/ui-test.xcresult` (the script prints its passed, failed and skipped counts), and screenshots taken by the tests in `build/screens`.
 

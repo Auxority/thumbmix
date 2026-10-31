@@ -57,5 +57,21 @@ expect "the privacy text is the app's own" '.apps[0].appPermissions.privacy | ke
 expect "the privacy text matches project.yml" '.apps[0].appPermissions.privacy.NSLocalNetworkUsageDescription' \
   "$(jq -cn --arg text "$plist" '$text')"
 
+# The user's pick (2026-10-31), taken by store-screenshots.sh. Face ID iPhone shape (9:19.5): plain URLs, no sizes.
+shots='["1-overview","2-eq","3-comp","4-sends","5-dca-members"]'
+expect "the screenshots, in the picked order, from main" '.apps[0].screenshots' \
+  "$(jq -cn --argjson shots "$shots" \
+    '$shots | map("https://raw.githubusercontent.com/Auxority/thumbmix/main/Design/store-screenshots/\(.).png")')"
+# The URLs point at main, so the files must be in the repo: an iPhone 17's 1206 x 2622, the shape SideStore rounds.
+for shot in $(jq -r '.[]' <<< "$shots"); do
+  size=$(sips -g pixelWidth -g pixelHeight "../Design/store-screenshots/$shot.png" 2>/dev/null | awk '/pixel/ { printf "%s ", $2 }')
+  if [ "$size" = "1206 2622 " ]; then
+    echo "ok   $shot.png is a Face ID iPhone screenshot"
+  else
+    echo "FAIL $shot.png: expected 1206 x 2622 (iPhone 17), got '${size:-no file}'" >&2
+    failures=$((failures + 1))
+  fi
+done
+
 [ "$failures" -eq 0 ] || { echo "$failures SideStore source check(s) failed" >&2; exit 1; }
 echo "SideStore source: all checks passed"
