@@ -31,7 +31,9 @@ extension DeskTools {
             name: "get_strip",
             description: "Read one strip's current settings in real units: fader (dB), mute, pan (-100 left to +100 right), EQ "
                 + "(on, and per band: type, freq_hz, gain_db, q), compressor (on, mode, threshold_db, ratio as N:1, attack_ms, "
-                + "release_ms, makeup_db, auto_time, mix_pct) and, on input channels, the gate. Call this before any relative "
+                + "release_ms, makeup_db, auto_time, mix_pct), on input channels the gate, and on inputs and aux ins the preamp "
+                + "(gain_db, phantom_48v, shared_with: other strips on the same preamp, which share its gain; null when no "
+                + "preamp feeds the strip; read only, no tool sets them). Call this before any relative "
                 + "change (\"more bass\", \"more compression\") and move from the value it returns. A null value was not read "
                 + "from the desk and is unknown. While auto_time is true the desk ignores attack and release. linked_with names "
                 + "the stereo partner of a linked pair.",

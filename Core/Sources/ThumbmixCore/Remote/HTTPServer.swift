@@ -5,7 +5,7 @@ import os
 /// A small HTTP/1.1 server on a TCP `NWListener`: one request per connection, answered and closed. Everything it
 /// touches (the listener's callbacks and `connections`) runs on `queue`.
 final class HTTPServer: @unchecked Sendable {
-    typealias Handler = @Sendable (HTTPRequest) async -> HTTPResponse
+    typealias Handler = @Sendable (RemoteRequest) async -> RemoteResponse
 
     /// A phone serving a laptop needs a handful; this keeps a flood of sockets from exhausting the app.
     static let maxConnections = 16
@@ -98,19 +98,19 @@ final class HTTPServer: @unchecked Sendable {
             case .request(let request):
                 answer(request, on: connection)
             case .refuse(let status, let reason):
-                finish(connection, HTTPResponse(status: status, json: ["error": .string(reason)]))
+                finish(connection, RemoteResponse(status: status, json: ["error": .string(reason)]))
             }
         }
     }
 
-    private func answer(_ request: HTTPRequest, on connection: NWConnection) {
+    private func answer(_ request: RemoteRequest, on connection: NWConnection) {
         Task { [handler] in
             let response = await handler(request)
             queue.async { [self] in finish(connection, response) }
         }
     }
 
-    private func finish(_ connection: NWConnection, _ response: HTTPResponse) {
+    private func finish(_ connection: NWConnection, _ response: RemoteResponse) {
         connection.send(
             content: response.serialized(), contentContext: .finalMessage, isComplete: true,
             completion: .contentProcessed { _ in connection.cancel() })

@@ -90,20 +90,37 @@ extension DeskTools {
     func runGetStrip(_ arguments: ToolArguments) async throws -> JSON {
         try requireLive()
         let strip = try resolve(arguments.string("strip") ?? "")
-        try await read([.eq, .comp, .gate], of: strip, needing: Self.detailSpecs(strip).map(\.address))
+        try await read([.eq, .comp, .gate, .input], of: strip, needing: detailSpecs(strip).map(\.address))
         try requireLive()
-        var result = summary(strip)
+        return .object(summary(strip).merging(sections(strip)) { $1 })
+    }
+
+    private func sections(_ strip: StripID) -> [String: JSON] {
+        var result: [String: JSON] = [:]
         if let pan = Catalog.pan(strip) { result["pan"] = json(pan, .number(places: 0)) }
         if strip.eqBandCount > 0 { result["eq"] = eq(strip) }
         if strip.hasDynamics { result["comp"] = comp(strip) }
         if strip.hasGate { result["gate"] = gate(strip) }
-        return .object(result)
+        if Catalog.headampIndex(strip) != nil { result["preamp"] = preamp(strip) }
+        return result
     }
 
     /// Everything `get_strip` shows beyond the overview: what it waits for.
-    private static func detailSpecs(_ strip: StripID) -> [ParamSpec] {
+    private func detailSpecs(_ strip: StripID) -> [ParamSpec] {
         let eq = strip.eqBandCount > 0 ? [Catalog.eqOn(strip)] + (1...strip.eqBandCount).flatMap { Catalog.eqBand(strip, $0).all } : []
-        return eq + (strip.hasDynamics ? Catalog.dynamics(strip).all : []) + (strip.hasGate ? Catalog.gate(strip).all : [])
+        let preamp = mirror.headamp(of: strip).map { [Catalog.headampGain($0), Catalog.headampPhantom($0)] } ?? []
+        return eq + (strip.hasDynamics ? Catalog.dynamics(strip).all : []) + (strip.hasGate ? Catalog.gate(strip).all : []) + preamp
+    }
+
+    /// Gain and 48V as the Input tab shows them: they live on the headamp, which other strips can share. Null when no
+    /// preamp feeds the strip (an internal source, a line jack). Read only: no tool sets them.
+    private func preamp(_ strip: StripID) -> JSON {
+        guard let index = mirror.headamp(of: strip) else { return .null }
+        let shared = mirror.stripsSharingHeadamp(with: strip).map { JSON.string(StripLookup.id(of: $0)) }
+        return [
+            "gain_db": json(Catalog.headampGain(index), .number(places: 1)),
+            "phantom_48v": json(Catalog.headampPhantom(index), .flag), "shared_with": .array(shared),
+        ]
     }
 
     private func eq(_ strip: StripID) -> JSON {

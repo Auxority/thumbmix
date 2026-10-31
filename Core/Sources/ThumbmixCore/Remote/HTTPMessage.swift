@@ -1,17 +1,18 @@
 import Foundation
 
-struct HTTPRequest: Equatable, Sendable {
-    let method: String
+/// One HTTP request as the server reads it; `ThumbmixMCP` hands `POST /mcp` to the MCP SDK from this.
+public struct RemoteRequest: Equatable, Sendable {
+    public let method: String
     /// Without the query: no endpoint reads one.
-    let path: String
+    public let path: String
     /// Names in lower case.
-    let headers: [String: String]
-    let body: Data
+    public let headers: [String: String]
+    public let body: Data
 }
 
 enum HTTPParse: Equatable {
     case needMore
-    case request(HTTPRequest)
+    case request(RemoteRequest)
     case refuse(status: Int, reason: String)
 }
 
@@ -38,7 +39,7 @@ enum HTTPRequestParser {
             let bodyStart = end.upperBound
             guard data.count - bodyStart >= length else { return .needMore }
             let body = data[bodyStart..<(bodyStart + length)]
-            return .request(HTTPRequest(method: method, path: path, headers: headers, body: Data(body)))
+            return .request(RemoteRequest(method: method, path: path, headers: headers, body: Data(body)))
         } catch let refusal as Refusal {
             return .refuse(status: refusal.status, reason: refusal.reason)
         } catch {
@@ -103,12 +104,12 @@ enum HTTPRequestParser {
     }
 }
 
-struct HTTPResponse: Sendable {
-    let status: Int
-    let headers: [String: String]
-    let body: Data
+public struct RemoteResponse: Sendable {
+    public let status: Int
+    public let headers: [String: String]
+    public let body: Data
 
-    init(status: Int, headers: [String: String] = [:], body: Data = Data()) {
+    public init(status: Int, headers: [String: String] = [:], body: Data = Data()) {
         self.status = status
         self.headers = headers
         self.body = body

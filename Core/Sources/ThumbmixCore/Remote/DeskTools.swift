@@ -5,7 +5,7 @@ import Foundation
 /// what it needs and checked every value, so a refused request changes nothing.
 @MainActor
 final class DeskTools {
-    let mirror: ConsoleMirror
+    var mirror: ConsoleMirror
     let readTimeout: Duration
 
     init(mirror: ConsoleMirror, readTimeout: Duration) {

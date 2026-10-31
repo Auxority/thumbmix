@@ -1,7 +1,7 @@
 import Foundation
 
 /// The JSON the remote API reads and writes. A value type, so it crosses actors, unlike `[String: Any]`.
-enum JSON: Equatable, Sendable {
+enum JSON: Hashable, Sendable {
     case null
     case bool(Bool)
     case number(Double)

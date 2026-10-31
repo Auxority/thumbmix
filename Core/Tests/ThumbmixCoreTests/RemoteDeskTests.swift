@@ -17,16 +17,9 @@ struct RemoteDeskTests {
         if case .array(let items)? = result.structured?["strips"] { items } else { [] }
     }
 
-    @Test func aClientCanInitializeListToolsAndListStrips() async throws {
+    @Test func listStripsShowsEveryStripWithItsLevelAndMute() async throws {
         try await withLiveDesk { _, mirror in
             try await withRemote(mirror) { client in
-                let initialize = try await client.rpc("initialize", ["protocolVersion": "2025-11-25"])
-                #expect(initialize.result?["protocolVersion"] == "2025-11-25")
-                let initialized = try await client.post("/mcp", ["jsonrpc": "2.0", "method": "notifications/initialized"])
-                #expect(initialized.status == 202)
-                let tools = try await client.rpc("tools/list", headers: ["MCP-Protocol-Version": "2025-11-25"])
-                #expect(tools.result?["tools"] != nil)
-
                 let result = try await client.call("list_strips")
 
                 #expect(!result.isError)

@@ -92,6 +92,19 @@ The fake M32 keeps every set it receives, so restart it for a clean desk. CI als
 12. connect speed: the overview read with 8 and with 32 requests in flight, and how many went unanswered
 13. the bus send meters: whose sends they show, and whether they report past 0 dBFS
 
+## Talk to the desk from Claude Code
+
+`thumbmix-mcp` is a Mac tool, not part of the app. It talks OSC to the desk directly (the Mac must be on the desk's network) and MCP on stdin and stdout, so an AI client can say "more bass on the bass guitar": it reads the strip, then changes it. Build it and add it to Claude Code:
+
+```
+swift build -c release --package-path Core --product thumbmix-mcp
+claude mcp add --transport stdio thumbmix -- "$PWD/Core/.build/release/thumbmix-mcp" --host <M32 IP>
+```
+
+The tools are `list_strips`, `get_strip` (fader, mute, pan, EQ, comp, gate, and the preamp's gain and 48V, read only), `set_fader`, `set_mute`, `set_eq_band` and `set_comp`, in real units (dB, Hz, ms). Strips are named by id (`ch/01`) or by the desk's name (`Kick`; case and accents don't matter). The safety rule holds here too: a write is refused while contact with the desk is lost or when the value was never read from the desk, a number outside the desk's range is refused rather than clamped, and a tool answers "not connected" instead of waiting when the desk isn't there. `--fake` runs against a fake desk in the same process, to try it without a console. `--http <port> [--bind <address>]` also serves MCP at `/mcp` and a plain JSON API (`GET /api/tools`, `POST /api/tools/<name>`) over HTTP; it has no login, and refuses any request that carries an `Origin` header (a web page), so keep `--bind` on a network you trust.
+
+The MCP protocol is [the official Swift SDK's](https://github.com/modelcontextprotocol/swift-sdk), pinned in `Core/Package.swift`. It speaks spec revision 2025-11-25 and the ones before it, which is what clients use today; it doesn't speak the stateless 2026-07-28 revision yet.
+
 ## Acceptance checklist (real M32)
 
 1. Scan finds the M32 and marks it Online, also when the desk is switched on after the Connect screen opened (within ~5 s of it booting), and Enter IP works: it starts from the phone's network, shows the number keypad (on a Dutch phone its comma key works too), and "192.168.1" is refused. With Local Network switched off, Connect says "Can't reach …", and its Settings button opens Thumbmix's page with the Local Network switch.

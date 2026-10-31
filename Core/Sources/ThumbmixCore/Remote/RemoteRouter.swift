@@ -6,16 +6,14 @@ import os
 struct RemoteRouter: Sendable {
     let tools: ToolTable
     let configuration: RemoteConfiguration
+    /// Answers `POST /mcp`; nil serves no MCP over HTTP.
+    let mcpHandler: RemoteHandler?
     private static let log = Logger(subsystem: "thumbmix", category: "mcp")
-    private static let requestCounter = OSAllocatedUnfairLock(initialState: 0)
     private static let toolPrefix = "/api/tools/"
 
     /// Logs one line per request under its own number: method, path and outcome. A request's body never reaches the log.
-    func respond(to request: HTTPRequest) async -> HTTPResponse {
-        let id = Self.requestCounter.withLock { count -> Int in
-            count += 1
-            return count
-        }
+    func respond(to request: RemoteRequest) async -> RemoteResponse {
+        let id = RequestIDs.next()
         let response = await route(request, requestID: id)
         Self.log.info("[\(id)] \(request.method, privacy: .public) \(Self.loggable(request.path), privacy: .public) -> \(response.status)")
         return response
@@ -26,7 +24,7 @@ struct RemoteRouter: Sendable {
         String(path.prefix(80).filter { $0.isASCII && !$0.isNewline })
     }
 
-    private func route(_ request: HTTPRequest, requestID: Int) async -> HTTPResponse {
+    private func route(_ request: RemoteRequest, requestID: Int) async -> RemoteResponse {
         let isMCP = request.path == "/mcp"
         // A browser sends Origin, a program doesn't: a page on another site, or a rebound DNS name, is refused.
         if let origin = request.headers["origin"], !configuration.allowedOrigins.contains(origin) {
@@ -35,10 +33,10 @@ struct RemoteRouter: Sendable {
         }
         switch request.path {
         case "/mcp":
-            return await mcp(request, requestID: requestID)
+            return await mcp(request)
         case "/api/tools":
             guard request.method == "GET" else { return Self.notAllowed("GET", rpc: false) }
-            return HTTPResponse(status: 200, json: ["tools": tools.listJSON])
+            return RemoteResponse(status: 200, json: ["tools": tools.listJSON])
         case let path where path.hasPrefix(Self.toolPrefix):
             return await runTool(String(path.dropFirst(Self.toolPrefix.count)), request, requestID: requestID)
         default:
@@ -46,14 +44,16 @@ struct RemoteRouter: Sendable {
         }
     }
 
-    private func mcp(_ request: HTTPRequest, requestID: Int) async -> HTTPResponse {
-        // No SSE stream is offered, so a GET (and anything but a POST) gets 405, as the transport allows.
+    /// MCP itself is the SDK's (`ThumbmixMCP`); this only lets in what passed the Origin check, as a POST of JSON. No SSE
+    /// stream is offered, so a GET (and anything but a POST) gets 405, as the transport allows.
+    private func mcp(_ request: RemoteRequest) async -> RemoteResponse {
+        guard let mcpHandler else { return Self.refusal(404, "MCP is not served over HTTP here. Try GET /api/tools.", rpc: false) }
         guard request.method == "POST" else { return Self.notAllowed("POST", rpc: true) }
         guard Self.isJSON(request) else { return Self.refusal(415, "The body must be application/json.", rpc: true) }
-        return await MCPEndpoint(tools: tools, serverVersion: configuration.serverVersion).respond(to: request, requestID: requestID)
+        return await mcpHandler(request)
     }
 
-    private func runTool(_ name: String, _ request: HTTPRequest, requestID: Int) async -> HTTPResponse {
+    private func runTool(_ name: String, _ request: RemoteRequest, requestID: Int) async -> RemoteResponse {
         guard request.method == "POST" else { return Self.notAllowed("POST", rpc: false) }
         guard Self.isJSON(request) else { return Self.refusal(415, "The body must be application/json.", rpc: false) }
         guard let tool = tools.tool(named: name.removingPercentEncoding ?? name) else {
@@ -68,7 +68,7 @@ struct RemoteRouter: Sendable {
             return Self.refusal(400, "The body could not be read.", rpc: false)
         }
         let result = await tools.call(tool, arguments: arguments, requestID: requestID)
-        return HTTPResponse(status: result.httpStatus, json: result.json)
+        return RemoteResponse(status: result.httpStatus, json: result.json)
     }
 
     /// An empty body is a call without arguments.
@@ -80,22 +80,23 @@ struct RemoteRouter: Sendable {
     }
 
     /// A body needs `application/json` (a simple cross-site form post can't send it); no body needs no type.
-    private static func isJSON(_ request: HTTPRequest) -> Bool {
+    private static func isJSON(_ request: RemoteRequest) -> Bool {
         guard let type = request.headers["content-type"] else { return request.body.isEmpty }
         return type.lowercased().hasPrefix("application/json")
     }
 
-    private static func notAllowed(_ allowed: String, rpc: Bool) -> HTTPResponse {
+    private static func notAllowed(_ allowed: String, rpc: Bool) -> RemoteResponse {
         var response = refusal(405, "This path takes \(allowed) only.", rpc: rpc)
-        response = HTTPResponse(status: response.status, headers: response.headers.merging(["Allow": allowed]) { $1 }, body: response.body)
+        response = RemoteResponse(
+            status: response.status, headers: response.headers.merging(["Allow": allowed]) { $1 }, body: response.body)
         return response
     }
 
-    private static func refusal(_ status: Int, _ message: String, rpc: Bool) -> HTTPResponse {
+    private static func refusal(_ status: Int, _ message: String, rpc: Bool) -> RemoteResponse {
         let body: JSON =
             rpc
-            ? RPCError.errorBody(id: .null, error: RPCError(code: -32600, message: message, status: status))
+            ? ["jsonrpc": "2.0", "id": .null, "error": ["code": -32600, "message": .string(message)]]
             : ["error": .string(message)]
-        return HTTPResponse(status: status, json: body)
+        return RemoteResponse(status: status, json: body)
     }
 }

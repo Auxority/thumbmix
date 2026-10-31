@@ -39,10 +39,10 @@ struct RemoteClient {
         return try await post("/mcp", .object(message), headers: headers)
     }
 
-    /// `tools/call` and the reply's result.
+    /// The JSON API's `POST /api/tools/<tool>`, and the result it answers (the shape MCP's `tools/call` has too).
     func call(_ tool: String, _ arguments: JSON = [:]) async throws -> JSON {
-        let reply = try await rpc("tools/call", ["name": .string(tool), "arguments": arguments])
-        return try #require(reply.json?["result"])
+        let reply = try await post("/api/tools/\(tool)", arguments)
+        return try #require(reply.json)
     }
 
     private func send(_ request: URLRequest) async throws -> Reply {
@@ -77,7 +77,7 @@ func idleMirror() -> ConsoleMirror {
 @MainActor
 func withRemote(
     _ mirror: ConsoleMirror, maxBodyBytes: Int = 64 * 1024, allowedOrigins: Set<String> = [],
-    readTimeout: Duration = .seconds(3), body: (RemoteClient) async throws -> Void
+    readTimeout: Duration = .seconds(3), mcp: RemoteHandler? = nil, body: (RemoteClient) async throws -> Void
 ) async throws {
     var configuration = RemoteConfiguration()
     configuration.bindAddress = "127.0.0.1"
@@ -86,7 +86,7 @@ func withRemote(
     configuration.allowedOrigins = allowedOrigins
     configuration.readTimeout = readTimeout
     let server = RemoteServer(mirror: mirror, configuration: configuration)
-    let port = try await server.start()
+    let port = try await server.start(mcp: mcp)
     defer { server.stop() }
     try await body(RemoteClient(port: port))
 }
