@@ -232,6 +232,9 @@ public final class ConsoleMirror {
             onIdentified?(info)
             startSync()
         case .lost:
+            // An edit not yet sent (a tick that never ran, the app suspended at a lock) would reach the desk after the
+            // outage, a value from before it; the resync is the truth.
+            pendingSends.removeAll()
             reads = ReadQueue()
             linkCopies.forget()
             abandonSoloStroke()
