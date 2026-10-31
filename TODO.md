@@ -46,7 +46,6 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 ## Features
 
-- [ ] **Talk to the desk through an MCP server and an HTTP/JSON API** (2026-10-31, the user: "Could you add some more bass to the bass guitar? Could you increase the compression of Headset 1?"; replaces "Long term: a lightweight API and an MCP server"). Decided in DECISIONS ("An MCP server and a JSON API as a standalone Mac tool"). Steps: the tools and `thumbmix-mcp` in Core, tested against the fake desk; then try it with Claude Code on the user's work laptop against the real desk (this session's Claude Code refused an HTTP MCP server by enterprise policy: check whether a stdio tool passes, else ask IT to allow it).
 - [ ] **Icon suggestions from the strip's name** (2026-10-31, the user's note: "just like presets"): the icon grid offers the icons that fit the name first, as the Presets row does with match words (`PresetMatching`), e.g. "Kick" → the kick drum. Decide where the words for each icon come from (the desk's icon names, plus a few per icon), then mock first.
 - [ ] **The key filter graph, closer to what the user had in mind** (2026-10-22): the Comp and Gate sheets now show two graphs (the key graph from #160 and the curve), and the user wants one. Ask what one graph should show, then mock first.
 - [ ] **Shortcuts** (2026-10-17): App Intents for the Shortcuts app, the Action button and Control Center, e.g. "Mute Vox 1", "Solo Kick", "Fader of Vox 1 to −5 dB". Not Siri voice (the user: unreliable next to a PA). Ask before mocking:
