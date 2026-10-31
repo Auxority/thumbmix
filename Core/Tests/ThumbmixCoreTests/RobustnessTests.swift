@@ -86,6 +86,25 @@ struct MirrorRobustnessTests {
             #expect(mirror.cell(fader).argument == consoleValue)
         }
     }
+
+    /// A send tick that never ran before the outage (a busy main thread, or iOS suspending the app at a lock) must not
+    /// send the edit once the desk answers again: the desk would jump to a value from before the outage.
+    @Test func anEditQueuedBeforeAnOutageNeverReachesTheDeskAfterIt() async throws {
+        try await withLiveDesk(auditAddresses: []) { fake, mirror in
+            let fader = "/ch/01/mix/fader"
+            let consoleValue = fake.value(at: fader)
+
+            fake.silent = true
+            mirror.set(fader, .float(0.6))
+            mirror.wake()
+            fake.silent = false
+
+            #expect(await eventually(timeout: syncTimeout) { mirror.isLive })
+            try await Task.sleep(for: .milliseconds(100))
+            #expect(fake.value(at: fader) == consoleValue, "the desk kept its own value")
+            #expect(mirror.cell(fader).argument == consoleValue)
+        }
+    }
 }
 
 @MainActor
