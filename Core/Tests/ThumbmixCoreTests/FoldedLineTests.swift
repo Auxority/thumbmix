@@ -26,27 +26,38 @@ struct FoldedLineTests {
     @Test func theCompLineNamesItsSettingsAndTheirValues() {
         #expect(
             mirror(plainComp).compFold(kick, locale: .testEnglish)
-                == FoldedLine(names: "Detector · Envelope · Position · Key", values: "RMS · LOG · After EQ · Self"))
+                == FoldedLine(
+                    names: "Detector · Envelope · Position · Key", values: "RMS · LOG · After EQ · Self", states: [false],
+                    subject: .keyFilter))
     }
 
-    @Test func aKeyFilterThatsOnJoinsTheLine() {
+    /// Slim (2026-10-31): whether the key filter is on, in words; its type and frequency stay in the sheet.
+    @Test func aKeyFilterThatsOnSaysSoWithoutItsShape() {
         let changes = plainComp.merging(
             ["/ch/01/dyn/filter/on": .int(1), "/ch/01/dyn/filter/type": .int(1), "/ch/01/dyn/filter/f": .float(0.5)]
         ) { $1 }
-        let freq = ValueText.format(0.5, Catalog.dynamicsKey(kick).filterFrequency, locale: .testEnglish)
-        #expect(mirror(changes).compFold(kick, locale: .testEnglish).values == "RMS · LOG · After EQ · Self · LC12 \(freq)")
+        let line = mirror(changes).compFold(kick, locale: .testEnglish)
+        #expect(line.values == "RMS · LOG · After EQ · Self")
+        #expect(line.states == [true])
+        #expect(line.text == "RMS · LOG · After EQ · Self · Filter on")
     }
 
     /// A matrix's comp has a key filter but no source (doc p.32-37): the line still says what the key does.
     @Test func aMatrixCompHasNoSourceSoSaysFilterOff() {
         let line = mirror(["/mtx/01/dyn/filter/on": .int(0)]).compFold(StripID(.matrix, 1), locale: .testEnglish)
-        #expect(line.values.hasSuffix(" · Filter off"))
+        #expect(line.text.hasSuffix(" · Filter off"))
     }
 
-    @Test func theGateLineNamesItsKeySource() {
+    @Test func theGateLineNamesItsKeySourceAndFilter() {
         let line = mirror(["/ch/01/gate/keysrc": .int(2), "/ch/01/gate/filter/on": .int(0)])
             .gateKeyFold(kick, locale: .testEnglish)
-        #expect(line == FoldedLine(names: "Key", values: "Ch 2 · Snare"))
+        #expect(line == FoldedLine(names: "Key", values: "Ch 2 · Snare", states: [false], subject: .keyFilter))
+        #expect(line.text == "Ch 2 · Snare · Filter off")
+    }
+
+    /// A key without a source shows only its filter: no leading separator.
+    @Test func aLineWithOnlyAStateStartsWithIt() {
+        #expect(FoldedLine(names: "Key", values: "", states: [true], subject: .keyFilter).text == "Filter on")
     }
 
     /// The safety rule: a value the desk never sent reads "—", never a default.
@@ -81,18 +92,11 @@ struct FoldedLineTests {
         #expect(line.text.hasSuffix(" · Off"))
     }
 
-    @Test func aLineWithoutAStateHasNone() {
-        let line = mirror(plainComp).compFold(kick, locale: .testEnglish)
+    /// The safety rule: a filter switch the desk never sent is a dash, never "Filter off".
+    @Test func anUnreadKeyFilterShowsADashAndNoState() {
+        let line = mirror(plainComp, forgetting: ["/ch/01/dyn/filter/on"]).compFold(kick, locale: .testEnglish)
         #expect(line.states.isEmpty)
-        #expect(line.text == line.values)
-    }
-
-    /// A filter that's on but whose type or frequency wasn't read yet: one dash, not "— —".
-    @Test func anUnreadFilterSettingShowsOneDash() {
-        let changes = plainComp.merging(["/ch/01/dyn/filter/on": .int(1)]) { $1 }
-        let line = mirror(changes, forgetting: ["/ch/01/dyn/filter/type", "/ch/01/dyn/filter/f"])
-            .compFold(kick, locale: .testEnglish)
-        #expect(line.values == "RMS · LOG · After EQ · Self · —")
+        #expect(line.text == "RMS · LOG · After EQ · Self · —")
     }
 
     @Test func anEmptySlotSaysSo() {

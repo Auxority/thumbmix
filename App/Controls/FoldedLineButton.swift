@@ -14,12 +14,14 @@ struct FoldedLineButton: View {
             HStack(spacing: 8) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: line.names).font(.footnote).foregroundStyle(Theme.secondaryText)
+                        .truncationMode(.tail)
+                    // A long key ("RMS · LOG · After EQ · Ch 13 · Acoustic Gtr") shrinks, then is cut in the middle:
+                    // the On/Off at its end always shows (2026-10-31).
                     Text(values).font(.subheadline.weight(.semibold)).foregroundStyle(.white)
-                        // A long key ("Ch 13 · Acoustic Gtr · LC12 150 Hz") shrinks before it's cut off.
                         .minimumScaleFactor(0.8)
+                        .truncationMode(.middle)
                 }
                 .lineLimit(1)
-                .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: "chevron.right").font(.subheadline).foregroundStyle(Theme.secondaryText)
             }
@@ -36,12 +38,13 @@ struct FoldedLineButton: View {
         .accessibilityIdentifier(identifier)
     }
 
-    /// The values, then each state as a green "On" or a grey "Off", like the chips (B, 2026-10-20).
+    /// The values, then each state as a green "On" or a grey "Off" ("Filter on" on a Key line), like the chips
+    /// (B, 2026-10-20).
     private var values: AttributedString {
         var text = AttributedString(line.values)
         for (index, isOn) in line.states.enumerated() {
-            text += AttributedString(index == 0 ? " · " : " / ")
-            var word = AttributedString(FoldedLine.word(isOn))
+            if index > 0 || !line.values.isEmpty { text += AttributedString(index == 0 ? " · " : " / ") }
+            var word = AttributedString(line.word(isOn))
             word.foregroundColor = isOn ? .green : Theme.secondaryText
             text += word
         }
