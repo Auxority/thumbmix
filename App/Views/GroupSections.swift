@@ -32,7 +32,7 @@ struct GroupSections: View {
     private func chip(_ group: Membership) -> some View {
         let current = mirror.assignment(of: strip, to: group)
         return DraftGroupChip(
-            title: "\(number(group))", caption: dcaName(group), shown: draft.shown(group, current: current),
+            title: "\(number(group))", caption: caption(group), shown: draft.shown(group, current: current),
             isGroupOn: muteGroupIsOn(group), identifier: identifier(group), label: label(group)
         ) { draft.toggle(group, current: current) }
     }
@@ -40,16 +40,20 @@ struct GroupSections: View {
     private func label(_ group: Membership) -> Text {
         switch group {
         case .dca(let number): Text("DCA \(number), \(dcaName(group) ?? "")")
-        case .muteGroup(let number):
-            muteGroupIsOn(group) ? Text("Mute group \(number), on") : Text("Mute group \(number)")
+        case .muteGroup(let number): muteGroupLabel(number, isOn: muteGroupIsOn(group))
         }
+    }
+
+    private func muteGroupLabel(_ number: Int, isOn: Bool) -> Text {
+        let name = mirror.muteGroupName(number).map { ", \($0)" } ?? ""
+        return isOn ? Text("Mute group \(number)\(name), on") : Text("Mute group \(number)\(name)")
     }
 
     /// Joining a group that's on mutes the strip there and then; Done is the moment, so say so before it.
     /// Names the sides as typed in the sheet, so a rename reads as it will after Done; a half pair already in the group
     /// names only the side that mutes.
     @ViewBuilder private var warning: some View {
-        let groups = mirror.mutesOnDone(draft, of: strip).map { String(localized: "Group \($0)") }
+        let groups = mirror.mutesOnDone(draft, of: strip).map { mirror.muteGroupLine($0) }
         let muted = mirror.sidesMutedOnDone(draft, of: sides.map(\.side))
         if !groups.isEmpty, !muted.isEmpty {
             let list = groups.formatted(.list(type: .and))
@@ -77,6 +81,13 @@ struct GroupSections: View {
     private func dcaName(_ group: Membership) -> String? {
         guard case .dca(let number) = group else { return nil }
         return mirror.name(StripID(.dca, number))
+    }
+
+    /// The chip's small line: a DCA's name from the desk, a mute group's from this iPhone; the sheet's line under the
+    /// chips has the whole name where the chip cuts it.
+    private func caption(_ group: Membership) -> String? {
+        if case .muteGroup(let number) = group { return mirror.muteGroupName(number) }
+        return dcaName(group)
     }
 
     private func muteGroupIsOn(_ group: Membership) -> Bool {

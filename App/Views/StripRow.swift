@@ -54,8 +54,8 @@ struct StripRow: View {
                         // Held back for the Exclusive solo question: not soloed yet, so not yellow.
                         .opacity(look == .pending ? 0.6 : 1)
                     if !numberLine.isEmpty {
-                        Text(numberLine).font(.caption2)
-                            .foregroundStyle(isSoloed ? Theme.soloYellow : Theme.secondaryText)
+                        Text(numberLine).font(.caption2).lineLimit(1)
+                            .foregroundStyle(captionColor)
                     }
                 }
                 Spacer(minLength: 0)
@@ -76,8 +76,16 @@ struct StripRow: View {
 
     private var isSoloed: Bool { look == .soloed }
 
-    /// "1 · Solo" while soloed: a cue beside the yellow that works without colour (option 2, 2026-10-19).
-    private var numberLine: String { isSoloed ? ConsoleMirror.soloCaption(number) : number }
+    /// "1 · Solo" while soloed: a cue beside the yellow that works without colour (option 2, 2026-10-19). A named
+    /// mute group that's on adds its name, cut by the narrow column where it must (mock Q3-B, 2026-10-31).
+    private var numberLine: String {
+        mirror.rowCaption(isSoloed ? ConsoleMirror.soloCaption(number) : number, of: strip)
+    }
+
+    private var captionColor: Color {
+        if isSoloed { return Theme.soloYellow }
+        return mirror.rowCaption("", of: strip).isEmpty ? Theme.secondaryText : Theme.groupMuteText
+    }
 
     private var stripe: some View { ItemStripe(item: item, mirror: mirror) }
 

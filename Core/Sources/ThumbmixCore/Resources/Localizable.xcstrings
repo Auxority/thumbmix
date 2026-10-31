@@ -1004,6 +1004,26 @@
         }
       }
     },
+    "Group %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Group %lld"
+          }
+        }
+      }
+    },
+    "Group %lld (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Group %1$lld (%2$@)"
+          }
+        }
+      }
+    },
     "High cut" : {
       "localizations" : {
         "en" : {
@@ -1463,6 +1483,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mtx"
+          }
+        }
+      }
+    },
+    "Muted by %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muted by %@"
+          }
+        }
+      }
+    },
+    "Muted by mute group %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muted by mute group %lld"
           }
         }
       }

@@ -50,7 +50,8 @@ class DeskUITestCase: XCTestCase {
             app = XCUIApplication()
             app.launchArguments =
                 desk.connect + arguments + fixedLocale + (arguments.contains("-tips") ? [] : quietTips)
-                + ["-disableAnimations", "YES"]
+                // No mute group names from an earlier run on this simulator: the fake desk is always the same console.
+                + ["-disableAnimations", "YES", "-muteGroupNames", "{}"]
             app.launch()
             Self.running = (app, arguments)
         }

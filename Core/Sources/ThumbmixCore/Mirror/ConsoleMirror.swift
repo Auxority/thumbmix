@@ -46,6 +46,9 @@ public final class ConsoleMirror {
     public internal(set) var soloStroke: ActiveSoloStroke?
     /// The engineer answered Keep to the Exclusive solo question for this desk; the App sets it per connection.
     @ObservationIgnored public var keepsExclusiveSolo = false
+    /// The mute groups' names, kept by the app per console; see ConsoleMirror+MuteGroupNames.
+    public var muteGroupNames = MuteGroupNames()
+    @ObservationIgnored public var onMuteGroupNamesChanged: ((MuteGroupNames) -> Void)?
     /// Called each time the console answers as an M32: on connect, and again after an outage.
     @ObservationIgnored public var onIdentified: ((ConsoleInfo) -> Void)?
 
