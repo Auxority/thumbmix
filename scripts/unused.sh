@@ -15,7 +15,10 @@ xcodebuild clean build-for-testing -project Thumbmix.xcodeproj -scheme Thumbmix 
   > "$logs/app.log" || { tail -20 "$logs/app.log" >&2; exit 1; }
 swift build --package-path Core --scratch-path "$logs/core" --build-tests -v > "$logs/core.log" 2>&1 \
   || { tail -20 "$logs/core.log" >&2; exit 1; }
-cat "$logs/app.log" "$logs/core.log" > "$logs/all.log"
+# The MCP tool is its own package (the SDK stays out of the app's graph) and uses Core's public API: its build counts as a use.
+swift build --package-path MCP --scratch-path "$logs/mcp" --build-tests -v > "$logs/mcp.log" 2>&1 \
+  || { tail -20 "$logs/mcp.log" >&2; exit 1; }
+cat "$logs/app.log" "$logs/core.log" "$logs/mcp.log" > "$logs/all.log"
 
 swiftlint analyze --strict --quiet --compiler-log-path "$logs/all.log"
 echo "swiftlint analyze: no unused code"

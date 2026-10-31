@@ -97,13 +97,13 @@ The fake M32 keeps every set it receives, so restart it for a clean desk. CI als
 `thumbmix-mcp` is a Mac tool, not part of the app. It talks OSC to the desk directly (the Mac must be on the desk's network) and MCP on stdin and stdout, so an AI client can say "more bass on the bass guitar": it reads the strip, then changes it. Build it and add it to Claude Code:
 
 ```
-swift build -c release --package-path Core --product thumbmix-mcp
-claude mcp add --transport stdio thumbmix -- "$PWD/Core/.build/release/thumbmix-mcp" --host <M32 IP>
+swift build -c release --package-path MCP --product thumbmix-mcp
+claude mcp add --transport stdio thumbmix -- "$PWD/MCP/.build/release/thumbmix-mcp" --host <M32 IP>
 ```
 
 The tools are `list_strips`, `get_strip` (fader, mute, pan, EQ, comp, gate, and the preamp's gain and 48V, read only), `set_fader`, `set_mute`, `set_eq_band` and `set_comp`, in real units (dB, Hz, ms). Strips are named by id (`ch/01`) or by the desk's name (`Kick`; case and accents don't matter). The safety rule holds here too: a write is refused while contact with the desk is lost or when the value was never read from the desk, a number outside the desk's range is refused rather than clamped, and a tool answers "not connected" instead of waiting when the desk isn't there. `--fake` runs against a fake desk in the same process, to try it without a console. `--http <port> [--bind <address>]` also serves MCP at `/mcp` and a plain JSON API (`GET /api/tools`, `POST /api/tools/<name>`) over HTTP; it has no login, and refuses any request that carries an `Origin` header (a web page), so keep `--bind` on a network you trust.
 
-The MCP protocol is [the official Swift SDK's](https://github.com/modelcontextprotocol/swift-sdk), pinned in `Core/Package.swift`. It speaks spec revision 2025-11-25 and the ones before it, which is what clients use today; it doesn't speak the stateless 2026-07-28 revision yet.
+The MCP protocol is [the official Swift SDK's](https://github.com/modelcontextprotocol/swift-sdk), pinned in `MCP/Package.swift`. It speaks spec revision 2025-11-25 and the ones before it, which is what clients use today; it doesn't speak the stateless 2026-07-28 revision yet.
 
 ## Acceptance checklist (real M32)
 

@@ -4,6 +4,8 @@
 included:
   - Core/Sources
   - Core/Tests
+  - MCP/Sources
+  - MCP/Tests
   - App
   - UITests
 

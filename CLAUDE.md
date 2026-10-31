@@ -1,6 +1,6 @@
 # Thumbmix
 
-iPhone remote for the Midas M32 over OSC/UDP. `Core/` (Swift package: protocol, state, UI maths, all unit-tested) and `App/` (thin SwiftUI layer).
+iPhone remote for the Midas M32 over OSC/UDP. `Core/` (Swift package: protocol, state, UI maths, all unit-tested) and `App/` (thin SwiftUI layer). `MCP/` is a separate package, the Mac tool `thumbmix-mcp` (MCP server on the official Swift SDK, which the app never links; see README).
 
 Read `TODO.md` when choosing what to work on next or picking the project back up; the PR that finishes an item deletes it from the file. Read `DECISIONS.md` before changing how something already behaves: it holds the settled choices and why. Anything lasting a finished item decided goes there.
 
@@ -21,7 +21,7 @@ OSC addresses, ranges and value laws come from Patrick-Gilles Maillot's *Unoffic
 
 ## Done means
 
-`scripts/lint.sh` and `scripts/unused.sh` clean, `swift test --package-path Core` green, and `scripts/ui-test.sh` green: it runs the UI suite on the **iPhone SE (3rd generation)** simulator on iOS 26+ (375 pt wide, like the target iPhone 11 Pro). Every change ships a test that failed first.
+`scripts/lint.sh` and `scripts/unused.sh` clean, `swift test --package-path Core` and `swift test --package-path MCP` green, and `scripts/ui-test.sh` green: it runs the UI suite on the **iPhone SE (3rd generation)** simulator on iOS 26+ (375 pt wide, like the target iPhone 11 Pro). Every change ships a test that failed first.
 
 **Keep the loop tight.** Iterate on `swift test --package-path Core` (seconds): put the logic in Core, where a unit test reaches it, and keep the App layer thin enough that a UI test only checks the wiring. Any UI run costs minutes and loads the Mac, even one class. While working, run only the classes a change touches (`scripts/ui-test.sh SendsUITests`). The full suite runs at two moments: just before opening a PR, and just before pushing new code to an open PR. A branch pushed while its PR waits on its base, a rebase that changes no code, and a change UI can't see (Core logic with its own tests, docs, CI) need no full run.
 

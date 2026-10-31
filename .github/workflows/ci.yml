@@ -1,4 +1,4 @@
-# Every pull request: style and the Core test suite, on the same toolchain as the release job.
+# Every pull request: style and the Core and MCP test suites, on the same toolchain as the release job.
 # Also every push to main: a PR can only restore its own caches and main's, so without a run on main
 # every new PR's first run compiled Core from scratch.
 name: CI
@@ -64,7 +64,9 @@ jobs:
       - name: Restore the Core build
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: Core/.build
+          path: |
+            Core/.build
+            MCP/.build
           key: core-build-${{ runner.os }}-xcode27.0-${{ github.sha }}
           restore-keys: core-build-${{ runner.os }}-xcode27.0-
 
@@ -82,6 +84,10 @@ jobs:
 
       - name: Test Core
         run: swift test --package-path Core
+
+      # The Mac tool is its own package, so the MCP SDK stays out of the app's dependency graph.
+      - name: Test the MCP tool
+        run: swift test --package-path MCP
 
       # The IPA is built only after merge, so a Release-only compile error (a #Preview outside #if DEBUG)
       # would pass this check. Same signing flags as scripts/build-ipa.sh.

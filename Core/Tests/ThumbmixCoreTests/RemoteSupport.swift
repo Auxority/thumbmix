@@ -57,7 +57,6 @@ struct RemoteClient {
 }
 
 extension RemoteClient.Reply {
-    var result: JSON? { json?["result"] }
     var errorCode: Double? { if case .number(let code)? = json?["error"]?["code"] { code } else { nil } }
 }
 
