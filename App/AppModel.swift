@@ -39,17 +39,21 @@ final class AppModel {
     /// another's presets or needs the web.
     private static func makePresetLibrary() -> PresetLibrary {
         let files = FileManager.default
-        var own = files.urls(for: .documentDirectory, in: .userDomainMask)[0].appending(path: "Presets")
+        let documents = files.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        var own = documents.appending(path: "Presets")
+        // iOS puts the copy of a file opened from Mail or Messages here.
+        var inbox = documents.appending(path: "Inbox")
         var sources = PresetSources(
             folder: files.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appending(path: "PresetSources"))
         #if DEBUG
             if UserDefaults.standard.bool(forKey: "isolatedPresets") {
                 let root = files.temporaryDirectory.appending(path: "thumbmix-presets-" + UUID().uuidString)
                 own = root.appending(path: "own")
+                inbox = root.appending(path: "inbox")
                 sources = PresetSources(folder: root.appending(path: "sources"), defaults: [])
             }
         #endif
-        return PresetLibrary(ownFolder: own, sources: sources)
+        return PresetLibrary(ownFolder: own, inbox: inbox, sources: sources)
     }
 
     /// A console that answers as an M32 is remembered under the name set on the desk; the demo never is.
@@ -116,18 +120,39 @@ final class AppModel {
 
         /// UI tests launch the app once per test class (a launch is most of a test's time) and send each next
         /// test's fresh fake desk as `thumbmix-test://connect?port=N`. Always this Mac's loopback, never another host.
-        /// XCUITest can't shake a simulator, so `thumbmix-test://shake` plays one.
+        /// XCUITest can't shake a simulator, so `thumbmix-test://shake` plays one, and can't share a file to the app
+        /// as AirDrop does, so `thumbmix-test://open?path=…` plays that.
         func openTestURL(_ url: URL) {
             guard url.scheme == "thumbmix-test" else { return }
-            if url.host() == "shake" { NotificationCenter.default.post(name: .deviceShaken, object: nil) }
-            guard url.host() == "connect",
-                let value = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?
-                    .first(where: { $0.name == "port" })?.value,
-                let port = UInt16(value), port > 0
-            else { return }
-            connect(to: "127.0.0.1", port: port)
+            switch url.host() {
+            case "shake": NotificationCenter.default.post(name: .deviceShaken, object: nil)
+            case "open": if let path = queryValue("path", of: url) { openFile(URL(fileURLWithPath: path)) }
+            case "connect":
+                if let port = queryValue("port", of: url).flatMap(UInt16.init), port > 0 { connect(to: "127.0.0.1", port: port) }
+            default: break
+            }
+        }
+
+        private func queryValue(_ name: String, of url: URL) -> String? {
+            URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == name }?.value
         }
     #endif
+
+    /// Every URL the app is opened with: a `.json` file shared to Thumbmix, or in Debug builds a UI test's.
+    func open(_ url: URL) {
+        if url.isFileURL {
+            openFile(url)
+            return
+        }
+        #if DEBUG
+            openTestURL(url)
+        #endif
+    }
+
+    private func openFile(_ url: URL) {
+        let notice = presets.openFile(at: url)
+        Task { await SystemNotice.show(notice, title: String(localized: "Presets")) }
+    }
 
     /// Coming back from the background: anything could have changed on the desk meanwhile.
     func wake() {

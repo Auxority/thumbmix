@@ -46,6 +46,14 @@ targets:
         # preset files can be copied out, edited or shared by hand.
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
+        # A preset shared from AirDrop, Mail, Messages or Files opens here (AppModel.open). Any `.json`: the type can't
+        # tell a preset from other JSON, so the app opens the file, checks it and refuses what isn't one. Alternate rank
+        # keeps it a choice in the share sheet, never the phone's default for JSON.
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Thumbmix preset
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [public.json]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.thumbmix.app

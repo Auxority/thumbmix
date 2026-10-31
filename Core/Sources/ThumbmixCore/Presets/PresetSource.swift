@@ -115,7 +115,7 @@ enum PresetFiles {
     typealias Fetched = PresetSources.Fetched
 
     static var notFoundText: String { CoreStrings.text("Not found. Pick it again.") }
-    static var stillDownloadingText: String { CoreStrings.text("Still downloading from iCloud. Refresh in a moment.") }
+    static var stillDownloadingText: String { CoreStrings.text("Still downloading from iCloud. Try again in a moment.") }
 
     /// A file iCloud keeps elsewhere: a coordinated read would wait for the download, offline for good.
     struct StillDownloading: LocalizedError {
