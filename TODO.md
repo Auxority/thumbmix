@@ -37,6 +37,17 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 
 - [ ] **Review and redesign a strip's preset page and its load flow** (the user). Look at it on the phone with the user first, then mocks. Sources too (the user, 2026-10-29: "it doesn't really feel easy yet"): how a preset someone sends is kept, and what a deleted original does (today a file deleted from a folder source leaves the list, while a lost or moved one shows its last good read; the user asked for a copy that follows the original and says when it was removed).
 
+## Fixes and polish (2026-11-02, the user's list)
+
+- [ ] **Key filter view, more like the EQ** (the user). Today the Comp and Gate sheets show two graphs (key graph and curve), with a white dot on the graph and no frequencies. The user wants one graph that reads like the EQ (frequency axis) and shows what the key does. Merges with "The key filter graph, closer to what the user had in mind" under Features: ask what the one graph shows, then mock first.
+- [ ] **"Reset comp" → "Reset compressor"** (`DynamicsTabs.swift`, `App/Localizable.xcstrings`, `UITests/DynamicsUITests.swift`; the alert title says "comp" too).
+- [ ] **The Key line says "Filter on", the user wanted "On"** (2026-11-02). #221 shipped "Filter on" after the user picked Slim of 3 mocks; DECISIONS gives the reason ("On" at the end of the Comp line reads as the comp being on). The user says they asked for the bare "On". Ask which wins, then change `FoldedLine.Subject.keyFilter` and DECISIONS.
+- [ ] **Bug: all channels, hidden or not, disappear until the app restarts.** Reproduce first: note what happened just before (connect, disconnect, desk switch, scene change, a sync mid-way). A Console.app capture filtered on "thumbmix" (shake-log) from the moment it happens; failing test first.
+- [ ] **Bug: disconnecting shortly after connecting leaves the console showing offline though it is online.** Reproduce with the fake desk (disconnect during the initial sync, or right after); check the state after a quick Disconnect/Connect, and that a stale session's late `.lost` or sync-done can't overwrite the new one.
+- [ ] **Inconsistent spacing in some screens.** Walk every screen and sheet on the SE and a large iPhone, list each mismatch (a screenshot per screen), then fix them together with shared spacing values.
+- [ ] **Redesign the sheets that slide in from the bottom** (Comp and Gate fold sheets, Send sheet, edit strip). A drag down doesn't close them on purpose (it could close one by accident), so how does the engineer leave? Look at what closes today (Done), then mock options, e.g. an always-visible close/Done at the top, a grab handle that only closes with a tap, or a push instead of a sheet.
+- [ ] **Clear Solo counts down instead of clearing at once.** The app already sends the desk's single CLEAR SOLO (`/-action/clearsolo`, `ConsoleMirror.clearSolo`), so no per-strip command is missing. Likely cause (not confirmed): the desk doesn't push every switch it clears, so the app re-reads each solo (`rereadSoon`) and `soloedCount` falls as the answers arrive. Confirm with a log of the incoming `/solo` values after a clear, then show 0 / hide the bar at once (the desk accepted the clear) and let the re-reads confirm in the background.
+
 ## Performance
 
 - [ ] **Fast, also on older devices.** Scrolling, fader drags, meters and the spectrum must stay smooth on the oldest iPhone the app supports (iOS 26.0: iPhone 11, SE 2nd gen; the iPhone 11 Pro qualifies). Profile there with Instruments before and after a change, and keep that in mind for every new feature.
@@ -46,7 +57,7 @@ What's next for Thumbmix, newest decisions first within each section. The PR tha
 ## Features
 
 - [ ] **Icon suggestions from the strip's name** (2026-10-31, the user's note: "just like presets"): the icon grid offers the icons that fit the name first, as the Presets row does with match words (`PresetMatching`), e.g. "Kick" → the kick drum. Decide where the words for each icon come from (the desk's icon names, plus a few per icon), then mock first.
-- [ ] **The key filter graph, closer to what the user had in mind** (2026-10-22): the Comp and Gate sheets now show two graphs (the key graph from #160 and the curve), and the user wants one. Ask what one graph should show, then mock first.
+- [ ] **The key filter graph, closer to what the user had in mind** (2026-10-22) (see also "Key filter view, more like the EQ", 2026-11-02: no frequencies, a white dot, two graphs): the Comp and Gate sheets now show two graphs (the key graph from #160 and the curve), and the user wants one. Ask what one graph should show, then mock first.
 - [ ] **Shortcuts** (2026-10-17): App Intents for the Shortcuts app, the Action button and Control Center, e.g. "Mute Vox 1", "Solo Kick", "Fader of Vox 1 to −5 dB". Not Siri voice (the user: unreliable next to a PA). Ask before mocking:
   - Which actions? Each one changes the desk without the engineer looking at the app.
   - The safety rule: an intent connects, reads the current value, then sets; it fails out loud when the desk doesn't answer, never acting on a guess. A relative change ("+3 dB") needs that read; an absolute one ("mute") still needs the desk to answer.
